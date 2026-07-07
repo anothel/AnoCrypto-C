@@ -33,3 +33,11 @@ If excluded material is discovered:
 - TODO: Define the internal approval process for source manifest changes.
 - TODO: Define repository scanning rules for secrets and prohibited terminology.
 - TODO: Define whether release evidence may contain logs with absolute build paths.
+
+
+## P1 Foundation Review Notes
+
+- No external implementation source files were imported for SHA-2, HMAC, or DRBG.
+- No test vectors were imported.
+- No secret keys, seeds, entropy samples, tokens, or certificate private keys were added.
+- Algorithm processing APIs intentionally return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` until implementation source and test vector provenance are reviewed.

@@ -21,13 +21,33 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p0-skeleton" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-foundation" CACHE STRING "Build fingerprint string")
+
+set(ANO_CRYPTO_PUBLIC_HEADERS
+    include/anocrypto/anocrypto.h
+    include/anocrypto/ac_status.h
+    include/anocrypto/ac_version.h
+    include/anocrypto/ac_build.h
+    include/anocrypto/ac_module.h
+    include/anocrypto/ac_selftest.h
+    include/anocrypto/ac_hash.h
+    include/anocrypto/ac_hmac.h
+    include/anocrypto/ac_drbg.h
+    include/anocrypto/ac_csp.h
+    include/anocrypto/ac_key.h)
 
 add_library(anocrypto_c
     src/core/status.c
     src/core/module_state.c
     src/core/build_identity.c
-    src/selftest/selftest.c)
+    src/selftest/selftest.c
+    src/selftest/kat_manifest.c
+    src/hash/hash.c
+    src/mac/hmac.c
+    src/drbg/drbg.c
+    src/csp/csp_handle.c
+    src/csp/key.c
+    src/csp/zeroize.c)
 
 add_library(AnoCryptoC::AnoCryptoC ALIAS anocrypto_c)
 
@@ -36,7 +56,7 @@ set_target_properties(anocrypto_c PROPERTIES
     EXPORT_NAME AnoCryptoC
     VERSION ${PROJECT_VERSION}
     SOVERSION 0
-    PUBLIC_HEADER "include/anocrypto/anocrypto.h;include/anocrypto/ac_status.h;include/anocrypto/ac_version.h;include/anocrypto/ac_build.h;include/anocrypto/ac_module.h;include/anocrypto/ac_selftest.h")
+    PUBLIC_HEADER "${ANO_CRYPTO_PUBLIC_HEADERS}")
 
 target_include_directories(anocrypto_c
     PUBLIC
@@ -106,6 +126,12 @@ if(ANO_CRYPTO_BUILD_TESTS)
     target_compile_definitions(ano_crypto_module_state_tests PRIVATE ANO_CRYPTO_ENABLE_TEST_HOOKS)
 
     add_test(NAME ano_crypto_module_state_tests COMMAND ano_crypto_module_state_tests)
+
+    add_executable(ano_crypto_service_gate_negative_tests
+        tests/negative/crypto_service_gate_tests.c)
+    target_link_libraries(ano_crypto_service_gate_negative_tests PRIVATE anocrypto_c)
+
+    add_test(NAME ano_crypto_service_gate_negative_tests COMMAND ano_crypto_service_gate_negative_tests)
 
     add_executable(ano_crypto_install_smoke_buildtree
         tests/install_smoke/main.c)

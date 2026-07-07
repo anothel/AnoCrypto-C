@@ -38,3 +38,16 @@ It is intentionally conservative: implementation code, test vectors, file names,
 2. Add a reviewed source entry for every public KAT vector set, including source URL, version/date, and SHA-256 of the local copy.
 3. Add a reviewer and approval column if this repository is used by more than one implementer.
 4. Add a rule for how generated files are traced back to inputs.
+
+
+## P1 Foundation Additions
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| P1-001 | AnoCrypto-C P0 skeleton generated in this repository | User-owned project artifact | Extended into P1 foundation skeleton | No third-party code imported. |
+| P1-002 | Project C99 API/ABI rules | User-provided design guidance | Naming, status/API style, public header expansion | Abstract requirements only. |
+| P1-003 | Project C99 module architecture | User-provided design guidance | Hash/HMAC/DRBG/CSP skeleton directories and state-gate policy | Abstract requirements only. |
+
+## P1 KAT Source Status
+
+No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c` contains placeholder manifest entries only and must not be treated as algorithm evidence.

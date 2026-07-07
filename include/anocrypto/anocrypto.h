@@ -8,5 +8,10 @@
 #include <anocrypto/ac_build.h>
 #include <anocrypto/ac_module.h>
 #include <anocrypto/ac_selftest.h>
+#include <anocrypto/ac_hash.h>
+#include <anocrypto/ac_hmac.h>
+#include <anocrypto/ac_drbg.h>
+#include <anocrypto/ac_csp.h>
+#include <anocrypto/ac_key.h>
 
 #endif /* ANO_CRYPTO_ANOCRYPTO_H */

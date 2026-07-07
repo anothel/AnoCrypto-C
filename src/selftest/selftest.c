@@ -1,6 +1,8 @@
+#include <stddef.h>
 #include <anocrypto/ac_build.h>
 #include <anocrypto/ac_selftest.h>
 #include "ac_internal.h"
+#include "ac_kat_manifest.h"
 
 static ano_crypto_status_t g_selftest_last_status = ANO_CRYPTO_ERR_NOT_INITIALIZED;
 static uint32_t g_selftest_last_flags = 0u;
@@ -22,12 +24,25 @@ static ano_crypto_status_t ano_crypto_selftest_check_build_identity(void)
     return ANO_CRYPTO_OK;
 }
 
-static ano_crypto_status_t ano_crypto_selftest_run_placeholder_kats(void)
+static ano_crypto_status_t ano_crypto_selftest_check_kat_manifest_skeleton(void)
 {
-    /*
-     * P0 placeholder only.
-     * TODO(P1): Replace with public-source KAT manifest and per-algorithm tests.
-     */
+    size_t count;
+    size_t i;
+
+    count = ano_crypto_internal_kat_manifest_count();
+    if (count == 0u) {
+        return ANO_CRYPTO_ERR_INTEGRITY_CHECK_FAILED;
+    }
+
+    for (i = 0u; i < count; ++i) {
+        const ano_crypto_internal_kat_manifest_entry_t *entry;
+        entry = ano_crypto_internal_kat_manifest_get(i);
+        if (entry == 0 || entry->selftest_id == 0 || entry->algorithm_name == 0 ||
+            entry->source_policy == 0 || entry->status == 0) {
+            return ANO_CRYPTO_ERR_INTEGRITY_CHECK_FAILED;
+        }
+    }
+
     return ANO_CRYPTO_OK;
 }
 
@@ -57,7 +72,7 @@ ano_crypto_status_t ano_crypto_selftest_run(uint32_t flags)
         return st;
     }
 
-    st = ano_crypto_selftest_run_placeholder_kats();
+    st = ano_crypto_selftest_check_kat_manifest_skeleton();
     if (st != ANO_CRYPTO_OK) {
         g_selftest_last_status = st;
         ano_crypto_internal_module_mark_error(st);
