@@ -1,6 +1,6 @@
 # C99 Thread-Safety Policy
 
-Status: P1-6 draft.
+Status: P1-7 draft.
 
 ## Goal
 

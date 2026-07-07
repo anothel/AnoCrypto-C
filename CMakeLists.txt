@@ -12,6 +12,7 @@ option(ANO_CRYPTO_BUILD_TESTS "Build AnoCrypto-C unit and smoke tests" ON)
 option(ANO_CRYPTO_ENABLE_STRICT_WARNINGS "Enable strict compiler warnings" ON)
 option(ANO_CRYPTO_ENABLE_TEST_HOOKS "Enable internal test-only hooks" ${ANO_CRYPTO_BUILD_TESTS})
 option(ANO_CRYPTO_ENABLE_THREAD_SAFETY "Enable internal locks for module/self-test/CSP global state" ON)
+option(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER "Enable reviewed internal platform entropy provider where supported" ON)
 
 if(NOT DEFINED BUILD_SHARED_LIBS)
     set(BUILD_SHARED_LIBS ON)
@@ -22,7 +23,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-6-thread-safety" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-7-platform-entropy" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -94,6 +95,21 @@ endif()
 
 if(ANO_CRYPTO_ENABLE_TEST_HOOKS)
     target_compile_definitions(anocrypto_c PRIVATE ANO_CRYPTO_ENABLE_TEST_HOOKS)
+endif()
+
+if(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER)
+    target_compile_definitions(anocrypto_c PRIVATE ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        target_compile_definitions(anocrypto_c PRIVATE ANO_CRYPTO_USE_LINUX_GETRANDOM _GNU_SOURCE)
+    elseif(WIN32)
+        target_compile_definitions(anocrypto_c PRIVATE ANO_CRYPTO_USE_WINDOWS_BCRYPTGENRANDOM)
+        target_link_libraries(anocrypto_c PRIVATE bcrypt)
+    elseif(APPLE)
+        target_compile_definitions(anocrypto_c PRIVATE ANO_CRYPTO_USE_APPLE_SECRANDOMCOPYBYTES)
+        target_link_libraries(anocrypto_c PRIVATE "-framework Security")
+    else()
+        message(STATUS "ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER is ON, but no reviewed provider is configured for ${CMAKE_SYSTEM_NAME}")
+    endif()
 endif()
 
 if(ANO_CRYPTO_ENABLE_STRICT_WARNINGS)
@@ -203,6 +219,13 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
     add_test(NAME ano_crypto_entropy_adapter_tests COMMAND ano_crypto_entropy_adapter_tests)
 
+    add_executable(ano_crypto_platform_entropy_provider_tests
+        tests/unit/platform_entropy_provider_tests.c)
+    target_link_libraries(ano_crypto_platform_entropy_provider_tests PRIVATE anocrypto_c)
+    target_include_directories(ano_crypto_platform_entropy_provider_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
+
+    add_test(NAME ano_crypto_platform_entropy_provider_tests COMMAND ano_crypto_platform_entropy_provider_tests)
+
     add_executable(ano_crypto_thread_lock_tests
         tests/unit/thread_lock_tests.c)
     target_link_libraries(ano_crypto_thread_lock_tests PRIVATE anocrypto_c)
@@ -228,13 +251,13 @@ if(ANO_CRYPTO_BUILD_TESTS)
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-6
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-7
             -DANO_CRYPTO_RUN_CTEST=ON
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-6 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-7 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         anocrypto_c
         ano_crypto_module_state_tests
@@ -248,6 +271,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_csp_key_lifecycle_negative_tests
         ano_crypto_csp_handle_stale_exhaustion_tests
         ano_crypto_entropy_adapter_tests
+        ano_crypto_platform_entropy_provider_tests
         ano_crypto_thread_lock_tests
         ano_crypto_install_smoke_buildtree)
 

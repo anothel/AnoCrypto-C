@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-5 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-7 \
 #         -DANO_CRYPTO_RUN_CTEST=ON \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -22,7 +22,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-5")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-7")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -128,7 +128,7 @@ set(_included_source_files "")
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SOURCE_FILES.sha256" "")
 foreach(_rel IN LISTS _source_files)
     set(_skip OFF)
-    if(_rel MATCHES "(^|/)(\\.git|build|cmake-build-[^/]*|\\.cache)(/|$)")
+    if(_rel MATCHES "(^|/)(\\.git|build|build-[^/]*|cmake-build-[^/]*|\\.cache)(/|$)")
         set(_skip ON)
     endif()
     if(_rel MATCHES "^evidence/(generated|out|p1-[0-9][^/]*|release-[^/]*)/")
@@ -311,11 +311,13 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `BINARY_FILES.sha256`: SHA-256 hashes of build outputs matched by the script.\n"
 "- `ctest.log`: captured CTest output when requested.\n"
 "- `INSTALL_SMOKE_*.log`: installed-package configure/build/run logs when requested.\n"
-"- `INSTALL_SMOKE_SUMMARY.txt`: install smoke paths and result when requested.\n\n"
+"- `INSTALL_SMOKE_SUMMARY.txt`: install smoke paths and result when requested.\n"
+"- Platform entropy provider status appears in `ctest.log` when the provider test output is shown by CTest.\n\n"
 "## Review before release-candidate use\n\n"
 "- Confirm source archive contents match the intended release scope.\n"
 "- Confirm install smoke paths do not disclose internal deployment details before sharing.\n"
 "- Add SBOM/signing status when available.\n"
-"- Confirm no secrets, entropy bytes, generated secret bytes, private keys, tokens, or internal deployment details are present.\n")
+"- Confirm no secrets, entropy bytes, generated secret bytes, private keys, tokens, or internal deployment details are present.\n"
+"- Confirm platform entropy evidence records provider/status only and does not contain entropy bytes.\n")
 
 message(STATUS "AnoCrypto-C evidence draft written to ${ANO_CRYPTO_EVIDENCE_DIR}")

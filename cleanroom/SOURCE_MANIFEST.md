@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P1-6 draft
+Status: P1-7 draft
 Date: 2026-07-07
 
 ## Purpose
@@ -154,3 +154,22 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - The HMAC key bytes used by the concurrent test are public synthetic fixtures only and are not operational secrets.
 - Evidence and test logs must not print key material, entropy bytes, generated output, private keys, or tokens.
 - P1-6 thread-safety is a limited engineering policy for global state only; public per-context concurrency guarantees remain TODO.
+
+## P1-7 Platform Entropy Provider Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| SRC-1601 | Linux `getrandom(2)` manual page from the Linux man-pages project | Public OS API documentation | Linux platform entropy provider boundary using `getrandom(..., flags=0)` | Documentation input only; no external implementation code imported. |
+| SRC-1602 | Microsoft documentation for `BCryptGenRandom` | Public OS API documentation | Windows platform entropy provider boundary using the system-preferred RNG flag | Documentation input only; no external implementation code imported. |
+| SRC-1603 | Apple Developer documentation for `SecRandomCopyBytes` | Public OS API documentation | Apple platform entropy provider boundary using `kSecRandomDefault` | Documentation input only; no external implementation code imported. |
+| DER-6001 | Fresh C99 platform entropy provider seam written in this repository | User-owned generated source | Internal provider name/status function and platform read wrapper | Entropy bytes must never be logged or written to evidence. |
+| DER-6002 | Fresh C99 platform entropy provider tests written in this repository | User-owned generated test code | Provider availability/status smoke test and failure zeroization behavior | Test logs may include provider name and status only. |
+
+## P1-7 Clean-room Notes
+
+- No third-party RNG wrapper, entropy abstraction, or random-service implementation code was imported.
+- Platform API documentation influenced boundary selection only.
+- The OS provider seam is internal and does not expose a public random-service API.
+- The public HMAC_DRBG API remains explicit-entropy based for deterministic tests and validation-boundary review.
+- Entropy bytes, generated random bytes, DRBG state, key material, private keys, and tokens must not be logged or included in evidence artifacts.
+- Provider smoke tests are engineering checks only and are not entropy-quality proof for every customer environment.

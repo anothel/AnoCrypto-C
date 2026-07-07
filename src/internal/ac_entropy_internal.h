@@ -7,7 +7,9 @@
 
 #define ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_NONE 0u
 #define ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_CALLBACK 1u
-#define ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_OS_RESERVED 2u
+#define ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_OS 2u
+/* Backward-compatible internal name retained for P1-4/P1-6 test wording. */
+#define ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_OS_RESERVED ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_OS
 
 typedef ano_crypto_status_t (*ano_crypto_internal_entropy_read_fn)(
     void *user_context,
@@ -31,12 +33,24 @@ ano_crypto_status_t ano_crypto_internal_entropy_source_init_callback(
     void *user_context,
     size_t min_request_len);
 
+ano_crypto_status_t ano_crypto_internal_entropy_source_init_os(
+    ano_crypto_internal_entropy_source_t *source,
+    size_t min_request_len);
+
 ano_crypto_status_t ano_crypto_internal_entropy_source_init_os_reserved(
     ano_crypto_internal_entropy_source_t *source,
     size_t min_request_len);
 
 ano_crypto_status_t ano_crypto_internal_entropy_source_get(
     const ano_crypto_internal_entropy_source_t *source,
+    uint8_t *out,
+    size_t out_len);
+
+int ano_crypto_internal_platform_entropy_is_available(void);
+
+const char *ano_crypto_internal_platform_entropy_provider_name(void);
+
+ano_crypto_status_t ano_crypto_internal_platform_entropy_get(
     uint8_t *out,
     size_t out_len);
 

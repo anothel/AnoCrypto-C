@@ -1,6 +1,6 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-6 draft.
+Status: P1-7 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -26,18 +26,21 @@ Status: P1-6 draft.
 - CSP handle table exhaustion and stale-handle reuse tests
 - Limited module/self-test/CSP global-state lock seam and thread-safety policy draft
 - POSIX concurrent CSP/HMAC smoke test
+- Internal platform entropy provider seam for Linux, Windows, and Apple provider branches
+- Platform entropy provider smoke/status tests
 
 ## Immediate P1 next items
 
-1. Connect reviewed platform entropy sources to the adapter seam.
+1. Add CI matrix coverage for Linux, Windows, and Apple entropy provider branches.
 2. Decide SHA-384/SHA-512 implementation timing.
-3. Add CI matrix and reproducible build notes.
+3. Add reproducible build notes.
 4. Add API/ABI review notes for caller-provided context buffers.
 5. Expand thread-safety policy into reviewed public support matrix and CI coverage.
 6. Add side-channel review checklist for key-dependent code paths.
 7. Add additional HMAC_DRBG KAT paths: personalization string, no reseed, no additional input, and request-size boundaries.
 8. Add SBOM/signing placeholders to the evidence workflow.
-9. Add reproducible source archive rules if archive byte-for-byte reproducibility becomes a release requirement.
+9. Add public random-service API design only after provider and validation-boundary review.
+10. Add reproducible source archive rules if archive byte-for-byte reproducibility becomes a release requirement.
 
 ## P2 candidates
 

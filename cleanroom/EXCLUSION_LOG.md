@@ -1,6 +1,6 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P1-6 draft
+Status: P1-7 draft
 Date: 2026-07-07
 
 ## Purpose
@@ -96,3 +96,12 @@ If excluded material is discovered:
 | EX-1502 | Claiming broad thread-safety for caller-owned hash/HMAC/DRBG contexts | Support/claims risk | Excluded | P1-6 only protects selected global module/self-test/CSP state. |
 | EX-1503 | Logs containing thread test key bytes, MAC output, generated DRBG bytes, entropy bytes, private keys, or tokens | Sensitive information risk | Excluded | P1-6 thread tests must remain status-only. |
 | EX-1504 | Treating thread smoke tests as formal concurrency assurance or external review completion | Claims risk | Excluded | These are engineering tests only. |
+
+## P1-7 Additional Exclusions
+
+| ID | Material / Pattern | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-1601 | Third-party RNG wrappers, entropy abstraction libraries, random-service implementation code, or vendor SDK samples | Code provenance risk | Excluded | P1-7 platform entropy provider seam is fresh C99 code using documented OS API boundaries. |
+| EX-1602 | Operational entropy captures, DRBG seeds, generated random bytes, private keys, tokens, customer secrets, or production random samples | Sensitive information risk | Excluded | Provider tests must record status and provider name only. |
+| EX-1603 | Claiming entropy quality, validation completion, or platform suitability from a local provider smoke test alone | Claims risk | Excluded | Platform-specific review and evidence remain required before customer or validation-boundary commitments. |
+| EX-1604 | Adding a public random byte API before provider policy, DRBG integration, prediction-resistance behavior, and validation-boundary review | API/support risk | Deferred | P1-7 keeps the provider seam internal. |

@@ -1,13 +1,14 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include "ac_entropy_internal.h"
-
-static int g_failures = 0;
 
 typedef struct entropy_test_counter_s {
     uint8_t next;
 } entropy_test_counter_t;
+
+static int g_failures = 0;
 
 static void expect_status(const char *name, ano_crypto_status_t got, ano_crypto_status_t expected)
 {
@@ -74,7 +75,7 @@ int main(void)
 {
     ano_crypto_internal_entropy_source_t source;
     entropy_test_counter_t counter;
-    uint8_t out[16];
+    uint8_t out[32];
     size_t i;
 
     for (i = 0u; i < sizeof(out); ++i) {
@@ -89,7 +90,7 @@ int main(void)
     counter.next = 0x10u;
     expect_status("callback init", ano_crypto_internal_entropy_source_init_callback(
                       &source, counter_entropy, &counter, 8u), ANO_CRYPTO_OK);
-    expect_status("callback get", ano_crypto_internal_entropy_source_get(&source, out, sizeof(out)),
+    expect_status("callback get", ano_crypto_internal_entropy_source_get(&source, out, 16u),
                   ANO_CRYPTO_OK);
     expect_true("callback first byte", out[0] == 0x10u);
     expect_true("callback last byte", out[15] == 0x1fu);
@@ -110,11 +111,25 @@ int main(void)
                   ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED);
     expect_true("failing callback zeroized output", buffer_is_zero(out, sizeof(out)));
 
-    expect_status("os reserved init", ano_crypto_internal_entropy_source_init_os_reserved(&source, 8u),
+    expect_status("os init", ano_crypto_internal_entropy_source_init_os(&source, 8u),
                   ANO_CRYPTO_OK);
-    expect_status("os reserved get", ano_crypto_internal_entropy_source_get(&source, out, sizeof(out)),
-                  ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
-    expect_true("os reserved zeroized output", buffer_is_zero(out, sizeof(out)));
+    for (i = 0u; i < sizeof(out); ++i) {
+        out[i] = 0xaau;
+    }
+    {
+        ano_crypto_status_t os_status = ano_crypto_internal_entropy_source_get(&source, out, sizeof(out));
+        if (ano_crypto_internal_platform_entropy_is_available()) {
+            expect_status("os get", os_status, ANO_CRYPTO_OK);
+            memset(out, 0, sizeof(out));
+        } else {
+            expect_status("os get unsupported", os_status, ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
+            expect_true("os unsupported zeroized output", buffer_is_zero(out, sizeof(out)));
+        }
+    }
+
+    expect_status("os reserved alias init", ano_crypto_internal_entropy_source_init_os_reserved(&source, 8u),
+                  ANO_CRYPTO_OK);
+    expect_true("provider name present", ano_crypto_internal_platform_entropy_provider_name() != 0);
 
     if (g_failures != 0) {
         fprintf(stderr, "entropy_adapter_tests: %d failure(s)\n", g_failures);
