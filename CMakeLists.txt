@@ -21,7 +21,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-foundation" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-sha256-hmac-kat" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -43,6 +43,7 @@ add_library(anocrypto_c
     src/selftest/selftest.c
     src/selftest/kat_manifest.c
     src/hash/hash.c
+    src/hash/sha256.c
     src/mac/hmac.c
     src/drbg/drbg.c
     src/csp/csp_handle.c
@@ -132,6 +133,12 @@ if(ANO_CRYPTO_BUILD_TESTS)
     target_link_libraries(ano_crypto_service_gate_negative_tests PRIVATE anocrypto_c)
 
     add_test(NAME ano_crypto_service_gate_negative_tests COMMAND ano_crypto_service_gate_negative_tests)
+
+    add_executable(ano_crypto_sha256_hmac_kat_tests
+        tests/kat/sha256_hmac_kat_tests.c)
+    target_link_libraries(ano_crypto_sha256_hmac_kat_tests PRIVATE anocrypto_c)
+
+    add_test(NAME ano_crypto_sha256_hmac_kat_tests COMMAND ano_crypto_sha256_hmac_kat_tests)
 
     add_executable(ano_crypto_install_smoke_buildtree
         tests/install_smoke/main.c)

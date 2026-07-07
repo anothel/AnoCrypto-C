@@ -13,9 +13,11 @@ extern "C" {
 /*
  * P1 public API skeleton for HMAC services.
  *
- * Key material must never be logged by callers or by this library. Processing
- * functions are state-gated and return ANO_CRYPTO_ERR_NOT_IMPLEMENTED until a
- * reviewed implementation and public KAT evidence are added.
+ * P1-1 scope:
+ * - HMAC-SHA-256 processing is implemented and covered by public-source KATs.
+ * - HMAC with SHA-384/SHA-512 is ABI-reserved and returns
+ *   ANO_CRYPTO_ERR_NOT_IMPLEMENTED from processing APIs until reviewed.
+ * - Key material must never be logged by callers or by this library.
  */
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_hmac_context_size(
     ano_crypto_hash_algorithm_t hash_algorithm,

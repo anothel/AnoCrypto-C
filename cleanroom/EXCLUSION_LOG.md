@@ -41,3 +41,11 @@ If excluded material is discovered:
 - No test vectors were imported.
 - No secret keys, seeds, entropy samples, tokens, or certificate private keys were added.
 - Algorithm processing APIs intentionally return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` until implementation source and test vector provenance are reviewed.
+
+## P1-1 Additional Exclusions
+
+| ID | Material / Pattern | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-1001 | Third-party SHA-2/HMAC implementation source code with unclear license or ownership | Code provenance risk | Excluded | P1-1 implementation is fresh C99 code based on public specifications only. |
+| EX-1002 | Non-public KCMVP/CAVP submission materials or lab reports | Confidentiality / legal risk | Excluded | Public standards and public vectors only. |
+| EX-1003 | Operational HMAC keys, seeds, entropy samples, tokens, private keys | Sensitive information risk | Excluded | Public RFC test-vector keys are allowed only as KAT fixtures. |

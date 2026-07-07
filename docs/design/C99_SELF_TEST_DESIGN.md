@@ -1,29 +1,40 @@
-# C99 Self-Test Design Skeleton
+# C99 Self-test Design
 
-## Status
+Status: P1-1 draft.
 
-P1 foundation only. The current self-test verifies build identity availability and KAT manifest skeleton wiring.
+## Startup flow
 
-## Startup Flow
+`ano_crypto_module_init(NULL)` transitions the module to `SELF_TEST_RUNNING`, invokes `ano_crypto_selftest_run()`, and enters `OPERATIONAL` only if all startup checks pass.
 
-```text
-module_init(NULL)
-  -> SELF_TEST_RUNNING
-  -> build identity skeleton check
-  -> KAT manifest skeleton check
-  -> OPERATIONAL or ERROR_STATE
-```
+Current startup checks:
 
-## KAT Manifest Rules
+1. Build identity sanity check.
+2. KAT manifest structure check.
+3. SHA-256 KATs.
+4. HMAC-SHA-256 KATs.
 
-- Add the manifest entry before importing or writing a vector fixture.
-- Record source provenance in `cleanroom/SOURCE_MANIFEST.md`.
-- Use only public-source or user-owned test vectors.
-- Do not include secrets, private keys, tokens, or customer material.
+## Failure behavior
 
-## TODO(P1)
+A startup self-test failure records the failure status and transitions the module into `ERROR_STATE`. The current policy keeps `ERROR_STATE` sticky for the process.
 
-- Add per-algorithm KAT runner interface.
-- Add negative self-test path evidence.
-- Add self-test logs suitable for release evidence.
-- Define conditional self-tests for DRBG and key lifecycle events.
+## Service-gate rule
+
+External cryptographic processing APIs require `OPERATIONAL`. Self-test uses internal helpers to avoid exposing cryptographic services before successful startup self-test completion.
+
+## Current KATs
+
+- SHA-256 empty message.
+- SHA-256 `abc` message.
+- HMAC-SHA-256 RFC 4231 test case 1.
+- HMAC-SHA-256 RFC 4231 test case 2.
+
+## Evidence boundary
+
+These KATs are implementation correctness checks only. They are not official validation evidence.
+
+## TODO
+
+- Add dedicated KAT manifest files with source URL/date/hash metadata.
+- Add negative self-test injection cases beyond test hook forced failure.
+- Add DRBG instantiate/generate/reseed KAT once DRBG implementation starts.
+- Add conditional tests for future key generation and public-key algorithms.

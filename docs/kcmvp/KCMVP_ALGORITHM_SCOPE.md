@@ -1,28 +1,32 @@
-# KCMVP Candidate Algorithm Scope
+# AnoCrypto-C Algorithm Scope
 
-## Status
+Status: P1-1 draft.
 
-Draft. This document is for readiness planning only and does not state completion of any official validation.
+## Implemented candidate slice
 
-## P1 Candidate Scope
+| Area | Algorithm | P1-1 status | Notes |
+|---|---|---|---|
+| Hash | SHA-256 | Implemented | Public-source KATs added. |
+| MAC | HMAC-SHA-256 | Implemented | Public RFC KATs added. |
 
-| Area | Candidate | Implementation Status | Evidence Status |
-|---|---|---:|---:|
-| Hash | SHA-256 / SHA-384 / SHA-512 | TODO | TODO |
-| MAC | HMAC-SHA-256 / HMAC-SHA-384 / HMAC-SHA-512 | TODO | TODO |
-| DRBG | HMAC_DRBG-SHA-256 or Hash_DRBG-SHA-256 | TODO | TODO |
-| CSP | key handle / zeroize lifecycle | skeleton | TODO |
+## ABI-reserved / not implemented
 
-## Out of Scope for P1
+| Area | Algorithm | Status | Notes |
+|---|---|---|---|
+| Hash | SHA-384 | Not implemented | Digest-size query only. |
+| Hash | SHA-512 | Not implemented | Digest-size query only. |
+| MAC | HMAC-SHA-384 | Not implemented | MAC-size query only. |
+| MAC | HMAC-SHA-512 | Not implemented | MAC-size query only. |
+| DRBG | HMAC_DRBG-SHA-256 | Skeleton only | No entropy, instantiate, generate, reseed implementation yet. |
+| CSP/key | HMAC key import | Skeleton only | No operational key handle implementation yet. |
 
-- Full PKI workflows
-- Certificate chain validation
-- Application envelope encryption policy
-- Platform keystore adapters
+## Important boundary
 
-## TODO
+This file describes an implementation and evidence-preparation scope. It does not assert official validation status.
 
-- Choose the first DRBG candidate.
-- Record public KAT vector provenance.
-- Define algorithm implementation strategy.
-- Add negative test and evidence collection plan.
+## P1 next candidates
+
+1. Expand SHA-256/HMAC-SHA-256 KAT coverage.
+2. Add local public-vector manifest with source and SHA-256 checksums.
+3. Implement HMAC_DRBG-SHA-256 state machine and KATs.
+4. Add CSP/key handle lifecycle for HMAC keys.

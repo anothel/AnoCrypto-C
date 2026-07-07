@@ -2,7 +2,20 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton.
 
-Current status: P1 foundation skeleton. Cryptographic algorithm processing is not implemented yet.
+Current status: P1-1 foundation with a small reviewed algorithm slice.
+
+Implemented processing scope:
+
+- SHA-256 one-shot and streaming API
+- HMAC-SHA-256 one-shot and streaming API
+- Startup self-test KATs for SHA-256 and HMAC-SHA-256
+
+Skeleton-only scope:
+
+- SHA-384/SHA-512 ABI placeholders
+- HMAC-SHA-384/HMAC-SHA-512 ABI placeholders
+- HMAC_DRBG/Hash_DRBG interface skeleton
+- CSP/key handle lifecycle skeleton
 
 ## Build
 
@@ -21,22 +34,20 @@ cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
 
-## P1 foundation scope
+## P1-1 scope
 
-- Clean-room manifest and exclusion log updates
-- SHA-2 hash API skeleton
-- HMAC API skeleton
-- HMAC_DRBG/Hash_DRBG API skeleton
-- CSP/key handle skeleton
-- KAT manifest skeleton without vector data
-- Negative service-gate tests
-- Design document skeletons for hash/HMAC, DRBG, CSP, and self-test
+- Fresh C99 SHA-256 implementation
+- Fresh C99 HMAC-SHA-256 implementation
+- Public-source KAT fixtures recorded in `cleanroom/SOURCE_MANIFEST.md`
+- KAT test executable for SHA-256 and HMAC-SHA-256
+- Startup self-test uses internal KAT calls without opening the external crypto service gate
+- Negative service-gate tests remain in place
 
 ## Important limitations
 
-- No cryptographic algorithm processing implementation is included yet.
-- KAT manifest entries are placeholders only.
-- Public KAT vectors are not imported yet.
+- This is not an official validation result.
+- SHA-384, SHA-512, DRBG, CSP/key import, and block cipher APIs are not implemented yet.
+- KAT pass results are correctness checks only and do not replace formal validation.
 - Thread-safety is not finalized.
 - Error recovery policy after fatal state remains TODO.
 - This repository does not claim official validation or external review completion.

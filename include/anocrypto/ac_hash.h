@@ -12,10 +12,11 @@ extern "C" {
 /*
  * P1 public API skeleton for hash services.
  *
- * No hash algorithm implementation is included yet. Query functions expose the
- * candidate ABI shape. Processing functions are state-gated and return
- * ANO_CRYPTO_ERR_NOT_IMPLEMENTED until a reviewed implementation and public KAT
- * evidence are added.
+ * P1-1 scope:
+ * - SHA-256 processing is implemented and covered by public-source KATs.
+ * - SHA-384/SHA-512 are ABI-reserved candidates and return
+ *   ANO_CRYPTO_ERR_NOT_IMPLEMENTED from processing APIs until reviewed.
+ * - Processing functions are state-gated and require an operational module.
  */
 typedef enum ano_crypto_hash_algorithm_e {
     ANO_CRYPTO_HASH_ALG_SHA256 = 1,

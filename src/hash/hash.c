@@ -2,11 +2,15 @@
 #include <stdint.h>
 #include <anocrypto/ac_hash.h>
 #include <anocrypto/ac_module.h>
+#include "ac_internal.h"
+#include "ac_sha256_internal.h"
+
+#define ANO_CRYPTO_HASH_CTX_MAGIC 0x41434853u /* ACHS */
 
 typedef struct ano_crypto_hash_ctx_internal_s {
     uint32_t magic;
     uint32_t algorithm;
-    uint64_t processed_bytes;
+    ano_crypto_internal_sha256_ctx_t sha256;
 } ano_crypto_hash_ctx_internal_t;
 
 static ano_crypto_status_t ano_crypto_hash_validate_algorithm(
@@ -20,6 +24,25 @@ static ano_crypto_status_t ano_crypto_hash_validate_algorithm(
     default:
         return ANO_CRYPTO_ERR_UNSUPPORTED_ALGORITHM;
     }
+}
+
+static ano_crypto_status_t ano_crypto_hash_check_ctx(
+    void *ctx,
+    ano_crypto_hash_ctx_internal_t **out_ctx)
+{
+    ano_crypto_hash_ctx_internal_t *internal_ctx;
+
+    if (ctx == 0 || out_ctx == 0) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    internal_ctx = (ano_crypto_hash_ctx_internal_t *)ctx;
+    if (internal_ctx->magic != ANO_CRYPTO_HASH_CTX_MAGIC) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    *out_ctx = internal_ctx;
+    return ANO_CRYPTO_OK;
 }
 
 ano_crypto_status_t ano_crypto_hash_context_size(
@@ -51,7 +74,7 @@ ano_crypto_status_t ano_crypto_hash_digest_size(
 
     switch (algorithm) {
     case ANO_CRYPTO_HASH_ALG_SHA256:
-        *out_size = 32u;
+        *out_size = ANO_CRYPTO_SHA256_DIGEST_SIZE;
         return ANO_CRYPTO_OK;
     case ANO_CRYPTO_HASH_ALG_SHA384:
         *out_size = 48u;
@@ -71,6 +94,7 @@ ano_crypto_status_t ano_crypto_hash_init(
 {
     size_t required_len;
     ano_crypto_status_t st;
+    ano_crypto_hash_ctx_internal_t *internal_ctx;
 
     st = ano_crypto_module_require_operational();
     if (st != ANO_CRYPTO_OK) {
@@ -90,7 +114,17 @@ ano_crypto_status_t ano_crypto_hash_init(
         return ANO_CRYPTO_ERR_BUFFER_TOO_SMALL;
     }
 
-    return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+    if (algorithm != ANO_CRYPTO_HASH_ALG_SHA256) {
+        return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+    }
+
+    internal_ctx = (ano_crypto_hash_ctx_internal_t *)ctx;
+    ano_crypto_internal_zeroize(internal_ctx, required_len);
+    internal_ctx->magic = ANO_CRYPTO_HASH_CTX_MAGIC;
+    internal_ctx->algorithm = (uint32_t)algorithm;
+    ano_crypto_internal_sha256_init(&internal_ctx->sha256);
+
+    return ANO_CRYPTO_OK;
 }
 
 ano_crypto_status_t ano_crypto_hash_update(
@@ -99,17 +133,27 @@ ano_crypto_status_t ano_crypto_hash_update(
     size_t input_len)
 {
     ano_crypto_status_t st;
+    ano_crypto_hash_ctx_internal_t *internal_ctx;
 
     st = ano_crypto_module_require_operational();
     if (st != ANO_CRYPTO_OK) {
         return st;
     }
 
-    if (ctx == 0 || (input == 0 && input_len != 0u)) {
+    if ((input == 0 && input_len != 0u)) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
-    return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+    st = ano_crypto_hash_check_ctx(ctx, &internal_ctx);
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
+    if (internal_ctx->algorithm != (uint32_t)ANO_CRYPTO_HASH_ALG_SHA256) {
+        return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+    }
+
+    return ano_crypto_internal_sha256_update(&internal_ctx->sha256, input, input_len);
 }
 
 ano_crypto_status_t ano_crypto_hash_final(
@@ -119,18 +163,40 @@ ano_crypto_status_t ano_crypto_hash_final(
     size_t *out_written)
 {
     ano_crypto_status_t st;
+    ano_crypto_hash_ctx_internal_t *internal_ctx;
 
     st = ano_crypto_module_require_operational();
     if (st != ANO_CRYPTO_OK) {
         return st;
     }
 
-    if (ctx == 0 || out == 0 || out_written == 0 || out_len == 0u) {
+    if (out == 0 || out_written == 0) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
     *out_written = 0u;
-    return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+
+    st = ano_crypto_hash_check_ctx(ctx, &internal_ctx);
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
+    if (internal_ctx->algorithm != (uint32_t)ANO_CRYPTO_HASH_ALG_SHA256) {
+        return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+    }
+
+    if (out_len < ANO_CRYPTO_SHA256_DIGEST_SIZE) {
+        return ANO_CRYPTO_ERR_BUFFER_TOO_SMALL;
+    }
+
+    st = ano_crypto_internal_sha256_final(&internal_ctx->sha256, out);
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
+    *out_written = ANO_CRYPTO_SHA256_DIGEST_SIZE;
+    ano_crypto_internal_zeroize(internal_ctx, sizeof(*internal_ctx));
+    return ANO_CRYPTO_OK;
 }
 
 ano_crypto_status_t ano_crypto_hash_digest(
@@ -153,18 +219,28 @@ ano_crypto_status_t ano_crypto_hash_digest(
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
+    *out_written = 0u;
+
     st = ano_crypto_hash_digest_size(algorithm, &digest_len);
     if (st != ANO_CRYPTO_OK) {
         return st;
     }
 
     if (out_len < digest_len) {
-        *out_written = 0u;
         return ANO_CRYPTO_ERR_BUFFER_TOO_SMALL;
     }
 
-    *out_written = 0u;
-    return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+    if (algorithm != ANO_CRYPTO_HASH_ALG_SHA256) {
+        return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+    }
+
+    st = ano_crypto_internal_sha256_digest(input, input_len, out);
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
+    *out_written = ANO_CRYPTO_SHA256_DIGEST_SIZE;
+    return ANO_CRYPTO_OK;
 }
 
 const char *ano_crypto_hash_algorithm_name(

@@ -47,7 +47,7 @@ static void test_gate_before_init(void)
                   ANO_CRYPTO_ERR_NOT_INITIALIZED);
 }
 
-static void test_query_and_not_implemented_after_init(void)
+static void test_query_processing_and_not_implemented_after_init(void)
 {
     uint8_t out[64];
     uint8_t ctx[128];
@@ -82,15 +82,29 @@ static void test_query_and_not_implemented_after_init(void)
         ++g_failures;
     }
 
-    expect_status("hash after init",
+    expect_status("sha256 after init",
                   ano_crypto_hash_digest(ANO_CRYPTO_HASH_ALG_SHA256,
                                          0, 0u, out, sizeof(out), &written),
-                  ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
+                  ANO_CRYPTO_OK);
+    if (written != 32u) {
+        fprintf(stderr, "FAIL sha256 written: got %lu\n", (unsigned long)written);
+        ++g_failures;
+    }
 
-    expect_status("hmac after init",
+    written = 0u;
+    expect_status("hmac sha256 after init",
                   ano_crypto_hmac_compute(ANO_CRYPTO_HASH_ALG_SHA256,
                                           key, sizeof(key), 0, 0u,
                                           out, sizeof(out), &written),
+                  ANO_CRYPTO_OK);
+    if (written != 32u) {
+        fprintf(stderr, "FAIL hmac sha256 written: got %lu\n", (unsigned long)written);
+        ++g_failures;
+    }
+
+    expect_status("sha512 still not implemented",
+                  ano_crypto_hash_digest(ANO_CRYPTO_HASH_ALG_SHA512,
+                                         0, 0u, out, sizeof(out), &written),
                   ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
 
     expect_status("drbg instantiate after init",
@@ -122,7 +136,7 @@ static void test_zeroize_helper(void)
 int main(void)
 {
     test_gate_before_init();
-    test_query_and_not_implemented_after_init();
+    test_query_processing_and_not_implemented_after_init();
     test_zeroize_helper();
 
     if (g_failures != 0) {

@@ -51,3 +51,20 @@ It is intentionally conservative: implementation code, test vectors, file names,
 ## P1 KAT Source Status
 
 No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c` contains placeholder manifest entries only and must not be treated as algorithm evidence.
+
+## P1-1 SHA-256 / HMAC-SHA-256 Implementation Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| SRC-1001 | NIST FIPS 180-4, Secure Hash Standard (SHS), final publication page and PDF | Public standard | SHA-256 compression, padding, digest size, IV and round constants | Algorithm specification input only. This repository does not claim official validation. |
+| SRC-1002 | RFC 4231, Identifiers and Test Vectors for HMAC-SHA-224/SHA-256/SHA-384/SHA-512 | Public RFC / public test vectors | HMAC-SHA-256 KAT cases 1 and 2 | Public test-vector keys are synthetic KAT material and not operational secrets. |
+| SRC-1003 | RFC 2104, HMAC: Keyed-Hashing for Message Authentication | Public RFC | HMAC construction rule using inner/outer pads | Specification input only. No RFC sample implementation code imported. |
+| SRC-1004 | NIST CAVP Secure Hashing project page | Public validation-program information | Evidence caveat language: local KATs are informal correctness checks only | KAT pass results do not replace official validation. |
+
+## P1-1 Clean-room Notes
+
+- SHA-256 and HMAC-SHA-256 were implemented as fresh C99 source in this repository.
+- No external SHA/HMAC implementation code was imported.
+- Embedded KAT values are limited to public specification/test-vector material.
+- HMAC KAT keys are public test vectors only; they must not be reused as operational keys.
+- SHA-384, SHA-512, DRBG, CSP/key import, and algorithm validation evidence remain TODO.

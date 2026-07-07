@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p0-skeleton"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-sha256-hmac-kat"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P0 C99 skeleton; cryptographic algorithms not implemented";
+    out_identity->notes = "P1 C99 foundation; SHA-256 and HMAC-SHA-256 KAT-backed implementations included; DRBG/CSP/key remain skeletons";
 
     return ANO_CRYPTO_OK;
 }

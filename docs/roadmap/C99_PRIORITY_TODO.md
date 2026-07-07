@@ -1,31 +1,31 @@
 # AnoCrypto-C Priority TODO
 
-## Completed in P0
+## Completed in P1-1
 
-- Clean-room manifest and exclusion log skeleton
-- C99 public core headers
-- Module lifecycle and startup self-test skeleton
-- Build/version identity API skeleton
-- CMake build/install skeleton
-- Initial unit and install smoke tests
+- Fresh C99 SHA-256 implementation.
+- Fresh C99 HMAC-SHA-256 implementation.
+- Public-source SHA-256/HMAC-SHA-256 KATs in startup self-test.
+- KAT test executable for one-shot and streaming APIs.
+- Service-gate negative tests updated to reflect implemented SHA-256/HMAC-SHA-256.
 
-## Added in P1 Foundation
+## P1-2 Immediate TODO
 
-- SHA-2 hash API skeleton
-- HMAC API skeleton
-- HMAC_DRBG/Hash_DRBG API skeleton
-- CSP/key handle skeleton
-- KAT manifest skeleton
-- Negative service-gate test
-- Design document skeletons
+1. Add expanded public SHA-256/HMAC-SHA-256 vector corpus.
+2. Record vector source date and local file SHA-256 checksums.
+3. Add chunk-boundary and long-message streaming tests.
+4. Add HMAC long-key tests.
+5. Add differential validation workflow against an independently selected tool.
+6. Decide SHA-384/SHA-512 implementation timing.
+7. Start HMAC_DRBG-SHA-256 implementation design.
+8. Add CSP/key handle lifecycle implementation for HMAC keys.
+9. Add release evidence collection script.
+10. Add CI matrix.
 
-## Next P1 Work
+## Still not included
 
-1. Choose SHA-2/HMAC implementation strategy.
-2. Add public-source KAT manifest entries with provenance.
-3. Implement SHA-256 first, then SHA-384/SHA-512.
-4. Implement HMAC on top of the selected hash interface.
-5. Choose HMAC_DRBG or Hash_DRBG as the first DRBG candidate.
-6. Add release evidence collection scripts.
-7. Expand negative tests and install smoke tests.
-8. Review ABI before any external PoC package.
+- DRBG implementation.
+- CSP/key handle implementation.
+- SHA-384/SHA-512 processing.
+- Block cipher or AEAD processing.
+- Public-key algorithms.
+- Official validation evidence.

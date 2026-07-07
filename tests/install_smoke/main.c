@@ -53,6 +53,18 @@ int main(void)
         return 1;
     }
 
+    {
+        static const uint8_t msg[] = { 'a', 'b', 'c' };
+        uint8_t digest[32];
+        size_t written = 0u;
+        st = ano_crypto_hash_digest(ANO_CRYPTO_HASH_ALG_SHA256,
+                                    msg, sizeof(msg), digest, sizeof(digest), &written);
+        if (st != ANO_CRYPTO_OK || written != sizeof(digest)) {
+            fprintf(stderr, "sha256 smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+    }
+
     st = ano_crypto_module_shutdown();
     if (st != ANO_CRYPTO_OK) {
         fprintf(stderr, "module shutdown failed: %s\n", ano_crypto_status_name(st));
