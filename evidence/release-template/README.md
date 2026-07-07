@@ -21,12 +21,14 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - SBOM status
 - Signing status
 
-## P1 Foundation Evidence Notes
+## P1-2 Evidence Notes
 
-- Hash/HMAC/DRBG processing APIs are present but return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`.
-- KAT manifest entries are placeholders only.
+- SHA-256 and HMAC-SHA-256 processing APIs are implemented for the current P1 slice.
+- Extended KAT tests cover public SHA-256 vectors and RFC 4231 HMAC-SHA-256 cases.
+- Deterministic chunk-boundary tests cover one-shot versus streaming API consistency.
 - `tests/negative/crypto_service_gate_tests.c` verifies that cryptographic services are rejected before module initialization and startup self-test success.
-- Zeroization helper has a skeleton test; compiler/platform review is still TODO.
+- `tests/negative/hash_hmac_api_negative_tests.c` verifies representative invalid argument, short output buffer, and finalized-context behavior.
+- `tools/collect_release_evidence.cmake` creates a local engineering evidence draft from a build tree.
 
 ## Commands
 
@@ -39,14 +41,22 @@ ctest --test-dir build --output-on-failure
 Install smoke:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1
+cmake --install build --prefix /tmp/anocrypto-c-p1-2
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-2
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
 
+Evidence draft:
+
+```sh
+cmake --build build --target ano_crypto_collect_release_evidence
+```
+
 ## TODO
 
-- Add script to capture command output and SHA-256 hashes.
-- Add KAT evidence only after public-source vectors are imported and recorded in the clean-room manifest.
+- Add script support for source archive SHA-256.
+- Add script support for install-prefix smoke logs.
+- Add KAT vector local-copy hash policy when vectors are stored as separate data files.
 - Add CI-produced evidence bundle layout.
+- Add SBOM and signing evidence fields.

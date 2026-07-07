@@ -68,3 +68,22 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - Embedded KAT values are limited to public specification/test-vector material.
 - HMAC KAT keys are public test vectors only; they must not be reused as operational keys.
 - SHA-384, SHA-512, DRBG, CSP/key import, and algorithm validation evidence remain TODO.
+
+## P1-2 Extended KAT and Evidence Tooling Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| SRC-1101 | Existing P1-1 SHA-256/HMAC-SHA-256 implementation in this repository | User-owned project artifact | Extended tests and startup self-test coverage | No external implementation code imported. |
+| SRC-1102 | NIST FIPS 180-4 SHA-256 example digests already recorded as SRC-1001 | Public standard / public test vectors | Added multi-block and million-`a` SHA-256 KAT coverage | Correctness test input only; not official validation evidence. |
+| SRC-1103 | RFC 4231 HMAC-SHA-256 test vectors already recorded as SRC-1002 | Public RFC / public test vectors | Added HMAC-SHA-256 test cases 3, 4, 6, and 7 | Public synthetic keys only; not operational secrets. |
+| DER-2001 | Locally generated deterministic SHA-256 chunk-boundary API consistency fixtures | User-owned generated test data | Compare one-shot and streaming APIs for boundary lengths | Not a public KAT source and not validation evidence. |
+| DER-2002 | Locally generated deterministic HMAC-SHA-256 chunk-boundary API consistency fixtures | User-owned generated test data | Compare one-shot and streaming APIs for key/message boundary lengths | Not a public KAT source and not validation evidence. |
+| DER-2003 | `tools/collect_release_evidence.cmake` written for this repository | User-owned project artifact | Engineering evidence draft collection | Captures local paths and logs; review before sharing. |
+
+## P1-2 Clean-room Notes
+
+- No external SHA-256, HMAC, KAT runner, or evidence script implementation code was imported.
+- Public KAT values are limited to already recorded public SHA-256 and HMAC-SHA-256 sources.
+- Public HMAC test-vector keys are synthetic test fixtures and must not be used as operational keys.
+- Deterministic boundary tests are local API consistency tests and are labeled separately from public KAT sources.
+- Evidence drafts may include local paths, compiler identity, and test logs; review before external sharing.

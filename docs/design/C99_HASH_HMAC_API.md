@@ -1,14 +1,28 @@
 # C99 Hash and HMAC API Design
 
-Status: P1-1 draft.
+Status: P1-2 draft.
 
-## Implemented P1-1 scope
+## Implemented P1 scope
 
 - `ANO_CRYPTO_HASH_ALG_SHA256`
 - `ano_crypto_hash_digest()` one-shot API
 - `ano_crypto_hash_init/update/final()` streaming API
 - `ano_crypto_hmac_compute()` one-shot API over SHA-256
 - `ano_crypto_hmac_init/update/final()` streaming API over SHA-256
+
+## P1-2 coverage additions
+
+- Startup self-test now covers:
+  - SHA-256 empty message
+  - SHA-256 `abc`
+  - SHA-256 standard multi-block message
+  - HMAC-SHA-256 RFC 4231 test cases 1 and 2
+  - HMAC-SHA-256 RFC 4231 test case 6 for the long-key path
+- Extended KAT executable covers:
+  - SHA-256 standard multi-block message
+  - SHA-256 million-`a` vector
+  - HMAC-SHA-256 RFC 4231 test cases 3, 4, 6, and 7
+- Boundary consistency executable coverage is included through deterministic one-shot versus streaming comparisons.
 
 ## ABI boundary
 
@@ -32,6 +46,7 @@ Startup self-test uses internal SHA-256/HMAC-SHA-256 helpers so that self-test c
 - HMAC-SHA-256 supports zero-length key and zero-length message inputs.
 - HMAC temporary key blocks and inner digests are explicitly zeroized after use.
 - Output buffer sizes are checked before writing results.
+- Finalized public contexts are zeroized and rejected on further use.
 
 ## Reserved but not implemented
 
@@ -40,12 +55,12 @@ Startup self-test uses internal SHA-256/HMAC-SHA-256 helpers so that self-test c
 - HMAC-SHA-384
 - HMAC-SHA-512
 
-These algorithm IDs remain ABI candidates but processing APIs return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` for them in P1-1.
+These algorithm IDs remain ABI candidates but processing APIs return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` for them in P1-2.
 
 ## TODO
 
-- Add larger public KAT corpus and local vector manifest hashes.
-- Add long-message tests and incremental chunk-boundary tests.
 - Decide whether SHA-384/SHA-512 enter P1 or stay P2.
 - Add differential validation strategy against an independently selected reference tool.
 - Document input/output aliasing policy per API.
+- Add constant-time and side-channel review checklist for HMAC key handling.
+- Add generated KAT evidence format if vectors move into separate manifest files.

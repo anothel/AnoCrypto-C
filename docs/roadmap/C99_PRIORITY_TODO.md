@@ -1,31 +1,40 @@
 # AnoCrypto-C Priority TODO
 
-## Completed in P1-1
+Status: P1-2 draft.
 
-- Fresh C99 SHA-256 implementation.
-- Fresh C99 HMAC-SHA-256 implementation.
-- Public-source SHA-256/HMAC-SHA-256 KATs in startup self-test.
-- KAT test executable for one-shot and streaming APIs.
-- Service-gate negative tests updated to reflect implemented SHA-256/HMAC-SHA-256.
+## Completed P0/P1 foundation items
 
-## P1-2 Immediate TODO
+- C99 repository skeleton
+- clean-room source manifest and exclusion log
+- public C ABI header skeletons
+- module lifecycle/state-machine skeleton
+- startup self-test framework skeleton
+- build/version identity APIs
+- CMake build/install/export skeleton
+- unit, negative, KAT, and install smoke test skeletons
+- SHA-256 implementation
+- HMAC-SHA-256 implementation
+- public-source SHA-256/HMAC-SHA-256 KAT coverage
+- extended chunk-boundary consistency tests
+- engineering release evidence collection script
 
-1. Add expanded public SHA-256/HMAC-SHA-256 vector corpus.
-2. Record vector source date and local file SHA-256 checksums.
-3. Add chunk-boundary and long-message streaming tests.
-4. Add HMAC long-key tests.
-5. Add differential validation workflow against an independently selected tool.
-6. Decide SHA-384/SHA-512 implementation timing.
-7. Start HMAC_DRBG-SHA-256 implementation design.
-8. Add CSP/key handle lifecycle implementation for HMAC keys.
-9. Add release evidence collection script.
-10. Add CI matrix.
+## Immediate P1 next items
 
-## Still not included
+1. Decide SHA-384/SHA-512 implementation timing.
+2. Add HMAC_DRBG or Hash_DRBG design-to-code slice.
+3. Add public DRBG KAT source manifest entries before implementation.
+4. Add CSP/key handle lifecycle behavior beyond skeleton allocation rules.
+5. Add install-prefix evidence capture to the evidence script.
+6. Add source archive SHA-256 generation to the evidence script.
+7. Add CI matrix and reproducible build notes.
+8. Add API/ABI review notes for caller-provided context buffers.
+9. Add thread-safety policy and tests.
+10. Add side-channel review checklist for key-dependent code paths.
 
-- DRBG implementation.
-- CSP/key handle implementation.
-- SHA-384/SHA-512 processing.
-- Block cipher or AEAD processing.
-- Public-key algorithms.
-- Official validation evidence.
+## P2 candidates
+
+- Block cipher/mode scope selection based on customer and validation-target requirements.
+- KDF/MAC expansion.
+- Public-key primitive planning.
+- AnoCrypto C++ Wrapper boundary draft.
+- AnoSecureKit and AnoPKI integration boundary drafts.
