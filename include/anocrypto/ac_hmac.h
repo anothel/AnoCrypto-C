@@ -18,7 +18,7 @@ extern "C" {
  * - HMAC-SHA-256 processing is implemented and covered by public-source KATs.
  * - HMAC with SHA-384/SHA-512 is ABI-reserved and returns
  *   ANO_CRYPTO_ERR_NOT_IMPLEMENTED from processing APIs until reviewed.
- * - P1-4 adds an HMAC-key handle compute path backed by the CSP skeleton.
+ * - P1-4/P1-5 add and test an HMAC-key handle compute path backed by the CSP skeleton.
  * - Key material must never be logged by callers or by this library.
  */
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_hmac_context_size(

@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-4-entropy-csp"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-5-evidence-lifecycle"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P1-4 C99 foundation; SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, internal entropy adapter seam, and HMAC key handle lifecycle include engineering test coverage; Hash_DRBG and OS entropy remain TODO";
+    out_identity->notes = "P1-5 C99 foundation; SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, internal entropy adapter seam, HMAC key handle lifecycle, stale-handle/exhaustion tests, and evidence archive/smoke-log collection include engineering test coverage; Hash_DRBG and OS entropy remain TODO";
 
     return ANO_CRYPTO_OK;
 }

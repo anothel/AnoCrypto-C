@@ -1,6 +1,6 @@
 # C99 Hash and HMAC API Design
 
-Status: P1-4 draft.
+Status: P1-5 draft.
 
 ## Implemented P1 scope
 
@@ -55,7 +55,7 @@ Startup self-test uses internal SHA-256/HMAC-SHA-256 helpers so that self-test c
 - HMAC-SHA-384
 - HMAC-SHA-512
 
-These algorithm IDs remain ABI candidates but processing APIs return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` for them in P1-4.
+These algorithm IDs remain ABI candidates but processing APIs return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` for them in P1-5.
 
 ## TODO
 
@@ -66,7 +66,7 @@ These algorithm IDs remain ABI candidates but processing APIs return `ANO_CRYPTO
 - Add generated KAT evidence format if vectors move into separate manifest files.
 
 
-## P1-4 HMAC key handle path
+## P1-4/P1-5 HMAC key handle path
 
 P1-4 adds `ano_crypto_hmac_compute_with_key()` for HMAC-SHA-256 using an imported `ANO_CRYPTO_KEY_TYPE_HMAC` CSP handle. This path is intended to exercise key lifecycle and service-gate behavior without exposing raw key bytes after import.
 

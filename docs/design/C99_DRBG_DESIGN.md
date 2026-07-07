@@ -1,8 +1,8 @@
 # C99 DRBG Design Skeleton
 
-Status: P1-4 draft.
+Status: P1-5 draft.
 
-## Implemented through P1-4
+## Implemented through P1-5
 
 - HMAC_DRBG-SHA-256 deterministic core
 - caller-provided opaque DRBG context buffer
@@ -25,7 +25,7 @@ Status: P1-4 draft.
 
 | Algorithm | Status | Notes |
 |---|---|---|
-| HMAC_DRBG-SHA-256 | Implemented P1-4 slice | Deterministic core only; entropy input is explicit. Internal entropy adapter seam exists but OS provider is TODO. |
+| HMAC_DRBG-SHA-256 | Implemented P1-5 slice | Deterministic core only; entropy input is explicit. Internal entropy adapter seam exists but OS provider is TODO. |
 | Hash_DRBG-SHA-256 | ABI-reserved | Returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` from processing APIs. |
 
 ## State Model
@@ -55,11 +55,11 @@ ano_crypto_drbg_reseed(ctx,
                        flags);
 ```
 
-This is intentionally a low-level DRBG core interface. A later entropy adapter or random-service layer must collect and assess entropy before calling this core API. P1-4 does not claim that caller-provided entropy or callback-provided entropy is suitable for operational use.
+This is intentionally a low-level DRBG core interface. A later entropy adapter or random-service layer must collect and assess entropy before calling this core API. P1-5 does not claim that caller-provided entropy or callback-provided entropy is suitable for operational use.
 
 ## HMAC_DRBG-SHA-256 policy constants
 
-| Constant | Value | P1-4 meaning |
+| Constant | Value | P1-5 meaning |
 |---|---:|---|
 | `ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_ENTROPY_INPUT_SIZE` | 32 bytes | Minimum entropy input accepted by instantiate/reseed. |
 | `ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_NONCE_SIZE` | 16 bytes | Minimum nonce accepted by instantiate. |
@@ -68,7 +68,7 @@ This is intentionally a low-level DRBG core interface. A later entropy adapter o
 
 ## Entropy Adapter Boundary
 
-P1-4 adds an internal entropy adapter seam in `src/internal/ac_entropy_internal.h` and `src/drbg/entropy_adapter.c`. The callback provider is test-only plumbing. The OS-reserved provider returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` until platform entropy collection is reviewed.
+P1-4 added an internal entropy adapter seam in `src/internal/ac_entropy_internal.h` and `src/drbg/entropy_adapter.c`. The callback provider is test-only plumbing. The OS-reserved provider returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` until platform entropy collection is reviewed.
 
 The future adapter still needs to define:
 

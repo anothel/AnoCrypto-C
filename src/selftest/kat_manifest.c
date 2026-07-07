@@ -1,7 +1,7 @@
 #include "ac_kat_manifest.h"
 
 /*
- * P1-4 KAT manifest.
+ * P1-5 KAT manifest.
  *
  * Vectors embedded in selftest.c, src/drbg/drbg.c, and tests/kat are limited to public
  * specification/test-vector inputs recorded in cleanroom/SOURCE_MANIFEST.md.
@@ -90,8 +90,8 @@ static const ano_crypto_internal_kat_manifest_entry_t g_kat_manifest[] = {
     {
         "hmac.sha256.handle.rfc4231.tc2",
         "HMAC-SHA-256 with CSP handle",
-        "SRC-1002: RFC 4231 HMAC-SHA-256 Test Case 2 through P1-4 HMAC key handle path",
-        "p1-4-key-handle-kat-test"
+        "SRC-1002: RFC 4231 HMAC-SHA-256 Test Case 2 through P1-5 HMAC key handle path",
+        "p1-5-key-handle-kat-test"
     }
 };
 

@@ -1,14 +1,14 @@
 # C99 Entropy Adapter Design Skeleton
 
-Status: P1-4 draft.
+Status: P1-5 draft.
 
 ## Purpose
 
 The entropy adapter is a seam between platform entropy sources and DRBG core logic. It is not itself a DRBG and it does not replace the HMAC_DRBG-SHA-256 state machine.
 
-P1-4 adds only an internal adapter interface so future OS/platform-specific entropy collection can be implemented and reviewed separately from DRBG logic.
+P1-4 added only an internal adapter interface so future OS/platform-specific entropy collection can be implemented and reviewed separately from DRBG logic.
 
-## Implemented P1-4 slice
+## Implemented P1-5 slice
 
 - Internal entropy source descriptor in `src/internal/ac_entropy_internal.h`
 - Callback-based test seam for deterministic unit tests

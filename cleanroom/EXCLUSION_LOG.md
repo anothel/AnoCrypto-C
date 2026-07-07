@@ -1,6 +1,6 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P0 skeleton draft
+Status: P1-5 draft
 Date: 2026-07-07
 
 ## Purpose
@@ -76,3 +76,13 @@ If excluded material is discovered:
 | EX-1302 | Operational entropy captures, generated random bytes, production seeds, private keys, HMAC keys, or tokens | Sensitive information risk | Excluded | Tests use public synthetic fixtures only and logs must not print bytes. |
 | EX-1303 | Third-party keystore, key table, handle manager, or key export implementation source code | Code provenance risk | Excluded | P1-4 CSP table is a fresh in-memory lifecycle slice only. |
 | EX-1304 | Treating callback entropy tests as operational entropy-source evidence | Claims/design risk | Excluded | Callback provider is test plumbing; OS entropy provider remains TODO. |
+
+
+## P1-5 Additional Exclusions
+
+| ID | Material / Pattern | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-1401 | Third-party CSP handle-manager, key table, slot allocator, or stale-handle implementation source code | Code provenance risk | Excluded | P1-5 stale-handle/exhaustion tests and handle behavior are fresh code in this repository. |
+| EX-1402 | Source archives containing build outputs, generated evidence bundles, local caches, or copied third-party material | Provenance / disclosure risk | Excluded | Evidence source archive is generated from filtered repository source files. |
+| EX-1403 | Install smoke logs containing secrets, operational entropy, generated secret bytes, private keys, tokens, customer paths, or internal deployment details | Sensitive information / disclosure risk | Excluded | P1-5 install smoke logs must remain status-only and be reviewed before sharing. |
+| EX-1404 | Treating source archive hashes, CTest logs, or install smoke logs as formal validation results | Claims risk | Excluded | They are engineering traceability and correctness inputs only. |

@@ -14,7 +14,7 @@ extern "C" {
  * Key/CSP lifecycle skeleton.
  *
  * Raw key material is accepted only as caller-provided input to future import
- * operations. P1-4 implements an in-memory HMAC key handle path only. It does
+ * operations. P1-5 implements an in-memory HMAC key handle path only. It does
  * not export, print, persist, or test with operational secret material.
  */
 typedef enum ano_crypto_key_type_e {

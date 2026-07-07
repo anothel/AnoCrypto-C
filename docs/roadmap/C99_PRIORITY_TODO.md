@@ -1,6 +1,6 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-4 draft.
+Status: P1-5 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -21,20 +21,21 @@ Status: P1-4 draft.
 - internal entropy adapter seam and unit tests
 - in-memory HMAC CSP/key handle lifecycle slice
 - engineering release evidence collection script
+- install-prefix smoke log capture in the evidence script
+- source archive SHA-256 generation in the evidence script
+- CSP handle table exhaustion and stale-handle reuse tests
 
 ## Immediate P1 next items
 
 1. Connect reviewed platform entropy sources to the adapter seam.
-2. Add CSP/key handle lifecycle allocation exhaustion and stale-handle tests.
-3. Decide SHA-384/SHA-512 implementation timing.
-4. Add source archive SHA-256 generation to the evidence script.
-5. Add install-prefix smoke log capture to the evidence script.
-6. Add CI matrix and reproducible build notes.
-7. Add API/ABI review notes for caller-provided context buffers.
-8. Add thread-safety policy and tests.
-9. Add side-channel review checklist for key-dependent code paths.
-10. Add additional HMAC_DRBG KAT paths: personalization string, no reseed, no additional input, and request-size boundaries.
-11. Define thread-safety policy for CSP table and module global state.
+2. Decide SHA-384/SHA-512 implementation timing.
+3. Add CI matrix and reproducible build notes.
+4. Add API/ABI review notes for caller-provided context buffers.
+5. Add thread-safety policy and tests for CSP table and module global state.
+6. Add side-channel review checklist for key-dependent code paths.
+7. Add additional HMAC_DRBG KAT paths: personalization string, no reseed, no additional input, and request-size boundaries.
+8. Add SBOM/signing placeholders to the evidence workflow.
+9. Add reproducible source archive rules if archive byte-for-byte reproducibility becomes a release requirement.
 
 ## P2 candidates
 

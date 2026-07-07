@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton.
 
-Current status: P1-4 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal entropy adapter seam, HMAC key handle lifecycle slice, and evidence tooling.
+Current status: P1-5 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal entropy adapter seam, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, and release-evidence draft tooling.
 
 Implemented processing scope:
 
@@ -12,8 +12,9 @@ Implemented processing scope:
 - HMAC_DRBG-SHA-256 deterministic core API
 - Startup self-test KATs for SHA-256, HMAC-SHA-256, and HMAC_DRBG-SHA-256
 - Extended KAT executables for SHA-256, HMAC-SHA-256, HMAC key handle path, and HMAC_DRBG-SHA-256 public vectors
-- Negative API tests for hash/HMAC/DRBG/CSP/key argument handling and context lifecycle behavior
+- Negative API tests for hash/HMAC/DRBG/CSP/key argument handling, context lifecycle behavior, handle exhaustion, and stale handle rejection
 - Internal entropy adapter seam with callback and OS-reserved provider tests
+- Release evidence draft collection with source archive hash and install smoke logs
 
 Skeleton-only / TODO scope:
 
@@ -22,6 +23,7 @@ Skeleton-only / TODO scope:
 - Hash_DRBG-SHA-256 ABI placeholder
 - Reviewed OS entropy provider and public random service layer
 - Persistent keystore, key export, key wrapping, and multi-process CSP model
+- Thread-safety policy for module and CSP global state
 
 ## Build
 
@@ -34,8 +36,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-4
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-4
+cmake --install build --prefix /tmp/anocrypto-c-p1-5
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-5
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -48,19 +50,22 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-## P1-4 scope
+Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `ctest.log`, and installed-package smoke logs when the default P1-5 target is used.
+
+## P1-5 scope
 
 - Fresh C99 SHA-256 implementation retained from P1-1
 - Fresh C99 HMAC-SHA-256 implementation retained from P1-1
 - Fresh C99 HMAC_DRBG-SHA-256 deterministic core implementation retained from P1-3
+- Internal entropy adapter seam and HMAC key handle lifecycle retained from P1-4
 - Public-source KAT fixtures recorded in `cleanroom/SOURCE_MANIFEST.md`
 - Extended public KAT coverage for SHA-256 long-message/million-`a` vectors and RFC 4231 HMAC-SHA-256 cases
 - HMAC key handle KAT path using RFC 4231 Test Case 2 through the CSP handle lifecycle
 - HMAC_DRBG-SHA-256 public CAVP vector flow covering instantiate, reseed, and two generate calls
 - Chunk-boundary API consistency tests for one-shot versus streaming behavior
 - Startup self-test includes SHA-256, HMAC-SHA-256, and HMAC_DRBG-SHA-256 paths
-- Internal entropy adapter seam with test callback and OS-reserved provider behavior
-- Release evidence collection script skeleton
+- CSP handle table exhaustion and stale-handle reuse tests
+- Source archive SHA-256 and install smoke log capture in the evidence script
 
 ## Important limitations
 

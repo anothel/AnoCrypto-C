@@ -31,6 +31,8 @@ const char *ano_crypto_status_name(ano_crypto_status_t status)
         return "ANO_CRYPTO_ERR_INTEGRITY_CHECK_FAILED";
     case ANO_CRYPTO_ERR_NOT_IMPLEMENTED:
         return "ANO_CRYPTO_ERR_NOT_IMPLEMENTED";
+    case ANO_CRYPTO_ERR_RESOURCE_EXHAUSTED:
+        return "ANO_CRYPTO_ERR_RESOURCE_EXHAUSTED";
     case ANO_CRYPTO_ERR_INTERNAL_ERROR:
         return "ANO_CRYPTO_ERR_INTERNAL_ERROR";
     default:

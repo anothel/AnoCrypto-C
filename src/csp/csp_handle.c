@@ -105,7 +105,7 @@ static ano_crypto_status_t find_free_slot(size_t *out_index)
         }
     }
 
-    return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+    return ANO_CRYPTO_ERR_RESOURCE_EXHAUSTED;
 }
 
 static uint32_t next_generation(void)
