@@ -21,7 +21,7 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - SBOM status
 - Signing status
 
-## P1-5 Evidence Notes
+## P1-6 Evidence Notes
 
 - SHA-256 and HMAC-SHA-256 processing APIs are implemented for the current P1 slice.
 - HMAC-SHA-256 can also be computed through an in-memory HMAC key handle lifecycle slice.
@@ -47,8 +47,8 @@ ctest --test-dir build --output-on-failure
 Install smoke:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-5
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-5
+cmake --install build --prefix /tmp/anocrypto-c-p1-6
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-6
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -66,3 +66,14 @@ cmake --build build --target ano_crypto_collect_release_evidence
 - Add SBOM and signing evidence fields.
 - Add reproducible build notes.
 - Add thread-safety test/evidence strategy for global module state and CSP table.
+
+
+## P1-6 Thread-Safety Log Review
+
+If present, review thread-safety test logs for:
+
+- status-only output
+- no key bytes
+- no MAC/DRBG output bytes
+- no entropy bytes
+- no broad support claims beyond the documented P1-6 global-state lock policy

@@ -8,9 +8,31 @@
 #include "ac_internal.h"
 #include "ac_kat_manifest.h"
 #include "ac_sha256_internal.h"
+#include "ac_thread_internal.h"
 
 static ano_crypto_status_t g_selftest_last_status = ANO_CRYPTO_ERR_NOT_INITIALIZED;
 static uint32_t g_selftest_last_flags = 0u;
+
+
+static void ano_crypto_selftest_set_last_flags(uint32_t flags)
+{
+    if (ano_crypto_internal_global_lock() == ANO_CRYPTO_OK) {
+        g_selftest_last_flags = flags;
+        ano_crypto_internal_global_unlock();
+    } else {
+        g_selftest_last_flags = flags;
+    }
+}
+
+static void ano_crypto_selftest_set_last_status(ano_crypto_status_t status)
+{
+    if (ano_crypto_internal_global_lock() == ANO_CRYPTO_OK) {
+        g_selftest_last_status = status;
+        ano_crypto_internal_global_unlock();
+    } else {
+        g_selftest_last_status = status;
+    }
+}
 
 static int bytes_equal(const uint8_t *a, const uint8_t *b, size_t len)
 {
@@ -267,78 +289,94 @@ ano_crypto_status_t ano_crypto_selftest_run(uint32_t flags)
 {
     ano_crypto_status_t st;
 
-    g_selftest_last_flags = flags;
+    ano_crypto_selftest_set_last_flags(flags);
 
 #if defined(ANO_CRYPTO_ENABLE_TEST_HOOKS)
     if ((flags & ANO_CRYPTO_SELFTEST_FLAG_FORCE_FAILURE_FOR_TEST) != 0u) {
-        g_selftest_last_status = ANO_CRYPTO_ERR_SELF_TEST_FAILED;
-        ano_crypto_internal_module_mark_error(g_selftest_last_status);
-        return g_selftest_last_status;
+        ano_crypto_selftest_set_last_status(ANO_CRYPTO_ERR_SELF_TEST_FAILED);
+        ano_crypto_internal_module_mark_error(ANO_CRYPTO_ERR_SELF_TEST_FAILED);
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
     }
 #else
     if ((flags & 0x80000000u) != 0u) {
-        g_selftest_last_status = ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
-        return g_selftest_last_status;
+        ano_crypto_selftest_set_last_status(ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER);
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
     }
 #endif
 
     st = ano_crypto_selftest_check_build_identity();
     if (st != ANO_CRYPTO_OK) {
-        g_selftest_last_status = st;
+        ano_crypto_selftest_set_last_status(st);
         ano_crypto_internal_module_mark_error(st);
         return st;
     }
 
     st = ano_crypto_selftest_check_kat_manifest();
     if (st != ANO_CRYPTO_OK) {
-        g_selftest_last_status = st;
+        ano_crypto_selftest_set_last_status(st);
         ano_crypto_internal_module_mark_error(st);
         return st;
     }
 
     st = ano_crypto_selftest_sha256_kat();
     if (st != ANO_CRYPTO_OK) {
-        g_selftest_last_status = st;
+        ano_crypto_selftest_set_last_status(st);
         ano_crypto_internal_module_mark_error(st);
         return st;
     }
 
     st = ano_crypto_selftest_hmac_sha256_kat();
     if (st != ANO_CRYPTO_OK) {
-        g_selftest_last_status = st;
+        ano_crypto_selftest_set_last_status(st);
         ano_crypto_internal_module_mark_error(st);
         return st;
     }
 
     st = ano_crypto_internal_hmac_drbg_sha256_selftest();
     if (st != ANO_CRYPTO_OK) {
-        g_selftest_last_status = st;
+        ano_crypto_selftest_set_last_status(st);
         ano_crypto_internal_module_mark_error(st);
         return st;
     }
 
-    g_selftest_last_status = ANO_CRYPTO_OK;
+    ano_crypto_selftest_set_last_status(ANO_CRYPTO_OK);
     return ANO_CRYPTO_OK;
 }
 
 ano_crypto_status_t ano_crypto_selftest_get_last_status(
     ano_crypto_status_t *out_status)
 {
+    ano_crypto_status_t st;
+
     if (out_status == 0) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
+    st = ano_crypto_internal_global_lock();
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
     *out_status = g_selftest_last_status;
+    ano_crypto_internal_global_unlock();
     return ANO_CRYPTO_OK;
 }
 
 ano_crypto_status_t ano_crypto_selftest_get_last_flags(
     uint32_t *out_flags)
 {
+    ano_crypto_status_t st;
+
     if (out_flags == 0) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
+    st = ano_crypto_internal_global_lock();
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
     *out_flags = g_selftest_last_flags;
+    ano_crypto_internal_global_unlock();
     return ANO_CRYPTO_OK;
 }

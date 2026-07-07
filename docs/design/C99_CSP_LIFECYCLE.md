@@ -1,6 +1,6 @@
 # C99 CSP / Key Lifecycle Skeleton
 
-Status: P1-5 draft.
+Status: P1-6 draft.
 
 ## Implemented P1-5 slice
 

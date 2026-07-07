@@ -1,6 +1,6 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-5 draft.
+Status: P1-6 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -24,6 +24,8 @@ Status: P1-5 draft.
 - install-prefix smoke log capture in the evidence script
 - source archive SHA-256 generation in the evidence script
 - CSP handle table exhaustion and stale-handle reuse tests
+- Limited module/self-test/CSP global-state lock seam and thread-safety policy draft
+- POSIX concurrent CSP/HMAC smoke test
 
 ## Immediate P1 next items
 
@@ -31,7 +33,7 @@ Status: P1-5 draft.
 2. Decide SHA-384/SHA-512 implementation timing.
 3. Add CI matrix and reproducible build notes.
 4. Add API/ABI review notes for caller-provided context buffers.
-5. Add thread-safety policy and tests for CSP table and module global state.
+5. Expand thread-safety policy into reviewed public support matrix and CI coverage.
 6. Add side-channel review checklist for key-dependent code paths.
 7. Add additional HMAC_DRBG KAT paths: personalization string, no reseed, no additional input, and request-size boundaries.
 8. Add SBOM/signing placeholders to the evidence workflow.

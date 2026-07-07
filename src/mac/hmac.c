@@ -372,7 +372,7 @@ ano_crypto_status_t ano_crypto_hmac_compute_with_key(
     size_t out_len,
     size_t *out_written)
 {
-    const uint8_t *key_material = 0;
+    uint8_t key_material[ANO_CRYPTO_INTERNAL_CSP_MAX_SECRET_BYTES];
     size_t key_material_len = 0u;
     ano_crypto_status_t st;
 
@@ -399,14 +399,21 @@ ano_crypto_status_t ano_crypto_hmac_compute_with_key(
         return ANO_CRYPTO_ERR_BUFFER_TOO_SMALL;
     }
 
-    st = ano_crypto_internal_csp_lookup_secret(
-        key_handle, ANO_CRYPTO_KEY_TYPE_HMAC, &key_material, &key_material_len);
+    ano_crypto_internal_zeroize(key_material, sizeof(key_material));
+    st = ano_crypto_internal_csp_copy_secret(
+        key_handle,
+        ANO_CRYPTO_KEY_TYPE_HMAC,
+        key_material,
+        sizeof(key_material),
+        &key_material_len);
     if (st != ANO_CRYPTO_OK) {
+        ano_crypto_internal_zeroize(key_material, sizeof(key_material));
         return st;
     }
 
     st = ano_crypto_internal_hmac_sha256_compute(
         key_material, key_material_len, input, input_len, out);
+    ano_crypto_internal_zeroize(key_material, sizeof(key_material));
     if (st != ANO_CRYPTO_OK) {
         return st;
     }

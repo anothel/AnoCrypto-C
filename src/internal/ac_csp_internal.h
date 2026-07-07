@@ -20,10 +20,11 @@ ano_crypto_status_t ano_crypto_internal_csp_import_secret(
 ano_crypto_status_t ano_crypto_internal_csp_destroy(
     ano_crypto_csp_handle_t handle);
 
-ano_crypto_status_t ano_crypto_internal_csp_lookup_secret(
+ano_crypto_status_t ano_crypto_internal_csp_copy_secret(
     ano_crypto_csp_handle_t handle,
     ano_crypto_key_type_t expected_type,
-    const uint8_t **out_key_material,
+    uint8_t *out_key_material,
+    size_t out_key_material_capacity,
     size_t *out_key_material_len);
 
 #endif /* ANO_CRYPTO_CSP_INTERNAL_H */

@@ -1,6 +1,6 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P1-5 draft
+Status: P1-6 draft
 Date: 2026-07-07
 
 ## Purpose
@@ -86,3 +86,13 @@ If excluded material is discovered:
 | EX-1402 | Source archives containing build outputs, generated evidence bundles, local caches, or copied third-party material | Provenance / disclosure risk | Excluded | Evidence source archive is generated from filtered repository source files. |
 | EX-1403 | Install smoke logs containing secrets, operational entropy, generated secret bytes, private keys, tokens, customer paths, or internal deployment details | Sensitive information / disclosure risk | Excluded | P1-5 install smoke logs must remain status-only and be reviewed before sharing. |
 | EX-1404 | Treating source archive hashes, CTest logs, or install smoke logs as formal validation results | Claims risk | Excluded | They are engineering traceability and correctness inputs only. |
+
+
+## P1-6 Additional Exclusions
+
+| ID | Material / Pattern | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-1501 | Third-party thread wrapper, lock abstraction, concurrent test harness, or CSP synchronization implementation source code | Code provenance risk | Excluded | P1-6 lock seam and tests are fresh code in this repository. |
+| EX-1502 | Claiming broad thread-safety for caller-owned hash/HMAC/DRBG contexts | Support/claims risk | Excluded | P1-6 only protects selected global module/self-test/CSP state. |
+| EX-1503 | Logs containing thread test key bytes, MAC output, generated DRBG bytes, entropy bytes, private keys, or tokens | Sensitive information risk | Excluded | P1-6 thread tests must remain status-only. |
+| EX-1504 | Treating thread smoke tests as formal concurrency assurance or external review completion | Claims risk | Excluded | These are engineering tests only. |

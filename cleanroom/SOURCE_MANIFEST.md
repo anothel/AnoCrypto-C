@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P1-5 draft
+Status: P1-6 draft
 Date: 2026-07-07
 
 ## Purpose
@@ -137,3 +137,20 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - Source archive and install smoke logs are engineering evidence inputs only.
 - Evidence output must be reviewed for local path disclosure and must not contain secrets, entropy bytes, private keys, tokens, or operational key material.
 - The fixed table capacity is an implementation detail for P1 testing and must be re-reviewed before ABI or product commitments.
+
+
+## P1-6 Thread-Safety Policy and Lock Seam Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| DER-5001 | Fresh C99 internal thread lock seam written in this repository | User-owned generated source | Process-wide lock for module, self-test bookkeeping, and CSP global state | POSIX and Windows implementation branches are small platform bindings; unsupported fallback requires review before commitment. |
+| DER-5002 | Fresh POSIX concurrent CSP/HMAC test written in this repository | User-owned generated test code | Import/use/destroy HMAC handles across worker threads | Uses public synthetic HMAC fixture bytes only and does not print key material. |
+| DER-5003 | Thread-safety policy document written in this repository | User-owned generated document | Defines P1-6 concurrency boundary and TODOs | Does not claim broad per-context thread safety. |
+
+## P1-6 Clean-room Notes
+
+- No third-party lock wrapper, concurrency library, key table, or test harness code was imported.
+- The POSIX test uses standard `pthread` APIs as platform interfaces, not copied implementation code.
+- The HMAC key bytes used by the concurrent test are public synthetic fixtures only and are not operational secrets.
+- Evidence and test logs must not print key material, entropy bytes, generated output, private keys, or tokens.
+- P1-6 thread-safety is a limited engineering policy for global state only; public per-context concurrency guarantees remain TODO.

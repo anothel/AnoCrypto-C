@@ -30,6 +30,8 @@ typedef enum ano_crypto_module_state_e {
  *   before processing any cryptographic operation.
  * - A self-test failure enters ERROR_STATE.
  * - ERROR_STATE is sticky for this process; recovery policy is TODO(P1).
+ * - P1-6 adds an internal global-state lock; caller-owned operation contexts
+ *   are still not safe for concurrent mutation by multiple threads.
  */
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_module_init(
     const ano_crypto_module_config_t *config);

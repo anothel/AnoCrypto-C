@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton.
 
-Current status: P1-5 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal entropy adapter seam, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, and release-evidence draft tooling.
+Current status: P1-6 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal entropy adapter seam, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, limited internal global-state locking, and release-evidence draft tooling.
 
 Implemented processing scope:
 
@@ -15,6 +15,7 @@ Implemented processing scope:
 - Negative API tests for hash/HMAC/DRBG/CSP/key argument handling, context lifecycle behavior, handle exhaustion, and stale handle rejection
 - Internal entropy adapter seam with callback and OS-reserved provider tests
 - Release evidence draft collection with source archive hash and install smoke logs
+- Limited internal locking for module/self-test/CSP global state
 
 Skeleton-only / TODO scope:
 
@@ -23,7 +24,7 @@ Skeleton-only / TODO scope:
 - Hash_DRBG-SHA-256 ABI placeholder
 - Reviewed OS entropy provider and public random service layer
 - Persistent keystore, key export, key wrapping, and multi-process CSP model
-- Thread-safety policy for module and CSP global state
+- Public per-context concurrency guarantees and platform CI coverage
 
 ## Build
 
@@ -36,8 +37,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-5
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-5
+cmake --install build --prefix /tmp/anocrypto-c-p1-6
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-6
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -50,9 +51,9 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `ctest.log`, and installed-package smoke logs when the default P1-5 target is used.
+Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `ctest.log`, and installed-package smoke logs when the default P1-6 target is used.
 
-## P1-5 scope
+## P1-6 scope
 
 - Fresh C99 SHA-256 implementation retained from P1-1
 - Fresh C99 HMAC-SHA-256 implementation retained from P1-1
@@ -65,6 +66,7 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `ctest.l
 - Chunk-boundary API consistency tests for one-shot versus streaming behavior
 - Startup self-test includes SHA-256, HMAC-SHA-256, and HMAC_DRBG-SHA-256 paths
 - CSP handle table exhaustion and stale-handle reuse tests
+- Limited module/self-test/CSP global-state lock seam and POSIX concurrent CSP/HMAC test
 - Source archive SHA-256 and install smoke log capture in the evidence script
 
 ## Important limitations
@@ -74,7 +76,7 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `ctest.l
 - KAT pass results are correctness checks only and do not replace formal validation.
 - HMAC_DRBG-SHA-256 accepts explicit entropy input; production entropy source policy remains TODO.
 - The entropy callback seam is test/internal plumbing and is not an operational entropy source.
-- HMAC key handles are in-memory only; export, persistence, keystore integration, and thread-safety are not finalized.
+- HMAC key handles are in-memory only; export, persistence, keystore integration, and full thread-safety support are not finalized.
 - Prediction-resistance requests are rejected until the entropy adapter is connected to reviewed providers.
 - Error recovery policy after fatal state remains TODO.
 - This repository does not claim official validation or external review completion.

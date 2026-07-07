@@ -11,6 +11,7 @@ include(CMakePackageConfigHelpers)
 option(ANO_CRYPTO_BUILD_TESTS "Build AnoCrypto-C unit and smoke tests" ON)
 option(ANO_CRYPTO_ENABLE_STRICT_WARNINGS "Enable strict compiler warnings" ON)
 option(ANO_CRYPTO_ENABLE_TEST_HOOKS "Enable internal test-only hooks" ${ANO_CRYPTO_BUILD_TESTS})
+option(ANO_CRYPTO_ENABLE_THREAD_SAFETY "Enable internal locks for module/self-test/CSP global state" ON)
 
 if(NOT DEFINED BUILD_SHARED_LIBS)
     set(BUILD_SHARED_LIBS ON)
@@ -21,7 +22,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-5-evidence-lifecycle" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-6-thread-safety" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -40,6 +41,7 @@ add_library(anocrypto_c
     src/core/status.c
     src/core/module_state.c
     src/core/build_identity.c
+    src/core/thread_lock.c
     src/selftest/selftest.c
     src/selftest/kat_manifest.c
     src/hash/hash.c
@@ -79,6 +81,16 @@ target_compile_definitions(anocrypto_c
         ANO_CRYPTO_BUILD_COMPILER="${CMAKE_C_COMPILER_ID} ${CMAKE_C_COMPILER_VERSION}"
         ANO_CRYPTO_BUILD_TARGET="${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR}"
         ANO_CRYPTO_BUILD_FINGERPRINT="${ANO_CRYPTO_BUILD_FINGERPRINT}")
+
+if(ANO_CRYPTO_ENABLE_THREAD_SAFETY)
+    find_package(Threads QUIET)
+    if(Threads_FOUND)
+        target_compile_definitions(anocrypto_c PRIVATE ANO_CRYPTO_ENABLE_THREAD_SAFETY)
+        target_link_libraries(anocrypto_c PRIVATE Threads::Threads)
+    else()
+        message(WARNING "ANO_CRYPTO_ENABLE_THREAD_SAFETY is ON, but CMake Threads was not found; using unsupported no-op fallback")
+    endif()
+endif()
 
 if(ANO_CRYPTO_ENABLE_TEST_HOOKS)
     target_compile_definitions(anocrypto_c PRIVATE ANO_CRYPTO_ENABLE_TEST_HOOKS)
@@ -191,6 +203,21 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
     add_test(NAME ano_crypto_entropy_adapter_tests COMMAND ano_crypto_entropy_adapter_tests)
 
+    add_executable(ano_crypto_thread_lock_tests
+        tests/unit/thread_lock_tests.c)
+    target_link_libraries(ano_crypto_thread_lock_tests PRIVATE anocrypto_c)
+    target_include_directories(ano_crypto_thread_lock_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
+
+    add_test(NAME ano_crypto_thread_lock_tests COMMAND ano_crypto_thread_lock_tests)
+
+    if(CMAKE_USE_PTHREADS_INIT)
+        add_executable(ano_crypto_csp_thread_safety_tests
+            tests/unit/csp_thread_safety_tests.c)
+        target_link_libraries(ano_crypto_csp_thread_safety_tests PRIVATE anocrypto_c Threads::Threads)
+
+        add_test(NAME ano_crypto_csp_thread_safety_tests COMMAND ano_crypto_csp_thread_safety_tests)
+    endif()
+
     add_executable(ano_crypto_install_smoke_buildtree
         tests/install_smoke/main.c)
     target_link_libraries(ano_crypto_install_smoke_buildtree PRIVATE anocrypto_c)
@@ -201,13 +228,13 @@ if(ANO_CRYPTO_BUILD_TESTS)
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-5
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-6
             -DANO_CRYPTO_RUN_CTEST=ON
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-5 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-6 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         anocrypto_c
         ano_crypto_module_state_tests
@@ -221,5 +248,10 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_csp_key_lifecycle_negative_tests
         ano_crypto_csp_handle_stale_exhaustion_tests
         ano_crypto_entropy_adapter_tests
+        ano_crypto_thread_lock_tests
         ano_crypto_install_smoke_buildtree)
+
+    if(TARGET ano_crypto_csp_thread_safety_tests)
+        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_csp_thread_safety_tests)
+    endif()
 endif()

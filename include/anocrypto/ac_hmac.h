@@ -57,6 +57,10 @@ ANO_CRYPTO_API ano_crypto_status_t ano_crypto_hmac_compute(
     size_t out_len,
     size_t *out_written);
 
+/*
+ * P1-6 note: this API snapshots an in-memory HMAC key handle under the
+ * internal CSP lock, computes using the local copy, then zeroizes the copy.
+ */
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_hmac_compute_with_key(
     ano_crypto_hash_algorithm_t hash_algorithm,
     ano_crypto_csp_handle_t key_handle,

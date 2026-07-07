@@ -1,6 +1,6 @@
 # AnoCrypto-C Release Evidence Workflow
 
-Status: P1-5 draft.
+Status: P1-6 draft.
 
 ## Purpose
 
@@ -19,7 +19,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 The generated output defaults to:
 
 ```text
-build/evidence/p1-5/
+build/evidence/p1-6/
   BUILD_METADATA.txt
   SOURCE_FILES.sha256
   SOURCE_ARCHIVE_CONTENTS.txt
@@ -55,14 +55,14 @@ Before treating the generated directory as a release-candidate evidence input, r
 - known limitations
 - absence of secrets, private keys, tokens, operational entropy samples, or internal deployment details
 
-## P1-5 additions
+## P1-6 additions
 
 - Generate `AnoCrypto-C-source.tar.gz` from filtered repository source inputs.
 - Generate `SOURCE_ARCHIVE.sha256` and `SOURCE_ARCHIVE_CONTENTS.txt`.
 - Capture installed-package smoke logs by installing the current build into an evidence-local prefix and building `tests/install_smoke` as an external consumer.
 - Include `ano_crypto_csp_handle_stale_exhaustion_tests` in CTest and evidence output.
 
-## P1-5 known gaps
+## P1-6 known gaps
 
 - SBOM and signing status are placeholders.
 - CI-produced evidence bundle layout remains TODO.
@@ -73,3 +73,9 @@ Before treating the generated directory as a release-candidate evidence input, r
 ## Sensitive-data rule
 
 Do not include raw entropy, HMAC key bytes, DRBG state, generated secret bytes, private material, tokens, or internal deployment details in evidence logs.
+
+
+## P1-6 Thread-Safety Evidence Notes
+
+P1-6 CTest output may include `ano_crypto_thread_lock_tests` and, on POSIX builds, `ano_crypto_csp_thread_safety_tests`.
+These logs are engineering concurrency smoke-test evidence only. They must not be described as external review results or broad thread-safety certification.
