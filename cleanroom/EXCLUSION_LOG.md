@@ -1,11 +1,11 @@
-# AnoCrypto-C Exclusion Log
+# anocrypto-c Exclusion Log
 
-Status: P1-7 draft
+Status: P1-8 draft
 Date: 2026-07-07
 
 ## Purpose
 
-This log records materials and categories that must not influence the AnoCrypto-C implementation, tests, documentation wording, file names, function names, constants, or build structure.
+This log records materials and categories that must not influence the anocrypto-c implementation, tests, documentation wording, file names, function names, constants, or build structure.
 
 ## Exclusion rules
 
@@ -15,7 +15,7 @@ This log records materials and categories that must not influence the AnoCrypto-
 | EXC-0002 | Private employer, customer, vendor, or third-party code/documents | Confidentiality / trade-secret risk | Exclude from design input and repository contents. | Record only path/risk/action if accidentally discovered. |
 | EXC-0003 | Internal certification submissions, test reports, vulnerability reports, or non-public assessment artifacts | Confidentiality / regulatory process risk | Exclude from design input and repository contents. | Use public standards and public vectors instead. |
 | EXC-0004 | Secret keys, seeds, entropy captures, private scalars, tokens, certificate private keys | Secret material risk | Do not store, log, print, or include in tests. Delete from repo history if accidentally committed. | Test fixtures must use public non-secret vectors only. |
-| EXC-0005 | Legacy names outside the AnoCrypto-C naming plan | Brand/API contamination risk | Do not introduce into new source, headers, examples, package names, or CMake targets. | Historical mention only if a future migration document explicitly needs it. |
+| EXC-0005 | Legacy names outside the anocrypto-c naming plan | Brand/API contamination risk | Do not introduce into new source, headers, examples, package names, or CMake targets. | Historical mention only if a future migration document explicitly needs it. |
 | EXC-0006 | Assurance claims not yet backed by completed validation or formal review | Claims risk | Do not use in README, docs, comments, samples, release notes, or sales text. | Use KCMVP-oriented preparation language only. |
 
 ## Accidental discovery protocol
@@ -105,3 +105,12 @@ If excluded material is discovered:
 | EX-1602 | Operational entropy captures, DRBG seeds, generated random bytes, private keys, tokens, customer secrets, or production random samples | Sensitive information risk | Excluded | Provider tests must record status and provider name only. |
 | EX-1603 | Claiming entropy quality, validation completion, or platform suitability from a local provider smoke test alone | Claims risk | Excluded | Platform-specific review and evidence remain required before customer or validation-boundary commitments. |
 | EX-1604 | Adding a public random byte API before provider policy, DRBG integration, prediction-resistance behavior, and validation-boundary review | API/support risk | Deferred | P1-7 keeps the provider seam internal. |
+
+## P1-8 Additional Exclusions
+
+| ID | Material / Pattern | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-1701 | Third-party public random-service API implementations, RNG wrappers, DRBG auto-seeding helpers, or provider abstraction code | Code provenance risk | Excluded | P1-8 helper and tests are fresh C99 code in this repository. |
+| EX-1702 | Operational entropy captures, DRBG seeds, generated random bytes, production nonces, private keys, tokens, or customer random samples | Sensitive information risk | Excluded | P1-8 tests must not print or persist entropy/seed/generated output bytes. |
+| EX-1703 | Adding public `ano_crypto_random_*` ABI before API/ABI, provider, reseed, fork-safety, and validation-boundary review | API/support risk | Deferred | P1-8 adds a design draft and internal helper only. |
+| EX-1704 | Treating helper-driven DRBG tests or local OS entropy smoke tests as formal validation evidence | Claims risk | Excluded | These are engineering correctness and integration checks only. |

@@ -462,6 +462,113 @@ ano_crypto_status_t ano_crypto_drbg_instantiate(
         personalization, personalization_len);
 }
 
+ano_crypto_status_t ano_crypto_internal_hmac_drbg_sha256_instantiate_from_entropy_source(
+    void *ctx,
+    size_t ctx_len,
+    const ano_crypto_internal_entropy_source_t *source,
+    const uint8_t *personalization,
+    size_t personalization_len,
+    uint32_t flags)
+{
+    uint8_t entropy_input[ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_ENTROPY_INPUT_SIZE];
+    uint8_t nonce[ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_NONCE_SIZE];
+    size_t required_len;
+    ano_crypto_status_t st;
+
+    st = ano_crypto_module_require_operational();
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
+    if (ctx == 0 || source == 0 || !is_absent_or_valid(personalization, personalization_len)) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    st = reject_unsupported_flags(flags);
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
+    st = ano_crypto_drbg_context_size(ANO_CRYPTO_DRBG_ALG_HMAC_SHA256, &required_len);
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
+    if (ctx_len < required_len) {
+        return ANO_CRYPTO_ERR_BUFFER_TOO_SMALL;
+    }
+
+    st = ano_crypto_internal_entropy_source_get(source, entropy_input, sizeof(entropy_input));
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_internal_zeroize(entropy_input, sizeof(entropy_input));
+        ano_crypto_internal_zeroize(nonce, sizeof(nonce));
+        ano_crypto_internal_zeroize(ctx, ctx_len);
+        return st;
+    }
+
+    st = ano_crypto_internal_entropy_source_get(source, nonce, sizeof(nonce));
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_internal_zeroize(entropy_input, sizeof(entropy_input));
+        ano_crypto_internal_zeroize(nonce, sizeof(nonce));
+        ano_crypto_internal_zeroize(ctx, ctx_len);
+        return st;
+    }
+
+    st = hmac_drbg_instantiate_core(
+        (ano_crypto_drbg_ctx_internal_t *)ctx,
+        entropy_input, sizeof(entropy_input),
+        nonce, sizeof(nonce),
+        personalization, personalization_len);
+
+    ano_crypto_internal_zeroize(entropy_input, sizeof(entropy_input));
+    ano_crypto_internal_zeroize(nonce, sizeof(nonce));
+
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_internal_zeroize(ctx, ctx_len);
+    }
+
+    return st;
+}
+
+ano_crypto_status_t ano_crypto_internal_hmac_drbg_sha256_reseed_from_entropy_source(
+    void *ctx,
+    const ano_crypto_internal_entropy_source_t *source,
+    const uint8_t *additional_input,
+    size_t additional_input_len,
+    uint32_t flags)
+{
+    uint8_t entropy_input[ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_ENTROPY_INPUT_SIZE];
+    ano_crypto_status_t st;
+
+    st = ano_crypto_module_require_operational();
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
+    if (ctx == 0 || source == 0 || !is_absent_or_valid(additional_input, additional_input_len)) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    st = reject_unsupported_flags(flags);
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
+    st = ano_crypto_internal_entropy_source_get(source, entropy_input, sizeof(entropy_input));
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_internal_zeroize(entropy_input, sizeof(entropy_input));
+        return st;
+    }
+
+    st = hmac_drbg_reseed_core(
+        (ano_crypto_drbg_ctx_internal_t *)ctx,
+        entropy_input, sizeof(entropy_input),
+        additional_input, additional_input_len);
+
+    ano_crypto_internal_zeroize(entropy_input, sizeof(entropy_input));
+    return st;
+}
+
 ano_crypto_status_t ano_crypto_drbg_reseed(
     void *ctx,
     const uint8_t *entropy_input,

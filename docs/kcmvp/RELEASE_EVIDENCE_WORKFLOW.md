@@ -1,91 +1,63 @@
-# AnoCrypto-C Release Evidence Workflow
+# Release Evidence Workflow
 
-Status: P1-7 draft.
+Status: P1-8 draft.
 
 ## Purpose
 
-This document describes the engineering workflow for collecting release evidence drafts from the private C99 codebase.
+This workflow defines local engineering evidence collection for anocrypto-c development builds. It is not official validation evidence and should be reviewed before external sharing.
 
-This workflow is not a substitute for formal validation, lab review, legal review, or release approval.
-
-## Draft collection command
+## Current evidence target
 
 ```sh
-cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
-cmake --build build --parallel
 cmake --build build --target ano_crypto_collect_release_evidence
 ```
 
-The generated output defaults to:
+Default output path:
 
 ```text
-build/evidence/p1-7/
-  BUILD_METADATA.txt
-  SOURCE_FILES.sha256
-  SOURCE_ARCHIVE_CONTENTS.txt
-  SOURCE_ARCHIVE.sha256
-  SOURCE_ARCHIVE.log
-  AnoCrypto-C-source.tar.gz
-  BINARY_FILES.sha256
-  ctest.log
-  INSTALL_SMOKE_INSTALL.log
-  INSTALL_SMOKE_CONFIGURE.log
-  INSTALL_SMOKE_BUILD.log
-  INSTALL_SMOKE_RUN.log
-  INSTALL_SMOKE_SUMMARY.txt
-  README.md
+build/evidence/p1-8/
 ```
 
-## Review checklist
+## Expected generated files
 
-Before treating the generated directory as a release-candidate evidence input, review:
+```text
+BUILD_METADATA.txt
+SOURCE_FILES.sha256
+SOURCE_ARCHIVE_CONTENTS.txt
+SOURCE_ARCHIVE.sha256
+SOURCE_ARCHIVE.log
+anocrypto-c-source.tar.gz
+BINARY_FILES.sha256
+ctest.log
+INSTALL_SMOKE_INSTALL.log
+INSTALL_SMOKE_CONFIGURE.log
+INSTALL_SMOKE_BUILD.log
+INSTALL_SMOKE_RUN.log
+INSTALL_SMOKE_SUMMARY.txt
+README.md
+```
 
-- source manifest and exclusion log snapshots
-- source archive file list and SHA-256
-- source and binary SHA-256 lists
-- compiler and target identity
-- CTest logs
-- SHA-256/HMAC-SHA-256 KAT coverage
-- HMAC_DRBG-SHA-256 KAT coverage
-- CSP handle lifecycle, exhaustion, and stale-handle coverage
-- negative test coverage
-- platform entropy provider smoke status, provider name, and absence of entropy byte logging
-- install smoke test log from an installed prefix
-- algorithm scope matrix
-- SBOM/signing status
-- known limitations
-- absence of secrets, private keys, tokens, operational entropy samples, or internal deployment details
+## Review checklist before sharing
 
-## P1-7 additions
+- Confirm the source archive excludes build outputs, generated evidence bundles, local caches, and copied third-party material.
+- Confirm logs do not include entropy bytes, DRBG seed material, generated random bytes, MAC output, key material, private keys, tokens, customer data, or internal deployment details.
+- Confirm KAT vector provenance is recorded in `cleanroom/SOURCE_MANIFEST.md`.
+- Confirm excluded categories are recorded in `cleanroom/EXCLUSION_LOG.md`.
+- Confirm claims remain limited to engineering correctness and readiness preparation.
+- Confirm platform provider logs include provider name/status only.
 
-- Generate `AnoCrypto-C-source.tar.gz` from filtered repository source inputs.
-- Generate `SOURCE_ARCHIVE.sha256` and `SOURCE_ARCHIVE_CONTENTS.txt`.
-- Capture installed-package smoke logs by installing the current build into an evidence-local prefix and building `tests/install_smoke` as an external consumer.
-- Include `ano_crypto_csp_handle_stale_exhaustion_tests` in CTest and evidence output.
-- Include `ano_crypto_platform_entropy_provider_tests` in CTest and evidence output.
-- Record provider status only; never record raw entropy bytes.
+## P1-8 additions
 
-## P1-7 known gaps
+- Internal HMAC_DRBG-SHA-256 instantiate/reseed helper tests are included in CTest.
+- Evidence may include `ano_crypto_drbg_entropy_helper_tests` pass/fail status.
+- Helper tests must not print entropy, seed material, nonce bytes, generated random bytes, or deterministic callback byte streams.
+- Public random-service API remains a design draft only and is not part of the installed public ABI.
 
-- SBOM and signing status are placeholders.
-- CI-produced evidence bundle layout remains TODO.
-- Reproducible build procedure remains TODO.
-- Official validation-package mapping remains TODO.
-- Platform entropy provider CI is not complete until Linux, Windows, and Apple branches are built and tested.
+## Known gaps
 
-## Sensitive-data rule
-
-Do not include raw entropy, HMAC key bytes, DRBG state, generated secret bytes, private material, tokens, or internal deployment details in evidence logs.
-
-
-## P1-6 Thread-Safety Evidence Notes
-
-P1-6 CTest output may include `ano_crypto_thread_lock_tests` and, on POSIX builds, `ano_crypto_csp_thread_safety_tests`.
-These logs are engineering concurrency smoke-test evidence only. They must not be described as external review results or broad thread-safety certification.
-
-
-## P1-7 Platform Entropy Evidence Notes
-
-P1-7 CTest output may include `ano_crypto_platform_entropy_provider_tests`. The test may print provider name and availability only. It must not print entropy bytes, DRBG seed material, generated bytes, key material, or tokens.
-
-Provider smoke-test pass results are engineering evidence only. They do not prove entropy quality for all customer environments and must be supplemented with platform/toolchain review before PoC or validation-boundary decisions.
+- No SBOM generation yet.
+- No release signing evidence yet.
+- No platform CI evidence for Windows/Apple provider branches yet.
+- No reproducible build procedure beyond source/binary hash capture.
+- No formal validation evidence.
+- No public random-service API review record yet.

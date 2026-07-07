@@ -145,6 +145,6 @@ int main(void)
         return 1;
     }
 
-    printf("AnoCrypto-C install smoke: PASS (%s)\n", version);
+    printf("anocrypto-c install smoke: PASS (%s)\n", version);
     return 0;
 }

@@ -1,10 +1,10 @@
 # C99 Thread-Safety Policy
 
-Status: P1-7 draft.
+Status: P1-8 draft.
 
 ## Goal
 
-This document records the current thread-safety boundary for AnoCrypto-C. It is a design and engineering-test artifact, not a broad concurrency guarantee.
+This document records the current thread-safety boundary for anocrypto-c. It is a design and engineering-test artifact, not a broad concurrency guarantee.
 
 ## Current Policy
 

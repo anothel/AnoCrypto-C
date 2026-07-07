@@ -1,7 +1,7 @@
 #ifndef ANO_CRYPTO_ANOCRYPTO_H
 #define ANO_CRYPTO_ANOCRYPTO_H
 
-/* Umbrella header for the AnoCrypto-C public C99 API. */
+/* Umbrella header for the anocrypto-c public C99 API. */
 
 #include <anocrypto/ac_status.h>
 #include <anocrypto/ac_version.h>

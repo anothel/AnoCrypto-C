@@ -124,6 +124,6 @@ int main(void)
         return 1;
     }
 
-    puts("AnoCrypto-C module_state_tests: PASS");
+    puts("anocrypto-c module_state_tests: PASS");
     return 0;
 }

@@ -1,7 +1,7 @@
 #include "ac_kat_manifest.h"
 
 /*
- * P1-7 KAT manifest.
+ * P1-8 KAT manifest.
  *
  * Vectors embedded in selftest.c, src/drbg/drbg.c, and tests/kat are limited to public
  * specification/test-vector inputs recorded in cleanroom/SOURCE_MANIFEST.md.

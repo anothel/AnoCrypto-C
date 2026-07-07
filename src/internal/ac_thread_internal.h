@@ -7,7 +7,7 @@
  * Internal process-wide lock seam.
  *
  * P1-6 policy:
- * - This lock protects AnoCrypto-C global module/self-test/CSP table state.
+ * - This lock protects anocrypto-c global module/self-test/CSP table state.
  * - Caller-provided operation contexts remain caller-owned and are not made
  *   concurrently mutable by this lock.
  * - The implementation is intentionally small and must be reviewed before

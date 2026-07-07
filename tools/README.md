@@ -1,4 +1,4 @@
-# AnoCrypto-C Tools
+# anocrypto-c Tools
 
 This directory contains engineering helper scripts for the private C99 codebase.
 

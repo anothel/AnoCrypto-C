@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-7-platform-entropy"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-8-random-drbg-helper"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -54,13 +54,13 @@ ano_crypto_status_t ano_crypto_build_identity(
     }
 
     out_identity->abi_version = ANO_CRYPTO_BUILD_IDENTITY_ABI_VERSION;
-    out_identity->product_name = "AnoCrypto-C";
+    out_identity->product_name = "anocrypto-c";
     out_identity->version = ANO_CRYPTO_VERSION_STRING;
     out_identity->git_commit = ANO_CRYPTO_BUILD_GIT_COMMIT;
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P1-7 C99 foundation; SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, HMAC key handle lifecycle, stale-handle/exhaustion tests, evidence archive/smoke-log collection, limited internal thread-safety locks, and internal platform entropy provider seam include engineering test coverage; Hash_DRBG and public random service remain TODO";
+    out_identity->notes = "P1-8 C99 foundation; SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, HMAC key handle lifecycle, stale-handle/exhaustion tests, evidence archive/smoke-log collection, limited internal thread-safety locks, internal platform entropy provider seam, and internal DRBG instantiate-from-entropy helper include engineering test coverage; Hash_DRBG and public random service remain TODO";
 
     return ANO_CRYPTO_OK;
 }

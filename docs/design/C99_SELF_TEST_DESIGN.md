@@ -1,6 +1,6 @@
 # C99 Self-test Design
 
-Status: P1-7 draft.
+Status: P1-8 draft.
 
 ## Startup flow
 

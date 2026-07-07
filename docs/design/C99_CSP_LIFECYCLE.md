@@ -1,10 +1,10 @@
 # C99 CSP / Key Lifecycle Skeleton
 
-Status: P1-7 draft.
+Status: P1-8 draft.
 
 ## Implemented P1-5 slice
 
-AnoCrypto-C currently provides a small in-process CSP handle table for HMAC keys. This is a lifecycle and API-gating slice, not a complete key-management subsystem.
+anocrypto-c currently provides a small in-process CSP handle table for HMAC keys. This is a lifecycle and API-gating slice, not a complete key-management subsystem.
 
 Implemented behavior:
 

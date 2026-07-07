@@ -1,8 +1,8 @@
-# AnoCrypto-C release evidence collection draft.
+# anocrypto-c release evidence collection draft.
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-7 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-8 \
 #         -DANO_CRYPTO_RUN_CTEST=ON \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -22,7 +22,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-7")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-8")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -107,7 +107,7 @@ if(_git_exe)
 endif()
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-"AnoCrypto-C Release Evidence Draft\n"
+"anocrypto-c Release Evidence Draft\n"
 "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
 "Source directory: ${ANO_CRYPTO_SOURCE_DIR}\n"
 "Build directory: ${ANO_CRYPTO_BUILD_DIR}\n"
@@ -152,8 +152,8 @@ endforeach()
 
 if(ANO_CRYPTO_CREATE_SOURCE_ARCHIVE)
     set(_archive_root "${ANO_CRYPTO_EVIDENCE_DIR}/source-archive-work")
-    set(_archive_tree "${_archive_root}/AnoCrypto-C")
-    set(_archive_path "${ANO_CRYPTO_EVIDENCE_DIR}/AnoCrypto-C-source.tar.gz")
+    set(_archive_tree "${_archive_root}/anocrypto-c")
+    set(_archive_path "${ANO_CRYPTO_EVIDENCE_DIR}/anocrypto-c-source.tar.gz")
     file(REMOVE_RECURSE "${_archive_root}")
     file(MAKE_DIRECTORY "${_archive_tree}")
 
@@ -169,7 +169,7 @@ if(ANO_CRYPTO_CREATE_SOURCE_ARCHIVE)
     endforeach()
 
     execute_process(
-        COMMAND "${CMAKE_COMMAND}" -E tar cfz "${_archive_path}" "AnoCrypto-C"
+        COMMAND "${CMAKE_COMMAND}" -E tar cfz "${_archive_path}" "anocrypto-c"
         WORKING_DIRECTORY "${_archive_root}"
         RESULT_VARIABLE _archive_result
         OUTPUT_VARIABLE _archive_stdout
@@ -182,9 +182,9 @@ if(ANO_CRYPTO_CREATE_SOURCE_ARCHIVE)
 
     file(SHA256 "${_archive_path}" _archive_hash)
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SOURCE_ARCHIVE.sha256"
-        "${_archive_hash}  AnoCrypto-C-source.tar.gz\n")
+        "${_archive_hash}  anocrypto-c-source.tar.gz\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-        "Source archive: AnoCrypto-C-source.tar.gz\n"
+        "Source archive: anocrypto-c-source.tar.gz\n"
         "Source archive SHA-256: ${_archive_hash}\n")
 else()
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SOURCE_ARCHIVE.sha256"
@@ -242,7 +242,7 @@ if(ANO_CRYPTO_RUN_INSTALL_SMOKE)
 
     ano_crypto_run_logged(
         "${ANO_CRYPTO_EVIDENCE_DIR}/INSTALL_SMOKE_INSTALL.log"
-        "Install AnoCrypto-C package prefix"
+        "Install anocrypto-c package prefix"
         "${CMAKE_COMMAND}" --install "${ANO_CRYPTO_BUILD_DIR}" --prefix "${ANO_CRYPTO_INSTALL_PREFIX}")
 
     ano_crypto_run_logged(
@@ -298,7 +298,7 @@ else()
 endif()
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
-"# AnoCrypto-C Evidence Draft\n\n"
+"# anocrypto-c Evidence Draft\n\n"
 "Generated: ${ANO_CRYPTO_EVIDENCE_UTC}\n\n"
 "This directory is an engineering evidence draft for the current local build.\n"
 "It is not official validation evidence. Review path disclosure, source provenance,\n"
@@ -307,7 +307,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `BUILD_METADATA.txt`: local build and source metadata.\n"
 "- `SOURCE_FILES.sha256`: SHA-256 hashes of repository source files included by the script.\n"
 "- `SOURCE_ARCHIVE_CONTENTS.txt`: file list used for the local source archive.\n"
-"- `SOURCE_ARCHIVE.sha256`: SHA-256 hash of `AnoCrypto-C-source.tar.gz` when archive creation is enabled.\n"
+"- `SOURCE_ARCHIVE.sha256`: SHA-256 hash of `anocrypto-c-source.tar.gz` when archive creation is enabled.\n"
 "- `BINARY_FILES.sha256`: SHA-256 hashes of build outputs matched by the script.\n"
 "- `ctest.log`: captured CTest output when requested.\n"
 "- `INSTALL_SMOKE_*.log`: installed-package configure/build/run logs when requested.\n"
@@ -320,4 +320,4 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- Confirm no secrets, entropy bytes, generated secret bytes, private keys, tokens, or internal deployment details are present.\n"
 "- Confirm platform entropy evidence records provider/status only and does not contain entropy bytes.\n")
 
-message(STATUS "AnoCrypto-C evidence draft written to ${ANO_CRYPTO_EVIDENCE_DIR}")
+message(STATUS "anocrypto-c evidence draft written to ${ANO_CRYPTO_EVIDENCE_DIR}")
