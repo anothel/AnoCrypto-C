@@ -18,7 +18,7 @@ Or run the script directly:
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-2 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-3 \
   -DANO_CRYPTO_RUN_CTEST=ON \
   -P tools/collect_release_evidence.cmake
 ```

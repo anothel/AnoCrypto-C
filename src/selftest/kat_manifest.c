@@ -1,9 +1,9 @@
 #include "ac_kat_manifest.h"
 
 /*
- * P1-2 KAT manifest.
+ * P1-3 KAT manifest.
  *
- * Vectors embedded in selftest.c and tests/kat are limited to public
+ * Vectors embedded in selftest.c, src/drbg/drbg.c, and tests/kat are limited to public
  * specification/test-vector inputs recorded in cleanroom/SOURCE_MANIFEST.md.
  * The HMAC test keys are public test-vector materials only and are not
  * operational secrets.
@@ -82,10 +82,10 @@ static const ano_crypto_internal_kat_manifest_entry_t g_kat_manifest[] = {
         "p1-extended-api-test"
     },
     {
-        "drbg.hmac-sha256.placeholder",
+        "drbg.hmac-sha256.nist-cavp-no-pr-reseed-count0",
         "HMAC_DRBG-SHA-256",
-        "TODO(P1): public-source DRBG KAT manifest entry required before implementation",
-        "placeholder"
+        "SRC-1202: NIST CAVP DRBG test vector package, HMAC_DRBG-SHA-256 no prediction resistance with reseed COUNT=0",
+        "p1-implemented-startup"
     }
 };
 

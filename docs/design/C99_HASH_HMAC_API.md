@@ -1,6 +1,6 @@
 # C99 Hash and HMAC API Design
 
-Status: P1-2 draft.
+Status: P1-3 draft.
 
 ## Implemented P1 scope
 
@@ -10,7 +10,7 @@ Status: P1-2 draft.
 - `ano_crypto_hmac_compute()` one-shot API over SHA-256
 - `ano_crypto_hmac_init/update/final()` streaming API over SHA-256
 
-## P1-2 coverage additions
+## P1-2/P1-3 coverage additions
 
 - Startup self-test now covers:
   - SHA-256 empty message
@@ -55,7 +55,7 @@ Startup self-test uses internal SHA-256/HMAC-SHA-256 helpers so that self-test c
 - HMAC-SHA-384
 - HMAC-SHA-512
 
-These algorithm IDs remain ABI candidates but processing APIs return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` for them in P1-2.
+These algorithm IDs remain ABI candidates but processing APIs return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` for them in P1-3.
 
 ## TODO
 

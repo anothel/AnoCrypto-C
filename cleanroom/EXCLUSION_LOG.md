@@ -58,3 +58,12 @@ If excluded material is discovered:
 | EX-1102 | Non-public algorithm validation submissions, lab traces, or vendor test logs | Confidentiality / process risk | Excluded | P1-2 uses public vectors and local engineering logs only. |
 | EX-1103 | Evidence bundles containing secrets, private keys, tokens, entropy captures, or private deployment details | Sensitive information risk | Excluded | Evidence script output must be reviewed before sharing. |
 | EX-1104 | Treating local KAT/CTest pass logs as formal validation evidence | Claims risk | Excluded | Logs are engineering correctness evidence only. |
+
+## P1-3 Additional Exclusions
+
+| ID | Material / Pattern | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-1201 | Third-party DRBG implementation source code, including sample code from libraries or public repositories | Code provenance risk | Excluded | P1-3 HMAC_DRBG-SHA-256 implementation is fresh C99 source based on public specifications. |
+| EX-1202 | Operational entropy captures, seeds, nonces, generated secrets, or customer random samples | Sensitive information risk | Excluded | DRBG tests use public synthetic vector material only. |
+| EX-1203 | Treating public CAVP DRBG test-vector pass logs as a formal validation result | Claims risk | Excluded | The logs are engineering correctness evidence only. |
+| EX-1204 | OS entropy source implementation without review of platform boundary and evidence requirements | Design/evidence risk | Deferred | P1-3 implements only the deterministic DRBG core. |

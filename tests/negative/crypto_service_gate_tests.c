@@ -50,11 +50,21 @@ static void test_gate_before_init(void)
 static void test_query_processing_and_not_implemented_after_init(void)
 {
     uint8_t out[64];
-    uint8_t ctx[128];
+    uint8_t ctx[256];
+    uint8_t entropy[32];
+    uint8_t nonce[16];
     size_t size = 0u;
     size_t written = 0u;
     ano_crypto_csp_handle_t handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
     const uint8_t key[1] = {0u};
+    size_t i;
+
+    for (i = 0u; i < sizeof(entropy); ++i) {
+        entropy[i] = (uint8_t)i;
+    }
+    for (i = 0u; i < sizeof(nonce); ++i) {
+        nonce[i] = (uint8_t)(0xa0u + (uint8_t)i);
+    }
 
     expect_status("module init", ano_crypto_module_init(0), ANO_CRYPTO_OK);
 
@@ -107,10 +117,22 @@ static void test_query_processing_and_not_implemented_after_init(void)
                                          0, 0u, out, sizeof(out), &written),
                   ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
 
-    expect_status("drbg instantiate after init",
+    expect_status("hmac drbg instantiate after init",
                   ano_crypto_drbg_instantiate(ctx, sizeof(ctx),
                                               ANO_CRYPTO_DRBG_ALG_HMAC_SHA256,
-                                              0, 0u, ANO_CRYPTO_DRBG_FLAG_NONE),
+                                              entropy, sizeof(entropy),
+                                              nonce, sizeof(nonce),
+                                              0, 0u,
+                                              ANO_CRYPTO_DRBG_FLAG_NONE),
+                  ANO_CRYPTO_OK);
+
+    expect_status("hash drbg still not implemented",
+                  ano_crypto_drbg_instantiate(ctx, sizeof(ctx),
+                                              ANO_CRYPTO_DRBG_ALG_HASH_SHA256,
+                                              entropy, sizeof(entropy),
+                                              nonce, sizeof(nonce),
+                                              0, 0u,
+                                              ANO_CRYPTO_DRBG_FLAG_NONE),
                   ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
 
     expect_status("key import after init",

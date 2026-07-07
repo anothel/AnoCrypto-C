@@ -1,6 +1,6 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-2 draft.
+Status: P1-3 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -16,20 +16,22 @@ Status: P1-2 draft.
 - HMAC-SHA-256 implementation
 - public-source SHA-256/HMAC-SHA-256 KAT coverage
 - extended chunk-boundary consistency tests
+- HMAC_DRBG-SHA-256 deterministic core implementation
+- public-source HMAC_DRBG-SHA-256 KAT coverage
 - engineering release evidence collection script
 
 ## Immediate P1 next items
 
-1. Decide SHA-384/SHA-512 implementation timing.
-2. Add HMAC_DRBG or Hash_DRBG design-to-code slice.
-3. Add public DRBG KAT source manifest entries before implementation.
-4. Add CSP/key handle lifecycle behavior beyond skeleton allocation rules.
-5. Add install-prefix evidence capture to the evidence script.
-6. Add source archive SHA-256 generation to the evidence script.
-7. Add CI matrix and reproducible build notes.
-8. Add API/ABI review notes for caller-provided context buffers.
-9. Add thread-safety policy and tests.
-10. Add side-channel review checklist for key-dependent code paths.
+1. Add entropy adapter design and test seam without logging raw entropy.
+2. Add CSP/key handle lifecycle behavior beyond skeleton allocation rules.
+3. Decide SHA-384/SHA-512 implementation timing.
+4. Add source archive SHA-256 generation to the evidence script.
+5. Add install-prefix smoke log capture to the evidence script.
+6. Add CI matrix and reproducible build notes.
+7. Add API/ABI review notes for caller-provided context buffers.
+8. Add thread-safety policy and tests.
+9. Add side-channel review checklist for key-dependent code paths.
+10. Add additional HMAC_DRBG KAT paths: personalization string, no reseed, no additional input, and request-size boundaries.
 
 ## P2 candidates
 

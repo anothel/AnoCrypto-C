@@ -10,11 +10,17 @@ extern "C" {
 #endif
 
 /*
- * P1 public API skeleton for a DRBG state machine.
+ * P1 public API for the DRBG core state machine.
  *
- * The entropy source adapter and DRBG core are intentionally separate TODOs.
- * This header fixes instantiate/reseed/generate/uninstantiate API shape without
- * importing test vectors or algorithm implementation code.
+ * P1-3 scope:
+ * - HMAC_DRBG-SHA-256 core processing is implemented with explicit caller-
+ *   supplied entropy input for deterministic KAT and adapter-driven use.
+ * - OS entropy collection is intentionally not implemented here. A later
+ *   entropy adapter/random-service layer must provide entropy input and record
+ *   its own evidence.
+ * - Hash_DRBG-SHA-256 remains ABI-reserved and returns
+ *   ANO_CRYPTO_ERR_NOT_IMPLEMENTED from processing APIs.
+ * - Entropy, nonce, seed material, and generated secrets must never be logged.
  */
 typedef enum ano_crypto_drbg_algorithm_e {
     ANO_CRYPTO_DRBG_ALG_HMAC_SHA256 = 1,
@@ -28,7 +34,13 @@ typedef enum ano_crypto_drbg_state_e {
 } ano_crypto_drbg_state_t;
 
 #define ANO_CRYPTO_DRBG_FLAG_NONE 0x00000000u
+/* Reserved until an entropy adapter can satisfy per-request reseed input. */
 #define ANO_CRYPTO_DRBG_FLAG_PREDICTION_RESISTANCE_REQUESTED 0x00000001u
+
+#define ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_ENTROPY_INPUT_SIZE 32u
+#define ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_NONCE_SIZE 16u
+#define ANO_CRYPTO_DRBG_HMAC_SHA256_MAX_REQUEST_SIZE 65536u
+#define ANO_CRYPTO_DRBG_HMAC_SHA256_OUTPUT_SIZE 32u
 
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_drbg_context_size(
     ano_crypto_drbg_algorithm_t algorithm,
@@ -38,12 +50,18 @@ ANO_CRYPTO_API ano_crypto_status_t ano_crypto_drbg_instantiate(
     void *ctx,
     size_t ctx_len,
     ano_crypto_drbg_algorithm_t algorithm,
+    const uint8_t *entropy_input,
+    size_t entropy_input_len,
+    const uint8_t *nonce,
+    size_t nonce_len,
     const uint8_t *personalization,
     size_t personalization_len,
     uint32_t flags);
 
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_drbg_reseed(
     void *ctx,
+    const uint8_t *entropy_input,
+    size_t entropy_input_len,
     const uint8_t *additional_input,
     size_t additional_input_len,
     uint32_t flags);
@@ -63,6 +81,10 @@ ANO_CRYPTO_API ano_crypto_status_t ano_crypto_drbg_generate(
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_drbg_uninstantiate(
     void *ctx,
     size_t ctx_len);
+
+ANO_CRYPTO_API ano_crypto_status_t ano_crypto_drbg_get_state(
+    const void *ctx,
+    ano_crypto_drbg_state_t *out_state);
 
 ANO_CRYPTO_API const char *ano_crypto_drbg_algorithm_name(
     ano_crypto_drbg_algorithm_t algorithm);

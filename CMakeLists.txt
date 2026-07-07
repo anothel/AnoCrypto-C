@@ -21,7 +21,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-2-kat-evidence" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-3-hmac-drbg" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -146,11 +146,23 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
     add_test(NAME ano_crypto_sha256_hmac_extended_kat_tests COMMAND ano_crypto_sha256_hmac_extended_kat_tests)
 
+    add_executable(ano_crypto_hmac_drbg_kat_tests
+        tests/kat/hmac_drbg_kat_tests.c)
+    target_link_libraries(ano_crypto_hmac_drbg_kat_tests PRIVATE anocrypto_c)
+
+    add_test(NAME ano_crypto_hmac_drbg_kat_tests COMMAND ano_crypto_hmac_drbg_kat_tests)
+
     add_executable(ano_crypto_hash_hmac_api_negative_tests
         tests/negative/hash_hmac_api_negative_tests.c)
     target_link_libraries(ano_crypto_hash_hmac_api_negative_tests PRIVATE anocrypto_c)
 
     add_test(NAME ano_crypto_hash_hmac_api_negative_tests COMMAND ano_crypto_hash_hmac_api_negative_tests)
+
+    add_executable(ano_crypto_drbg_api_negative_tests
+        tests/negative/drbg_api_negative_tests.c)
+    target_link_libraries(ano_crypto_drbg_api_negative_tests PRIVATE anocrypto_c)
+
+    add_test(NAME ano_crypto_drbg_api_negative_tests COMMAND ano_crypto_drbg_api_negative_tests)
 
     add_executable(ano_crypto_install_smoke_buildtree
         tests/install_smoke/main.c)
@@ -162,17 +174,19 @@ if(ANO_CRYPTO_BUILD_TESTS)
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-2
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-3
             -DANO_CRYPTO_RUN_CTEST=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-2 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-3 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         anocrypto_c
         ano_crypto_module_state_tests
         ano_crypto_service_gate_negative_tests
         ano_crypto_sha256_hmac_kat_tests
         ano_crypto_sha256_hmac_extended_kat_tests
+        ano_crypto_hmac_drbg_kat_tests
         ano_crypto_hash_hmac_api_negative_tests
+        ano_crypto_drbg_api_negative_tests
         ano_crypto_install_smoke_buildtree)
 endif()

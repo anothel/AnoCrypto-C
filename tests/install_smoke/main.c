@@ -65,6 +65,45 @@ int main(void)
         }
     }
 
+    {
+        uint8_t ctx[256];
+        uint8_t entropy[32];
+        uint8_t nonce[16];
+        uint8_t random_like_output[32];
+        size_t i;
+
+        for (i = 0u; i < sizeof(entropy); ++i) {
+            entropy[i] = (uint8_t)(0x40u + (uint8_t)i);
+        }
+        for (i = 0u; i < sizeof(nonce); ++i) {
+            nonce[i] = (uint8_t)(0x80u + (uint8_t)i);
+        }
+
+        st = ano_crypto_drbg_instantiate(ctx, sizeof(ctx),
+                                         ANO_CRYPTO_DRBG_ALG_HMAC_SHA256,
+                                         entropy, sizeof(entropy),
+                                         nonce, sizeof(nonce),
+                                         0, 0u,
+                                         ANO_CRYPTO_DRBG_FLAG_NONE);
+        if (st != ANO_CRYPTO_OK) {
+            fprintf(stderr, "hmac-drbg instantiate smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+
+        st = ano_crypto_drbg_generate(ctx, random_like_output, sizeof(random_like_output),
+                                      0, 0u, ANO_CRYPTO_DRBG_FLAG_NONE);
+        if (st != ANO_CRYPTO_OK) {
+            fprintf(stderr, "hmac-drbg generate smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+
+        st = ano_crypto_drbg_uninstantiate(ctx, sizeof(ctx));
+        if (st != ANO_CRYPTO_OK) {
+            fprintf(stderr, "hmac-drbg uninstantiate smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+    }
+
     st = ano_crypto_module_shutdown();
     if (st != ANO_CRYPTO_OK) {
         fprintf(stderr, "module shutdown failed: %s\n", ano_crypto_status_name(st));

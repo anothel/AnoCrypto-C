@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-2 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-3 \
 #         -DANO_CRYPTO_RUN_CTEST=ON \
 #         -P tools/collect_release_evidence.cmake
 #
@@ -20,7 +20,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-2")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-3")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -88,7 +88,7 @@ foreach(_rel IN LISTS _source_files)
     if(_rel MATCHES "(^|/)(\\.git|build|cmake-build-[^/]*|\\.cache)(/|$)")
         set(_skip ON)
     endif()
-    if(_rel MATCHES "^evidence/(generated|out|p1-2|release-[^/]*)/")
+    if(_rel MATCHES "^evidence/(generated|out|p1-[0-9][^/]*|release-[^/]*)/")
         set(_skip ON)
     endif()
     if(_rel MATCHES "\\.(zip|patch|tar|tgz|gz)$")

@@ -87,3 +87,19 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - Public HMAC test-vector keys are synthetic test fixtures and must not be used as operational keys.
 - Deterministic boundary tests are local API consistency tests and are labeled separately from public KAT sources.
 - Evidence drafts may include local paths, compiler identity, and test logs; review before external sharing.
+
+## P1-3 HMAC_DRBG-SHA-256 Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| SRC-1201 | NIST SP 800-90A Revision 1, Recommendation for Random Number Generation Using Deterministic Random Bit Generators | Public standard | HMAC_DRBG instantiate, reseed, generate, update state-machine logic | Algorithm specification input only. OS entropy-source integration remains TODO. |
+| SRC-1202 | NIST CAVP DRBG Test Vectors package linked from the public CAVP Random Number Generators page | Public test vectors | HMAC_DRBG-SHA-256 no-prediction-resistance with reseed COUNT=0 KAT | Used for informal implementation correctness testing only. Does not replace formal validation. |
+| DER-3001 | Fresh C99 DRBG API negative tests written in this repository | User-owned generated test code | Invalid argument, unsupported flag, short entropy, context state, and uninstantiate behavior | No third-party test harness code imported. |
+
+## P1-3 Clean-room Notes
+
+- HMAC_DRBG-SHA-256 was implemented as fresh C99 source in this repository using the public algorithm specification above.
+- No external DRBG implementation code was imported.
+- Embedded DRBG KAT values are public test-vector material only and are not operational entropy, seed, nonce, or secret material.
+- The P1-3 public DRBG API accepts explicit entropy input so the DRBG core can be tested deterministically and later driven by a reviewed entropy adapter.
+- OS entropy collection, prediction-resistance requests, and Hash_DRBG-SHA-256 remain TODO.

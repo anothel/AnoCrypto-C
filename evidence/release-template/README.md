@@ -21,13 +21,15 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - SBOM status
 - Signing status
 
-## P1-2 Evidence Notes
+## P1-3 Evidence Notes
 
 - SHA-256 and HMAC-SHA-256 processing APIs are implemented for the current P1 slice.
-- Extended KAT tests cover public SHA-256 vectors and RFC 4231 HMAC-SHA-256 cases.
+- HMAC_DRBG-SHA-256 deterministic core APIs are implemented for the current P1 slice.
+- Extended KAT tests cover public SHA-256 vectors, RFC 4231 HMAC-SHA-256 cases, and a public CAVP HMAC_DRBG-SHA-256 flow.
 - Deterministic chunk-boundary tests cover one-shot versus streaming API consistency.
 - `tests/negative/crypto_service_gate_tests.c` verifies that cryptographic services are rejected before module initialization and startup self-test success.
 - `tests/negative/hash_hmac_api_negative_tests.c` verifies representative invalid argument, short output buffer, and finalized-context behavior.
+- `tests/negative/drbg_api_negative_tests.c` verifies DRBG argument, entropy-length, flag, state, and cleanup behavior.
 - `tools/collect_release_evidence.cmake` creates a local engineering evidence draft from a build tree.
 
 ## Commands
@@ -41,8 +43,8 @@ ctest --test-dir build --output-on-failure
 Install smoke:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-2
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-2
+cmake --install build --prefix /tmp/anocrypto-c-p1-3
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-3
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```

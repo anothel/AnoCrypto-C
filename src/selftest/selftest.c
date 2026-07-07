@@ -3,6 +3,7 @@
 #include <string.h>
 #include <anocrypto/ac_build.h>
 #include <anocrypto/ac_selftest.h>
+#include "ac_drbg_internal.h"
 #include "ac_hmac_internal.h"
 #include "ac_internal.h"
 #include "ac_kat_manifest.h"
@@ -303,6 +304,13 @@ ano_crypto_status_t ano_crypto_selftest_run(uint32_t flags)
     }
 
     st = ano_crypto_selftest_hmac_sha256_kat();
+    if (st != ANO_CRYPTO_OK) {
+        g_selftest_last_status = st;
+        ano_crypto_internal_module_mark_error(st);
+        return st;
+    }
+
+    st = ano_crypto_internal_hmac_drbg_sha256_selftest();
     if (st != ANO_CRYPTO_OK) {
         g_selftest_last_status = st;
         ano_crypto_internal_module_mark_error(st);
