@@ -140,7 +140,8 @@ static void test_query_processing_and_not_implemented_after_init(void)
                                                key, sizeof(key),
                                                ANO_CRYPTO_KEY_FLAG_NONE,
                                                &handle),
-                  ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
+                  ANO_CRYPTO_OK);
+    expect_status("key destroy after import", ano_crypto_key_destroy(handle), ANO_CRYPTO_OK);
 
     expect_status("module shutdown", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
 }

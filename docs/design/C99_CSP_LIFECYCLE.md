@@ -1,8 +1,18 @@
 # C99 CSP / Key Lifecycle Skeleton
 
-## Status
+Status: P1-4 draft.
 
-P1 foundation only. Public handle and state enums are present, but handle storage, import/export policy, and key ownership rules are TODO.
+## Implemented P1-4 slice
+
+P1-4 adds a small in-process CSP handle table for HMAC keys. This is a lifecycle and API-gating slice, not a complete key-management subsystem.
+
+Implemented behavior:
+
+- `ano_crypto_key_import_secret()` imports HMAC keys into an opaque `ano_crypto_csp_handle_t`.
+- `ano_crypto_hmac_compute_with_key()` computes HMAC-SHA-256 using an imported HMAC key handle.
+- `ano_crypto_key_destroy()` zeroizes stored key bytes and marks the handle as destroyed.
+- `ano_crypto_key_get_state()` and `ano_crypto_csp_handle_is_valid()` expose state/validity queries without exposing key material.
+- Cleanup through `ano_crypto_key_destroy()` is allowed outside `OPERATIONAL` so callers can clear CSP storage during shutdown/error cleanup.
 
 ## Candidate CSP States
 
@@ -16,16 +26,28 @@ ZEROIZED
 DESTROYED
 ```
 
-## API Direction
+P1-4 currently uses `ACTIVE` for imported HMAC keys and `DESTROYED` after destroy. Other states are ABI-reserved for later lifecycle work.
 
-- Public callers receive opaque integer handles.
-- Raw key buffers are caller input only.
-- Key material must not be printed, logged, persisted, or added to test fixtures.
-- Export policy must be explicit per algorithm and candidate mode.
+## Current constraints
 
-## TODO(P1)
+- Only HMAC keys are accepted by `ano_crypto_key_import_secret()`.
+- Imported key length must be 1..128 bytes.
+- Exportable-key flag is rejected until export policy exists.
+- Key material is stored in process memory only.
+- No persistence, serialization, export, or keystore integration is implemented.
+- No thread-safety guarantee is made yet.
+- Handle table capacity is intentionally small and fixed for P1 tests.
 
-- Decide handle table ownership model.
-- Define import/export permission matrix.
-- Add lifecycle tests for destroy, zeroize, and failure paths.
-- Define thread-safety and process-global state policy.
+## Sensitive data rules
+
+- Raw key bytes must not be printed, logged, copied to evidence, or included in diagnostics.
+- Test keys are public synthetic KAT inputs only.
+- Destroy paths must zeroize key storage before marking the slot destroyed.
+
+## TODO(P1/P2)
+
+1. Decide handle table ownership, locking, and process model.
+2. Define import/export permission matrix by key type and candidate mode.
+3. Add internal zeroization evidence strategy for optimized builds.
+4. Add lifecycle tests for allocation exhaustion and stale handle reuse.
+5. Decide whether CSP/key lifecycle belongs inside the validation-target boundary for each product package.

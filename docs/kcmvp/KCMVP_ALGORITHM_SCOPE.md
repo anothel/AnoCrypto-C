@@ -1,14 +1,14 @@
 # AnoCrypto-C Algorithm Scope
 
-Status: P1-3 draft.
+Status: P1-4 draft.
 
 ## Implemented candidate slice
 
-| Area | Algorithm | P1-3 status | Notes |
+| Area | Algorithm | P1-4 status | Notes |
 |---|---|---|---|
 | Hash | SHA-256 | Implemented | Public-source KATs and extended boundary tests added. |
 | MAC | HMAC-SHA-256 | Implemented | Public RFC KATs and long-key path coverage added. |
-| DRBG | HMAC_DRBG-SHA-256 | Implemented P1-3 deterministic core | Explicit entropy-input API, startup KAT, public CAVP vector test, and negative tests added. |
+| DRBG | HMAC_DRBG-SHA-256 | Implemented P1-4 deterministic core | Explicit entropy-input API, startup KAT, public CAVP vector test, and negative tests added. |
 
 ## ABI-reserved / not implemented
 
@@ -19,7 +19,7 @@ Status: P1-3 draft.
 | MAC | HMAC-SHA-384 | Not implemented | MAC-size query only. |
 | MAC | HMAC-SHA-512 | Not implemented | MAC-size query only. |
 | DRBG | Hash_DRBG-SHA-256 | Not implemented | Algorithm ID is reserved for API review. |
-| CSP/key | HMAC key import | Skeleton only | No operational key handle implementation yet. |
+| CSP/key | HMAC key import/use/destroy | Implemented P1-4 lifecycle slice | In-memory HMAC key handles only; no export, persistence, or keystore. |
 
 ## Important boundary
 
@@ -29,8 +29,15 @@ KAT and CTest pass logs are engineering correctness evidence only. They do not r
 
 ## P1 next candidates
 
-1. Add entropy adapter design and tests without logging raw entropy.
-2. Add CSP/key handle lifecycle behavior for HMAC keys.
+1. Connect reviewed platform entropy sources to the adapter seam.
+2. Add CSP/key handle lifecycle allocation exhaustion and stale-handle tests.
 3. Decide SHA-384/SHA-512 implementation timing.
 4. Add source archive SHA-256 and install smoke log capture to evidence tooling.
 5. Add CI matrix and reproducible build notes.
+
+
+## P1-4 CSP/Entropy Notes
+
+- HMAC key handle lifecycle is implemented as an in-memory engineering slice only.
+- Internal entropy adapter seam exists, but OS entropy collection remains TODO.
+- These additions are not formal validation evidence.

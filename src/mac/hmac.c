@@ -3,6 +3,7 @@
 #include <anocrypto/ac_hmac.h>
 #include <anocrypto/ac_module.h>
 #include "ac_internal.h"
+#include "ac_csp_internal.h"
 #include "ac_hmac_internal.h"
 
 #define ANO_CRYPTO_HMAC_CTX_MAGIC 0x4143484du /* ACHM */
@@ -354,6 +355,58 @@ ano_crypto_status_t ano_crypto_hmac_compute(
     }
 
     st = ano_crypto_internal_hmac_sha256_compute(key, key_len, input, input_len, out);
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
+    *out_written = ANO_CRYPTO_HMAC_SHA256_MAC_SIZE;
+    return ANO_CRYPTO_OK;
+}
+
+ano_crypto_status_t ano_crypto_hmac_compute_with_key(
+    ano_crypto_hash_algorithm_t hash_algorithm,
+    ano_crypto_csp_handle_t key_handle,
+    const uint8_t *input,
+    size_t input_len,
+    uint8_t *out,
+    size_t out_len,
+    size_t *out_written)
+{
+    const uint8_t *key_material = 0;
+    size_t key_material_len = 0u;
+    ano_crypto_status_t st;
+
+    st = ano_crypto_module_require_operational();
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
+    if ((input == 0 && input_len != 0u) || out == 0 || out_written == 0) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    *out_written = 0u;
+
+    if (hash_algorithm != ANO_CRYPTO_HASH_ALG_SHA256) {
+        st = ano_crypto_hmac_mac_size(hash_algorithm, &key_material_len);
+        if (st != ANO_CRYPTO_OK) {
+            return st;
+        }
+        return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+    }
+
+    if (out_len < ANO_CRYPTO_HMAC_SHA256_MAC_SIZE) {
+        return ANO_CRYPTO_ERR_BUFFER_TOO_SMALL;
+    }
+
+    st = ano_crypto_internal_csp_lookup_secret(
+        key_handle, ANO_CRYPTO_KEY_TYPE_HMAC, &key_material, &key_material_len);
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
+    st = ano_crypto_internal_hmac_sha256_compute(
+        key_material, key_material_len, input, input_len, out);
     if (st != ANO_CRYPTO_OK) {
         return st;
     }

@@ -65,6 +65,41 @@ int main(void)
         }
     }
 
+
+
+    {
+        static const uint8_t key[] = { 'J', 'e', 'f', 'e' };
+        static const uint8_t msg[] = { 'a', 'b', 'c' };
+        ano_crypto_csp_handle_t handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+        uint8_t mac[32];
+        size_t written = 0u;
+
+        st = ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_HMAC,
+                                          key, sizeof(key),
+                                          ANO_CRYPTO_KEY_FLAG_NONE,
+                                          &handle);
+        if (st != ANO_CRYPTO_OK || handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
+            fprintf(stderr, "hmac key import smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+
+        st = ano_crypto_hmac_compute_with_key(ANO_CRYPTO_HASH_ALG_SHA256,
+                                              handle,
+                                              msg, sizeof(msg),
+                                              mac, sizeof(mac),
+                                              &written);
+        if (st != ANO_CRYPTO_OK || written != sizeof(mac)) {
+            fprintf(stderr, "hmac key handle smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+
+        st = ano_crypto_key_destroy(handle);
+        if (st != ANO_CRYPTO_OK) {
+            fprintf(stderr, "hmac key destroy smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+    }
+
     {
         uint8_t ctx[256];
         uint8_t entropy[32];

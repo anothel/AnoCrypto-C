@@ -1,12 +1,13 @@
 # AnoCrypto-C KAT Tests
 
-Status: P1-3 draft.
+Status: P1-4 draft.
 
 This directory contains public-source known-answer tests for the currently implemented algorithm slice:
 
 - SHA-256: empty message, `abc`, the standard multi-block message, and the million-`a` vector.
 - HMAC-SHA-256: RFC 4231 test cases 1, 2, 3, 4, 6, and 7.
 - HMAC_DRBG-SHA-256: NIST CAVP DRBG no-prediction-resistance with reseed COUNT=0 flow.
+- HMAC key handle path: RFC 4231 Test Case 2 through the in-memory CSP handle lifecycle.
 - API consistency checks: deterministic chunk-boundary tests compare one-shot and streaming APIs.
 
 Important boundaries:

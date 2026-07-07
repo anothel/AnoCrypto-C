@@ -13,7 +13,9 @@ extern "C" {
  * CSP handle skeleton.
  *
  * The handle is intentionally opaque to callers. Value 0 is always invalid.
- * Storage, ownership, export policy, and persistence are TODO(P1/P2).
+ * P1-4 provides a small in-process handle table for HMAC keys only. Storage,
+ * ownership, export policy, persistence, thread-safety, and multi-process
+ * behavior require further review before wider use.
  */
 typedef uint64_t ano_crypto_csp_handle_t;
 

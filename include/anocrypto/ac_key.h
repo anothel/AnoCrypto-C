@@ -14,8 +14,8 @@ extern "C" {
  * Key/CSP lifecycle skeleton.
  *
  * Raw key material is accepted only as caller-provided input to future import
- * operations. This P1 foundation does not store, export, print, or test with
- * real secret material.
+ * operations. P1-4 implements an in-memory HMAC key handle path only. It does
+ * not export, print, persist, or test with operational secret material.
  */
 typedef enum ano_crypto_key_type_e {
     ANO_CRYPTO_KEY_TYPE_SECRET_BYTES = 1,
@@ -29,6 +29,8 @@ typedef enum ano_crypto_key_type_e {
 #define ANO_CRYPTO_KEY_FLAG_NONE 0x00000000u
 #define ANO_CRYPTO_KEY_FLAG_EXPORTABLE_CANDIDATE 0x00000001u
 #define ANO_CRYPTO_KEY_FLAG_VALIDATION_TARGET_CANDIDATE 0x00000002u
+
+#define ANO_CRYPTO_KEY_MAX_SECRET_BYTES 128u
 
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_key_import_secret(
     ano_crypto_key_type_t key_type,

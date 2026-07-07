@@ -1,6 +1,6 @@
 # AnoCrypto-C Release Evidence Workflow
 
-Status: P1-3 draft.
+Status: P1-4 draft.
 
 ## Purpose
 
@@ -19,7 +19,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 The generated output defaults to:
 
 ```text
-build/evidence/p1-3/
+build/evidence/p1-4/
   BUILD_METADATA.txt
   SOURCE_FILES.sha256
   BINARY_FILES.sha256
@@ -44,10 +44,18 @@ Before treating the generated directory as a release-candidate evidence input, r
 - known limitations
 - absence of secrets, private keys, tokens, operational entropy samples, or internal deployment details
 
-## P1-3 known gaps
+## P1-4 known gaps
 
 - Source archive SHA-256 is not generated yet.
 - Install-prefix smoke logs are not captured by the evidence script yet.
 - SBOM and signing status are placeholders.
 - Entropy adapter, CSP/key lifecycle, and thread-safety evidence remain TODO.
 - Official validation-package mapping remains TODO.
+
+
+## P1-4 additions
+
+- Include `ano_crypto_hmac_key_handle_kat_tests` output in KAT logs.
+- Include `ano_crypto_csp_key_lifecycle_negative_tests` output in negative test logs.
+- Include `ano_crypto_entropy_adapter_tests` output as internal seam test evidence.
+- Do not include raw entropy, HMAC key bytes, DRBG state, generated secret bytes, or private material in evidence logs.

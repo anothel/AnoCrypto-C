@@ -12,7 +12,7 @@ extern "C" {
 /*
  * P1 public API for the DRBG core state machine.
  *
- * P1-3 scope:
+ * P1-4 scope:
  * - HMAC_DRBG-SHA-256 core processing is implemented with explicit caller-
  *   supplied entropy input for deterministic KAT and adapter-driven use.
  * - OS entropy collection is intentionally not implemented here. A later

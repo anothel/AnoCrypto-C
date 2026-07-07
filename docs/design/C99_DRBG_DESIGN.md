@@ -1,8 +1,8 @@
 # C99 DRBG Design Skeleton
 
-Status: P1-3 draft.
+Status: P1-4 draft.
 
-## Implemented P1-3 slice
+## Implemented through P1-4
 
 - HMAC_DRBG-SHA-256 deterministic core
 - caller-provided opaque DRBG context buffer
@@ -14,7 +14,7 @@ Status: P1-3 draft.
 
 ## Explicitly not implemented yet
 
-- OS entropy source adapter
+- OS entropy source provider
 - prediction-resistance requests
 - Hash_DRBG-SHA-256
 - automatic reseed policy driven by an entropy adapter
@@ -25,7 +25,7 @@ Status: P1-3 draft.
 
 | Algorithm | Status | Notes |
 |---|---|---|
-| HMAC_DRBG-SHA-256 | Implemented P1-3 slice | Deterministic core only; entropy input is explicit. |
+| HMAC_DRBG-SHA-256 | Implemented P1-4 slice | Deterministic core only; entropy input is explicit. Internal entropy adapter seam exists but OS provider is TODO. |
 | Hash_DRBG-SHA-256 | ABI-reserved | Returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` from processing APIs. |
 
 ## State Model
@@ -38,7 +38,7 @@ UNINSTANTIATED -> INSTANTIATED -> ERROR
 
 Module state is separate from DRBG instance state. DRBG instantiate, reseed, and generate require the module to be operational. DRBG uninstantiate is allowed outside the operational state so callers can clear caller-owned context storage during cleanup.
 
-## P1-3 public API boundary
+## Public DRBG core API boundary
 
 The DRBG core API accepts explicit entropy input:
 
@@ -55,11 +55,11 @@ ano_crypto_drbg_reseed(ctx,
                        flags);
 ```
 
-This is intentionally a low-level DRBG core interface. A later entropy adapter or random-service layer must collect and assess entropy before calling this core API. P1-3 does not claim that caller-provided entropy is suitable for operational use.
+This is intentionally a low-level DRBG core interface. A later entropy adapter or random-service layer must collect and assess entropy before calling this core API. P1-4 does not claim that caller-provided entropy or callback-provided entropy is suitable for operational use.
 
 ## HMAC_DRBG-SHA-256 policy constants
 
-| Constant | Value | P1-3 meaning |
+| Constant | Value | P1-4 meaning |
 |---|---:|---|
 | `ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_ENTROPY_INPUT_SIZE` | 32 bytes | Minimum entropy input accepted by instantiate/reseed. |
 | `ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_NONCE_SIZE` | 16 bytes | Minimum nonce accepted by instantiate. |
@@ -68,9 +68,9 @@ This is intentionally a low-level DRBG core interface. A later entropy adapter o
 
 ## Entropy Adapter Boundary
 
-TODO(P1/P2): add an internal entropy source adapter interface. Do not treat OS RNG calls as the DRBG itself.
+P1-4 adds an internal entropy adapter seam in `src/internal/ac_entropy_internal.h` and `src/drbg/entropy_adapter.c`. The callback provider is test-only plumbing. The OS-reserved provider returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` until platform entropy collection is reviewed.
 
-The future adapter should define:
+The future adapter still needs to define:
 
 - platform entropy source selection
 - entropy input length policy
@@ -88,7 +88,7 @@ The future adapter should define:
 
 ## TODO
 
-1. Add a reviewed entropy adapter design.
+1. Connect a reviewed platform entropy provider to the adapter seam.
 2. Decide whether a higher-level `ano_crypto_random_generate()` API belongs in AnoCrypto-C P1 or P2.
 3. Add reseed counter and fork-safety tests when the adapter exists.
 4. Add install-prefix evidence capture for DRBG KAT logs.

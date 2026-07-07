@@ -1,14 +1,253 @@
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
 #include <anocrypto/ac_csp.h>
+#include <anocrypto/ac_key.h>
+#include "ac_csp_internal.h"
+#include "ac_internal.h"
+
+#define ANO_CRYPTO_CSP_HANDLE_INDEX_MASK 0xffffffffULL
+
+typedef struct ano_crypto_csp_slot_s {
+    uint32_t generation;
+    uint32_t state;
+    uint32_t key_type;
+    uint32_t flags;
+    size_t key_len;
+    uint8_t key_material[ANO_CRYPTO_INTERNAL_CSP_MAX_SECRET_BYTES];
+} ano_crypto_csp_slot_t;
+
+static ano_crypto_csp_slot_t g_csp_slots[ANO_CRYPTO_INTERNAL_CSP_TABLE_CAPACITY];
+static uint32_t g_csp_next_generation = 1u;
+
+static ano_crypto_csp_handle_t make_handle(size_t index, uint32_t generation)
+{
+    return ((ano_crypto_csp_handle_t)generation << 32) |
+           ((ano_crypto_csp_handle_t)(index + 1u) & ANO_CRYPTO_CSP_HANDLE_INDEX_MASK);
+}
+
+static int decode_handle(ano_crypto_csp_handle_t handle, size_t *out_index, uint32_t *out_generation)
+{
+    uint64_t raw_index;
+    uint32_t generation;
+
+    if (handle == ANO_CRYPTO_CSP_INVALID_HANDLE || out_index == 0 || out_generation == 0) {
+        return 0;
+    }
+
+    raw_index = (uint64_t)(handle & ANO_CRYPTO_CSP_HANDLE_INDEX_MASK);
+    generation = (uint32_t)(handle >> 32);
+    if (raw_index == 0u || raw_index > (uint64_t)ANO_CRYPTO_INTERNAL_CSP_TABLE_CAPACITY || generation == 0u) {
+        return 0;
+    }
+
+    *out_index = (size_t)(raw_index - 1u);
+    *out_generation = generation;
+    return 1;
+}
+
+static ano_crypto_csp_slot_t *slot_from_handle(ano_crypto_csp_handle_t handle)
+{
+    size_t index = 0u;
+    uint32_t generation = 0u;
+    ano_crypto_csp_slot_t *slot;
+
+    if (!decode_handle(handle, &index, &generation)) {
+        return 0;
+    }
+
+    slot = &g_csp_slots[index];
+    if (slot->generation != generation) {
+        return 0;
+    }
+
+    return slot;
+}
+
+static const ano_crypto_csp_slot_t *const_slot_from_handle(ano_crypto_csp_handle_t handle)
+{
+    size_t index = 0u;
+    uint32_t generation = 0u;
+    const ano_crypto_csp_slot_t *slot;
+
+    if (!decode_handle(handle, &index, &generation)) {
+        return 0;
+    }
+
+    slot = &g_csp_slots[index];
+    if (slot->generation != generation) {
+        return 0;
+    }
+
+    return slot;
+}
+
+static int slot_state_is_live(uint32_t state)
+{
+    return state == (uint32_t)ANO_CRYPTO_CSP_STATE_ALLOCATED ||
+           state == (uint32_t)ANO_CRYPTO_CSP_STATE_INITIALIZED ||
+           state == (uint32_t)ANO_CRYPTO_CSP_STATE_ACTIVE ||
+           state == (uint32_t)ANO_CRYPTO_CSP_STATE_RESTRICTED;
+}
+
+static ano_crypto_status_t find_free_slot(size_t *out_index)
+{
+    size_t i;
+
+    if (out_index == 0) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    for (i = 0u; i < ANO_CRYPTO_INTERNAL_CSP_TABLE_CAPACITY; ++i) {
+        if (!slot_state_is_live(g_csp_slots[i].state)) {
+            *out_index = i;
+            return ANO_CRYPTO_OK;
+        }
+    }
+
+    return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+}
+
+static uint32_t next_generation(void)
+{
+    uint32_t generation = g_csp_next_generation;
+
+    ++g_csp_next_generation;
+    if (g_csp_next_generation == 0u) {
+        g_csp_next_generation = 1u;
+    }
+
+    if (generation == 0u) {
+        generation = g_csp_next_generation;
+        ++g_csp_next_generation;
+    }
+
+    return generation;
+}
+
+ano_crypto_status_t ano_crypto_internal_csp_import_secret(
+    ano_crypto_key_type_t key_type,
+    const uint8_t *key_material,
+    size_t key_material_len,
+    uint32_t flags,
+    ano_crypto_csp_handle_t *out_handle)
+{
+    size_t index = 0u;
+    ano_crypto_csp_slot_t *slot;
+    ano_crypto_status_t st;
+
+    if (out_handle == 0 || key_material == 0 || key_material_len == 0u) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    *out_handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+
+    if (key_material_len > ANO_CRYPTO_INTERNAL_CSP_MAX_SECRET_BYTES) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+    }
+
+    if (key_type != ANO_CRYPTO_KEY_TYPE_HMAC) {
+        return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+    }
+
+    if ((flags & ANO_CRYPTO_KEY_FLAG_EXPORTABLE_CANDIDATE) != 0u) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+    }
+
+    st = find_free_slot(&index);
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+
+    slot = &g_csp_slots[index];
+    ano_crypto_internal_zeroize(slot, sizeof(*slot));
+    slot->generation = next_generation();
+    slot->state = (uint32_t)ANO_CRYPTO_CSP_STATE_ALLOCATED;
+    slot->key_type = (uint32_t)key_type;
+    slot->flags = flags;
+    slot->key_len = key_material_len;
+    memcpy(slot->key_material, key_material, key_material_len);
+    slot->state = (uint32_t)ANO_CRYPTO_CSP_STATE_ACTIVE;
+
+    *out_handle = make_handle(index, slot->generation);
+    return ANO_CRYPTO_OK;
+}
+
+ano_crypto_status_t ano_crypto_internal_csp_destroy(
+    ano_crypto_csp_handle_t handle)
+{
+    ano_crypto_csp_slot_t *slot;
+
+    if (handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    slot = slot_from_handle(handle);
+    if (slot == 0) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    if (!slot_state_is_live(slot->state)) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    ano_crypto_internal_zeroize(slot->key_material, sizeof(slot->key_material));
+    slot->key_len = 0u;
+    slot->key_type = 0u;
+    slot->flags = 0u;
+    slot->state = (uint32_t)ANO_CRYPTO_CSP_STATE_DESTROYED;
+    return ANO_CRYPTO_OK;
+}
+
+ano_crypto_status_t ano_crypto_internal_csp_lookup_secret(
+    ano_crypto_csp_handle_t handle,
+    ano_crypto_key_type_t expected_type,
+    const uint8_t **out_key_material,
+    size_t *out_key_material_len)
+{
+    const ano_crypto_csp_slot_t *slot;
+
+    if (out_key_material == 0 || out_key_material_len == 0) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    *out_key_material = 0;
+    *out_key_material_len = 0u;
+
+    if (handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    slot = const_slot_from_handle(handle);
+    if (slot == 0 || !slot_state_is_live(slot->state)) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    if (slot->key_type != (uint32_t)expected_type) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+    }
+
+    if (slot->key_len == 0u || slot->key_len > ANO_CRYPTO_INTERNAL_CSP_MAX_SECRET_BYTES) {
+        return ANO_CRYPTO_ERR_INTERNAL_ERROR;
+    }
+
+    *out_key_material = slot->key_material;
+    *out_key_material_len = slot->key_len;
+    return ANO_CRYPTO_OK;
+}
 
 ano_crypto_status_t ano_crypto_csp_handle_is_valid(
     ano_crypto_csp_handle_t handle,
     int *out_is_valid)
 {
+    const ano_crypto_csp_slot_t *slot;
+
     if (out_is_valid == 0) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
-    *out_is_valid = (handle != ANO_CRYPTO_CSP_INVALID_HANDLE) ? 1 : 0;
+    slot = const_slot_from_handle(handle);
+    *out_is_valid = (slot != 0 && slot_state_is_live(slot->state)) ? 1 : 0;
     return ANO_CRYPTO_OK;
 }
 
@@ -16,18 +255,31 @@ ano_crypto_status_t ano_crypto_csp_handle_get_state(
     ano_crypto_csp_handle_t handle,
     ano_crypto_csp_state_t *out_state)
 {
+    const ano_crypto_csp_slot_t *slot;
+
     if (out_state == 0) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
-    if (handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
+    slot = const_slot_from_handle(handle);
+    if (slot == 0) {
         *out_state = ANO_CRYPTO_CSP_STATE_INVALID;
         return ANO_CRYPTO_OK;
     }
 
-    /* TODO(P1): Replace with real handle table lookup. */
-    *out_state = ANO_CRYPTO_CSP_STATE_INVALID;
-    return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+    switch ((ano_crypto_csp_state_t)slot->state) {
+    case ANO_CRYPTO_CSP_STATE_ALLOCATED:
+    case ANO_CRYPTO_CSP_STATE_INITIALIZED:
+    case ANO_CRYPTO_CSP_STATE_ACTIVE:
+    case ANO_CRYPTO_CSP_STATE_RESTRICTED:
+    case ANO_CRYPTO_CSP_STATE_ZEROIZED:
+    case ANO_CRYPTO_CSP_STATE_DESTROYED:
+        *out_state = (ano_crypto_csp_state_t)slot->state;
+        return ANO_CRYPTO_OK;
+    default:
+        *out_state = ANO_CRYPTO_CSP_STATE_INVALID;
+        return ANO_CRYPTO_OK;
+    }
 }
 
 const char *ano_crypto_csp_state_name(
