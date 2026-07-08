@@ -1,6 +1,6 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-13 draft.
+Status: P1-14 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -53,11 +53,13 @@ Status: P1-13 draft.
 - P1-13 evidence manifest policy
 - P1-13 PoC package review manifest and package status records
 - P1-13 evidence workflow additions for `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, and `EVIDENCE_MANIFEST.sha256`
+- P1-14 thread-safety support matrix and CI checklist
+- P1-14 thread-safety policy check target and evidence/PoC package records
 
 ## Immediate P1 next items
 
 1. Review and harden CI matrix after first hosted runs on Linux, Windows, and Apple runners.
-2. Expand thread-safety policy into reviewed public support matrix and CI coverage.
+2. Add Windows-specific concurrent CSP/HMAC coverage and sanitizer lanes where supported.
 3. Decide SHA-384/SHA-512 implementation timing.
 4. Decide whether and when to expose public `ano_crypto_random_*` APIs.
 5. Add reproducible source archive timestamp normalization if byte-for-byte archives become a release requirement.

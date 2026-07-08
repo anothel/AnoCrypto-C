@@ -1,10 +1,10 @@
 # Evidence Manifest Policy
 
-Status: P1-13 draft.
+Status: P1-14 draft.
 
 ## Purpose
 
-AnoCrypto-C release evidence is currently a local engineering draft. P1-13 adds a manifest policy so each generated evidence directory and customer PoC package can be reviewed with consistent hash and placeholder records.
+AnoCrypto-C release evidence is currently a local engineering draft. P1-14 retains the manifest policy so each generated evidence directory and customer PoC package can be reviewed with consistent hash and placeholder records.
 
 ## Manifest files
 
@@ -17,10 +17,12 @@ AnoCrypto-C release evidence is currently a local engineering draft. P1-13 adds 
 | `EVIDENCE_MANIFEST.sha256` | evidence script | Hashes generated evidence files after collection. |
 | `PACKAGE_MANIFEST.md` | PoC package script | Hashes staged PoC package files. |
 | `PACKAGE_REVIEW_MANIFEST.md` | PoC package script | Records package review intent and sensitive-data boundaries. |
+| `THREAD_SAFETY_CHECK.txt` | evidence script | Records support-matrix and thread-safety policy-check output. |
+| `THREAD_SAFETY_PACKAGE_NOTES.txt` | PoC package script | Records package-facing thread-safety notes for customer PoC review. |
 
 ## Hash algorithm
 
-Use SHA-256 for P1-13 manifests. If later release policy requires additional digest algorithms, add them as separate files instead of changing existing file semantics silently.
+Use SHA-256 for P1-14 manifests. If later release policy requires additional digest algorithms, add them as separate files instead of changing existing file semantics silently.
 
 ## Manifest generation rules
 

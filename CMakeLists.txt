@@ -36,7 +36,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-13-sbom-signing-manifest" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-14-thread-safety-matrix" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -146,6 +146,15 @@ add_custom_target(ano_crypto_public_surface_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_public_surface.cmake
     USES_TERMINAL
     COMMENT "Checking AnoCrypto-C public surface and repository policy")
+
+add_custom_target(ano_crypto_thread_safety_policy_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_THREAD_SAFETY_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/THREAD_SAFETY_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_thread_safety_policy.cmake
+    USES_TERMINAL
+    COMMENT "Checking AnoCrypto-C thread-safety policy and support matrix")
 
 if(ANO_CRYPTO_BUILD_EXAMPLES)
     add_subdirectory(examples/core_poc)
@@ -297,7 +306,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
     add_test(NAME ano_crypto_thread_lock_tests COMMAND ano_crypto_thread_lock_tests)
 
-    if(CMAKE_USE_PTHREADS_INIT)
+    if(ANO_CRYPTO_ENABLE_THREAD_SAFETY AND CMAKE_USE_PTHREADS_INIT)
         add_executable(ano_crypto_csp_thread_safety_tests
             tests/unit/csp_thread_safety_tests.c)
         target_link_libraries(ano_crypto_csp_thread_safety_tests PRIVATE anocrypto_c Threads::Threads)
@@ -319,7 +328,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-13
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-14
             -DANO_CRYPTO_RUN_CTEST=ON
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
@@ -327,9 +336,10 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_POC_PACKAGE_SMOKE=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-13 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-14 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_public_surface_check
+        ano_crypto_thread_safety_policy_check
         anocrypto_c
         ano_crypto_module_state_tests
         ano_crypto_service_gate_negative_tests

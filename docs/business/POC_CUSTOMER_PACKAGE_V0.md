@@ -15,6 +15,7 @@ AnoCrypto-C-PoC-v0/
   PACKAGE_REVIEW_MANIFEST.md
   SBOM_STATUS.txt
   SIGNING_STATUS.txt
+  THREAD_SAFETY_PACKAGE_NOTES.txt
   INSTALL_PACKAGE.log
   sdk/
     include/anocrypto/*.h
@@ -34,8 +35,11 @@ AnoCrypto-C-PoC-v0/
     kcmvp/*.md
     design/API_ABI_REVIEW_CHECKLIST.md
     design/BLOCK_CIPHER_MODE_SELECTION.md
+    design/C99_THREAD_SAFETY_POLICY.md
+    design/THREAD_SAFETY_SUPPORT_MATRIX.md
     security/SIDE_CHANNEL_REVIEW_CHECKLIST.md
     ci/CI_MATRIX.md
+    ci/THREAD_SAFETY_CI_CHECKLIST.md
     roadmap/C99_PRIORITY_TODO.md
   evidence-template/README.md
 ```
@@ -63,6 +67,7 @@ Allowed v0 evaluation questions:
 - Does the public header set compile as C99 in the customer toolchain?
 - Does the shared or static library link in the customer environment?
 - Does the module lifecycle and startup self-test path run successfully?
+- Does the thread-safety support matrix match the customer integration model?
 - Are status codes and output-parameter conventions usable for the customer integration layer?
 
 Out of scope for v0:
@@ -75,6 +80,7 @@ Out of scope for v0:
 - performance commitments
 - public random-service API commitment
 - binary reproducibility commitment across hosts
+- concurrent mutation support for a single caller-owned hash, HMAC, or DRBG context
 
 ## Packaging commands
 
@@ -100,6 +106,7 @@ Before sharing a package externally, review:
 - `PACKAGE_REVIEW_MANIFEST.md`
 - `SBOM_STATUS.txt`
 - `SIGNING_STATUS.txt`
+- `THREAD_SAFETY_PACKAGE_NOTES.txt`
 - `INSTALL_PACKAGE.log`
 - generated example smoke logs
 - local absolute paths in logs
@@ -117,3 +124,7 @@ Do not add or retain secrets, entropy captures, generated secret bytes, private 
 - Replace SBOM/signing placeholders with reviewed generated outputs after tool and key-management policies are selected.
 - Customer questionnaire for OS, CPU, compiler, linker, deployment model, and required algorithm scope is available as `CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md`.
 - Add a support boundary document for error reports and evidence requests.
+
+## Thread-safety support-matrix review
+
+For P1-14, review `THREAD_SAFETY_PACKAGE_NOTES.txt`, `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md`, and `docs/ci/THREAD_SAFETY_CI_CHECKLIST.md` together. The current support boundary is tied to `ANO_CRYPTO_ENABLE_THREAD_SAFETY=ON`, a reviewed platform lock branch, and caller serialization for shared operation contexts.

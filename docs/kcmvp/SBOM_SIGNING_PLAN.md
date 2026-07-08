@@ -1,12 +1,12 @@
 # SBOM and Signing Plan
 
-Status: P1-13 draft.
+Status: P1-14 draft.
 
 ## Purpose
 
 This document records how AnoCrypto-C will track SBOM and release-signing evidence without adding private signing keys, tokens, customer data, or unpublished deployment details to the repository or PoC package.
 
-P1-13 does not generate a complete SBOM and does not perform release signing. It adds placeholders, manifest files, and review steps so that later release-candidate packaging can record the same fields consistently.
+P1-14 still does not generate a complete SBOM and does not perform release signing. It adds placeholders, manifest files, and review steps so that later release-candidate packaging can record the same fields consistently.
 
 ## SBOM scope
 
@@ -20,7 +20,7 @@ Candidate SBOM inputs:
 - selected documentation included in customer PoC packages
 - compiler and generator identity from build metadata
 
-Out of scope for P1-13:
+Out of scope for P1-14:
 
 - dependency graph attestation from a pinned SBOM generator
 - package-manager dependency import
@@ -30,7 +30,7 @@ Out of scope for P1-13:
 
 ## Candidate SBOM formats
 
-| Format | P1-13 position | Notes |
+| Format | P1-14 position | Notes |
 |---|---|---|
 | SPDX JSON | Candidate | Tool selection and exact schema version remain TODO. |
 | CycloneDX JSON | Candidate | Tool selection and exact schema version remain TODO. |
@@ -56,7 +56,7 @@ Signing rules:
 - Record timestamping policy only after infrastructure review.
 - Record verification command examples only after the signing tool is selected.
 
-## P1-13 generated placeholder files
+## P1-14 generated placeholder files
 
 Evidence collection writes:
 
@@ -74,6 +74,7 @@ SBOM_STATUS.txt
 SIGNING_STATUS.txt
 PACKAGE_REVIEW_MANIFEST.md
 PACKAGE_MANIFEST.md
+THREAD_SAFETY_PACKAGE_NOTES.txt
 ```
 
 These files are engineering tracking artifacts. They do not assert that a complete SBOM exists and they do not assert that release signing has been performed.

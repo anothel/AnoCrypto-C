@@ -61,7 +61,8 @@ set(_required_package_records
     "PACKAGE_MANIFEST.md"
     "PACKAGE_REVIEW_MANIFEST.md"
     "SBOM_STATUS.txt"
-    "SIGNING_STATUS.txt")
+    "SIGNING_STATUS.txt"
+    "THREAD_SAFETY_PACKAGE_NOTES.txt")
 foreach(_record IN LISTS _required_package_records)
     if(NOT EXISTS "${_package_dir}/${_record}")
         message(FATAL_ERROR "PoC package record is missing: ${_package_dir}/${_record}")
@@ -122,6 +123,7 @@ file(WRITE "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_PACKAGE_SMOKE_SUMMARY.txt"
     "Package review manifest: ${_package_dir}/PACKAGE_REVIEW_MANIFEST.md\n"
     "SBOM status: ${_package_dir}/SBOM_STATUS.txt\n"
     "Signing status: ${_package_dir}/SIGNING_STATUS.txt\n"
+    "Thread-safety notes: ${_package_dir}/THREAD_SAFETY_PACKAGE_NOTES.txt\n"
     "PoC package smoke result: ${_run_result}\n")
 
 message(STATUS "AnoCrypto-C PoC package smoke passed: ${ANO_CRYPTO_POC_SMOKE_DIR}")

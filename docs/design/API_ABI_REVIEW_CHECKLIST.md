@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-13 draft.
+Status: P1-14 draft.
 
 ## Review scope
 
@@ -8,7 +8,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 
 ## Naming and package identity
 
-| Item | Expected | P1-12 status |
+| Item | Expected | P1-14 status |
 |---|---|---|
 | Product spelling | `AnoCrypto-C` | OK |
 | Repository/archive slug | `anocrypto-c` | OK |
@@ -21,7 +21,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 
 ## Header ABI checklist
 
-| Rule | P1-12 status | Notes |
+| Rule | P1-14 status | Notes |
 |---|---|---|
 | Public cryptographic contexts do not expose internal struct layout. | OK | Hash/HMAC/DRBG contexts use caller-provided opaque buffers and size APIs. |
 | Public enum values are explicit. | OK | Current public enums use fixed numeric values. |
@@ -36,7 +36,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 
 ## Per-header review notes
 
-| Header | P1-12 review note |
+| Header | P1-14 review note |
 |---|---|
 | `anocrypto.h` | Umbrella header only; no extra ABI. |
 | `ac_status.h` | Status enum values are explicit and append-only before internal error sentinel. |
@@ -57,8 +57,9 @@ cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DANO_CRYPTO_BUILD_EXAMPLES=ON -
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 cmake --build build --target ano_crypto_public_surface_check
-cmake --install build --prefix /tmp/anocrypto-c-p1-13
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-13
+cmake --build build --target ano_crypto_thread_safety_policy_check
+cmake --install build --prefix /tmp/anocrypto-c-p1-14
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-14
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 cmake --build build --target ano_crypto_poc_package_smoke
@@ -79,3 +80,7 @@ Expected exported public names should use the `ano_crypto_` prefix. Internal `an
 3. Decide whether static libraries are supported and what ABI commitments apply.
 4. Add ABI baseline comparison after symbol policy is fixed.
 5. Keep unsupported algorithms as explicit placeholder returns until implementation and evidence are reviewed.
+
+## P1-14 thread-safety ABI note
+
+The P1-14 support matrix does not add public symbols or public struct layouts. It documents current behavior for existing APIs and keeps caller-owned context serialization outside the library ABI.

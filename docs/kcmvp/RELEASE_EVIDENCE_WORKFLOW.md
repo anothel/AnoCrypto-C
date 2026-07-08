@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-13 draft.
+Status: P1-14 draft.
 
 ## Purpose
 
@@ -15,7 +15,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-13/
+build/evidence/p1-14/
 ```
 
 ## Expected generated files
@@ -29,6 +29,7 @@ SOURCE_ARCHIVE.log
 anocrypto-c-source.tar.gz
 BINARY_FILES.sha256
 PUBLIC_SURFACE_CHECK.txt
+THREAD_SAFETY_CHECK.txt
 REPRODUCIBLE_BUILD_NOTES.txt
 SCOPE_REVIEW_NOTES.txt
 SBOM_STATUS.txt
@@ -57,6 +58,7 @@ README.md
 - Confirm PoC package manifests and logs do not disclose local customer/internal details before sharing.
 - Confirm P1-12 scope-review notes still match the intended customer and validation-target candidate boundary.
 - Confirm P1-13 SBOM/signing placeholder status and evidence manifest are accurate.
+- Confirm P1-14 thread-safety support matrix and CI checklist match the current build configuration.
 
 ## P1-12 additions
 
@@ -87,6 +89,8 @@ README.md
 - No complete SBOM generation yet; P1-13 records placeholder status only.
 - No release signing evidence yet; P1-13 records placeholder status only.
 - CI workflow has not yet been reviewed against all customer toolchains.
+- Windows-specific concurrent CSP/HMAC coverage remains TODO.
+- Sanitizer lanes remain TODO until compiler/toolchain policy is selected.
 - PoC package legal/evaluation notice remains TODO pending legal review.
 - Source archive timestamp normalization is still TODO if byte-for-byte archives become required.
 - Binary reproducibility across hosts/toolchains is still TODO.
@@ -94,3 +98,14 @@ README.md
 - No public random-service API review record yet.
 - No selected block cipher/mode implementation scope yet.
 - No differential-reference tool/source has been selected yet.
+
+
+## P1-14 additions
+
+- Thread-safety support matrix added: `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md`.
+- Thread-safety CI checklist added: `docs/ci/THREAD_SAFETY_CI_CHECKLIST.md`.
+- Thread-safety policy check script added: `tools/check_thread_safety_policy.cmake`.
+- Evidence collection writes `THREAD_SAFETY_CHECK.txt`.
+- PoC package staging writes `THREAD_SAFETY_PACKAGE_NOTES.txt`.
+- PoC package smoke checks that thread-safety package notes exist.
+

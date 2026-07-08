@@ -1,10 +1,10 @@
 # AnoCrypto-C CI Matrix Skeleton
 
-Status: P1-13 draft.
+Status: P1-14 draft.
 
 ## Purpose
 
-This matrix records the first CI coverage skeleton for build, test, public-surface checks, install-package checks, customer PoC package checks, and evidence-draft generation. It should be reviewed and tightened before being used for release-candidate decisions.
+This matrix records the first CI coverage skeleton for build, test, public-surface checks, thread-safety policy checks, install-package checks, customer PoC package checks, and evidence-draft generation. It should be reviewed and tightened before being used for release-candidate decisions.
 
 ## Required checks
 
@@ -19,19 +19,22 @@ This matrix records the first CI coverage skeleton for build, test, public-surfa
 | Installed-package smoke | Required | Required | Required | Uses `find_package(AnoCryptoC CONFIG REQUIRED)`. |
 | Customer PoC package smoke | Required | Optional | Optional | Stages package, configures packaged example, builds, and runs it. |
 | Public surface policy check | Required | Required | Required | Checks naming, claims boundary, headers, package template presence, and Linux exported symbols when available. |
-| Evidence draft target | Linux required | Optional | Optional | Includes SBOM/signing placeholder status and evidence manifest in P1-13. |
+| Thread-safety policy check | Required | Required | Required | Checks support-matrix docs, lock branches, CMake option, concurrent-test guard, evidence hook, and PoC package note. |
+| Evidence draft target | Linux required | Optional | Optional | Includes SBOM/signing placeholder status, evidence manifest, and thread-safety check output in P1-14. |
 | Platform entropy provider branch | Linux provider | Apple provider | Windows provider | Provider tests must not print entropy bytes. |
+| Thread-safety ON lane | Required | Required | Required | Uses internal locking where supported. |
+| Thread-safety OFF lane | Required | Optional | Optional | Build/test only; not a concurrency-support lane. |
 
 ## Suggested matrix axes
 
-| Axis | Values | P1-13 decision |
+| Axis | Values | P1-14 decision |
 |---|---|---|
 | OS | `ubuntu-latest`, `macos-latest`, `windows-latest` | Required skeleton |
 | Build type | `Debug`, `Release` | Start with `Debug`; add `Release` before release-candidate review |
 | Library kind | Shared first, static later | Shared required; static TODO |
 | Compiler | Default OS compiler first | GCC/Clang/MSVC expansion TODO |
 | Entropy provider | Enabled by default | Required, but logs must be status-only |
-| Thread safety | Enabled by default | Required for current global-state seam |
+| Thread safety | `ON` default, Linux `OFF` smoke | ON required; OFF confirms explicit caller-serialization configuration |
 | Examples | `ANO_CRYPTO_BUILD_EXAMPLES=ON` | Required for PoC smoke |
 | Internal symbol hiding | Off for internal test-hook build; on for release-style no-test build | Add dedicated release-style lane before release-candidate review |
 
@@ -39,12 +42,21 @@ This matrix records the first CI coverage skeleton for build, test, public-surfa
 
 The repository includes `.github/workflows/ci.yml` as a starter workflow. It is intentionally conservative and should be treated as CI plumbing, not release approval.
 
+P1-14 workflow expectations:
+
+- Run default build/test/smoke lanes with `ANO_CRYPTO_ENABLE_THREAD_SAFETY=ON` on Linux, macOS, and Windows.
+- Run a Linux `ANO_CRYPTO_ENABLE_THREAD_SAFETY=OFF` lane to keep the non-concurrency-support build path explicit.
+- Run `ano_crypto_thread_safety_policy_check` in all default lanes.
+- Generate `THREAD_SAFETY_CHECK.txt` in the Linux evidence draft.
+- Keep customer PoC package smoke on Linux until macOS/Windows package path handling is reviewed.
+
 ## Release-candidate TODO
 
 1. Add a second Linux compiler lane.
 2. Add a Release build lane with `ANO_CRYPTO_BUILD_TESTS=OFF` and `ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON`.
 3. Add customer PoC package smoke on macOS and Windows after path/executable lookup is reviewed.
-4. Add static library smoke checks if static packaging becomes a supported deliverable.
-5. Add artifact upload only after log redaction rules are reviewed.
-6. Replace SBOM/signing placeholders with reviewed generator/signing jobs when the release process is defined.
-7. Add ABI baseline comparison after the public ABI is frozen.
+4. Add Windows-specific concurrent CSP/HMAC stress coverage before widening Windows thread-safety wording.
+5. Add static library smoke checks if static packaging becomes a supported deliverable.
+6. Add artifact upload only after log redaction rules are reviewed.
+7. Replace SBOM/signing placeholders with reviewed generator/signing jobs when the release process is defined.
+8. Add ABI baseline comparison after the public ABI is frozen.

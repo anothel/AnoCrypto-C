@@ -7,13 +7,18 @@ on:
 
 jobs:
   build-test-smoke:
-    name: ${{ matrix.os }} / ${{ matrix.build_type }}
+    name: ${{ matrix.os }} / ${{ matrix.build_type }} / thread-safety-${{ matrix.thread_safety }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         build_type: [Debug]
+        thread_safety: [ON]
+        include:
+          - os: ubuntu-latest
+            build_type: Debug
+            thread_safety: OFF
 
     steps:
       - name: Checkout
@@ -25,10 +30,10 @@ jobs:
           -DANO_CRYPTO_BUILD_TESTS=ON
           -DANO_CRYPTO_BUILD_EXAMPLES=ON
           -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
-          -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
+          -DANO_CRYPTO_ENABLE_THREAD_SAFETY=${{ matrix.thread_safety }}
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-13-sbom-signing-manifest
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-14-thread-safety-matrix
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -39,6 +44,9 @@ jobs:
 
       - name: Public surface check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_public_surface_check
+
+      - name: Thread-safety policy check
+        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_thread_safety_policy_check
 
       - name: Install
         run: cmake --install build --config ${{ matrix.build_type }} --prefix install-prefix
@@ -57,8 +65,8 @@ jobs:
         if: runner.os == 'Windows'
         run: .\\build-install-smoke\\${{ matrix.build_type }}\\anocrypto_c_install_smoke.exe
 
-      - name: PoC package smoke on Linux
-        if: runner.os == 'Linux'
+      - name: PoC package smoke on Linux thread-safety ON
+        if: runner.os == 'Linux' && matrix.thread_safety == 'ON'
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_poc_package_smoke
 
   evidence-draft:
@@ -75,8 +83,9 @@ jobs:
           -DANO_CRYPTO_BUILD_TESTS=ON
           -DANO_CRYPTO_BUILD_EXAMPLES=ON
           -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
+          -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-13-sbom-signing-manifest
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-14-thread-safety-matrix
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build

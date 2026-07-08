@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P1-13 draft.
+Status: P1-14 draft.
 
 ## Purpose
 
@@ -40,6 +40,7 @@ Each task should follow this loop:
    - Install smoke when package behavior changes.
    - PoC smoke when customer-package behavior changes.
    - Public-surface check when naming, public headers, or symbols change.
+   - Thread-safety policy check when synchronization code, CSP/key handle behavior, or concurrency wording changes.
 
 4. Update clean-room and claims records.
    - Record public standards and user-owned documents used as inputs.
@@ -52,6 +53,7 @@ Each task should follow this loop:
    - Build.
    - CTest.
    - Public-surface check.
+   - Thread-safety policy check.
    - Install smoke.
    - PoC package smoke when enabled.
    - Evidence target.
@@ -90,11 +92,23 @@ P1-13 deliverables:
 - PoC package outputs for `PACKAGE_REVIEW_MANIFEST.md`, `SBOM_STATUS.txt`, and `SIGNING_STATUS.txt`.
 - PoC package smoke check for required package records.
 
+## P1-14 placement
+
+P1-14 is the thread-safety support-matrix step after the P1-13 evidence/package manifest hardening step. It does not add new cryptographic algorithms or widen the public ABI. The output is a support-boundary draft, CI checklist, policy check target, evidence output, and PoC package note that make current global-state locking easier to review.
+
+P1-14 deliverables:
+
+- Thread-safety support matrix.
+- Thread-safety CI checklist.
+- Thread-safety policy check target.
+- Evidence output for `THREAD_SAFETY_CHECK.txt`.
+- PoC package output for `THREAD_SAFETY_PACKAGE_NOTES.txt`.
+- CMake guard so the POSIX concurrent CSP/HMAC test only runs when thread safety is enabled and pthread support is available.
+
 ## Planned next sequence
 
 | Step | Candidate name | Scope |
 |---|---|---|
-| P1-14 | Thread-safety support matrix | Turn internal locking notes into a public support matrix and CI checklist. |
 | P1-15 | SHA-384/SHA-512 implementation decision | Decide whether to implement, defer, or source-review SHA-384/SHA-512. |
 | P1-16 | Public random API decision | Decide whether to expose `ano_crypto_random_*` or keep DRBG APIs lower-level until entropy policy is reviewed. |
 | P2-01 | Block cipher implementation start | Start only after P1-12 selection criteria and customer/KCMVP scope are reviewed. |

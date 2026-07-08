@@ -1,66 +1,79 @@
 # C99 Thread-Safety Policy
 
-Status: P1-13 draft.
+Status: P1-14 draft.
 
 ## Goal
 
-This document records the current thread-safety boundary for anocrypto-c. It is a design and engineering-test artifact, not a broad concurrency guarantee.
+This document records the current thread-safety boundary for AnoCrypto-C. It is a design and engineering-test artifact, not a broad concurrency guarantee.
 
-## Current Policy
+P1-14 adds a public support matrix and CI checklist:
 
-P1-6 introduces a small internal process-wide lock seam for mutable global state:
+- `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md`
+- `docs/ci/THREAD_SAFETY_CI_CHECKLIST.md`
+- `tools/check_thread_safety_policy.cmake`
+
+## Current policy
+
+AnoCrypto-C currently has a small internal process-wide lock seam for selected mutable global state:
 
 - module lifecycle state
 - self-test last-status and last-flags bookkeeping
 - in-memory CSP handle table and generation counter
 
-The following APIs are intended to be safe for concurrent calls under that limited policy:
+The following API groups are intended to tolerate concurrent calls when `ANO_CRYPTO_ENABLE_THREAD_SAFETY=ON` and a reviewed platform lock branch is active:
 
+- version, status, state-name, and build-identity queries
 - module state/status queries
-- module init/shutdown state transition attempts
+- module init/shutdown state transition attempts, with application-level lifecycle ownership still recommended
 - self-test last-status/flag queries
 - HMAC key import/destroy/state/is-valid operations
-- HMAC-SHA-256 compute using an imported key handle
+- HMAC-SHA-256 compute using an imported HMAC key handle
+- one-shot hash/HMAC operations with independent caller-owned buffers
 
 Caller-provided operation contexts remain caller-owned. The module does not promise that a single hash, HMAC, or DRBG context can be mutated concurrently by multiple threads.
 
-## Key Handle Snapshot Rule
+## Key handle snapshot rule
 
-`ano_crypto_hmac_compute_with_key()` copies key material from the CSP table under the internal lock, releases the lock, performs HMAC using the local copy, and zeroizes the local copy before returning.
+`ano_crypto_hmac_compute_with_key()` copies key material from the CSP table under the internal lock, releases the lock, performs HMAC using the local copy, and clears the local copy before returning.
 
 This means a concurrent destroy of the same handle does not retroactively invalidate an operation that already captured a valid key snapshot. A later operation with the stale handle must fail.
 
-## Lock Implementation
+## Lock implementation
 
-P1-6 adds `src/internal/ac_thread_internal.h` and `src/core/thread_lock.c`.
+P1-6 introduced `src/internal/ac_thread_internal.h` and `src/core/thread_lock.c`.
 
 - POSIX-like platforms use `pthread_mutex_t` when `ANO_CRYPTO_ENABLE_THREAD_SAFETY` is enabled.
 - Windows uses `INIT_ONCE` plus `CRITICAL_SECTION` when enabled.
-- Unsupported platforms currently build with an internal no-op fallback and must be reviewed before any thread-safety commitment.
+- Unsupported platforms currently build with an internal no-op fallback and must be reviewed before any thread-safety support statement.
 
-## Build Option
+## Build options
 
 ```sh
 cmake -S . -B build -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
 ```
 
-The option is ON by default in P1-6 when thread support is available through CMake `Threads`.
+The option is ON by default. If thread support is disabled or unavailable, callers must serialize shared module, self-test, CSP, key-handle, and context access themselves.
 
-## Tests
+## Tests and checks
 
-P1-6 adds:
+Existing tests:
 
 - `ano_crypto_thread_lock_tests`: basic internal lock seam smoke test.
-- `ano_crypto_csp_thread_safety_tests`: POSIX-only concurrent HMAC key import/use/destroy loop.
+- `ano_crypto_csp_thread_safety_tests`: POSIX-style concurrent HMAC key import/use/destroy loop when thread safety and pthread support are available.
 
-The concurrent test uses public synthetic HMAC fixture bytes only and must not print key material.
+P1-14 adds:
+
+- `ano_crypto_thread_safety_policy_check`: confirms the support matrix, CI checklist, lock sources, build option, test guard, evidence hook, and PoC package note are present.
+- `THREAD_SAFETY_CHECK.txt`: generated in release evidence drafts.
+- `THREAD_SAFETY_PACKAGE_NOTES.txt`: generated in customer PoC package drafts.
+
+The concurrent test uses public synthetic HMAC fixture bytes only and must not print key material, MAC output, entropy bytes, nonce bytes, DRBG state, generated DRBG bytes, private keys, tokens, or customer data.
 
 ## TODO
 
-1. Decide whether thread safety is part of the public ABI support contract or only a build configuration.
-2. Add Windows CI coverage before claiming Windows thread-safety support.
-3. Add thread sanitizer jobs where available.
-4. Review whether module init should block or reject concurrent init during self-test.
-5. Add per-context guidance to each public header.
-6. Decide if future CSP operations require per-slot locks instead of one global lock.
-7. Define behavior for concurrent destroy versus long-running cryptographic operations.
+1. Add Windows-specific concurrent CSP/HMAC coverage.
+2. Add sanitizer lanes where supported by the selected compiler/toolchain policy.
+3. Review whether module init should block, reject, or otherwise define concurrent startup races more precisely.
+4. Add per-header guidance only where wording is stable enough for a public support boundary.
+5. Decide if future CSP operations require per-slot locks instead of one global lock.
+6. Define behavior for concurrent destroy versus long-running cryptographic operations for future key types.

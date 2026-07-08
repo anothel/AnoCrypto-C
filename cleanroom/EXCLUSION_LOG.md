@@ -1,7 +1,7 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P1-13 draft
-Date: 2026-07-07
+Status: P1-14 draft
+Date: 2026-07-08
 
 ## Purpose
 
@@ -165,3 +165,13 @@ If excluded material is discovered:
 | EX-2203 | Third-party SBOM generator outputs or vendor manifests without reviewed tool/configuration provenance | Provenance/process risk | Deferred | P1-13 records SBOM placeholder status and waits for tool and schema review. |
 | EX-2204 | Treating SHA-256 manifests or placeholder SBOM/signing status as official validation evidence | Claims risk | Excluded | Manifests are engineering review aids only. |
 | EX-2205 | Detached signature files or verification instructions before signing tool, signer identity, and key-management policy are selected | Process risk | Deferred | P1-13 documents future approach without performing signing. |
+
+## P1-14 Additional Exclusions
+
+| ID | Material / Pattern | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-2301 | Third-party thread-safety support matrices, lock wrappers, concurrency test harnesses, or CI snippets with unclear ownership | Code/document provenance risk | Excluded | P1-14 docs, scripts, and workflow updates are fresh project-owned material. |
+| EX-2302 | Claiming that caller-owned hash, HMAC, or DRBG contexts are concurrently mutable | Support/claims risk | Excluded | P1-14 keeps context serialization as caller responsibility. |
+| EX-2303 | Treating POSIX concurrency smoke results as a broad platform support guarantee | Claims risk | Excluded | Current results are engineering evidence tied to specific build configuration and platform branch. |
+| EX-2304 | Thread test logs containing key material, entropy input, nonce input, DRBG state, MAC output, generated DRBG bytes, private keys, tokens, customer data, or internal deployment details | Sensitive information risk | Excluded | P1-14 log rules require status-only output. |
+| EX-2305 | Enabling POSIX concurrent CSP/HMAC smoke tests when `ANO_CRYPTO_ENABLE_THREAD_SAFETY=OFF` | Test/support risk | Excluded | P1-14 guards that test behind both the build option and pthread availability. |

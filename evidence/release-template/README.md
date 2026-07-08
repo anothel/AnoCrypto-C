@@ -26,11 +26,12 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - Signing status
 - Reproducible build notes
 - Public surface check result
+- Thread-safety policy check result
 - CI matrix result summary
 - Customer PoC package smoke log
 - Customer PoC package manifest review
 
-## P1-13 Evidence Notes
+## P1 Evidence Notes
 
 - SHA-256 and HMAC-SHA-256 processing APIs are implemented for the current P1 slice.
 - HMAC-SHA-256 can also be computed through an in-memory HMAC key handle lifecycle slice.
@@ -53,7 +54,10 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - `docs/kcmvp/SBOM_SIGNING_PLAN.md` records SBOM/signing placeholders and boundaries.
 - `docs/kcmvp/EVIDENCE_MANIFEST_POLICY.md` records manifest generation rules.
 - `docs/business/POC_PACKAGE_REVIEW_MANIFEST.md` records customer package review fields.
-- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, and `EVIDENCE_MANIFEST.sha256` for P1-13 evidence drafts.
+- `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md` records the P1-14 public thread-safety support boundary.
+- `docs/ci/THREAD_SAFETY_CI_CHECKLIST.md` records the P1-14 thread-safety CI lanes and log-review rules.
+- `tools/check_thread_safety_policy.cmake` checks thread-safety policy/evidence wiring.
+- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, and `THREAD_SAFETY_CHECK.txt` for P1-14 evidence drafts.
 
 ## Commands
 
@@ -66,8 +70,8 @@ ctest --test-dir build --output-on-failure
 Install smoke:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-13
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-13
+cmake --install build --prefix /tmp/anocrypto-c-p1-14
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-14
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -91,12 +95,14 @@ cmake --build build --target ano_crypto_collect_release_evidence
 - Replace SBOM/signing placeholder fields with reviewed generator/signing outputs when tool and key-management policies are selected.
 - Add customer PoC legal/evaluation notice after legal review.
 - Add reviewed platform CI evidence for Linux, Windows, and Apple entropy provider branches.
+- Add Windows-specific concurrent CSP/HMAC coverage.
+- Add sanitizer lanes where supported by selected compiler/toolchain policy.
 - Add archive timestamp normalization if byte-identical source archives become required.
 - Add public random-service API only after provider, reseed policy, fork-safety, and validation-boundary review.
 - Add first block cipher/mode implementation only after P1-12 scope inputs are reviewed.
 - Add differential tests only after a reviewed public/reference source or tool is selected.
 
-## P1-13 Log Review
+## P1-14 Log Review
 
 If present, review entropy/thread/helper test logs for:
 
@@ -112,4 +118,5 @@ If present, review entropy/thread/helper test logs for:
 - PoC package manifests and logs do not include secrets, customer data, or internal deployment details
 - scope-review notes do not expand the implemented algorithm boundary by implication
 - SBOM/signing status files remain clear placeholders unless reviewed generated artifacts are present
+- thread-safety check output matches the support matrix and current build option
 - evidence and package manifests use intended file paths only

@@ -18,7 +18,7 @@ Or run the script directly:
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-13 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-14 \
   -DANO_CRYPTO_RUN_CTEST=ON \
   -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
   -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -27,7 +27,7 @@ cmake \
   -P tools/collect_release_evidence.cmake
 ```
 
-P1-13 output includes source-file hashes, a source archive SHA-256, binary hashes, CTest output, public-surface check output, reproducible-build notes, scope-review notes, SBOM/signing placeholder status, an evidence manifest, install-prefix smoke logs, and optional customer PoC package smoke logs.
+P1-14 output includes source-file hashes, a source archive SHA-256, binary hashes, CTest output, public-surface check output, thread-safety policy check output, reproducible-build notes, scope-review notes, SBOM/signing placeholder status, an evidence manifest, install-prefix smoke logs, and optional customer PoC package smoke logs.
 
 ## `check_public_surface.cmake`
 
@@ -35,6 +35,14 @@ Runs local policy checks for public headers, package identity, retired naming, p
 
 ```sh
 cmake --build build --target ano_crypto_public_surface_check
+```
+
+## `check_thread_safety_policy.cmake`
+
+Runs local policy checks for the P1-14 thread-safety support matrix, CI checklist, lock source branches, CMake option, concurrent-test guard, evidence hook, and PoC package note.
+
+```sh
+cmake --build build --target ano_crypto_thread_safety_policy_check
 ```
 
 ## `create_poc_package.cmake`
@@ -45,7 +53,7 @@ Stages a customer PoC package v0 from a configured build tree.
 cmake --build build --target ano_crypto_create_poc_package
 ```
 
-The generated package contains an installed SDK prefix, the public `examples/core_poc` integration example, selected docs, a package manifest, a package review manifest, and SBOM/signing placeholder status files.
+The generated package contains an installed SDK prefix, the public `examples/core_poc` integration example, selected docs, a package manifest, a package review manifest, and SBOM/signing placeholder status files, and thread-safety package notes.
 
 ## `run_poc_package_smoke.cmake`
 

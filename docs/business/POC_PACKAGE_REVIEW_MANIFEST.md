@@ -1,6 +1,6 @@
 # Customer PoC Package Review Manifest
 
-Status: P1-13 draft.
+Status: P1-14 draft.
 
 ## Purpose
 
@@ -15,6 +15,7 @@ The PoC package should contain:
 - `PACKAGE_REVIEW_MANIFEST.md`
 - `SBOM_STATUS.txt`
 - `SIGNING_STATUS.txt`
+- `THREAD_SAFETY_PACKAGE_NOTES.txt`
 - `INSTALL_PACKAGE.log`
 - `sdk/`
 - `examples/core_poc/`
@@ -31,6 +32,7 @@ Confirm:
 - docs do not imply official validation evidence or external review completion
 - SBOM status is clearly marked as placeholder unless an actual SBOM is generated later
 - signing status is clearly marked as not performed unless detached signature files are added later
+- thread-safety package notes match `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md` and current build options
 - package contents match the intended customer PoC scope
 
 ## Customer-specific notes
@@ -43,3 +45,7 @@ Do not add customer secrets, customer certificates with private keys, production
 - Add package archive creation after handoff format is chosen.
 - Add detached signature records after signing tool and key-management policy are selected.
 - Add generated SBOM records after generator selection.
+
+## P1-14 thread-safety package note
+
+The generated package includes `THREAD_SAFETY_PACKAGE_NOTES.txt`. Review it with `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md` before customer sharing. The note must not imply concurrent mutation support for caller-owned hash, HMAC, or DRBG contexts.

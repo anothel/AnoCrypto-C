@@ -73,6 +73,14 @@ if (st != ANO_CRYPTO_OK) {
 - Destroy CSP handles when no longer needed.
 - Zeroize caller-owned buffers containing sensitive material when practical.
 
+## Thread-safety integration notes
+
+- Build with `ANO_CRYPTO_ENABLE_THREAD_SAFETY=ON` for the current intended global-state locking configuration.
+- Initialize the module once at process startup when possible.
+- Do not mutate the same hash, HMAC, or DRBG context from multiple threads. Use separate contexts or external serialization.
+- HMAC key-handle import, destroy, state query, and compute-with-key are guarded by the internal CSP lock in the current P1 slice.
+- Review `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md` before relying on any concurrency behavior in a customer PoC.
+
 ## PoC example
 
 The `examples/core_poc` project is the reference v0 customer integration smoke. It intentionally uses only public headers and the installed CMake package.
