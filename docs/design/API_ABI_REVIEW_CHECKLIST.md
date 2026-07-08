@@ -1,14 +1,14 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-10 draft.
+Status: P1-11 draft.
 
 ## Review scope
 
-This checklist covers the public C headers under `include/anocrypto/`, the CMake installed package, and the exported public symbol surface for the current engineering slice.
+This checklist covers the public C headers under `include/anocrypto/`, the CMake installed package, the exported public symbol surface, and the installed-package PoC consumer for the current engineering slice.
 
 ## Naming and package identity
 
-| Item | Expected | P1-10 status |
+| Item | Expected | P1-11 status |
 |---|---|---|
 | Product spelling | `AnoCrypto-C` | OK |
 | Repository/archive slug | `anocrypto-c` | OK |
@@ -21,7 +21,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 
 ## Header ABI checklist
 
-| Rule | P1-10 status | Notes |
+| Rule | P1-11 status | Notes |
 |---|---|---|
 | Public cryptographic contexts do not expose internal struct layout. | OK | Hash/HMAC/DRBG contexts use caller-provided opaque buffers and size APIs. |
 | Public enum values are explicit. | OK | Current public enums use fixed numeric values. |
@@ -36,7 +36,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 
 ## Per-header review notes
 
-| Header | P1-10 review note |
+| Header | P1-11 review note |
 |---|---|
 | `anocrypto.h` | Umbrella header only; no extra ABI. |
 | `ac_status.h` | Status enum values are explicit and append-only before internal error sentinel. |
@@ -53,14 +53,15 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 ## Required local checks
 
 ```sh
-cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DANO_CRYPTO_BUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Debug
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 cmake --build build --target ano_crypto_public_surface_check
-cmake --install build --prefix /tmp/anocrypto-c-p1-10
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-10
+cmake --install build --prefix /tmp/anocrypto-c-p1-11
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-11
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
+cmake --build build --target ano_crypto_poc_package_smoke
 ```
 
 On Linux, inspect exported symbols with:

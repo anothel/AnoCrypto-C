@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P1-10 draft
+Status: P1-11 draft
 Date: 2026-07-07
 
 ## Purpose
@@ -221,3 +221,20 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - The P1-10 additions are documentation, CMake/tooling, and workflow skeleton changes only.
 - Reproducibility notes are draft engineering procedures and do not claim deterministic binary output yet.
 - CI matrix output, local CTest logs, and symbol lists remain engineering evidence until reviewed.
+
+## P1-11 Customer PoC Package Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| DER-11001 | Fresh `examples/core_poc` C99 integration example written in this repository | User-owned generated source | Customer PoC smoke using installed public headers and `AnoCryptoC::AnoCryptoC` | Uses public demo bytes only; does not print key material, entropy, nonce, DRBG state, or generated DRBG bytes. |
+| DER-11002 | Fresh customer PoC package staging and smoke scripts written in this repository | User-owned generated tooling | Stage installed SDK prefix, selected docs, example, manifest, and smoke logs | Scripts generate engineering package drafts only and must be reviewed before sharing. |
+| DER-11003 | Fresh SDK integration and customer PoC package documentation written in this repository | User-owned documentation | Record package contents, integration commands, evaluation boundary, and log handling | Does not assert validation completion or broad environment suitability. |
+| DER-11004 | P1-11 CI/evidence updates written in this repository | User-owned workflow/documentation | Add build-tree example test and Linux PoC package smoke path | CI output remains engineering evidence pending review. |
+
+## P1-11 Clean-room Notes
+
+- No third-party SDK sample, package script, CMake consumer project, or customer integration template was copied.
+- The PoC example uses only public AnoCrypto-C headers and public demo bytes created for this repository.
+- The PoC example intentionally does not print raw key material, entropy input, nonce input, DRBG state, MAC bytes, or generated DRBG bytes.
+- PoC package manifests and smoke logs must be reviewed for local paths and internal details before external sharing.
+- The customer PoC package is an engineering integration draft and is not official validation evidence.

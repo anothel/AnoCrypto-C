@@ -1,14 +1,14 @@
 # AnoCrypto-C Reproducible Build Notes
 
-Status: P1-10 draft.
+Status: P1-11 draft.
 
 ## Purpose
 
-These notes define the first engineering procedure for repeatable AnoCrypto-C builds and source archives. They are a preparation checklist, not a claim that every binary is currently byte-identical across hosts.
+These notes define the first engineering procedure for repeatable AnoCrypto-C builds, source archives, installed-package smoke checks, and customer PoC package smoke checks. They are a preparation checklist, not a claim that every binary is currently byte-identical across hosts.
 
 ## Current reproducibility target
 
-P1-10 targets reproducible inputs and reviewable evidence first:
+P1-11 targets reproducible inputs and reviewable evidence first:
 
 - Clean source tree with reviewed source manifest and exclusion log.
 - Stable CMake package identity: `AnoCryptoC`, `AnoCryptoC::AnoCryptoC`, library target/file `anocrypto_c`.
@@ -18,33 +18,45 @@ P1-10 targets reproducible inputs and reviewable evidence first:
 - Binary hash list captured after local build.
 - CTest and install-smoke logs captured as status evidence.
 - Public surface policy check captured before release-candidate review.
+- Customer PoC package smoke captured as an installed-package consumer flow.
 
 ## Reference local commands
 
 ```sh
 cmake -S . -B build \
   -DANO_CRYPTO_BUILD_TESTS=ON \
+  -DANO_CRYPTO_BUILD_EXAMPLES=ON \
   -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON \
   -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON \
   -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON \
   -DANO_CRYPTO_BUILD_GIT_COMMIT=$(git rev-parse --verify HEAD) \
-  -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-10-repro-ci-abi \
+  -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-11-customer-poc-v0 \
   -DCMAKE_BUILD_TYPE=Release
 
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 cmake --build build --target ano_crypto_public_surface_check
+cmake --build build --target ano_crypto_poc_package_smoke
 cmake --build build --target ano_crypto_collect_release_evidence
 ```
 
 Install smoke can also be run manually:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-10
+cmake --install build --prefix /tmp/anocrypto-c-p1-11
 cmake -S tests/install_smoke -B build-install-smoke \
-  -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-10
+  -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-11
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
+```
+
+The PoC example can also be run manually as an installed-package consumer:
+
+```sh
+cmake -S examples/core_poc -B build-core-poc \
+  -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-11
+cmake --build build-core-poc --parallel
+./build-core-poc/anocrypto_c_core_poc
 ```
 
 Release-style exported-symbol check without internal test hooks:
@@ -60,7 +72,7 @@ cmake --build build-release --target ano_crypto_public_surface_check
 
 ## Inputs to pin before release-candidate use
 
-| Area | P1-10 rule | Status |
+| Area | P1-11 rule | Status |
 |---|---|---|
 | Source tree | Use a clean commit and record commit hash. | Required |
 | Build type | Record `CMAKE_BUILD_TYPE` or multi-config configuration. | Required |
@@ -68,6 +80,7 @@ cmake --build build-release --target ano_crypto_public_surface_check
 | Generator | Record CMake generator and platform where applicable. | TODO |
 | Options | Record all `ANO_CRYPTO_*` build options. | Required |
 | Install prefix | Use a temporary prefix and review logs for path disclosure. | Required |
+| PoC package | Generate from the configured build tree and review manifest/logs before sharing. | Required for PoC draft |
 | Archive contents | Generate sorted content list and hash list. | Required |
 | Timestamps | Normalize archive timestamps if byte-for-byte source archives become a release requirement. | TODO |
 | Binary paths | Avoid embedding local absolute paths in release binaries where toolchain permits. | TODO |
@@ -78,7 +91,7 @@ cmake --build build-release --target ano_crypto_public_surface_check
 
 ## Evidence bundle additions
 
-P1-10 evidence should include:
+P1-11 evidence should include:
 
 - `REPRODUCIBLE_BUILD_NOTES.txt`
 - `PUBLIC_SURFACE_CHECK.txt`
@@ -88,10 +101,13 @@ P1-10 evidence should include:
 - `BINARY_FILES.sha256`
 - `ctest.log`
 - `INSTALL_SMOKE_*.log`
+- `POC_PACKAGE_SMOKE.log`
+- `poc-package-smoke/POC_*` logs and `PACKAGE_MANIFEST.md`
 
 ## Review cautions
 
 - Do not include secret keys, entropy bytes, generated secret bytes, private keys, tokens, customer data, or internal deployment details in logs.
 - Treat source and binary hashes as traceability evidence only.
 - Treat local test and smoke results as engineering evidence only.
+- Review PoC package manifests before sharing externally.
 - Mark unresolved gaps as TODO instead of upgrading claims.

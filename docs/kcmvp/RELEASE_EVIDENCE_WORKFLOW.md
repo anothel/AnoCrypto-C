@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-10 draft.
+Status: P1-11 draft.
 
 ## Purpose
 
@@ -15,7 +15,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-10/
+build/evidence/p1-11/
 ```
 
 ## Expected generated files
@@ -36,6 +36,8 @@ INSTALL_SMOKE_CONFIGURE.log
 INSTALL_SMOKE_BUILD.log
 INSTALL_SMOKE_RUN.log
 INSTALL_SMOKE_SUMMARY.txt
+POC_PACKAGE_SMOKE.log
+poc-package-smoke/
 README.md
 ```
 
@@ -47,20 +49,22 @@ README.md
 - Confirm excluded categories are recorded in `cleanroom/EXCLUSION_LOG.md`.
 - Confirm claims remain limited to engineering correctness and readiness preparation.
 - Confirm platform provider logs include provider name/status only.
+- Confirm PoC package manifests and logs do not disclose local customer/internal details before sharing.
 
-## P1-10 additions
+## P1-11 additions
 
-- Reproducible-build notes are now captured in `docs/kcmvp/REPRODUCIBLE_BUILD_NOTES.md` and generated evidence as `REPRODUCIBLE_BUILD_NOTES.txt`.
-- Public surface policy checks are captured as `PUBLIC_SURFACE_CHECK.txt`.
-- CI matrix skeleton is recorded in `docs/ci/CI_MATRIX.md` and `.github/workflows/ci.yml`.
-- API/ABI review checklist is recorded in `docs/design/API_ABI_REVIEW_CHECKLIST.md`.
-- Evidence collection now records that reproducible-build procedure is draft-only and that byte-identical binaries are not claimed.
+- P1-10 reproducible-build notes, public surface checks, CI matrix skeleton, and API/ABI checklist are retained.
+- Customer PoC package v0 staging is available through `ano_crypto_create_poc_package`.
+- Customer PoC package smoke is available through `ano_crypto_poc_package_smoke`.
+- Evidence collection can run the PoC package smoke and capture `POC_PACKAGE_SMOKE.log` plus detailed logs under `poc-package-smoke/`.
+- The packaged PoC example validates installed-package lookup with `find_package(AnoCryptoC CONFIG REQUIRED)`.
 
 ## Known gaps
 
 - No SBOM generation yet.
 - No release signing evidence yet.
 - CI workflow has not yet been reviewed against all customer toolchains.
+- PoC package legal/evaluation notice remains TODO pending legal review.
 - Source archive timestamp normalization is still TODO if byte-for-byte archives become required.
 - Binary reproducibility across hosts/toolchains is still TODO.
 - No formal validation evidence.

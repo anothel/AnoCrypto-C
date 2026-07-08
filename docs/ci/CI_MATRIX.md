@@ -1,10 +1,10 @@
 # AnoCrypto-C CI Matrix Skeleton
 
-Status: P1-10 draft.
+Status: P1-11 draft.
 
 ## Purpose
 
-This matrix records the first CI coverage skeleton for build, test, public-surface checks, install-package checks, and evidence-draft generation. It should be reviewed and tightened before being used for release-candidate decisions.
+This matrix records the first CI coverage skeleton for build, test, public-surface checks, install-package checks, customer PoC package checks, and evidence-draft generation. It should be reviewed and tightened before being used for release-candidate decisions.
 
 ## Required checks
 
@@ -15,14 +15,16 @@ This matrix records the first CI coverage skeleton for build, test, public-surfa
 | Strict warnings | Required | Required | Required | MSVC uses `/W4`; GCC/Clang use warning flags from CMake. |
 | CTest unit/KAT/negative tests | Required | Required | Required | Output must remain status-only. |
 | Build-tree install smoke | Required | Required | Required | Uses linked build target. |
+| Build-tree core PoC example | Required | Required | Required | Uses public API and build-tree target. |
 | Installed-package smoke | Required | Required | Required | Uses `find_package(AnoCryptoC CONFIG REQUIRED)`. |
+| Customer PoC package smoke | Required | Optional | Optional | Stages package, configures packaged example, builds, and runs it. |
 | Public surface policy check | Required | Required | Required | Checks naming, claims boundary, headers, package template presence, and Linux exported symbols when available. |
 | Evidence draft target | Linux required | Optional | Optional | Cross-platform evidence layout still needs review. |
 | Platform entropy provider branch | Linux provider | Apple provider | Windows provider | Provider tests must not print entropy bytes. |
 
 ## Suggested matrix axes
 
-| Axis | Values | P1-10 decision |
+| Axis | Values | P1-11 decision |
 |---|---|---|
 | OS | `ubuntu-latest`, `macos-latest`, `windows-latest` | Required skeleton |
 | Build type | `Debug`, `Release` | Start with `Debug`; add `Release` before release-candidate review |
@@ -30,6 +32,7 @@ This matrix records the first CI coverage skeleton for build, test, public-surfa
 | Compiler | Default OS compiler first | GCC/Clang/MSVC expansion TODO |
 | Entropy provider | Enabled by default | Required, but logs must be status-only |
 | Thread safety | Enabled by default | Required for current global-state seam |
+| Examples | `ANO_CRYPTO_BUILD_EXAMPLES=ON` | Required for P1-11 PoC smoke |
 | Internal symbol hiding | Off for internal test-hook build; on for release-style no-test build | Add dedicated release-style lane before release-candidate review |
 
 ## Workflow skeleton
@@ -40,7 +43,8 @@ The repository includes `.github/workflows/ci.yml` as a starter workflow. It is 
 
 1. Add a second Linux compiler lane.
 2. Add a Release build lane with `ANO_CRYPTO_BUILD_TESTS=OFF` and `ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON`.
-3. Add static library smoke checks if static packaging becomes a supported deliverable.
-4. Add artifact upload only after log redaction rules are reviewed.
-5. Add SBOM/signing jobs when the release process is defined.
-6. Add ABI baseline comparison after the public ABI is frozen.
+3. Add customer PoC package smoke on macOS and Windows after path/executable lookup is reviewed.
+4. Add static library smoke checks if static packaging becomes a supported deliverable.
+5. Add artifact upload only after log redaction rules are reviewed.
+6. Add SBOM/signing jobs when the release process is defined.
+7. Add ABI baseline comparison after the public ABI is frozen.

@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-10 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-11 \
 #         -DANO_CRYPTO_RUN_CTEST=ON \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-10")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-11")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -42,6 +42,10 @@ if(NOT DEFINED ANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK)
     set(ANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK ON)
 endif()
 
+if(NOT DEFINED ANO_CRYPTO_RUN_POC_PACKAGE_SMOKE)
+    set(ANO_CRYPTO_RUN_POC_PACKAGE_SMOKE OFF)
+endif()
+
 get_filename_component(ANO_CRYPTO_SOURCE_DIR "${ANO_CRYPTO_SOURCE_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_BUILD_DIR "${ANO_CRYPTO_BUILD_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_EVIDENCE_DIR}" ABSOLUTE)
@@ -55,10 +59,14 @@ endif()
 if(NOT DEFINED ANO_CRYPTO_INSTALL_SMOKE_SOURCE_DIR)
     set(ANO_CRYPTO_INSTALL_SMOKE_SOURCE_DIR "${ANO_CRYPTO_SOURCE_DIR}/tests/install_smoke")
 endif()
+if(NOT DEFINED ANO_CRYPTO_POC_SMOKE_DIR)
+    set(ANO_CRYPTO_POC_SMOKE_DIR "${ANO_CRYPTO_EVIDENCE_DIR}/poc-package-smoke")
+endif()
 
 get_filename_component(ANO_CRYPTO_INSTALL_PREFIX "${ANO_CRYPTO_INSTALL_PREFIX}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_INSTALL_SMOKE_BUILD_DIR "${ANO_CRYPTO_INSTALL_SMOKE_BUILD_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_INSTALL_SMOKE_SOURCE_DIR "${ANO_CRYPTO_INSTALL_SMOKE_SOURCE_DIR}" ABSOLUTE)
+get_filename_component(ANO_CRYPTO_POC_SMOKE_DIR "${ANO_CRYPTO_POC_SMOKE_DIR}" ABSOLUTE)
 
 file(MAKE_DIRECTORY "${ANO_CRYPTO_EVIDENCE_DIR}")
 
@@ -120,7 +128,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
 "Git status: ${_git_status}\n"
 "CMake command: ${CMAKE_COMMAND}\n"
 "CMake version: ${CMAKE_VERSION}\n"
-"Reproducible build status: P1-10 draft procedure; binary byte identity not claimed\n"
+"Reproducible build status: P1-11 draft procedure; binary byte identity not claimed\n"
 "Evidence status: engineering draft only\n"
 "Claims boundary: not official validation evidence\n")
 
@@ -238,7 +246,7 @@ endif()
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "AnoCrypto-C reproducible build evidence notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-10 draft procedure; binary byte identity is not claimed.\n"
+    "Status: P1-11 draft procedure; binary byte identity is not claimed.\n"
     "Source directory: ${ANO_CRYPTO_SOURCE_DIR}\n"
     "Build directory: ${ANO_CRYPTO_BUILD_DIR}\n"
     "Source archive content list: SOURCE_ARCHIVE_CONTENTS.txt\n"
@@ -337,6 +345,33 @@ else()
         "Install smoke was not requested. Set ANO_CRYPTO_RUN_INSTALL_SMOKE=ON to capture installed-package smoke output.\n")
 endif()
 
+if(ANO_CRYPTO_RUN_POC_PACKAGE_SMOKE)
+    if(NOT EXISTS "${ANO_CRYPTO_SOURCE_DIR}/tools/run_poc_package_smoke.cmake")
+        message(FATAL_ERROR "PoC package smoke script is missing: ${ANO_CRYPTO_SOURCE_DIR}/tools/run_poc_package_smoke.cmake")
+    endif()
+
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+            -DANO_CRYPTO_POC_SMOKE_DIR=${ANO_CRYPTO_POC_SMOKE_DIR}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/run_poc_package_smoke.cmake"
+        RESULT_VARIABLE _poc_smoke_result
+        OUTPUT_VARIABLE _poc_smoke_stdout
+        ERROR_VARIABLE _poc_smoke_stderr)
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/POC_PACKAGE_SMOKE.log"
+        "# Run customer PoC package smoke\n"
+        "# Result: ${_poc_smoke_result}\n\n"
+        "${_poc_smoke_stdout}${_poc_smoke_stderr}")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "PoC package smoke result: ${_poc_smoke_result}\n")
+    if(NOT _poc_smoke_result EQUAL 0)
+        message(FATAL_ERROR "PoC package smoke failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/POC_PACKAGE_SMOKE.log")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/POC_PACKAGE_SMOKE.log"
+        "PoC package smoke was not requested. Set ANO_CRYPTO_RUN_POC_PACKAGE_SMOKE=ON to capture customer PoC package smoke output.\n")
+endif()
+
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "# anocrypto-c Evidence Draft\n\n"
 "Generated: ${ANO_CRYPTO_EVIDENCE_UTC}\n\n"
@@ -354,10 +389,13 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `ctest.log`: captured CTest output when requested.\n"
 "- `INSTALL_SMOKE_*.log`: installed-package configure/build/run logs when requested.\n"
 "- `INSTALL_SMOKE_SUMMARY.txt`: install smoke paths and result when requested.\n"
+"- `POC_PACKAGE_SMOKE.log`: customer PoC package creation/configure/build/run summary when requested.\n"
+"- `poc-package-smoke/`: detailed PoC package smoke logs and staged package when requested.\n"
 "- Platform entropy provider status appears in `ctest.log` when the provider test output is shown by CTest.\n\n"
 "## Review before release-candidate use\n\n"
 "- Confirm source archive contents match the intended release scope.\n"
-"- Confirm install smoke paths do not disclose internal deployment details before sharing.\n"
+"- Confirm install smoke and PoC package smoke paths do not disclose internal deployment details before sharing.\n"
+"- Confirm PoC package examples and manifests do not contain secrets, entropy bytes, generated secret bytes, private keys, tokens, or customer data.\n"
 "- Add SBOM/signing status when available.\n"
 "- Confirm reproducibility gaps are marked as TODO instead of stronger claims.\n"
 "- Confirm no secrets, entropy bytes, generated secret bytes, private keys, tokens, or internal deployment details are present.\n"

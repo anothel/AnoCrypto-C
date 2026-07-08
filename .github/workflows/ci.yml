@@ -23,11 +23,12 @@ jobs:
         run: >
           cmake -S . -B build
           -DANO_CRYPTO_BUILD_TESTS=ON
+          -DANO_CRYPTO_BUILD_EXAMPLES=ON
           -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-10-repro-ci-abi
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-11-customer-poc-v0
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -56,6 +57,10 @@ jobs:
         if: runner.os == 'Windows'
         run: .\\build-install-smoke\\${{ matrix.build_type }}\\anocrypto_c_install_smoke.exe
 
+      - name: PoC package smoke on Linux
+        if: runner.os == 'Linux'
+        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_poc_package_smoke
+
   evidence-draft:
     name: Linux evidence draft
     runs-on: ubuntu-latest
@@ -68,9 +73,10 @@ jobs:
         run: >
           cmake -S . -B build
           -DANO_CRYPTO_BUILD_TESTS=ON
+          -DANO_CRYPTO_BUILD_EXAMPLES=ON
           -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-10-repro-ci-abi
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-11-customer-poc-v0
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build

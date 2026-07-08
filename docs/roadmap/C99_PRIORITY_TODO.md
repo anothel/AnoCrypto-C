@@ -1,6 +1,6 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-10 draft.
+Status: P1-11 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -37,18 +37,25 @@ Status: P1-10 draft.
 - API/ABI review checklist
 - public surface policy check target
 - P1-10 evidence workflow additions for reproducibility and public surface review
+- customer PoC package v0 staging target
+- standalone public-API core PoC example using `find_package(AnoCryptoC)`
+- build-tree and installed-package PoC smoke flows
+- P1-11 evidence workflow additions for PoC package smoke logs
+- SDK integration guide and customer PoC package notes
 
 ## Immediate P1 next items
 
-1. Review and harden CI matrix after first hosted runs on Linux, Windows, and Apple runners.
-2. Expand thread-safety policy into reviewed public support matrix and CI coverage.
-3. Add side-channel review checklist for key-dependent code paths.
-4. Add SBOM/signing placeholders to the evidence workflow.
-5. Decide SHA-384/SHA-512 implementation timing.
-6. Decide whether and when to expose public `ano_crypto_random_*` APIs.
-7. Add reproducible source archive timestamp normalization if byte-for-byte archives become a release requirement.
-8. Decide whether to replace the public build identity struct with field getters before ABI freeze.
-9. Add exported-symbol baseline comparison after symbol visibility policy is chosen.
+1. Add side-channel review checklist for key-dependent code paths.
+2. Add SBOM/signing placeholders to the evidence workflow and PoC package manifest.
+3. Review and harden CI matrix after first hosted runs on Linux, Windows, and Apple runners.
+4. Expand thread-safety policy into reviewed public support matrix and CI coverage.
+5. Add customer PoC intake questionnaire for OS, CPU, compiler, linker, deployment model, and algorithm scope.
+6. Decide SHA-384/SHA-512 implementation timing.
+7. Decide whether and when to expose public `ano_crypto_random_*` APIs.
+8. Add reproducible source archive timestamp normalization if byte-for-byte archives become a release requirement.
+9. Decide whether to replace the public build identity struct with field getters before ABI freeze.
+10. Add exported-symbol baseline comparison after symbol visibility policy is chosen.
+11. Add package license/evaluation notice after legal review.
 
 ## P2 candidates
 

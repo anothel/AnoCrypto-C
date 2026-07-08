@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-10 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal platform entropy provider seam, internal DRBG instantiate/reseed helper, HMAC_DRBG boundary vectors, CMake package naming normalization, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, limited internal global-state locking, reproducible-build notes, CI matrix skeleton, API/ABI review checklist, public-surface policy check, and release-evidence draft tooling.
+Current status: P1-11 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal platform entropy provider seam, internal DRBG instantiate/reseed helper, HMAC_DRBG boundary vectors, CMake package naming normalization, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, limited internal global-state locking, reproducible-build notes, CI matrix skeleton, API/ABI review checklist, public-surface policy check, release-evidence draft tooling, and customer PoC package v0 skeleton.
 
 Implemented processing scope:
 
@@ -15,11 +15,12 @@ Implemented processing scope:
 - Extended KAT executables for SHA-256, HMAC-SHA-256, HMAC key handle path, and HMAC_DRBG-SHA-256 public vectors
 - Negative API tests for hash/HMAC/DRBG/CSP/key argument handling, context lifecycle behavior, handle exhaustion, stale handle rejection, and DRBG helper failure cleanup
 - Internal entropy adapter seam with callback and platform OS provider tests
-- Release evidence draft collection with source archive hash, public-surface check, reproducible-build notes, and install smoke logs
+- Release evidence draft collection with source archive hash, public-surface check, reproducible-build notes, install smoke logs, and PoC package smoke logs
 - Limited internal locking for module/self-test/CSP global state
 - CI matrix skeleton for Linux, macOS, and Windows build/test/install-smoke paths
 - API/ABI review checklist for public headers, package identity, and symbol-surface TODOs
 - Release-style internal symbol hiding option for supported compilers
+- Customer PoC package v0 staging and standalone public-API example smoke
 
 Skeleton-only / TODO scope:
 
@@ -31,6 +32,7 @@ Skeleton-only / TODO scope:
 - Public per-context concurrency guarantees and reviewed platform CI coverage
 - Byte-identical source archive and binary reproducibility rules
 - SBOM/signing workflow
+- PoC package legal/evaluation notice and customer-specific support boundary
 
 ## Build
 
@@ -43,11 +45,48 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-10
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-10
+cmake --install build --prefix /tmp/anocrypto-c-p1-11
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-11
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
+
+## Core PoC example
+
+Build the example from the build tree:
+
+```sh
+cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DANO_CRYPTO_BUILD_EXAMPLES=ON
+cmake --build build
+./build/examples/core_poc/anocrypto_c_core_poc
+```
+
+Build the example as an installed-package consumer:
+
+```sh
+cmake --install build --prefix /tmp/anocrypto-c-p1-11
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-11
+cmake --build build-core-poc
+./build-core-poc/anocrypto_c_core_poc
+```
+
+The example prints status-only success messages. It does not print raw key material, entropy input, nonce input, DRBG state, or generated DRBG bytes.
+
+## Customer PoC package v0
+
+Create a local package draft:
+
+```sh
+cmake --build build --target ano_crypto_create_poc_package
+```
+
+Run the package smoke flow:
+
+```sh
+cmake --build build --target ano_crypto_poc_package_smoke
+```
+
+The package smoke target stages an installed SDK prefix, configures the packaged `examples/core_poc` project with `find_package(AnoCryptoC)`, builds it, and runs it.
 
 ## Evidence draft collection
 
@@ -57,33 +96,18 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_SURFACE_CHECK.txt`, `REPRODUCIBLE_BUILD_NOTES.txt`, `ctest.log`, and installed-package smoke logs when the default P1-10 target is used.
+Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_SURFACE_CHECK.txt`, `REPRODUCIBLE_BUILD_NOTES.txt`, `ctest.log`, installed-package smoke logs, and PoC package smoke logs when the default P1-11 target is used.
 
-## P1-10 scope
+## P1-11 scope
 
-- Fresh C99 SHA-256 implementation retained from P1-1
-- Fresh C99 HMAC-SHA-256 implementation retained from P1-1
-- Fresh C99 HMAC_DRBG-SHA-256 deterministic core implementation retained from P1-3
-- Internal entropy adapter seam and HMAC key handle lifecycle retained from P1-4
-- Internal platform entropy provider seam retained from P1-7
-- Internal HMAC_DRBG-SHA-256 instantiate/reseed helper added for future random-service review
-- HMAC_DRBG-SHA-256 boundary vectors for personalization, additional input, reseed-after-generate, max request, and oversized request rejection
-- CMake package naming normalized to `AnoCryptoC` / `AnoCryptoC::AnoCryptoC` while keeping the library file name `anocrypto_c` and include root `include/anocrypto/`
-- Public-source KAT fixtures recorded in `cleanroom/SOURCE_MANIFEST.md`
-- Extended public KAT coverage for SHA-256 long-message/million-`a` vectors and RFC 4231 HMAC-SHA-256 cases
-- HMAC key handle KAT path using RFC 4231 Test Case 2 through the CSP handle lifecycle
-- HMAC_DRBG-SHA-256 public vector flow covering instantiate, reseed, and two generate calls
-- Chunk-boundary API consistency tests for one-shot versus streaming behavior
-- Startup self-test includes SHA-256, HMAC-SHA-256, and HMAC_DRBG-SHA-256 paths
-- CSP handle table exhaustion and stale-handle reuse tests
-- Limited module/self-test/CSP global-state lock seam and POSIX concurrent CSP/HMAC test
-- Platform entropy provider smoke test that records provider name/status only, not entropy bytes
-- Source archive SHA-256 and install smoke log capture in the evidence script
-- Reproducible-build notes and evidence fields added for P1-10
-- CI matrix skeleton added for Linux, macOS, and Windows
-- API/ABI review checklist added, including the current public build-identity struct TODO
-- Public surface policy check target added for naming, header, package, claims-boundary, and Linux exported-symbol scans
-- `ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS` added for release-style builds on supported compilers; internal test-hook builds keep internals linkable for internal-unit tests
+- P1-10 reproducible build notes, CI matrix skeleton, API/ABI checklist, public-surface checks, and symbol-hiding option retained
+- Customer PoC package v0 staging target added
+- Standalone public-API `examples/core_poc` consumer added
+- Build-tree CTest coverage added for the core PoC example
+- Installed-package PoC smoke target added
+- Evidence workflow extended with PoC package smoke logs
+- Integration guide and customer PoC package notes added
+- Clean-room source manifest and exclusion log updated for packaging/example additions
 
 ## Important limitations
 
@@ -99,4 +123,5 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_
 - Public build identity still exposes one versioned struct layout; field getters should be considered before ABI freeze.
 - Binary reproducibility across hosts/toolchains is not established yet.
 - Internal test-hook builds may expose internal symbols for internal-unit tests; release-style no-test builds should enable symbol hiding where supported.
+- Customer PoC package v0 is an integration draft and still needs legal/evaluation notice review before external sharing.
 - This repository does not claim official validation or external review completion.

@@ -1,6 +1,6 @@
 # C99 Hash and HMAC API Design
 
-Status: P1-10 draft.
+Status: P1-11 draft.
 
 ## Implemented P1 scope
 

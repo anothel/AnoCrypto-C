@@ -9,6 +9,7 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
 option(ANO_CRYPTO_BUILD_TESTS "Build AnoCrypto-C unit and smoke tests" ON)
+option(ANO_CRYPTO_BUILD_EXAMPLES "Build AnoCrypto-C example programs" ON)
 option(ANO_CRYPTO_ENABLE_STRICT_WARNINGS "Enable strict compiler warnings" ON)
 option(ANO_CRYPTO_ENABLE_TEST_HOOKS "Enable internal test-only hooks" ${ANO_CRYPTO_BUILD_TESTS})
 option(ANO_CRYPTO_ENABLE_THREAD_SAFETY "Enable internal locks for module/self-test/CSP global state" ON)
@@ -35,7 +36,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-10-repro-ci-abi" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-11-customer-poc-v0" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -145,6 +146,30 @@ add_custom_target(ano_crypto_public_surface_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_public_surface.cmake
     USES_TERMINAL
     COMMENT "Checking AnoCrypto-C public surface and repository policy")
+
+if(ANO_CRYPTO_BUILD_EXAMPLES)
+    add_subdirectory(examples/core_poc)
+endif()
+
+add_custom_target(ano_crypto_create_poc_package
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_POC_PACKAGE_DIR=${CMAKE_CURRENT_BINARY_DIR}/poc-package/AnoCrypto-C-PoC-v0
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/create_poc_package.cmake
+    DEPENDS anocrypto_c
+    USES_TERMINAL
+    COMMENT "Creating AnoCrypto-C customer PoC package v0 draft")
+
+add_custom_target(ano_crypto_poc_package_smoke
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_POC_SMOKE_DIR=${CMAKE_CURRENT_BINARY_DIR}/poc-package-smoke
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_poc_package_smoke.cmake
+    DEPENDS anocrypto_c
+    USES_TERMINAL
+    COMMENT "Running AnoCrypto-C customer PoC package smoke")
 
 install(TARGETS anocrypto_c
     EXPORT AnoCryptoCTargets
@@ -286,18 +311,23 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
     add_test(NAME ano_crypto_install_smoke_buildtree COMMAND ano_crypto_install_smoke_buildtree)
 
+    if(TARGET anocrypto_c_core_poc)
+        add_test(NAME ano_crypto_poc_example_buildtree COMMAND anocrypto_c_core_poc)
+    endif()
+
     add_custom_target(ano_crypto_collect_release_evidence
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-10
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-11
             -DANO_CRYPTO_RUN_CTEST=ON
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
             -DANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON
+            -DANO_CRYPTO_RUN_POC_PACKAGE_SMOKE=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-10 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-11 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_public_surface_check
         anocrypto_c
@@ -317,6 +347,10 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_drbg_entropy_helper_tests
         ano_crypto_thread_lock_tests
         ano_crypto_install_smoke_buildtree)
+
+    if(TARGET anocrypto_c_core_poc)
+        add_dependencies(ano_crypto_collect_release_evidence anocrypto_c_core_poc)
+    endif()
 
     if(TARGET ano_crypto_csp_thread_safety_tests)
         add_dependencies(ano_crypto_collect_release_evidence ano_crypto_csp_thread_safety_tests)

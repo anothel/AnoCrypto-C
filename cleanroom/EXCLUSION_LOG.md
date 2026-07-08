@@ -1,6 +1,6 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P1-10 draft
+Status: P1-11 draft
 Date: 2026-07-07
 
 ## Purpose
@@ -134,3 +134,13 @@ If excluded material is discovered:
 | EX-1903 | Treating exported symbol lists, CTest output, or install smoke logs as formal validation evidence | Claims risk | Excluded | These remain local engineering evidence pending external process review. |
 | EX-1904 | Logs containing secret keys, entropy bytes, DRBG seeds, generated secret bytes, private keys, tokens, customer data, or internal deployment details | Sensitive information risk | Excluded | P1-10 evidence review keeps logs status-only and redacts before sharing. |
 | EX-1905 | Public header changes that expose cryptographic context internals or freeze unreviewed struct layouts | ABI risk | Deferred or blocked | Public context internals remain hidden; the build identity struct remains a tracked TODO before public ABI freeze. |
+
+## P1-11 Additional Exclusions
+
+| ID | Material / Pattern | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-2001 | Third-party SDK integration samples, package scripts, CMake consumer templates, or vendor packaging workflows with unclear ownership | Code provenance risk | Excluded | P1-11 PoC package scripts and example are fresh C99/CMake files written in this repository. |
+| EX-2002 | PoC packages containing secrets, entropy captures, generated secret bytes, private keys, tokens, customer data, or internal deployment details | Sensitive information risk | Excluded | P1-11 package smoke and manifest are status/package-structure evidence only and must be reviewed before sharing. |
+| EX-2003 | Treating a customer PoC package smoke run as official validation evidence or broad environment suitability proof | Claims risk | Excluded | The package smoke only checks local installed-package integration and public-API smoke behavior. |
+| EX-2004 | Public random-service API commitment through the PoC package before provider/reseed/fork-safety/API review | API/support risk | Deferred | The PoC example uses explicit-entropy HMAC_DRBG flow only and does not expose new public random APIs. |
+| EX-2005 | Legal/evaluation license language without review | Legal/process risk | Deferred | Package notice text remains TODO pending legal review. |

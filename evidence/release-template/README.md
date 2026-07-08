@@ -23,13 +23,15 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - Reproducible build notes
 - Public surface check result
 - CI matrix result summary
+- Customer PoC package smoke log
+- Customer PoC package manifest review
 
-## P1-10 Evidence Notes
+## P1-11 Evidence Notes
 
 - SHA-256 and HMAC-SHA-256 processing APIs are implemented for the current P1 slice.
 - HMAC-SHA-256 can also be computed through an in-memory HMAC key handle lifecycle slice.
 - HMAC_DRBG-SHA-256 deterministic core APIs are implemented for the current P1 slice.
-- P1-10 adds internal HMAC_DRBG-SHA-256 instantiate/reseed helpers that draw entropy and nonce bytes through the entropy-source seam.
+- The internal HMAC_DRBG-SHA-256 instantiate/reseed helper from the prior P1 slice remains covered by unit tests.
 - Extended KAT tests cover public SHA-256 vectors, RFC 4231 HMAC-SHA-256 cases, the HMAC key handle path, and a public HMAC_DRBG-SHA-256 flow.
 - Deterministic chunk-boundary tests cover one-shot versus streaming API consistency.
 - `tests/negative/crypto_service_gate_tests.c` verifies that cryptographic services are rejected before module initialization and startup self-test success.
@@ -43,11 +45,14 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - `tools/collect_release_evidence.cmake` creates a local engineering evidence draft from a build tree and can capture source archive SHA-256, public surface check output, reproducible-build notes, and installed-package smoke logs.
 - `docs/kcmvp/REPRODUCIBLE_BUILD_NOTES.md` records the current repeatable-build procedure and unresolved gaps.
 - `docs/design/API_ABI_REVIEW_CHECKLIST.md` records the current public header and symbol-surface review checklist.
+- `examples/core_poc` records the current public-API customer PoC integration smoke.
+- `tools/create_poc_package.cmake` stages the customer PoC package v0 draft.
+- `tools/run_poc_package_smoke.cmake` configures, builds, and runs the packaged example as an installed-package consumer.
 
 ## Commands
 
 ```sh
-cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DANO_CRYPTO_BUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Debug
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 ```
@@ -55,10 +60,16 @@ ctest --test-dir build --output-on-failure
 Install smoke:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-10
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-10
+cmake --install build --prefix /tmp/anocrypto-c-p1-11
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-11
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
+```
+
+Customer PoC package smoke:
+
+```sh
+cmake --build build --target ano_crypto_poc_package_smoke
 ```
 
 Evidence draft:
@@ -72,11 +83,12 @@ cmake --build build --target ano_crypto_collect_release_evidence
 - Add KAT vector local-copy hash policy when vectors are stored as separate data files.
 - Add CI-produced evidence bundle layout after workflow review.
 - Add SBOM and signing evidence fields.
+- Add customer PoC legal/evaluation notice after legal review.
 - Add reviewed platform CI evidence for Linux, Windows, and Apple entropy provider branches.
 - Add archive timestamp normalization if byte-identical source archives become required.
 - Add public random-service API only after provider, reseed policy, fork-safety, and validation-boundary review.
 
-## P1-10 Log Review
+## P1-11 Log Review
 
 If present, review entropy/thread/helper test logs for:
 
@@ -89,3 +101,4 @@ If present, review entropy/thread/helper test logs for:
 - provider logs include provider name/status only and no entropy bytes
 - public surface check is PASS or has documented TODO-only warnings
 - reproducibility gaps remain marked as TODO
+- PoC package manifests and logs do not include secrets, customer data, or internal deployment details
