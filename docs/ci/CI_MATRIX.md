@@ -1,6 +1,6 @@
 # AnoCrypto-C CI Matrix Skeleton
 
-Status: P1-11 draft.
+Status: P1-12 draft.
 
 ## Purpose
 
@@ -24,7 +24,7 @@ This matrix records the first CI coverage skeleton for build, test, public-surfa
 
 ## Suggested matrix axes
 
-| Axis | Values | P1-11 decision |
+| Axis | Values | P1-12 decision |
 |---|---|---|
 | OS | `ubuntu-latest`, `macos-latest`, `windows-latest` | Required skeleton |
 | Build type | `Debug`, `Release` | Start with `Debug`; add `Release` before release-candidate review |
@@ -32,7 +32,7 @@ This matrix records the first CI coverage skeleton for build, test, public-surfa
 | Compiler | Default OS compiler first | GCC/Clang/MSVC expansion TODO |
 | Entropy provider | Enabled by default | Required, but logs must be status-only |
 | Thread safety | Enabled by default | Required for current global-state seam |
-| Examples | `ANO_CRYPTO_BUILD_EXAMPLES=ON` | Required for P1-11 PoC smoke |
+| Examples | `ANO_CRYPTO_BUILD_EXAMPLES=ON` | Required for P1-12 PoC smoke |
 | Internal symbol hiding | Off for internal test-hook build; on for release-style no-test build | Add dedicated release-style lane before release-candidate review |
 
 ## Workflow skeleton

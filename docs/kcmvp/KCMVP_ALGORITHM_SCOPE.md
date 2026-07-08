@@ -1,6 +1,6 @@
 # AnoCrypto-C Algorithm Scope
 
-Status: P1-11 draft.
+Status: P1-12 draft.
 
 ## Implemented candidate slice
 
@@ -46,3 +46,11 @@ KAT and CTest pass logs are engineering correctness evidence only. They do not r
 - Public random service and validation-boundary mapping remain TODO.
 - These additions are not formal validation evidence.
 - Release evidence tooling captures source archive SHA-256 and installed-package smoke logs as engineering evidence inputs.
+
+## P1-12 Scope-lock Notes
+
+- `docs/kcmvp/SERVICE_SCOPE_MATRIX.md` is now the service-level planning companion to this algorithm scope file.
+- `docs/kcmvp/DIFFERENTIAL_VALIDATION_STRATEGY.md` records allowed comparison inputs and logging limits before adding differential tests.
+- `docs/design/BLOCK_CIPHER_MODE_SELECTION.md` records why block cipher/mode implementation remains deferred until customer and validation-target candidate inputs are reviewed.
+- `docs/security/SIDE_CHANNEL_REVIEW_CHECKLIST.md` records review questions for key-dependent code paths.
+- P1-12 does not add a new algorithm implementation or a new public cryptographic API.

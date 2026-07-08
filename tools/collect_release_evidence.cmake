@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-11 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-12 \
 #         -DANO_CRYPTO_RUN_CTEST=ON \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-11")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-12")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -128,7 +128,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
 "Git status: ${_git_status}\n"
 "CMake command: ${CMAKE_COMMAND}\n"
 "CMake version: ${CMAKE_VERSION}\n"
-"Reproducible build status: P1-11 draft procedure; binary byte identity not claimed\n"
+"Reproducible build status: P1-12 draft procedure; binary byte identity not claimed\n"
 "Evidence status: engineering draft only\n"
 "Claims boundary: not official validation evidence\n")
 
@@ -246,7 +246,7 @@ endif()
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "AnoCrypto-C reproducible build evidence notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-11 draft procedure; binary byte identity is not claimed.\n"
+    "Status: P1-12 draft procedure; binary byte identity is not claimed.\n"
     "Source directory: ${ANO_CRYPTO_SOURCE_DIR}\n"
     "Build directory: ${ANO_CRYPTO_BUILD_DIR}\n"
     "Source archive content list: SOURCE_ARCHIVE_CONTENTS.txt\n"
@@ -255,6 +255,22 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "Public surface check: PUBLIC_SURFACE_CHECK.txt\n"
     "TODO: normalize archive timestamps if byte-for-byte source archives become a release requirement.\n"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
+
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
+    "AnoCrypto-C P1-12 scope-review notes\n"
+    "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
+    "Status: engineering planning artifact; no new cryptographic algorithm implementation is added by P1-12.\n"
+    "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
+    "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
+    "Differential validation strategy: docs/kcmvp/DIFFERENTIAL_VALIDATION_STRATEGY.md\n"
+    "Block cipher/mode selection gate: docs/design/BLOCK_CIPHER_MODE_SELECTION.md\n"
+    "Side-channel review checklist: docs/security/SIDE_CHANNEL_REVIEW_CHECKLIST.md\n"
+    "Customer PoC intake questionnaire: docs/business/CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md\n"
+    "Current implemented algorithm slice remains SHA-256, HMAC-SHA-256, and HMAC_DRBG-SHA-256.\n"
+    "Block cipher/mode implementation remains deferred until customer and validation-target candidate inputs are reviewed.\n"
+    "Differential tests remain deferred until a reviewed public/reference source or tool is selected.\n"
+    "Do not include secrets, entropy bytes, generated secret bytes, private keys, tokens, customer data, or internal deployment details in scope evidence.\n")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Scope review notes: SCOPE_REVIEW_NOTES.txt\n")
 
 if(ANO_CRYPTO_RUN_CTEST)
     find_program(_ctest_exe ctest)

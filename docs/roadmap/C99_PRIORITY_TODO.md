@@ -1,6 +1,6 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-11 draft.
+Status: P1-12 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -42,24 +42,31 @@ Status: P1-11 draft.
 - build-tree and installed-package PoC smoke flows
 - P1-11 evidence workflow additions for PoC package smoke logs
 - SDK integration guide and customer PoC package notes
+- P1-12 development workflow plan
+- P1-12 service scope matrix
+- P1-12 differential validation strategy draft
+- P1-12 block cipher/mode selection gate
+- P1-12 side-channel review checklist
+- P1-12 customer PoC intake questionnaire
+- P1-12 evidence workflow additions for scope-review notes
 
 ## Immediate P1 next items
 
-1. Add side-channel review checklist for key-dependent code paths.
-2. Add SBOM/signing placeholders to the evidence workflow and PoC package manifest.
-3. Review and harden CI matrix after first hosted runs on Linux, Windows, and Apple runners.
-4. Expand thread-safety policy into reviewed public support matrix and CI coverage.
-5. Add customer PoC intake questionnaire for OS, CPU, compiler, linker, deployment model, and algorithm scope.
-6. Decide SHA-384/SHA-512 implementation timing.
-7. Decide whether and when to expose public `ano_crypto_random_*` APIs.
-8. Add reproducible source archive timestamp normalization if byte-for-byte archives become a release requirement.
-9. Decide whether to replace the public build identity struct with field getters before ABI freeze.
-10. Add exported-symbol baseline comparison after symbol visibility policy is chosen.
-11. Add package license/evaluation notice after legal review.
+1. Add SBOM/signing placeholders to the evidence workflow and PoC package manifest.
+2. Review and harden CI matrix after first hosted runs on Linux, Windows, and Apple runners.
+3. Expand thread-safety policy into reviewed public support matrix and CI coverage.
+4. Decide SHA-384/SHA-512 implementation timing.
+5. Decide whether and when to expose public `ano_crypto_random_*` APIs.
+6. Add reproducible source archive timestamp normalization if byte-for-byte archives become a release requirement.
+7. Decide whether to replace the public build identity struct with field getters before ABI freeze.
+8. Add exported-symbol baseline comparison after symbol visibility policy is chosen.
+9. Add package license/evaluation notice after legal review.
+10. Select first block cipher/mode only after customer and validation-target candidate inputs are reviewed.
+11. Add differential tests only after a reviewed public/reference source or tool is selected.
 
 ## P2 candidates
 
-- Block cipher/mode scope selection based on customer and validation-target requirements.
+- Block cipher/mode implementation based on reviewed customer and validation-target requirements.
 - KDF/MAC expansion.
 - Public-key primitive planning.
 - AnoCrypto C++ Wrapper boundary draft.

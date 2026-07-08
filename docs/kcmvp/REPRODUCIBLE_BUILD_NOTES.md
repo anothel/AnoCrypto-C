@@ -1,6 +1,6 @@
 # AnoCrypto-C Reproducible Build Notes
 
-Status: P1-11 draft.
+Status: P1-12 draft.
 
 ## Purpose
 
@@ -8,7 +8,7 @@ These notes define the first engineering procedure for repeatable AnoCrypto-C bu
 
 ## Current reproducibility target
 
-P1-11 targets reproducible inputs and reviewable evidence first:
+P1-12 targets reproducible inputs and reviewable evidence first:
 
 - Clean source tree with reviewed source manifest and exclusion log.
 - Stable CMake package identity: `AnoCryptoC`, `AnoCryptoC::AnoCryptoC`, library target/file `anocrypto_c`.
@@ -30,7 +30,7 @@ cmake -S . -B build \
   -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON \
   -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON \
   -DANO_CRYPTO_BUILD_GIT_COMMIT=$(git rev-parse --verify HEAD) \
-  -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-11-customer-poc-v0 \
+  -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-12-scope-validation-plan \
   -DCMAKE_BUILD_TYPE=Release
 
 cmake --build build --parallel
@@ -43,9 +43,9 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Install smoke can also be run manually:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-11
+cmake --install build --prefix /tmp/anocrypto-c-p1-12
 cmake -S tests/install_smoke -B build-install-smoke \
-  -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-11
+  -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-12
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -54,7 +54,7 @@ The PoC example can also be run manually as an installed-package consumer:
 
 ```sh
 cmake -S examples/core_poc -B build-core-poc \
-  -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-11
+  -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-12
 cmake --build build-core-poc --parallel
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -72,7 +72,7 @@ cmake --build build-release --target ano_crypto_public_surface_check
 
 ## Inputs to pin before release-candidate use
 
-| Area | P1-11 rule | Status |
+| Area | P1-12 rule | Status |
 |---|---|---|
 | Source tree | Use a clean commit and record commit hash. | Required |
 | Build type | Record `CMAKE_BUILD_TYPE` or multi-config configuration. | Required |
@@ -91,7 +91,7 @@ cmake --build build-release --target ano_crypto_public_surface_check
 
 ## Evidence bundle additions
 
-P1-11 evidence should include:
+P1-12 evidence should include:
 
 - `REPRODUCIBLE_BUILD_NOTES.txt`
 - `PUBLIC_SURFACE_CHECK.txt`

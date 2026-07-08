@@ -11,8 +11,8 @@ extern "C" {
 #define ANO_CRYPTO_VERSION_MAJOR 0u
 #define ANO_CRYPTO_VERSION_MINOR 1u
 #define ANO_CRYPTO_VERSION_PATCH 0u
-#define ANO_CRYPTO_VERSION_PRERELEASE "p1-11-customer-poc-v0"
-#define ANO_CRYPTO_VERSION_STRING "0.1.0-p1-11-customer-poc-v0"
+#define ANO_CRYPTO_VERSION_PRERELEASE "p1-12-scope-validation-plan"
+#define ANO_CRYPTO_VERSION_STRING "0.1.0-p1-12-scope-validation-plan"
 
 /*
  * Version query APIs are allowed in all module states, including error state.

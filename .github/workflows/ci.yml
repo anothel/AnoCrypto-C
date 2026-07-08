@@ -28,7 +28,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-11-customer-poc-v0
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-12-scope-validation-plan
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -76,7 +76,7 @@ jobs:
           -DANO_CRYPTO_BUILD_EXAMPLES=ON
           -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-11-customer-poc-v0
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-12-scope-validation-plan
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build

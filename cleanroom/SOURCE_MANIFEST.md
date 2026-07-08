@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P1-11 draft
+Status: P1-12 draft
 Date: 2026-07-07
 
 ## Purpose
@@ -238,3 +238,23 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - The PoC example intentionally does not print raw key material, entropy input, nonce input, DRBG state, MAC bytes, or generated DRBG bytes.
 - PoC package manifests and smoke logs must be reviewed for local paths and internal details before external sharing.
 - The customer PoC package is an engineering integration draft and is not official validation evidence.
+
+## P1-12 Scope and Validation Planning Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| DER-12001 | Fresh `docs/roadmap/DEVELOPMENT_WORKFLOW.md` written in this repository | User-owned documentation | Record task flow, phase gates, stop conditions, and planned sequence | Planning document only; no external workflow copied. |
+| DER-12002 | Fresh `docs/kcmvp/SERVICE_SCOPE_MATRIX.md` written in this repository | User-owned documentation | Separate implemented services, ABI-reserved services, internal seams, and deferred product-layer features | Does not assert official validation status. |
+| DER-12003 | Fresh `docs/kcmvp/DIFFERENTIAL_VALIDATION_STRATEGY.md` written in this repository | User-owned documentation | Record allowed comparison inputs, generated vector rules, and logging limits | No third-party reference tool is selected yet. |
+| DER-12004 | Fresh `docs/design/BLOCK_CIPHER_MODE_SELECTION.md` written in this repository | User-owned documentation | Gate block cipher/mode implementation behind customer and validation-target scope review | No block cipher code or third-party implementation imported. |
+| DER-12005 | Fresh `docs/security/SIDE_CHANNEL_REVIEW_CHECKLIST.md` written in this repository | User-owned documentation | Add a review checklist for key-dependent code paths | Checklist is a review aid only; it does not claim leakage-resistance proof. |
+| DER-12006 | Fresh `docs/business/CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md` written in this repository | User-owned documentation | Collect non-secret customer PoC requirements for platform/toolchain/algorithm scope | Explicitly excludes secrets, entropy captures, private keys, tokens, and customer data. |
+| DER-12007 | P1-12 evidence workflow notes written in this repository | User-owned tooling/documentation | Add scope-review notes to local evidence drafts and PoC package documentation set | Engineering evidence only; not official validation evidence. |
+
+## P1-12 Clean-room Notes
+
+- No block cipher, KDF, AEAD, public-key, SecureKit, or PKI implementation code was imported.
+- P1-12 adds planning and review documents only, plus evidence/package references to those documents.
+- Customer intake explicitly excludes secret material, entropy captures, generated secret bytes, private keys, tokens, customer data, and internal deployment secrets.
+- Differential validation remains a strategy draft until a reviewed public/reference source or tool is selected.
+- Scope planning does not change the current implemented cryptographic service slice.

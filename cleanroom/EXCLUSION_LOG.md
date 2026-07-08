@@ -1,6 +1,6 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P1-11 draft
+Status: P1-12 draft
 Date: 2026-07-07
 
 ## Purpose
@@ -144,3 +144,14 @@ If excluded material is discovered:
 | EX-2003 | Treating a customer PoC package smoke run as official validation evidence or broad environment suitability proof | Claims risk | Excluded | The package smoke only checks local installed-package integration and public-API smoke behavior. |
 | EX-2004 | Public random-service API commitment through the PoC package before provider/reseed/fork-safety/API review | API/support risk | Deferred | The PoC example uses explicit-entropy HMAC_DRBG flow only and does not expose new public random APIs. |
 | EX-2005 | Legal/evaluation license language without review | Legal/process risk | Deferred | Package notice text remains TODO pending legal review. |
+
+## P1-12 Additional Exclusions
+
+| ID | Material / Pattern | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-2101 | Block cipher, mode, KDF, AEAD, public-key, SecureKit, or PKI implementation code from third-party or unclear sources | Code provenance risk | Excluded | P1-12 adds only planning documents and does not import implementation code. |
+| EX-2102 | Starting block cipher implementation before customer/platform scope, public vectors, self-test requirements, CSP mapping, and side-channel review are recorded | Scope/API risk | Deferred | P1-12 creates the decision gate instead of adding algorithm code. |
+| EX-2103 | Differential tests based on reference tools or libraries without license/usage review | Provenance/process risk | Deferred | P1-12 records the strategy and requires source/tool review before adding tests. |
+| EX-2104 | Customer PoC intake that requests secrets, entropy captures, generated secret bytes, private keys, tokens, customer data, or internal deployment secrets | Sensitive information risk | Excluded | Intake questionnaire is limited to platform, toolchain, deployment model, and algorithm-scope requirements. |
+| EX-2105 | Treating side-channel checklist completion as formal leakage-resistance proof | Claims risk | Excluded | Checklist is an engineering review aid and must be paired with evidence and external process as applicable. |
+| EX-2106 | Moving AnoSecureKit or AnoPKI workflows into the AnoCrypto-C core | Product-boundary risk | Excluded | P1-12 service matrix keeps application helper and PKI workflows out of the core boundary. |

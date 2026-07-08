@@ -46,12 +46,18 @@ set(_doc_files
     README.md
     LICENSE
     docs/business/POC_CUSTOMER_PACKAGE_V0.md
+    docs/business/CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md
     docs/integration/SDK_INTEGRATION_GUIDE.md
     docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md
+    docs/kcmvp/SERVICE_SCOPE_MATRIX.md
+    docs/kcmvp/DIFFERENTIAL_VALIDATION_STRATEGY.md
     docs/kcmvp/RELEASE_EVIDENCE_WORKFLOW.md
     docs/kcmvp/REPRODUCIBLE_BUILD_NOTES.md
     docs/design/API_ABI_REVIEW_CHECKLIST.md
+    docs/design/BLOCK_CIPHER_MODE_SELECTION.md
+    docs/security/SIDE_CHANNEL_REVIEW_CHECKLIST.md
     docs/ci/CI_MATRIX.md
+    docs/roadmap/DEVELOPMENT_WORKFLOW.md
     docs/roadmap/C99_PRIORITY_TODO.md)
 
 foreach(_doc IN LISTS _doc_files)

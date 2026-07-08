@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-11 draft.
+Status: P1-12 draft.
 
 ## Purpose
 
@@ -15,7 +15,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-11/
+build/evidence/p1-12/
 ```
 
 ## Expected generated files
@@ -30,6 +30,7 @@ anocrypto-c-source.tar.gz
 BINARY_FILES.sha256
 PUBLIC_SURFACE_CHECK.txt
 REPRODUCIBLE_BUILD_NOTES.txt
+SCOPE_REVIEW_NOTES.txt
 ctest.log
 INSTALL_SMOKE_INSTALL.log
 INSTALL_SMOKE_CONFIGURE.log
@@ -50,14 +51,21 @@ README.md
 - Confirm claims remain limited to engineering correctness and readiness preparation.
 - Confirm platform provider logs include provider name/status only.
 - Confirm PoC package manifests and logs do not disclose local customer/internal details before sharing.
+- Confirm P1-12 scope-review notes match the intended customer and validation-target candidate boundary.
 
-## P1-11 additions
+## P1-12 additions
 
 - P1-10 reproducible-build notes, public surface checks, CI matrix skeleton, and API/ABI checklist are retained.
-- Customer PoC package v0 staging is available through `ano_crypto_create_poc_package`.
-- Customer PoC package smoke is available through `ano_crypto_poc_package_smoke`.
-- Evidence collection can run the PoC package smoke and capture `POC_PACKAGE_SMOKE.log` plus detailed logs under `poc-package-smoke/`.
-- The packaged PoC example validates installed-package lookup with `find_package(AnoCryptoC CONFIG REQUIRED)`.
+- P1-11 customer PoC package staging and smoke are retained.
+- Scope-review planning artifacts are added:
+  - `docs/roadmap/DEVELOPMENT_WORKFLOW.md`
+  - `docs/kcmvp/SERVICE_SCOPE_MATRIX.md`
+  - `docs/kcmvp/DIFFERENTIAL_VALIDATION_STRATEGY.md`
+  - `docs/design/BLOCK_CIPHER_MODE_SELECTION.md`
+  - `docs/security/SIDE_CHANNEL_REVIEW_CHECKLIST.md`
+  - `docs/business/CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md`
+- Evidence collection writes `SCOPE_REVIEW_NOTES.txt` to point reviewers at the current scope-lock artifacts.
+- The packaged PoC documentation set includes the new scope and intake documents.
 
 ## Known gaps
 
@@ -67,5 +75,7 @@ README.md
 - PoC package legal/evaluation notice remains TODO pending legal review.
 - Source archive timestamp normalization is still TODO if byte-for-byte archives become required.
 - Binary reproducibility across hosts/toolchains is still TODO.
-- No formal validation evidence.
+- No official validation evidence.
 - No public random-service API review record yet.
+- No selected block cipher/mode implementation scope yet.
+- No differential-reference tool/source has been selected yet.
