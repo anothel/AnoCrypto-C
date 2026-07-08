@@ -1,8 +1,8 @@
 # C99 DRBG Design Skeleton
 
-Status: P1-8 draft.
+Status: P1-9 draft.
 
-## Implemented through P1-8
+## Implemented through P1-9
 
 - HMAC_DRBG-SHA-256 deterministic core
 - caller-provided opaque DRBG context buffer
@@ -13,6 +13,7 @@ Status: P1-8 draft.
 - negative tests for entropy length, nonce length, unsupported flags, invalid state, and cleanup
 - internal entropy-source driven instantiate/reseed helpers for HMAC_DRBG-SHA-256
 - internal tests proving helper-driven instantiate/reseed matches explicit-entropy DRBG behavior
+- boundary vectors for personalization string, additional input, reseed after generated blocks, max request size, and oversized request rejection
 
 ## Explicitly not implemented yet
 
@@ -27,7 +28,7 @@ Status: P1-8 draft.
 
 | Algorithm | Status | Notes |
 |---|---|---|
-| HMAC_DRBG-SHA-256 | Implemented P1-8 slice | Deterministic core plus internal entropy-source helper. Public API still accepts explicit entropy input. |
+| HMAC_DRBG-SHA-256 | Implemented P1-9 slice | Deterministic core plus internal entropy-source helper. Public API still accepts explicit entropy input. |
 | Hash_DRBG-SHA-256 | ABI-reserved | Returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` from processing APIs. |
 
 ## State Model
@@ -58,10 +59,10 @@ ano_crypto_drbg_reseed(ctx,
 ```
 
 This remains a low-level DRBG core interface. A later public random-service
-layer may use the internal entropy helper, but P1-8 deliberately does not expose
+layer may use the internal entropy helper, but P1-9 deliberately does not expose
 that as public API.
 
-## P1-8 internal entropy-source helper
+## P1-9 internal entropy-source helper
 
 The internal helper flow is:
 
@@ -80,7 +81,7 @@ Rules:
 
 ## HMAC_DRBG-SHA-256 policy constants
 
-| Constant | Value | P1-8 meaning |
+| Constant | Value | P1-9 meaning |
 |---|---:|---|
 | `ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_ENTROPY_INPUT_SIZE` | 32 bytes | Entropy input bytes requested from the helper source and accepted by instantiate/reseed. |
 | `ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_NONCE_SIZE` | 16 bytes | Nonce bytes requested from the helper source for instantiate. |
@@ -96,8 +97,8 @@ Rules:
 
 ## TODO
 
-1. Decide whether a higher-level `ano_crypto_random_generate()` API belongs in anocrypto-c P1 or P2.
+1. Decide whether a higher-level `ano_crypto_random_generate()` API belongs in AnoCrypto-C P1 or P2.
 2. Define reseed counter, fork-safety, and prediction-resistance policy before public random-service exposure.
-3. Add additional HMAC_DRBG KAT paths: personalization string, no reseed, no additional input, and request-size boundaries.
+3. Add a test-only reseed-counter hook or alternative long-run test strategy before enforcing reseed-interval behavior in CI.
 4. Add platform CI jobs that exercise the OS entropy provider branch.
 5. Add side-channel review checklist for HMAC_DRBG state transitions.

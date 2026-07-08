@@ -1,6 +1,6 @@
-# anocrypto-c Exclusion Log
+# AnoCrypto-C Exclusion Log
 
-Status: P1-8 draft
+Status: P1-9 draft
 Date: 2026-07-07
 
 ## Purpose
@@ -114,3 +114,12 @@ If excluded material is discovered:
 | EX-1702 | Operational entropy captures, DRBG seeds, generated random bytes, production nonces, private keys, tokens, or customer random samples | Sensitive information risk | Excluded | P1-8 tests must not print or persist entropy/seed/generated output bytes. |
 | EX-1703 | Adding public `ano_crypto_random_*` ABI before API/ABI, provider, reseed, fork-safety, and validation-boundary review | API/support risk | Deferred | P1-8 adds a design draft and internal helper only. |
 | EX-1704 | Treating helper-driven DRBG tests or local OS entropy smoke tests as formal validation evidence | Claims risk | Excluded | These are engineering correctness and integration checks only. |
+
+## P1-9 Additional Exclusions
+
+| ID | Material / Pattern | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-1801 | Third-party HMAC_DRBG implementation source, DRBG test harness code, or random-service implementation code | Code provenance risk | Excluded | P1-9 boundary tests are fresh C99 code in this repository. |
+| EX-1802 | Operational entropy captures, DRBG seeds, nonces, personalization strings from customer deployments, generated random bytes, private keys, or tokens | Sensitive information risk | Excluded | P1-9 fixtures are synthetic local regression data and test logs must remain status-only. |
+| EX-1803 | Treating local deterministic DRBG boundary tests as formal validation evidence | Claims risk | Excluded | Boundary tests are engineering correctness checks only. |
+| EX-1804 | Lowercase-only `anocryptoc` CMake package/target names that conflict with the product naming plan | Naming/API risk | Replaced | Use `AnoCryptoC` package and `AnoCryptoC::AnoCryptoC` target; keep `anocrypto_c` as the library file/target name. |

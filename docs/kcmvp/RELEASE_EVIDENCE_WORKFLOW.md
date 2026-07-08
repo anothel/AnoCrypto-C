@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-8 draft.
+Status: P1-9 draft.
 
 ## Purpose
 
@@ -15,7 +15,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-8/
+build/evidence/p1-9/
 ```
 
 ## Expected generated files
@@ -46,7 +46,7 @@ README.md
 - Confirm claims remain limited to engineering correctness and readiness preparation.
 - Confirm platform provider logs include provider name/status only.
 
-## P1-8 additions
+## P1-9 additions
 
 - Internal HMAC_DRBG-SHA-256 instantiate/reseed helper tests are included in CTest.
 - Evidence may include `ano_crypto_drbg_entropy_helper_tests` pass/fail status.

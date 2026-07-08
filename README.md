@@ -1,8 +1,8 @@
-# anocrypto-c
+# AnoCrypto-C
 
-anocrypto-c is a private C99 cryptographic module candidate skeleton.
+AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-8 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal platform entropy provider seam, internal DRBG instantiate/reseed helper, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, limited internal global-state locking, and release-evidence draft tooling.
+Current status: P1-9 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal platform entropy provider seam, internal DRBG instantiate/reseed helper, HMAC_DRBG boundary vectors, CMake package naming normalization, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, limited internal global-state locking, and release-evidence draft tooling.
 
 Implemented processing scope:
 
@@ -38,8 +38,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-8
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-8
+cmake --install build --prefix /tmp/anocrypto-c-p1-9
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-9
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -52,9 +52,9 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `ctest.log`, and installed-package smoke logs when the default P1-8 target is used.
+Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `ctest.log`, and installed-package smoke logs when the default P1-9 target is used.
 
-## P1-8 scope
+## P1-9 scope
 
 - Fresh C99 SHA-256 implementation retained from P1-1
 - Fresh C99 HMAC-SHA-256 implementation retained from P1-1
@@ -62,6 +62,8 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `ctest.l
 - Internal entropy adapter seam and HMAC key handle lifecycle retained from P1-4
 - Internal platform entropy provider seam retained from P1-7
 - Internal HMAC_DRBG-SHA-256 instantiate/reseed helper added for future random-service review
+- HMAC_DRBG-SHA-256 boundary vectors for personalization, additional input, reseed-after-generate, max request, and oversized request rejection
+- CMake package naming normalized to `AnoCryptoC` / `AnoCryptoC::AnoCryptoC` while keeping the library file name `anocrypto_c` and include root `include/anocrypto/`
 - Public-source KAT fixtures recorded in `cleanroom/SOURCE_MANIFEST.md`
 - Extended public KAT coverage for SHA-256 long-message/million-`a` vectors and RFC 4231 HMAC-SHA-256 cases
 - HMAC key handle KAT path using RFC 4231 Test Case 2 through the CSP handle lifecycle

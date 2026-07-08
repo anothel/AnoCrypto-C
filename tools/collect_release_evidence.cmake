@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-8 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-9 \
 #         -DANO_CRYPTO_RUN_CTEST=ON \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -22,7 +22,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-8")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-9")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -107,7 +107,7 @@ if(_git_exe)
 endif()
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-"anocrypto-c Release Evidence Draft\n"
+"AnoCrypto-C Release Evidence Draft\n"
 "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
 "Source directory: ${ANO_CRYPTO_SOURCE_DIR}\n"
 "Build directory: ${ANO_CRYPTO_BUILD_DIR}\n"
@@ -320,4 +320,4 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- Confirm no secrets, entropy bytes, generated secret bytes, private keys, tokens, or internal deployment details are present.\n"
 "- Confirm platform entropy evidence records provider/status only and does not contain entropy bytes.\n")
 
-message(STATUS "anocrypto-c evidence draft written to ${ANO_CRYPTO_EVIDENCE_DIR}")
+message(STATUS "AnoCrypto-C evidence draft written to ${ANO_CRYPTO_EVIDENCE_DIR}")

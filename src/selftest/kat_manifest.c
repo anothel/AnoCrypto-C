@@ -1,7 +1,7 @@
 #include "ac_kat_manifest.h"
 
 /*
- * P1-8 KAT manifest.
+ * P1-9 KAT manifest.
  *
  * Vectors embedded in selftest.c, src/drbg/drbg.c, and tests/kat are limited to public
  * specification/test-vector inputs recorded in cleanroom/SOURCE_MANIFEST.md.
@@ -86,6 +86,30 @@ static const ano_crypto_internal_kat_manifest_entry_t g_kat_manifest[] = {
         "HMAC_DRBG-SHA-256",
         "SRC-1202: NIST CAVP DRBG test vector package, HMAC_DRBG-SHA-256 no prediction resistance with reseed COUNT=0",
         "p1-implemented-startup"
+    },
+    {
+        "drbg.hmac-sha256.personalization-regression",
+        "HMAC_DRBG-SHA-256",
+        "DER-9001: locally generated deterministic HMAC_DRBG-SHA-256 personalization fixture derived from public SP 800-90A Rev.1 algorithm",
+        "p1-9-boundary-test"
+    },
+    {
+        "drbg.hmac-sha256.additional-input-regression",
+        "HMAC_DRBG-SHA-256",
+        "DER-9001: locally generated deterministic HMAC_DRBG-SHA-256 additional-input fixture derived from public SP 800-90A Rev.1 algorithm",
+        "p1-9-boundary-test"
+    },
+    {
+        "drbg.hmac-sha256.reseed-after-generate-regression",
+        "HMAC_DRBG-SHA-256",
+        "DER-9001: locally generated deterministic HMAC_DRBG-SHA-256 reseed-after-generate fixture derived from public SP 800-90A Rev.1 algorithm",
+        "p1-9-boundary-test"
+    },
+    {
+        "drbg.hmac-sha256.request-size-boundary",
+        "HMAC_DRBG-SHA-256",
+        "DER-9002: local request-size boundary test for maximum generate request and oversized-request rejection",
+        "p1-9-boundary-test"
     },
     {
         "hmac.sha256.handle.rfc4231.tc2",

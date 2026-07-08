@@ -9,7 +9,7 @@
 ano_crypto_status_t ano_crypto_internal_hmac_drbg_sha256_selftest(void);
 
 /*
- * P1-8 internal helper for future random-service wiring. It draws entropy and
+ * P1-9 internal helper for future random-service wiring. It draws entropy and
  * nonce bytes through the reviewed entropy-source seam, instantiates the
  * HMAC_DRBG-SHA-256 core, then zeroizes local seed material. This is not a
  * public random API.

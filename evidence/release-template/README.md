@@ -21,12 +21,12 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - SBOM status
 - Signing status
 
-## P1-8 Evidence Notes
+## P1-9 Evidence Notes
 
 - SHA-256 and HMAC-SHA-256 processing APIs are implemented for the current P1 slice.
 - HMAC-SHA-256 can also be computed through an in-memory HMAC key handle lifecycle slice.
 - HMAC_DRBG-SHA-256 deterministic core APIs are implemented for the current P1 slice.
-- P1-8 adds internal HMAC_DRBG-SHA-256 instantiate/reseed helpers that draw entropy and nonce bytes through the entropy-source seam.
+- P1-9 adds internal HMAC_DRBG-SHA-256 instantiate/reseed helpers that draw entropy and nonce bytes through the entropy-source seam.
 - Extended KAT tests cover public SHA-256 vectors, RFC 4231 HMAC-SHA-256 cases, the HMAC key handle path, and a public HMAC_DRBG-SHA-256 flow.
 - Deterministic chunk-boundary tests cover one-shot versus streaming API consistency.
 - `tests/negative/crypto_service_gate_tests.c` verifies that cryptographic services are rejected before module initialization and startup self-test success.
@@ -50,8 +50,8 @@ ctest --test-dir build --output-on-failure
 Install smoke:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-8
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-8
+cmake --install build --prefix /tmp/anocrypto-c-p1-9
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-9
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -71,7 +71,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 - Add platform CI evidence for Linux, Windows, and Apple entropy provider branches.
 - Add public random-service API only after provider, reseed policy, fork-safety, and validation-boundary review.
 
-## P1-8 Log Review
+## P1-9 Log Review
 
 If present, review entropy/thread/helper test logs for:
 

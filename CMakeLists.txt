@@ -1,14 +1,14 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(anocryptoc
+project(AnoCryptoC
     VERSION 0.1.0
-    DESCRIPTION "anocrypto-c C99 module skeleton"
+    DESCRIPTION "AnoCrypto-C C99 module skeleton"
     LANGUAGES C)
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 
-option(ANO_CRYPTO_BUILD_TESTS "Build anocrypto-c unit and smoke tests" ON)
+option(ANO_CRYPTO_BUILD_TESTS "Build AnoCrypto-C unit and smoke tests" ON)
 option(ANO_CRYPTO_ENABLE_STRICT_WARNINGS "Enable strict compiler warnings" ON)
 option(ANO_CRYPTO_ENABLE_TEST_HOOKS "Enable internal test-only hooks" ${ANO_CRYPTO_BUILD_TESTS})
 option(ANO_CRYPTO_ENABLE_THREAD_SAFETY "Enable internal locks for module/self-test/CSP global state" ON)
@@ -23,7 +23,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "anocrypto-c-p1-8-random-drbg-helper" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-9-drbg-boundary" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -54,11 +54,11 @@ add_library(anocrypto_c
     src/csp/key.c
     src/csp/zeroize.c)
 
-add_library(anocryptoc::anocryptoc ALIAS anocrypto_c)
+add_library(AnoCryptoC::AnoCryptoC ALIAS anocrypto_c)
 
 set_target_properties(anocrypto_c PROPERTIES
     OUTPUT_NAME anocrypto_c
-    EXPORT_NAME anocryptoc
+    EXPORT_NAME AnoCryptoC
     VERSION ${PROJECT_VERSION}
     SOVERSION 0
     PUBLIC_HEADER "${ANO_CRYPTO_PUBLIC_HEADERS}")
@@ -121,31 +121,31 @@ if(ANO_CRYPTO_ENABLE_STRICT_WARNINGS)
 endif()
 
 install(TARGETS anocrypto_c
-    EXPORT anocryptocTargets
+    EXPORT AnoCryptoCTargets
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/anocrypto)
 
-install(EXPORT anocryptocTargets
-    NAMESPACE anocryptoc::
-    FILE anocryptocTargets.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/anocryptoc)
+install(EXPORT AnoCryptoCTargets
+    NAMESPACE AnoCryptoC::
+    FILE AnoCryptoCTargets.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/AnoCryptoC)
 
 configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/anocryptocConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/anocryptocConfig.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/anocryptoc)
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/AnoCryptoCConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/AnoCryptoCConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/AnoCryptoC)
 
 write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/anocryptocConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/AnoCryptoCConfigVersion.cmake
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion)
 
 install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/anocryptocConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/anocryptocConfigVersion.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/anocryptoc)
+    ${CMAKE_CURRENT_BINARY_DIR}/AnoCryptoCConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/AnoCryptoCConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/AnoCryptoC)
 
 if(ANO_CRYPTO_BUILD_TESTS)
     enable_testing()
@@ -180,6 +180,12 @@ if(ANO_CRYPTO_BUILD_TESTS)
     target_link_libraries(ano_crypto_hmac_drbg_kat_tests PRIVATE anocrypto_c)
 
     add_test(NAME ano_crypto_hmac_drbg_kat_tests COMMAND ano_crypto_hmac_drbg_kat_tests)
+
+    add_executable(ano_crypto_hmac_drbg_boundary_tests
+        tests/kat/hmac_drbg_boundary_tests.c)
+    target_link_libraries(ano_crypto_hmac_drbg_boundary_tests PRIVATE anocrypto_c)
+
+    add_test(NAME ano_crypto_hmac_drbg_boundary_tests COMMAND ano_crypto_hmac_drbg_boundary_tests)
 
     add_executable(ano_crypto_hmac_key_handle_kat_tests
         tests/kat/hmac_key_handle_kat_tests.c)
@@ -258,13 +264,13 @@ if(ANO_CRYPTO_BUILD_TESTS)
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-8
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-9
             -DANO_CRYPTO_RUN_CTEST=ON
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting anocrypto-c P1-8 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-9 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         anocrypto_c
         ano_crypto_module_state_tests
@@ -272,6 +278,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_sha256_hmac_kat_tests
         ano_crypto_sha256_hmac_extended_kat_tests
         ano_crypto_hmac_drbg_kat_tests
+        ano_crypto_hmac_drbg_boundary_tests
         ano_crypto_hmac_key_handle_kat_tests
         ano_crypto_hash_hmac_api_negative_tests
         ano_crypto_drbg_api_negative_tests

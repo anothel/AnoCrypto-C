@@ -1,6 +1,6 @@
-# anocrypto-c Priority TODO
+# AnoCrypto-C Priority TODO
 
-Status: P1-8 draft.
+Status: P1-9 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -30,24 +30,25 @@ Status: P1-8 draft.
 - platform entropy provider smoke/status tests
 - internal HMAC_DRBG-SHA-256 instantiate/reseed helper driven by entropy source
 - random-service public API design draft without exposing public ABI
+- HMAC_DRBG-SHA-256 boundary tests for personalization, additional input, reseed-after-generate, max request, and oversized request rejection
+- CMake package naming normalized to `AnoCryptoC` / `AnoCryptoC::AnoCryptoC`
 
 ## Immediate P1 next items
 
-1. Add additional HMAC_DRBG KAT paths: personalization string, no reseed, no additional input, reseed after generated blocks, and request-size boundaries.
-2. Add CI matrix coverage for Linux, Windows, and Apple entropy provider branches.
-3. Add reproducible build notes.
-4. Add API/ABI review notes for caller-provided context buffers.
-5. Expand thread-safety policy into reviewed public support matrix and CI coverage.
-6. Add side-channel review checklist for key-dependent code paths.
-7. Add SBOM/signing placeholders to the evidence workflow.
-8. Decide SHA-384/SHA-512 implementation timing.
-9. Decide whether and when to expose public `ano_crypto_random_*` APIs.
-10. Add reproducible source archive rules if archive byte-for-byte reproducibility becomes a release requirement.
+1. Add CI matrix coverage for Linux, Windows, and Apple entropy provider branches.
+2. Add reproducible build notes.
+3. Add API/ABI review notes for caller-provided context buffers.
+4. Expand thread-safety policy into reviewed public support matrix and CI coverage.
+5. Add side-channel review checklist for key-dependent code paths.
+6. Add SBOM/signing placeholders to the evidence workflow.
+7. Decide SHA-384/SHA-512 implementation timing.
+8. Decide whether and when to expose public `ano_crypto_random_*` APIs.
+9. Add reproducible source archive rules if archive byte-for-byte reproducibility becomes a release requirement.
 
 ## P2 candidates
 
 - Block cipher/mode scope selection based on customer and validation-target requirements.
 - KDF/MAC expansion.
 - Public-key primitive planning.
-- anocrypto C++ Wrapper boundary draft.
+- AnoCrypto C++ Wrapper boundary draft.
 - AnoSecureKit and AnoPKI integration boundary drafts.
