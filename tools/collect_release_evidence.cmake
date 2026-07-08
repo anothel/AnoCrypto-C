@@ -2,10 +2,11 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-9 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-10 \
 #         -DANO_CRYPTO_RUN_CTEST=ON \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
+#         -DANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON \
 #         -P tools/collect_release_evidence.cmake
 #
 # This script creates a local evidence draft for engineering review. It does
@@ -22,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-9")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-10")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -35,6 +36,10 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_INSTALL_SMOKE)
     set(ANO_CRYPTO_RUN_INSTALL_SMOKE OFF)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK)
+    set(ANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK ON)
 endif()
 
 get_filename_component(ANO_CRYPTO_SOURCE_DIR "${ANO_CRYPTO_SOURCE_DIR}" ABSOLUTE)
@@ -115,6 +120,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
 "Git status: ${_git_status}\n"
 "CMake command: ${CMAKE_COMMAND}\n"
 "CMake version: ${CMAKE_VERSION}\n"
+"Reproducible build status: P1-10 draft procedure; binary byte identity not claimed\n"
 "Evidence status: engineering draft only\n"
 "Claims boundary: not official validation evidence\n")
 
@@ -207,6 +213,40 @@ if(EXISTS "${ANO_CRYPTO_BUILD_DIR}")
         endif()
     endforeach()
 endif()
+
+if(ANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK)
+    set(_policy_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/PUBLIC_SURFACE_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+            -DANO_CRYPTO_POLICY_CHECK_OUTPUT=${_policy_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_public_surface.cmake"
+        RESULT_VARIABLE _policy_result
+        OUTPUT_VARIABLE _policy_stdout
+        ERROR_VARIABLE _policy_stderr)
+    file(APPEND "${_policy_check_output}" "\nCommand output:\n${_policy_stdout}${_policy_stderr}\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Public surface check result: ${_policy_result}\n")
+    if(NOT _policy_result EQUAL 0)
+        message(FATAL_ERROR "public surface check failed; see ${_policy_check_output}")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/PUBLIC_SURFACE_CHECK.txt"
+        "Public surface check was not requested. Set ANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON.\n")
+endif()
+
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
+    "AnoCrypto-C reproducible build evidence notes\n"
+    "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
+    "Status: P1-10 draft procedure; binary byte identity is not claimed.\n"
+    "Source directory: ${ANO_CRYPTO_SOURCE_DIR}\n"
+    "Build directory: ${ANO_CRYPTO_BUILD_DIR}\n"
+    "Source archive content list: SOURCE_ARCHIVE_CONTENTS.txt\n"
+    "Source hash list: SOURCE_FILES.sha256\n"
+    "Binary hash list: BINARY_FILES.sha256\n"
+    "Public surface check: PUBLIC_SURFACE_CHECK.txt\n"
+    "TODO: normalize archive timestamps if byte-for-byte source archives become a release requirement.\n"
+    "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 if(ANO_CRYPTO_RUN_CTEST)
     find_program(_ctest_exe ctest)
@@ -309,6 +349,8 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `SOURCE_ARCHIVE_CONTENTS.txt`: file list used for the local source archive.\n"
 "- `SOURCE_ARCHIVE.sha256`: SHA-256 hash of `anocrypto-c-source.tar.gz` when archive creation is enabled.\n"
 "- `BINARY_FILES.sha256`: SHA-256 hashes of build outputs matched by the script.\n"
+"- `PUBLIC_SURFACE_CHECK.txt`: repository naming, claims-boundary, header, and package identity check.\n"
+"- `REPRODUCIBLE_BUILD_NOTES.txt`: current reproducibility procedure notes and unresolved gaps.\n"
 "- `ctest.log`: captured CTest output when requested.\n"
 "- `INSTALL_SMOKE_*.log`: installed-package configure/build/run logs when requested.\n"
 "- `INSTALL_SMOKE_SUMMARY.txt`: install smoke paths and result when requested.\n"
@@ -317,6 +359,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- Confirm source archive contents match the intended release scope.\n"
 "- Confirm install smoke paths do not disclose internal deployment details before sharing.\n"
 "- Add SBOM/signing status when available.\n"
+"- Confirm reproducibility gaps are marked as TODO instead of stronger claims.\n"
 "- Confirm no secrets, entropy bytes, generated secret bytes, private keys, tokens, or internal deployment details are present.\n"
 "- Confirm platform entropy evidence records provider/status only and does not contain entropy bytes.\n")
 

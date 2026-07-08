@@ -1,6 +1,6 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P1-9 draft
+Status: P1-10 draft
 Date: 2026-07-07
 
 ## Purpose
@@ -123,3 +123,14 @@ If excluded material is discovered:
 | EX-1802 | Operational entropy captures, DRBG seeds, nonces, personalization strings from customer deployments, generated random bytes, private keys, or tokens | Sensitive information risk | Excluded | P1-9 fixtures are synthetic local regression data and test logs must remain status-only. |
 | EX-1803 | Treating local deterministic DRBG boundary tests as formal validation evidence | Claims risk | Excluded | Boundary tests are engineering correctness checks only. |
 | EX-1804 | Lowercase-only `anocryptoc` CMake package/target names that conflict with the product naming plan | Naming/API risk | Replaced | Use `AnoCryptoC` package and `AnoCryptoC::AnoCryptoC` target; keep `anocrypto_c` as the library file/target name. |
+
+
+## P1-10 Additional Exclusions
+
+| ID | Material / Pattern | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-1901 | Third-party CI workflow files, release scripts, packaging jobs, or ABI checkers with unclear license or ownership | Code provenance risk | Excluded | P1-10 workflow and CMake policy checks are fresh skeletons. |
+| EX-1902 | Treating reproducible-build notes as proof of byte-identical binaries across hosts | Claims risk | Excluded | Current notes are a draft procedure and gap list only. |
+| EX-1903 | Treating exported symbol lists, CTest output, or install smoke logs as formal validation evidence | Claims risk | Excluded | These remain local engineering evidence pending external process review. |
+| EX-1904 | Logs containing secret keys, entropy bytes, DRBG seeds, generated secret bytes, private keys, tokens, customer data, or internal deployment details | Sensitive information risk | Excluded | P1-10 evidence review keeps logs status-only and redacts before sharing. |
+| EX-1905 | Public header changes that expose cryptographic context internals or freeze unreviewed struct layouts | ABI risk | Deferred or blocked | Public context internals remain hidden; the build identity struct remains a tracked TODO before public ABI freeze. |

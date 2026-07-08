@@ -1,6 +1,6 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-9 draft.
+Status: P1-10 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -32,18 +32,23 @@ Status: P1-9 draft.
 - random-service public API design draft without exposing public ABI
 - HMAC_DRBG-SHA-256 boundary tests for personalization, additional input, reseed-after-generate, max request, and oversized request rejection
 - CMake package naming normalized to `AnoCryptoC` / `AnoCryptoC::AnoCryptoC`
+- reproducible build notes draft
+- CI matrix skeleton and GitHub workflow starter
+- API/ABI review checklist
+- public surface policy check target
+- P1-10 evidence workflow additions for reproducibility and public surface review
 
 ## Immediate P1 next items
 
-1. Add CI matrix coverage for Linux, Windows, and Apple entropy provider branches.
-2. Add reproducible build notes.
-3. Add API/ABI review notes for caller-provided context buffers.
-4. Expand thread-safety policy into reviewed public support matrix and CI coverage.
-5. Add side-channel review checklist for key-dependent code paths.
-6. Add SBOM/signing placeholders to the evidence workflow.
-7. Decide SHA-384/SHA-512 implementation timing.
-8. Decide whether and when to expose public `ano_crypto_random_*` APIs.
-9. Add reproducible source archive rules if archive byte-for-byte reproducibility becomes a release requirement.
+1. Review and harden CI matrix after first hosted runs on Linux, Windows, and Apple runners.
+2. Expand thread-safety policy into reviewed public support matrix and CI coverage.
+3. Add side-channel review checklist for key-dependent code paths.
+4. Add SBOM/signing placeholders to the evidence workflow.
+5. Decide SHA-384/SHA-512 implementation timing.
+6. Decide whether and when to expose public `ano_crypto_random_*` APIs.
+7. Add reproducible source archive timestamp normalization if byte-for-byte archives become a release requirement.
+8. Decide whether to replace the public build identity struct with field getters before ABI freeze.
+9. Add exported-symbol baseline comparison after symbol visibility policy is chosen.
 
 ## P2 candidates
 

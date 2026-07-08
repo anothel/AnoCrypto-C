@@ -1,10 +1,10 @@
 # AnoCrypto-C Algorithm Scope
 
-Status: P1-9 draft.
+Status: P1-10 draft.
 
 ## Implemented candidate slice
 
-| Area | Algorithm | P1-9 status | Notes |
+| Area | Algorithm | Current status | Notes |
 |---|---|---|---|
 | Hash | SHA-256 | Implemented | Public-source KATs and extended boundary tests added. |
 | MAC | HMAC-SHA-256 | Implemented | Public RFC KATs and long-key path coverage added. |

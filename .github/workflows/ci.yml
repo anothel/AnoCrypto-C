@@ -1,0 +1,80 @@
+name: AnoCrypto-C CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-test-smoke:
+    name: ${{ matrix.os }} / ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        build_type: [Debug]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: >
+          cmake -S . -B build
+          -DANO_CRYPTO_BUILD_TESTS=ON
+          -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
+          -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
+          -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
+          -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-10-repro-ci-abi
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+      - name: Build
+        run: cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      - name: Test
+        run: ctest --test-dir build --build-config ${{ matrix.build_type }} --output-on-failure
+
+      - name: Public surface check
+        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_public_surface_check
+
+      - name: Install
+        run: cmake --install build --config ${{ matrix.build_type }} --prefix install-prefix
+
+      - name: Configure install smoke
+        run: cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=${{ github.workspace }}/install-prefix -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+      - name: Build install smoke
+        run: cmake --build build-install-smoke --config ${{ matrix.build_type }} --parallel
+
+      - name: Run install smoke on Unix-like runners
+        if: runner.os != 'Windows'
+        run: ./build-install-smoke/anocrypto_c_install_smoke
+
+      - name: Run install smoke on Windows
+        if: runner.os == 'Windows'
+        run: .\\build-install-smoke\\${{ matrix.build_type }}\\anocrypto_c_install_smoke.exe
+
+  evidence-draft:
+    name: Linux evidence draft
+    runs-on: ubuntu-latest
+    needs: build-test-smoke
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure
+        run: >
+          cmake -S . -B build
+          -DANO_CRYPTO_BUILD_TESTS=ON
+          -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
+          -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-10-repro-ci-abi
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Collect evidence draft
+        run: cmake --build build --target ano_crypto_collect_release_evidence

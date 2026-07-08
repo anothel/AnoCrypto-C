@@ -9,6 +9,8 @@
 #  else
 #    define ANO_CRYPTO_API __declspec(dllimport)
 #  endif
+#elif defined(ANO_CRYPTO_BUILDING_LIBRARY) && (defined(__GNUC__) || defined(__clang__))
+#  define ANO_CRYPTO_API __attribute__((visibility("default")))
 #else
 #  define ANO_CRYPTO_API
 #endif

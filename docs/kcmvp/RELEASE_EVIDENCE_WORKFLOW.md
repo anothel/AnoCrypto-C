@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-9 draft.
+Status: P1-10 draft.
 
 ## Purpose
 
@@ -15,7 +15,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-9/
+build/evidence/p1-10/
 ```
 
 ## Expected generated files
@@ -28,6 +28,8 @@ SOURCE_ARCHIVE.sha256
 SOURCE_ARCHIVE.log
 anocrypto-c-source.tar.gz
 BINARY_FILES.sha256
+PUBLIC_SURFACE_CHECK.txt
+REPRODUCIBLE_BUILD_NOTES.txt
 ctest.log
 INSTALL_SMOKE_INSTALL.log
 INSTALL_SMOKE_CONFIGURE.log
@@ -46,18 +48,20 @@ README.md
 - Confirm claims remain limited to engineering correctness and readiness preparation.
 - Confirm platform provider logs include provider name/status only.
 
-## P1-9 additions
+## P1-10 additions
 
-- Internal HMAC_DRBG-SHA-256 instantiate/reseed helper tests are included in CTest.
-- Evidence may include `ano_crypto_drbg_entropy_helper_tests` pass/fail status.
-- Helper tests must not print entropy, seed material, nonce bytes, generated random bytes, or deterministic callback byte streams.
-- Public random-service API remains a design draft only and is not part of the installed public ABI.
+- Reproducible-build notes are now captured in `docs/kcmvp/REPRODUCIBLE_BUILD_NOTES.md` and generated evidence as `REPRODUCIBLE_BUILD_NOTES.txt`.
+- Public surface policy checks are captured as `PUBLIC_SURFACE_CHECK.txt`.
+- CI matrix skeleton is recorded in `docs/ci/CI_MATRIX.md` and `.github/workflows/ci.yml`.
+- API/ABI review checklist is recorded in `docs/design/API_ABI_REVIEW_CHECKLIST.md`.
+- Evidence collection now records that reproducible-build procedure is draft-only and that byte-identical binaries are not claimed.
 
 ## Known gaps
 
 - No SBOM generation yet.
 - No release signing evidence yet.
-- No platform CI evidence for Windows/Apple provider branches yet.
-- No reproducible build procedure beyond source/binary hash capture.
+- CI workflow has not yet been reviewed against all customer toolchains.
+- Source archive timestamp normalization is still TODO if byte-for-byte archives become required.
+- Binary reproducibility across hosts/toolchains is still TODO.
 - No formal validation evidence.
 - No public random-service API review record yet.

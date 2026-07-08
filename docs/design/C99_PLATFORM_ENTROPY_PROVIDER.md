@@ -1,6 +1,6 @@
 # C99 Platform Entropy Provider Policy Skeleton
 
-Status: P1-9 draft.
+Status: P1-10 draft.
 
 ## Goal
 

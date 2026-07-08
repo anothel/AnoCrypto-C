@@ -14,8 +14,20 @@ option(ANO_CRYPTO_ENABLE_TEST_HOOKS "Enable internal test-only hooks" ${ANO_CRYP
 option(ANO_CRYPTO_ENABLE_THREAD_SAFETY "Enable internal locks for module/self-test/CSP global state" ON)
 option(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER "Enable reviewed internal platform entropy provider where supported" ON)
 
+if(NOT DEFINED ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS)
+    if(ANO_CRYPTO_ENABLE_TEST_HOOKS)
+        set(ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS OFF CACHE BOOL "Hide internal symbols in shared-library builds where supported")
+    else()
+        set(ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS ON CACHE BOOL "Hide internal symbols in shared-library builds where supported")
+    endif()
+endif()
+
 if(NOT DEFINED BUILD_SHARED_LIBS)
     set(BUILD_SHARED_LIBS ON)
+endif()
+
+if(ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS AND ANO_CRYPTO_ENABLE_TEST_HOOKS)
+    message(WARNING "ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS is ON while internal test hooks are enabled; internal-unit tests that link through the shared library may fail on ELF toolchains")
 endif()
 
 set(CMAKE_C_STANDARD 99)
@@ -23,7 +35,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-9-drbg-boundary" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-10-repro-ci-abi" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -119,6 +131,20 @@ if(ANO_CRYPTO_ENABLE_STRICT_WARNINGS)
         target_compile_options(anocrypto_c PRIVATE -Wall -Wextra -Wpedantic)
     endif()
 endif()
+
+if(ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS AND NOT MSVC)
+    target_compile_options(anocrypto_c PRIVATE -fvisibility=hidden)
+endif()
+
+
+add_custom_target(ano_crypto_public_surface_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_POLICY_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/PUBLIC_SURFACE_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_public_surface.cmake
+    USES_TERMINAL
+    COMMENT "Checking AnoCrypto-C public surface and repository policy")
 
 install(TARGETS anocrypto_c
     EXPORT AnoCryptoCTargets
@@ -264,14 +290,16 @@ if(ANO_CRYPTO_BUILD_TESTS)
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-9
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-10
             -DANO_CRYPTO_RUN_CTEST=ON
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
+            -DANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-9 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-10 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
+        ano_crypto_public_surface_check
         anocrypto_c
         ano_crypto_module_state_tests
         ano_crypto_service_gate_negative_tests

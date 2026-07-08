@@ -1,6 +1,6 @@
 # C99 Entropy Adapter Design Skeleton
 
-Status: P1-9 draft.
+Status: P1-10 draft.
 
 ## Purpose
 

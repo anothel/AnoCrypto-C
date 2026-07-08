@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-9 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal platform entropy provider seam, internal DRBG instantiate/reseed helper, HMAC_DRBG boundary vectors, CMake package naming normalization, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, limited internal global-state locking, and release-evidence draft tooling.
+Current status: P1-10 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal platform entropy provider seam, internal DRBG instantiate/reseed helper, HMAC_DRBG boundary vectors, CMake package naming normalization, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, limited internal global-state locking, reproducible-build notes, CI matrix skeleton, API/ABI review checklist, public-surface policy check, and release-evidence draft tooling.
 
 Implemented processing scope:
 
@@ -15,8 +15,11 @@ Implemented processing scope:
 - Extended KAT executables for SHA-256, HMAC-SHA-256, HMAC key handle path, and HMAC_DRBG-SHA-256 public vectors
 - Negative API tests for hash/HMAC/DRBG/CSP/key argument handling, context lifecycle behavior, handle exhaustion, stale handle rejection, and DRBG helper failure cleanup
 - Internal entropy adapter seam with callback and platform OS provider tests
-- Release evidence draft collection with source archive hash and install smoke logs
+- Release evidence draft collection with source archive hash, public-surface check, reproducible-build notes, and install smoke logs
 - Limited internal locking for module/self-test/CSP global state
+- CI matrix skeleton for Linux, macOS, and Windows build/test/install-smoke paths
+- API/ABI review checklist for public headers, package identity, and symbol-surface TODOs
+- Release-style internal symbol hiding option for supported compilers
 
 Skeleton-only / TODO scope:
 
@@ -25,7 +28,9 @@ Skeleton-only / TODO scope:
 - Hash_DRBG-SHA-256 ABI placeholder
 - Public random service layer and reviewed customer/platform entropy policy
 - Persistent keystore, key export, key wrapping, and multi-process CSP model
-- Public per-context concurrency guarantees and platform CI coverage
+- Public per-context concurrency guarantees and reviewed platform CI coverage
+- Byte-identical source archive and binary reproducibility rules
+- SBOM/signing workflow
 
 ## Build
 
@@ -38,8 +43,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-9
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-9
+cmake --install build --prefix /tmp/anocrypto-c-p1-10
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-10
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -52,9 +57,9 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `ctest.log`, and installed-package smoke logs when the default P1-9 target is used.
+Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_SURFACE_CHECK.txt`, `REPRODUCIBLE_BUILD_NOTES.txt`, `ctest.log`, and installed-package smoke logs when the default P1-10 target is used.
 
-## P1-9 scope
+## P1-10 scope
 
 - Fresh C99 SHA-256 implementation retained from P1-1
 - Fresh C99 HMAC-SHA-256 implementation retained from P1-1
@@ -74,6 +79,11 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `ctest.l
 - Limited module/self-test/CSP global-state lock seam and POSIX concurrent CSP/HMAC test
 - Platform entropy provider smoke test that records provider name/status only, not entropy bytes
 - Source archive SHA-256 and install smoke log capture in the evidence script
+- Reproducible-build notes and evidence fields added for P1-10
+- CI matrix skeleton added for Linux, macOS, and Windows
+- API/ABI review checklist added, including the current public build-identity struct TODO
+- Public surface policy check target added for naming, header, package, claims-boundary, and Linux exported-symbol scans
+- `ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS` added for release-style builds on supported compilers; internal test-hook builds keep internals linkable for internal-unit tests
 
 ## Important limitations
 
@@ -86,4 +96,7 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `ctest.l
 - HMAC key handles are in-memory only; export, persistence, keystore integration, and full thread-safety support are not finalized.
 - Prediction-resistance requests are rejected until the entropy adapter, reseed policy, and review evidence are defined.
 - Error recovery policy after fatal state remains TODO.
+- Public build identity still exposes one versioned struct layout; field getters should be considered before ABI freeze.
+- Binary reproducibility across hosts/toolchains is not established yet.
+- Internal test-hook builds may expose internal symbols for internal-unit tests; release-style no-test builds should enable symbol hiding where supported.
 - This repository does not claim official validation or external review completion.
