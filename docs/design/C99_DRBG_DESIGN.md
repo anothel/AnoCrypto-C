@@ -1,6 +1,6 @@
 # C99 DRBG Design Skeleton
 
-Status: P1-14 draft.
+Status: P1-15 draft.
 
 ## Implemented through P1-9
 

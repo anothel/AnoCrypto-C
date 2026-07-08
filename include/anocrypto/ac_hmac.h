@@ -14,10 +14,12 @@ extern "C" {
 /*
  * P1 public API skeleton for HMAC services.
  *
- * P1-1 scope:
+ * P1-15 scope:
  * - HMAC-SHA-256 processing is implemented and covered by public-source KATs.
- * - HMAC with SHA-384/SHA-512 is ABI-reserved and returns
- *   ANO_CRYPTO_ERR_NOT_IMPLEMENTED from processing APIs until reviewed.
+ * - HMAC with SHA-384/SHA-512 is ABI-reserved. MAC sizes are
+ *   queryable through the hash size API, but processing APIs return
+ *   ANO_CRYPTO_ERR_NOT_IMPLEMENTED until implementation, KAT, and review
+ *   evidence are added.
  * - P1-4/P1-5 add and test an HMAC-key handle compute path backed by the CSP skeleton.
  * - Key material must never be logged by callers or by this library.
  */

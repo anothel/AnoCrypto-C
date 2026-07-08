@@ -1,7 +1,7 @@
 #include "ac_kat_manifest.h"
 
 /*
- * P1-9 KAT manifest.
+ * P1-15 KAT manifest.
  *
  * Vectors embedded in selftest.c, src/drbg/drbg.c, and tests/kat are limited to public
  * specification/test-vector inputs recorded in cleanroom/SOURCE_MANIFEST.md.
@@ -9,6 +9,30 @@
  * operational secrets.
  */
 static const ano_crypto_internal_kat_manifest_entry_t g_kat_manifest[] = {
+    {
+        "hash.sha384.reserved-empty",
+        "SHA-384",
+        "SRC-1001: NIST FIPS 180-4 Secure Hash Standard; P1-15 reserves API metadata only",
+        "p1-15-reserved-kat-plan"
+    },
+    {
+        "hash.sha512.reserved-empty",
+        "SHA-512",
+        "SRC-1001: NIST FIPS 180-4 Secure Hash Standard; P1-15 reserves API metadata only",
+        "p1-15-reserved-kat-plan"
+    },
+    {
+        "hmac.sha384.reserved-rfc4231",
+        "HMAC-SHA-384",
+        "SRC-1002: RFC 4231 HMAC-SHA-384 test vectors; P1-15 reserves API metadata only",
+        "p1-15-reserved-kat-plan"
+    },
+    {
+        "hmac.sha512.reserved-rfc4231",
+        "HMAC-SHA-512",
+        "SRC-1002: RFC 4231 HMAC-SHA-512 test vectors; P1-15 reserves API metadata only",
+        "p1-15-reserved-kat-plan"
+    },
     {
         "hash.sha256.empty",
         "SHA-256",

@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-14 draft.
+Status: P1-15 draft.
 
 ## Purpose
 
@@ -15,7 +15,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-14/
+build/evidence/p1-15/
 ```
 
 ## Expected generated files

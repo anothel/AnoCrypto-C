@@ -1,6 +1,6 @@
 # AnoCrypto-C Algorithm Scope
 
-Status: P1-14 draft.
+Status: P1-15 draft.
 
 ## Implemented candidate slice
 
@@ -16,10 +16,10 @@ Status: P1-14 draft.
 
 | Area | Algorithm | Status | Notes |
 |---|---|---|---|
-| Hash | SHA-384 | Not implemented | Digest-size query only. |
-| Hash | SHA-512 | Not implemented | Digest-size query only. |
-| MAC | HMAC-SHA-384 | Not implemented | MAC-size query only. |
-| MAC | HMAC-SHA-512 | Not implemented | MAC-size query only. |
+| Hash | SHA-384 | ABI-reserved, not implemented | Name, digest-size, and context-size metadata query only; processing returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`. |
+| Hash | SHA-512 | ABI-reserved, not implemented | Name, digest-size, and context-size metadata query only; processing returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`. |
+| MAC | HMAC-SHA-384 | ABI-reserved, not implemented | MAC-size metadata query only; processing returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`. |
+| MAC | HMAC-SHA-512 | ABI-reserved, not implemented | MAC-size metadata query only; processing returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`. |
 | DRBG | Hash_DRBG-SHA-256 | Not implemented | Algorithm ID is reserved for API review. |
 | Random service | `ano_crypto_random_*` | Not implemented | Design draft only; no public header or ABI yet. |
 
@@ -33,7 +33,7 @@ KAT and CTest pass logs are engineering correctness evidence only. They do not r
 
 1. Add additional HMAC_DRBG KAT paths: personalization string, no reseed, no additional input, and request-size boundaries.
 2. Add CI matrix for Linux/Windows/Apple entropy provider branches.
-3. Decide SHA-384/SHA-512 implementation timing.
+3. Keep SHA-384/SHA-512 in P1-15 reserved scope until implementation/KAT/differential-validation entry criteria are ready.
 4. Add reproducible build notes.
 5. Add public support matrix for thread-safety and platform entropy provider behavior.
 6. Perform API/ABI review before adding public random-service APIs.
@@ -54,3 +54,12 @@ KAT and CTest pass logs are engineering correctness evidence only. They do not r
 - `docs/design/BLOCK_CIPHER_MODE_SELECTION.md` records why block cipher/mode implementation remains deferred until customer and validation-target candidate inputs are reviewed.
 - `docs/security/SIDE_CHANNEL_REVIEW_CHECKLIST.md` records review questions for key-dependent code paths.
 - P1-12 does not add a new algorithm implementation or a new public cryptographic API.
+
+
+## P1-15 SHA-384/SHA-512 Scope Notes
+
+- `docs/design/SHA2_384_512_SCOPE_DECISION.md` records the decision to keep SHA-384/SHA-512 processing deferred in P1-15.
+- `docs/kcmvp/SHA2_384_512_KAT_PLAN.md` records planned vector classes and evidence expectations.
+- `tests/negative/sha2_reserved_api_tests.c` verifies metadata queries and `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` processing behavior.
+- `tools/check_sha2_scope_policy.cmake` verifies docs, tests, KAT manifest, evidence, and PoC package wiring.
+- P1-15 does not add a new cryptographic algorithm implementation.

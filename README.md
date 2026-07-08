@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-14 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal platform entropy provider seam, internal DRBG instantiate/reseed helper, HMAC_DRBG boundary vectors, CMake package naming normalization, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, limited internal global-state locking, reproducible-build notes, CI matrix skeleton, API/ABI review checklist, public-surface policy check, release-evidence draft tooling, customer PoC package v0 skeleton, scope/validation planning documents, SBOM/signing placeholder manifests, and thread-safety support-matrix checks.
+Current status: P1-15 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal platform entropy provider seam, internal DRBG instantiate/reseed helper, HMAC_DRBG boundary vectors, CMake package naming normalization, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, limited internal global-state locking, reproducible-build notes, CI matrix skeleton, API/ABI review checklist, public-surface policy check, release-evidence draft tooling, customer PoC package v0 skeleton, scope/validation planning documents, SBOM/signing placeholder manifests, thread-safety support-matrix checks, and SHA-384/SHA-512 reserved-scope checks.
 
 Implemented processing scope:
 
@@ -26,7 +26,7 @@ Implemented processing scope:
 
 Skeleton-only / TODO scope:
 
-- SHA-384/SHA-512 ABI placeholders
+- SHA-384/SHA-512 ABI placeholders with P1-15 reserved-scope regression tests
 - HMAC-SHA-384/HMAC-SHA-512 ABI placeholders
 - Hash_DRBG-SHA-256 ABI placeholder
 - Public random service layer and reviewed customer/platform entropy policy
@@ -48,8 +48,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-14
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-14
+cmake --install build --prefix /tmp/anocrypto-c-p1-15
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-15
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -67,8 +67,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-14
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-14
+cmake --install build --prefix /tmp/anocrypto-c-p1-15
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-15
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -99,9 +99,9 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_SURFACE_CHECK.txt`, `THREAD_SAFETY_CHECK.txt`, `REPRODUCIBLE_BUILD_NOTES.txt`, `SCOPE_REVIEW_NOTES.txt`, `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST.sha256`, `ctest.log`, installed-package smoke logs, and PoC package smoke logs when the default P1-14 target is used.
+Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_SURFACE_CHECK.txt`, `THREAD_SAFETY_CHECK.txt`, `SHA2_SCOPE_CHECK.txt`, `REPRODUCIBLE_BUILD_NOTES.txt`, `SCOPE_REVIEW_NOTES.txt`, `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST.sha256`, `ctest.log`, installed-package smoke logs, and PoC package smoke logs when the default P1-15 target is used.
 
-## P1-14 thread-safety support matrix
+## P1-15 SHA-384/SHA-512 reserved scope and retained thread-safety matrix
 
 - P1-10 reproducible build notes, CI matrix skeleton, API/ABI checklist, public-surface checks, and symbol-hiding option retained
 - P1-11 customer PoC package v0 staging and smoke retained
@@ -114,6 +114,12 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_
 - PoC package now writes `THREAD_SAFETY_PACKAGE_NOTES.txt`
 - PoC package smoke checks that package manifest/review/status/thread-safety records exist
 - Clean-room source manifest and exclusion log updated for P1-14 thread-safety support-matrix additions
+- `docs/design/SHA2_384_512_SCOPE_DECISION.md` records the P1-15 SHA-384/SHA-512 reserved scope decision
+- `docs/kcmvp/SHA2_384_512_KAT_PLAN.md` records the P1-15 KAT/evidence plan
+- `ano_crypto_sha2_scope_policy_check` verifies SHA-384/SHA-512 reserved-scope wiring
+- `tests/negative/sha2_reserved_api_tests.c` verifies size/name metadata and NOT_IMPLEMENTED processing behavior
+- Evidence workflow now writes `SHA2_SCOPE_CHECK.txt` and `SHA2_SCOPE_REVIEW_NOTES.txt`
+- PoC package now writes `SHA2_SCOPE_PACKAGE_NOTES.txt`
 
 ## Important limitations
 
@@ -130,5 +136,6 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_
 - Binary reproducibility across hosts/toolchains is not established yet.
 - Internal test-hook builds may expose internal symbols for internal-unit tests; release-style no-test builds should enable symbol hiding where supported.
 - Customer PoC package v0 is an integration draft and still needs legal/evaluation notice review before external sharing.
-- P1-14 thread-safety support-matrix additions do not add new cryptographic algorithm implementations.
+- P1-14 thread-safety support-matrix additions are retained.
+- P1-15 SHA-384/SHA-512 scope additions do not add new cryptographic algorithm implementations.
 - This repository does not claim official validation or external review completion.

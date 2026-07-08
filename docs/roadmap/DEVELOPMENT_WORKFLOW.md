@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P1-14 draft.
+Status: P1-15 draft.
 
 ## Purpose
 
@@ -105,11 +105,26 @@ P1-14 deliverables:
 - PoC package output for `THREAD_SAFETY_PACKAGE_NOTES.txt`.
 - CMake guard so the POSIX concurrent CSP/HMAC test only runs when thread safety is enabled and pthread support is available.
 
+
+## P1-15 placement
+
+P1-15 is the SHA-384/SHA-512 scope-decision step after the P1-14 thread-safety support-matrix step. It keeps SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 as reserved processing APIs and adds tests/evidence wiring so the deferred state is explicit.
+
+P1-15 deliverables:
+
+- SHA-384/SHA-512 scope decision document.
+- SHA-384/SHA-512 KAT/evidence plan.
+- Public hash digest/block size metadata macros.
+- Reserved-API negative test for SHA-384/SHA-512 and HMAC variants.
+- SHA-2 reserved scope policy check target.
+- Evidence outputs for `SHA2_SCOPE_CHECK.txt` and `SHA2_SCOPE_REVIEW_NOTES.txt`.
+- PoC package output for `SHA2_SCOPE_PACKAGE_NOTES.txt`.
+
 ## Planned next sequence
 
 | Step | Candidate name | Scope |
 |---|---|---|
-| P1-15 | SHA-384/SHA-512 implementation decision | Decide whether to implement, defer, or source-review SHA-384/SHA-512. |
+| P1-15 | SHA-384/SHA-512 reserved scope decision | Completed as reserved-scope/KAT-plan guardrail without implementation. |
 | P1-16 | Public random API decision | Decide whether to expose `ano_crypto_random_*` or keep DRBG APIs lower-level until entropy policy is reviewed. |
 | P2-01 | Block cipher implementation start | Start only after P1-12 selection criteria and customer/KCMVP scope are reviewed. |
 

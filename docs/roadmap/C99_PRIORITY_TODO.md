@@ -1,6 +1,6 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-14 draft.
+Status: P1-15 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -55,12 +55,15 @@ Status: P1-14 draft.
 - P1-13 evidence workflow additions for `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, and `EVIDENCE_MANIFEST.sha256`
 - P1-14 thread-safety support matrix and CI checklist
 - P1-14 thread-safety policy check target and evidence/PoC package records
+- P1-15 SHA-384/SHA-512 reserved scope decision and KAT plan
+- P1-15 reserved SHA-2 API negative test and scope policy check target
+- P1-15 evidence/PoC package records for SHA-384/SHA-512 reserved scope
 
 ## Immediate P1 next items
 
 1. Review and harden CI matrix after first hosted runs on Linux, Windows, and Apple runners.
 2. Add Windows-specific concurrent CSP/HMAC coverage and sanitizer lanes where supported.
-3. Decide SHA-384/SHA-512 implementation timing.
+3. Decide when to implement SHA-384/SHA-512 after P1-15 reserved-scope entry criteria are reviewed.
 4. Decide whether and when to expose public `ano_crypto_random_*` APIs.
 5. Add reproducible source archive timestamp normalization if byte-for-byte archives become a release requirement.
 6. Decide whether to replace the public build identity struct with field getters before ABI freeze.

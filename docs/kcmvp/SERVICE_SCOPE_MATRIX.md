@@ -1,6 +1,6 @@
 # AnoCrypto-C Service Scope Matrix
 
-Status: P1-14 draft.
+Status: P1-15 draft.
 
 ## Purpose
 
@@ -14,7 +14,7 @@ This matrix separates implemented services, ABI-reserved services, internal seam
 | Self-test | `ano_crypto_selftest_*` | Implemented skeleton with startup KAT path | In core boundary | Startup KAT coverage and CTest logs | Integrity check strategy remains TODO. |
 | Build/version identity | `ano_crypto_version_*`, `ano_crypto_build_*` | Implemented | In core boundary | Install smoke and PoC smoke query version/build identity | Consider replacing public build identity struct before ABI freeze. |
 | SHA-256 | `ano_crypto_hash_*` | Implemented | Candidate core primitive | Public-source KATs and chunk-boundary tests | Keep as P1 baseline. |
-| SHA-384/SHA-512 | `ano_crypto_hash_*` algorithm IDs and size queries | ABI-reserved only | Not in implemented candidate slice | Size-query behavior only | Decide implementation timing. |
+| SHA-384/SHA-512 | `ano_crypto_hash_*` algorithm IDs, names, digest-size queries, context-size queries | ABI-reserved only | Not in implemented candidate slice | Reserved-API negative test and SHA-2 scope policy check | Keep reserved until implementation, KAT, differential-validation, and evidence updates are ready. |
 | HMAC-SHA-256 | `ano_crypto_hmac_*` | Implemented | Candidate core primitive | Public-source KATs, long-key coverage, streaming tests | Keep as P1 baseline. |
 | HMAC key handle path | `ano_crypto_key_*`, `ano_crypto_csp_*`, HMAC handle use | Implemented in-memory slice | Candidate CSP/key lifecycle slice | KAT path, stale-handle, exhaustion, lifecycle negative tests | Persistence/export/wrapping remain out of scope. |
 | HMAC_DRBG-SHA-256 | `ano_crypto_drbg_*` | Implemented deterministic core | Candidate DRBG core slice | Public-source KATs, boundary tests, negative tests | Public random service and entropy policy remain separate decisions. |
@@ -50,3 +50,8 @@ Every service that enters the implemented candidate slice should have:
 ## Current P1-12 conclusion
 
 Do not start block cipher implementation yet. First collect customer/platform inputs and choose the candidate algorithm/mode scope with a documented decision record.
+
+
+## P1-15 SHA-2 reserved scope conclusion
+
+P1-15 does not add SHA-384/SHA-512 or HMAC-SHA-384/HMAC-SHA-512 processing implementations. It adds reserved-API regression coverage, a KAT/evidence plan, and a scope policy check so the public metadata behavior remains explicit while implementation is deferred.

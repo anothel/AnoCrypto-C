@@ -1,6 +1,6 @@
 # AnoCrypto-C Reproducible Build Notes
 
-Status: P1-14 draft.
+Status: P1-15 draft.
 
 ## Purpose
 
@@ -45,9 +45,9 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Install smoke can also be run manually:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-14
+cmake --install build --prefix /tmp/anocrypto-c-p1-15
 cmake -S tests/install_smoke -B build-install-smoke \
-  -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-14
+  -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-15
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -56,7 +56,7 @@ The PoC example can also be run manually as an installed-package consumer:
 
 ```sh
 cmake -S examples/core_poc -B build-core-poc \
-  -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-14
+  -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-15
 cmake --build build-core-poc --parallel
 ./build-core-poc/anocrypto_c_core_poc
 ```

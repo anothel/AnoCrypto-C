@@ -1,6 +1,6 @@
 # C99 Random Service API Draft
 
-Status: P1-14 design draft only.
+Status: P1-15 design draft only.
 
 ## Purpose
 

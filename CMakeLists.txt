@@ -36,7 +36,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-14-thread-safety-matrix" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-15-sha2-scope-kat-plan" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -156,6 +156,16 @@ add_custom_target(ano_crypto_thread_safety_policy_check
     USES_TERMINAL
     COMMENT "Checking AnoCrypto-C thread-safety policy and support matrix")
 
+
+add_custom_target(ano_crypto_sha2_scope_policy_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_SHA2_SCOPE_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/SHA2_SCOPE_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_sha2_scope_policy.cmake
+    USES_TERMINAL
+    COMMENT "Checking AnoCrypto-C SHA-384/SHA-512 reserved scope policy")
+
 if(ANO_CRYPTO_BUILD_EXAMPLES)
     add_subdirectory(examples/core_poc)
 endif()
@@ -259,6 +269,12 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
     add_test(NAME ano_crypto_hash_hmac_api_negative_tests COMMAND ano_crypto_hash_hmac_api_negative_tests)
 
+    add_executable(ano_crypto_sha2_reserved_api_tests
+        tests/negative/sha2_reserved_api_tests.c)
+    target_link_libraries(ano_crypto_sha2_reserved_api_tests PRIVATE anocrypto_c)
+
+    add_test(NAME ano_crypto_sha2_reserved_api_tests COMMAND ano_crypto_sha2_reserved_api_tests)
+
     add_executable(ano_crypto_drbg_api_negative_tests
         tests/negative/drbg_api_negative_tests.c)
     target_link_libraries(ano_crypto_drbg_api_negative_tests PRIVATE anocrypto_c)
@@ -328,18 +344,20 @@ if(ANO_CRYPTO_BUILD_TESTS)
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-14
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-15
             -DANO_CRYPTO_RUN_CTEST=ON
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
             -DANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON
             -DANO_CRYPTO_RUN_POC_PACKAGE_SMOKE=ON
+            -DANO_CRYPTO_RUN_SHA2_SCOPE_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-14 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-15 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_public_surface_check
         ano_crypto_thread_safety_policy_check
+        ano_crypto_sha2_scope_policy_check
         anocrypto_c
         ano_crypto_module_state_tests
         ano_crypto_service_gate_negative_tests
@@ -349,6 +367,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_hmac_drbg_boundary_tests
         ano_crypto_hmac_key_handle_kat_tests
         ano_crypto_hash_hmac_api_negative_tests
+        ano_crypto_sha2_reserved_api_tests
         ano_crypto_drbg_api_negative_tests
         ano_crypto_csp_key_lifecycle_negative_tests
         ano_crypto_csp_handle_stale_exhaustion_tests

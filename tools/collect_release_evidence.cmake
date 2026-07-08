@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-14 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-15 \
 #         -DANO_CRYPTO_RUN_CTEST=ON \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-14")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-15")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -48,6 +48,10 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_THREAD_SAFETY_CHECK)
     set(ANO_CRYPTO_RUN_THREAD_SAFETY_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_SHA2_SCOPE_CHECK)
+    set(ANO_CRYPTO_RUN_SHA2_SCOPE_CHECK ON)
 endif()
 
 get_filename_component(ANO_CRYPTO_SOURCE_DIR "${ANO_CRYPTO_SOURCE_DIR}" ABSOLUTE)
@@ -132,7 +136,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
 "Git status: ${_git_status}\n"
 "CMake command: ${CMAKE_COMMAND}\n"
 "CMake version: ${CMAKE_VERSION}\n"
-"Reproducible build status: P1-14 draft procedure; binary byte identity not claimed\n"
+"Reproducible build status: P1-15 draft procedure; binary byte identity not claimed\n"
 "Evidence status: engineering draft only\n"
 "Claims boundary: not official validation evidence\n")
 
@@ -268,10 +272,31 @@ else()
         "Thread-safety policy check was not requested. Set ANO_CRYPTO_RUN_THREAD_SAFETY_CHECK=ON.\n")
 endif()
 
+if(ANO_CRYPTO_RUN_SHA2_SCOPE_CHECK)
+    set(_sha2_scope_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/SHA2_SCOPE_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+            -DANO_CRYPTO_SHA2_SCOPE_CHECK_OUTPUT=${_sha2_scope_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_sha2_scope_policy.cmake"
+        RESULT_VARIABLE _sha2_scope_check_result
+        OUTPUT_VARIABLE _sha2_scope_check_stdout
+        ERROR_VARIABLE _sha2_scope_check_stderr)
+    file(APPEND "${_sha2_scope_check_output}" "\nCommand output:\n${_sha2_scope_check_stdout}${_sha2_scope_check_stderr}\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SHA-2 reserved scope check result: ${_sha2_scope_check_result}\n")
+    if(NOT _sha2_scope_check_result EQUAL 0)
+        message(FATAL_ERROR "SHA-2 reserved scope check failed; see ${_sha2_scope_check_output}")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA2_SCOPE_CHECK.txt"
+        "SHA-2 reserved scope check was not requested. Set ANO_CRYPTO_RUN_SHA2_SCOPE_CHECK=ON.\n")
+endif()
+
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "AnoCrypto-C reproducible build evidence notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-14 draft procedure; binary byte identity is not claimed.\n"
+    "Status: P1-15 draft procedure; binary byte identity is not claimed.\n"
     "Source directory: ${ANO_CRYPTO_SOURCE_DIR}\n"
     "Build directory: ${ANO_CRYPTO_BUILD_DIR}\n"
     "Source archive content list: SOURCE_ARCHIVE_CONTENTS.txt\n"
@@ -279,13 +304,14 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "Binary hash list: BINARY_FILES.sha256\n"
     "Public surface check: PUBLIC_SURFACE_CHECK.txt\n"
     "Thread-safety policy check: THREAD_SAFETY_CHECK.txt\n"
+    "SHA-2 reserved scope check: SHA2_SCOPE_CHECK.txt\n"
     "TODO: normalize archive timestamps if byte-for-byte source archives become a release requirement.\n"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-14 evidence and scope-review notes\n"
+    "AnoCrypto-C P1-15 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: engineering planning artifact; no new cryptographic algorithm implementation is added by P1-14.\n"
+    "Status: engineering planning artifact; no new cryptographic algorithm implementation is added by P1-15.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Differential validation strategy: docs/kcmvp/DIFFERENTIAL_VALIDATION_STRATEGY.md\n"
@@ -301,13 +327,29 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
     "Thread-safety support matrix: docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md\n"
     "Thread-safety CI checklist: docs/ci/THREAD_SAFETY_CI_CHECKLIST.md\n"
     "Thread-safety evidence check: THREAD_SAFETY_CHECK.txt\n"
+    "SHA-384/SHA-512 scope decision: docs/design/SHA2_384_512_SCOPE_DECISION.md\n"
+    "SHA-384/SHA-512 KAT plan: docs/kcmvp/SHA2_384_512_KAT_PLAN.md\n"
+    "SHA-2 reserved scope check: SHA2_SCOPE_CHECK.txt\n"
+    "P1-15 keeps SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 as reserved processing APIs that return ANO_CRYPTO_ERR_NOT_IMPLEMENTED.\n"
     "Do not include secrets, entropy bytes, generated secret bytes, private keys, tokens, customer data, or internal deployment details in scope evidence.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Scope review notes: SCOPE_REVIEW_NOTES.txt\n")
+
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA2_SCOPE_REVIEW_NOTES.txt"
+    "AnoCrypto-C SHA-384/SHA-512 scope review notes\n"
+    "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
+    "Status: P1-15 planning and reserved-API regression evidence only.\n"
+    "Scope decision: docs/design/SHA2_384_512_SCOPE_DECISION.md\n"
+    "KAT plan: docs/kcmvp/SHA2_384_512_KAT_PLAN.md\n"
+    "Reserved API test: tests/negative/sha2_reserved_api_tests.c\n"
+    "Policy check: SHA2_SCOPE_CHECK.txt\n"
+    "Current behavior: size/name queries are available; SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 processing return ANO_CRYPTO_ERR_NOT_IMPLEMENTED.\n"
+    "No SHA-384/SHA-512 compression implementation, HMAC implementation, startup KAT, or differential validation code is added by P1-15.\n")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SHA-2 scope review notes: SHA2_SCOPE_REVIEW_NOTES.txt\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SBOM_STATUS.txt"
     "AnoCrypto-C SBOM status\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: placeholder only; no complete SBOM is generated by P1-14.\n"
+    "Status: placeholder only; no complete SBOM is generated by P1-15.\n"
     "Hash manifests available: SOURCE_FILES.sha256, SOURCE_ARCHIVE.sha256, BINARY_FILES.sha256, EVIDENCE_MANIFEST.sha256.\n"
     "Candidate SBOM formats: SPDX JSON or CycloneDX JSON after tool and schema review.\n"
     "SBOM plan: docs/kcmvp/SBOM_SIGNING_PLAN.md\n"
@@ -317,7 +359,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SBOM status: SBOM_S
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SIGNING_STATUS.txt"
     "AnoCrypto-C signing status\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: signing not performed by P1-14 evidence collection.\n"
+    "Status: signing not performed by P1-15 evidence collection.\n"
     "Private signing keys and signing tokens must not be stored in this repository, evidence directory, or PoC package.\n"
     "Candidate signed artifacts: source archive, source hash file, binary hash file, PoC package archive, SBOM, and evidence manifest after policy review.\n"
     "Preferred future approach: detached signatures with separately reviewed verification instructions.\n"

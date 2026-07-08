@@ -77,10 +77,10 @@ ano_crypto_status_t ano_crypto_hash_digest_size(
         *out_size = ANO_CRYPTO_SHA256_DIGEST_SIZE;
         return ANO_CRYPTO_OK;
     case ANO_CRYPTO_HASH_ALG_SHA384:
-        *out_size = 48u;
+        *out_size = ANO_CRYPTO_HASH_SHA384_DIGEST_SIZE;
         return ANO_CRYPTO_OK;
     case ANO_CRYPTO_HASH_ALG_SHA512:
-        *out_size = 64u;
+        *out_size = ANO_CRYPTO_HASH_SHA512_DIGEST_SIZE;
         return ANO_CRYPTO_OK;
     default:
         return ANO_CRYPTO_ERR_UNSUPPORTED_ALGORITHM;

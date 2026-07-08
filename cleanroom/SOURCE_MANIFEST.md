@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P1-14 draft
+Status: P1-15 draft
 Date: 2026-07-08
 
 ## Purpose
@@ -292,3 +292,21 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - P1-14 adds documentation, CMake/tooling, CI skeleton updates, and evidence/package records only.
 - The current support matrix does not make caller-owned hash, HMAC, or DRBG contexts concurrently mutable.
 - Thread/concurrency logs must remain status-only and must not print key material, entropy input, nonce input, DRBG state, MAC output, generated DRBG bytes, private keys, tokens, customer data, or internal deployment details.
+
+## P1-15 SHA-384/SHA-512 Reserved Scope Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| DER-15001 | Fresh `docs/design/SHA2_384_512_SCOPE_DECISION.md` written in this repository | User-owned planning artifact | Records the decision to keep SHA-384/SHA-512 processing reserved in P1-15 | No third-party implementation code imported. |
+| DER-15002 | Fresh `docs/kcmvp/SHA2_384_512_KAT_PLAN.md` written in this repository | User-owned planning artifact | Records planned SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 vector/evidence classes | Planning only; no new vector data files imported. |
+| DER-15003 | Fresh `tests/negative/sha2_reserved_api_tests.c` written in this repository | User-owned generated test code | Verifies SHA-384/SHA-512 metadata queries and `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` processing behavior | Status-only output; no secrets or generated digest bytes are printed. |
+| DER-15004 | Fresh `tools/check_sha2_scope_policy.cmake` written in this repository | User-owned tooling | Checks docs/source/evidence/PoC wiring for SHA-384/SHA-512 reserved scope | Engineering guardrail only. |
+| DER-15005 | P1-15 updates to PoC package staging and smoke scripts | User-owned tooling | Generate and verify `SHA2_SCOPE_PACKAGE_NOTES.txt` | Package note is a support-boundary summary only. |
+
+## P1-15 Clean-room Notes
+
+- P1-15 adds documentation, tests, CMake/tooling, evidence records, and package notes only for SHA-384/SHA-512 reserved scope.
+- No SHA-384/SHA-512 implementation code is imported or added.
+- No HMAC-SHA-384/HMAC-SHA-512 implementation code is imported or added.
+- No new non-public test vector data is imported.
+- No secret key, entropy sample, generated secret byte string, private key, token, customer data, or internal deployment detail is added.

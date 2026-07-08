@@ -1,6 +1,6 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P1-14 draft
+Status: P1-15 draft
 Date: 2026-07-08
 
 ## Purpose
@@ -175,3 +175,13 @@ If excluded material is discovered:
 | EX-2303 | Treating POSIX concurrency smoke results as a broad platform support guarantee | Claims risk | Excluded | Current results are engineering evidence tied to specific build configuration and platform branch. |
 | EX-2304 | Thread test logs containing key material, entropy input, nonce input, DRBG state, MAC output, generated DRBG bytes, private keys, tokens, customer data, or internal deployment details | Sensitive information risk | Excluded | P1-14 log rules require status-only output. |
 | EX-2305 | Enabling POSIX concurrent CSP/HMAC smoke tests when `ANO_CRYPTO_ENABLE_THREAD_SAFETY=OFF` | Test/support risk | Excluded | P1-14 guards that test behind both the build option and pthread availability. |
+
+## P1-15 Additional Exclusions
+
+| ID | Excluded material or behavior | Reason | Action | Notes |
+|---|---|---|---|---|
+| EX-2401 | Third-party SHA-384/SHA-512 implementation code or snippets with unclear ownership | Code provenance risk | Excluded | P1-15 does not add a SHA-512-family implementation. |
+| EX-2402 | Third-party HMAC-SHA-384/HMAC-SHA-512 implementation code or snippets with unclear ownership | Code provenance risk | Excluded | P1-15 keeps these processing APIs reserved. |
+| EX-2403 | Unreviewed SHA-384/SHA-512 or HMAC-SHA-384/HMAC-SHA-512 vector files | Test provenance risk | Excluded | P1-15 records only a KAT plan and KAT manifest reserved entries. |
+| EX-2404 | Behavior that silently treats SHA-384/SHA-512 as implemented without startup KAT and evidence updates | Evidence/scope risk | Excluded | `sha2_reserved_api_tests` and `ano_crypto_sha2_scope_policy_check` keep the reserved state explicit. |
+| EX-2405 | Logs containing HMAC key bytes, entropy input, nonce material, DRBG state, generated DRBG bytes, private keys, tokens, customer data, or internal deployment details | Sensitive information risk | Excluded | P1-15 reserved-scope tests and package notes use status-only output. |

@@ -1,6 +1,6 @@
 # C99 Hash and HMAC API Design
 
-Status: P1-14 draft.
+Status: P1-15 draft.
 
 ## Implemented P1 scope
 
@@ -55,11 +55,11 @@ Startup self-test uses internal SHA-256/HMAC-SHA-256 helpers so that self-test c
 - HMAC-SHA-384
 - HMAC-SHA-512
 
-These algorithm IDs remain ABI candidates but processing APIs return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` for them in P1-5.
+These algorithm IDs remain ABI candidates. P1-15 fixes their metadata behavior: name, digest size, MAC size, and context size queries are allowed; processing APIs return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`.
 
 ## TODO
 
-- Decide whether SHA-384/SHA-512 enter P1 or stay P2.
+- Decide when SHA-384/SHA-512 move from P1-15 reserved scope into implemented scope.
 - Add differential validation strategy against an independently selected reference tool.
 - Document input/output aliasing policy per API.
 - Add constant-time and side-channel review checklist for HMAC key handling.
@@ -77,3 +77,17 @@ Current limits:
 - No key export, persistence, wrapping, or keystore integration.
 - No thread-safety guarantee yet.
 - Test keys are public synthetic KAT fixtures only.
+
+
+## P1-15 SHA-384/SHA-512 reserved scope
+
+P1-15 adds public digest/block size macros for SHA-256, SHA-384, and SHA-512 metadata. SHA-384/SHA-512 processing remains unimplemented.
+
+Current contract:
+
+- `ano_crypto_hash_algorithm_name()` returns `SHA-384` and `SHA-512`.
+- `ano_crypto_hash_digest_size()` returns 48 and 64 bytes.
+- `ano_crypto_hmac_mac_size()` returns the corresponding MAC size metadata.
+- `ano_crypto_hash_init()`, `ano_crypto_hash_digest()`, `ano_crypto_hmac_init()`, and `ano_crypto_hmac_compute()` return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` for SHA-384/SHA-512 variants.
+- `tests/negative/sha2_reserved_api_tests.c` locks this behavior.
+- `docs/design/SHA2_384_512_SCOPE_DECISION.md` and `docs/kcmvp/SHA2_384_512_KAT_PLAN.md` record the implementation entry criteria.

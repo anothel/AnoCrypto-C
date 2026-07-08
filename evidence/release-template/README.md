@@ -27,6 +27,8 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - Reproducible build notes
 - Public surface check result
 - Thread-safety policy check result
+- SHA-384/SHA-512 scope check result
+- SHA-384/SHA-512 scope review notes
 - CI matrix result summary
 - Customer PoC package smoke log
 - Customer PoC package manifest review
@@ -57,7 +59,8 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md` records the P1-14 public thread-safety support boundary.
 - `docs/ci/THREAD_SAFETY_CI_CHECKLIST.md` records the P1-14 thread-safety CI lanes and log-review rules.
 - `tools/check_thread_safety_policy.cmake` checks thread-safety policy/evidence wiring.
-- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, and `THREAD_SAFETY_CHECK.txt` for P1-14 evidence drafts.
+- `tools/check_sha2_scope_policy.cmake` checks SHA-384/SHA-512 reserved-scope wiring.
+- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, `THREAD_SAFETY_CHECK.txt`, `SHA2_SCOPE_CHECK.txt`, and `SHA2_SCOPE_REVIEW_NOTES.txt` for P1-15 evidence drafts.
 
 ## Commands
 
@@ -70,8 +73,8 @@ ctest --test-dir build --output-on-failure
 Install smoke:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-14
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-14
+cmake --install build --prefix /tmp/anocrypto-c-p1-15
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-15
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -120,3 +123,14 @@ If present, review entropy/thread/helper test logs for:
 - SBOM/signing status files remain clear placeholders unless reviewed generated artifacts are present
 - thread-safety check output matches the support matrix and current build option
 - evidence and package manifests use intended file paths only
+
+
+## P1-15 SHA-2 Scope Review
+
+If present, review SHA-384/SHA-512 scope logs for:
+
+- reserved processing APIs return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`
+- metadata queries expose only name, digest size, MAC size, and opaque context size
+- KAT manifest entries remain `p1-15-reserved-kat-plan` until implementation evidence exists
+- no key bytes, entropy bytes, generated secret bytes, private keys, tokens, or customer data appear in logs
+- no wording implies SHA-384/SHA-512 processing implementation has been added
