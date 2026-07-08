@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P1-12 draft
+Status: P1-13 draft
 Date: 2026-07-07
 
 ## Purpose
@@ -258,3 +258,20 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - Customer intake explicitly excludes secret material, entropy captures, generated secret bytes, private keys, tokens, customer data, and internal deployment secrets.
 - Differential validation remains a strategy draft until a reviewed public/reference source or tool is selected.
 - Scope planning does not change the current implemented cryptographic service slice.
+
+## P1-13 SBOM, Signing, and Manifest Planning Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| DER-13001 | Fresh `docs/kcmvp/SBOM_SIGNING_PLAN.md` written in this repository | User-owned documentation | Record SBOM and signing placeholder workflow before selecting tools or key-management policy | No SBOM generator output, private key, token, or signature file is included. |
+| DER-13002 | Fresh `docs/kcmvp/EVIDENCE_MANIFEST_POLICY.md` written in this repository | User-owned documentation | Define evidence/package manifest hash rules and review boundaries | Uses SHA-256 manifests as engineering review aids only. |
+| DER-13003 | Fresh `docs/business/POC_PACKAGE_REVIEW_MANIFEST.md` written in this repository | User-owned documentation | Record PoC package review fields before customer sharing | Explicitly excludes customer secrets, signing keys, tokens, private keys, entropy captures, and customer data. |
+| DER-13004 | P1-13 updates to `tools/collect_release_evidence.cmake` | User-owned tooling | Generate `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, and evidence manifest files | Placeholder status only; no private signing material and no generated SBOM are added. |
+| DER-13005 | P1-13 updates to PoC package staging/smoke scripts | User-owned tooling | Generate and verify package manifest, package review manifest, SBOM status, and signing status records | Package smoke checks record presence without creating signatures or collecting secrets. |
+
+## P1-13 Clean-room Notes
+
+- No external SBOM generator output, signing workflow code, release service integration, or vendor package manifest was copied.
+- No private signing key, signing token, customer secret, customer data, entropy capture, generated secret bytes, private key, or internal deployment material is included.
+- P1-13 adds documentation, placeholder status records, and manifest generation only.
+- SBOM and signing remain TODO until tool, format, signer identity, and verification policy are reviewed.

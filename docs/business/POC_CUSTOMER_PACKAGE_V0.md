@@ -12,6 +12,9 @@ This package is not official validation evidence and does not promise certificat
 AnoCrypto-C-PoC-v0/
   README.md
   PACKAGE_MANIFEST.md
+  PACKAGE_REVIEW_MANIFEST.md
+  SBOM_STATUS.txt
+  SIGNING_STATUS.txt
   INSTALL_PACKAGE.log
   sdk/
     include/anocrypto/*.h
@@ -24,12 +27,16 @@ AnoCrypto-C-PoC-v0/
   docs/
     README.md
     LICENSE
-    docs/business/POC_CUSTOMER_PACKAGE_V0.md
-    docs/integration/SDK_INTEGRATION_GUIDE.md
-    docs/kcmvp/*.md
-    docs/design/API_ABI_REVIEW_CHECKLIST.md
-    docs/ci/CI_MATRIX.md
-    docs/roadmap/C99_PRIORITY_TODO.md
+    business/POC_CUSTOMER_PACKAGE_V0.md
+    business/CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md
+    business/POC_PACKAGE_REVIEW_MANIFEST.md
+    integration/SDK_INTEGRATION_GUIDE.md
+    kcmvp/*.md
+    design/API_ABI_REVIEW_CHECKLIST.md
+    design/BLOCK_CIPHER_MODE_SELECTION.md
+    security/SIDE_CHANNEL_REVIEW_CHECKLIST.md
+    ci/CI_MATRIX.md
+    roadmap/C99_PRIORITY_TODO.md
   evidence-template/README.md
 ```
 
@@ -90,6 +97,9 @@ The smoke target stages the package, configures `examples/core_poc` as a standal
 Before sharing a package externally, review:
 
 - `PACKAGE_MANIFEST.md`
+- `PACKAGE_REVIEW_MANIFEST.md`
+- `SBOM_STATUS.txt`
+- `SIGNING_STATUS.txt`
 - `INSTALL_PACKAGE.log`
 - generated example smoke logs
 - local absolute paths in logs
@@ -98,12 +108,12 @@ Before sharing a package externally, review:
 - test-vector provenance notes
 - whether any customer or internal deployment details were accidentally included
 
-Do not add or retain secrets, entropy captures, generated secret bytes, private keys, tokens, customer certificate bundles, or internal deployment details in the package.
+Do not add or retain secrets, entropy captures, generated secret bytes, private keys, signing keys, signing tokens, tokens, customer certificate bundles, customer data, or internal deployment details in the package.
 
 ## TODO before broader PoC use
 
 - Decide binary SDK versus source-available evaluation terms.
 - Add license/evaluation notice text after legal review.
-- Add SBOM/signing placeholders once release workflow decisions exist.
-- Add a customer questionnaire for OS, CPU, compiler, linker, deployment model, and required algorithm scope.
+- Replace SBOM/signing placeholders with reviewed generated outputs after tool and key-management policies are selected.
+- Customer questionnaire for OS, CPU, compiler, linker, deployment model, and required algorithm scope is available as `CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md`.
 - Add a support boundary document for error reports and evidence requests.

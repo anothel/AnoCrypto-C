@@ -1,6 +1,6 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-12 draft.
+Status: P1-13 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -49,20 +49,24 @@ Status: P1-12 draft.
 - P1-12 side-channel review checklist
 - P1-12 customer PoC intake questionnaire
 - P1-12 evidence workflow additions for scope-review notes
+- P1-13 SBOM/signing placeholder plan
+- P1-13 evidence manifest policy
+- P1-13 PoC package review manifest and package status records
+- P1-13 evidence workflow additions for `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, and `EVIDENCE_MANIFEST.sha256`
 
 ## Immediate P1 next items
 
-1. Add SBOM/signing placeholders to the evidence workflow and PoC package manifest.
-2. Review and harden CI matrix after first hosted runs on Linux, Windows, and Apple runners.
-3. Expand thread-safety policy into reviewed public support matrix and CI coverage.
-4. Decide SHA-384/SHA-512 implementation timing.
-5. Decide whether and when to expose public `ano_crypto_random_*` APIs.
-6. Add reproducible source archive timestamp normalization if byte-for-byte archives become a release requirement.
-7. Decide whether to replace the public build identity struct with field getters before ABI freeze.
-8. Add exported-symbol baseline comparison after symbol visibility policy is chosen.
-9. Add package license/evaluation notice after legal review.
-10. Select first block cipher/mode only after customer and validation-target candidate inputs are reviewed.
-11. Add differential tests only after a reviewed public/reference source or tool is selected.
+1. Review and harden CI matrix after first hosted runs on Linux, Windows, and Apple runners.
+2. Expand thread-safety policy into reviewed public support matrix and CI coverage.
+3. Decide SHA-384/SHA-512 implementation timing.
+4. Decide whether and when to expose public `ano_crypto_random_*` APIs.
+5. Add reproducible source archive timestamp normalization if byte-for-byte archives become a release requirement.
+6. Decide whether to replace the public build identity struct with field getters before ABI freeze.
+7. Add exported-symbol baseline comparison after symbol visibility policy is chosen.
+8. Add package license/evaluation notice after legal review.
+9. Select first block cipher/mode only after customer and validation-target candidate inputs are reviewed.
+10. Add differential tests only after a reviewed public/reference source or tool is selected.
+11. Replace SBOM/signing placeholders with reviewed generator/signing outputs after tool and key-management policy are selected.
 
 ## P2 candidates
 

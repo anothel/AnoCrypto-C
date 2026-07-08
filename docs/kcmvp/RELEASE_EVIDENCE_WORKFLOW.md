@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-12 draft.
+Status: P1-13 draft.
 
 ## Purpose
 
@@ -15,7 +15,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-12/
+build/evidence/p1-13/
 ```
 
 ## Expected generated files
@@ -31,6 +31,10 @@ BINARY_FILES.sha256
 PUBLIC_SURFACE_CHECK.txt
 REPRODUCIBLE_BUILD_NOTES.txt
 SCOPE_REVIEW_NOTES.txt
+SBOM_STATUS.txt
+SIGNING_STATUS.txt
+EVIDENCE_MANIFEST_README.txt
+EVIDENCE_MANIFEST.sha256
 ctest.log
 INSTALL_SMOKE_INSTALL.log
 INSTALL_SMOKE_CONFIGURE.log
@@ -51,7 +55,8 @@ README.md
 - Confirm claims remain limited to engineering correctness and readiness preparation.
 - Confirm platform provider logs include provider name/status only.
 - Confirm PoC package manifests and logs do not disclose local customer/internal details before sharing.
-- Confirm P1-12 scope-review notes match the intended customer and validation-target candidate boundary.
+- Confirm P1-12 scope-review notes still match the intended customer and validation-target candidate boundary.
+- Confirm P1-13 SBOM/signing placeholder status and evidence manifest are accurate.
 
 ## P1-12 additions
 
@@ -67,10 +72,20 @@ README.md
 - Evidence collection writes `SCOPE_REVIEW_NOTES.txt` to point reviewers at the current scope-lock artifacts.
 - The packaged PoC documentation set includes the new scope and intake documents.
 
+
+## P1-13 additions
+
+- SBOM/signing plan document added: `docs/kcmvp/SBOM_SIGNING_PLAN.md`.
+- Evidence manifest policy added: `docs/kcmvp/EVIDENCE_MANIFEST_POLICY.md`.
+- Customer PoC package review manifest added: `docs/business/POC_PACKAGE_REVIEW_MANIFEST.md`.
+- Evidence collection writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, and `EVIDENCE_MANIFEST.sha256`.
+- PoC package staging writes `PACKAGE_REVIEW_MANIFEST.md`, `SBOM_STATUS.txt`, and `SIGNING_STATUS.txt`.
+- PoC package smoke checks that package manifest/review/status files exist.
+
 ## Known gaps
 
-- No SBOM generation yet.
-- No release signing evidence yet.
+- No complete SBOM generation yet; P1-13 records placeholder status only.
+- No release signing evidence yet; P1-13 records placeholder status only.
 - CI workflow has not yet been reviewed against all customer toolchains.
 - PoC package legal/evaluation notice remains TODO pending legal review.
 - Source archive timestamp normalization is still TODO if byte-for-byte archives become required.

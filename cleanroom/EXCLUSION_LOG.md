@@ -1,6 +1,6 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P1-12 draft
+Status: P1-13 draft
 Date: 2026-07-07
 
 ## Purpose
@@ -155,3 +155,13 @@ If excluded material is discovered:
 | EX-2104 | Customer PoC intake that requests secrets, entropy captures, generated secret bytes, private keys, tokens, customer data, or internal deployment secrets | Sensitive information risk | Excluded | Intake questionnaire is limited to platform, toolchain, deployment model, and algorithm-scope requirements. |
 | EX-2105 | Treating side-channel checklist completion as formal leakage-resistance proof | Claims risk | Excluded | Checklist is an engineering review aid and must be paired with evidence and external process as applicable. |
 | EX-2106 | Moving AnoSecureKit or AnoPKI workflows into the AnoCrypto-C core | Product-boundary risk | Excluded | P1-12 service matrix keeps application helper and PKI workflows out of the core boundary. |
+
+## P1-13 Additional Exclusions
+
+| ID | Material / Pattern | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-2201 | Private signing keys, signing tokens, release-service credentials, or timestamping credentials | Sensitive information risk | Excluded | P1-13 records signing status placeholders only and does not include secret signing material. |
+| EX-2202 | Customer PoC packages containing customer secrets, customer data, private keys, entropy captures, generated secret bytes, tokens, or internal deployment details | Sensitive information risk | Excluded | P1-13 package review manifest and smoke checks keep package records structural and status-only. |
+| EX-2203 | Third-party SBOM generator outputs or vendor manifests without reviewed tool/configuration provenance | Provenance/process risk | Deferred | P1-13 records SBOM placeholder status and waits for tool and schema review. |
+| EX-2204 | Treating SHA-256 manifests or placeholder SBOM/signing status as official validation evidence | Claims risk | Excluded | Manifests are engineering review aids only. |
+| EX-2205 | Detached signature files or verification instructions before signing tool, signer identity, and key-management policy are selected | Process risk | Deferred | P1-13 documents future approach without performing signing. |

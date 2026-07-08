@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-12 draft.
+Status: P1-13 draft.
 
 ## Review scope
 
@@ -57,8 +57,8 @@ cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DANO_CRYPTO_BUILD_EXAMPLES=ON -
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 cmake --build build --target ano_crypto_public_surface_check
-cmake --install build --prefix /tmp/anocrypto-c-p1-12
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-12
+cmake --install build --prefix /tmp/anocrypto-c-p1-13
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-13
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 cmake --build build --target ano_crypto_poc_package_smoke

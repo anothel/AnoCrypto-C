@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P1-12 draft.
+Status: P1-13 draft.
 
 ## Purpose
 
@@ -13,7 +13,8 @@ This document explains the working flow used for AnoCrypto-C after the C99 reboo
 | P0 Foundation | Repository, clean-room records, C ABI skeleton, module lifecycle, self-test, build identity, install smoke | A consumer can build, install, link, initialize, self-test, and shut down the module. |
 | P1 Core slice | Small algorithm slice, KATs, negative tests, entropy/DRBG/CSP seams, CI/reproducibility notes, API/ABI review, customer PoC package | The limited SHA-256/HMAC-SHA-256/HMAC_DRBG-SHA-256 slice has repeatable tests and engineering evidence. |
 | P1 Scope lock | Decide the next validation-target candidate scope before expanding code | Algorithm scope, service matrix, differential-validation strategy, side-channel review checklist, and customer intake inputs are recorded. |
-| P2 Productization | Customer PoC hardening, SBOM/signing placeholders, toolchain support matrix, SecureKit/PKI boundary planning | A customer-specific PoC package can be reviewed without mixing core, SecureKit, and PKI scope. |
+| P1 Evidence/package hardening | SBOM/signing placeholders, package manifest review, and evidence manifest generation | Evidence and PoC packages have explicit status files and hash manifests without storing secrets or signing material. |
+| P2 Productization | Customer PoC hardening, toolchain support matrix, SecureKit/PKI boundary planning | A customer-specific PoC package can be reviewed without mixing core, SecureKit, and PKI scope. |
 | P3 Validation readiness | Gap review with selected platform/toolchain/scope and external preparation | Submission-facing artifacts are prepared from reviewed evidence, not from ad-hoc logs. |
 
 ## Default task loop
@@ -75,11 +76,24 @@ P1-12 deliverables:
 - Customer PoC intake questionnaire.
 - Evidence workflow notes that point to the new planning artifacts.
 
+
+## P1-13 placement
+
+P1-13 is the evidence/package manifest hardening step after the P1-12 scope-lock planning step. It intentionally avoids selecting an SBOM generator, signing tool, signer identity, or key-management policy. The output is a set of placeholder status files and hash manifests that make later release-candidate packaging easier to review.
+
+P1-13 deliverables:
+
+- SBOM/signing plan.
+- Evidence manifest policy.
+- Customer PoC package review manifest.
+- Evidence workflow outputs for `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, and `EVIDENCE_MANIFEST.sha256`.
+- PoC package outputs for `PACKAGE_REVIEW_MANIFEST.md`, `SBOM_STATUS.txt`, and `SIGNING_STATUS.txt`.
+- PoC package smoke check for required package records.
+
 ## Planned next sequence
 
 | Step | Candidate name | Scope |
 |---|---|---|
-| P1-13 | SBOM/signing placeholders | Add SBOM/signing status files to evidence and PoC manifest without choosing a signing tool yet. |
 | P1-14 | Thread-safety support matrix | Turn internal locking notes into a public support matrix and CI checklist. |
 | P1-15 | SHA-384/SHA-512 implementation decision | Decide whether to implement, defer, or source-review SHA-384/SHA-512. |
 | P1-16 | Public random API decision | Decide whether to expose `ano_crypto_random_*` or keep DRBG APIs lower-level until entropy policy is reviewed. |

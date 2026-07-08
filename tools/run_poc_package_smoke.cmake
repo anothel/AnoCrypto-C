@@ -57,6 +57,17 @@ if(NOT EXISTS "${_example_source}/CMakeLists.txt")
     message(FATAL_ERROR "Packaged core PoC example is missing: ${_example_source}")
 endif()
 
+set(_required_package_records
+    "PACKAGE_MANIFEST.md"
+    "PACKAGE_REVIEW_MANIFEST.md"
+    "SBOM_STATUS.txt"
+    "SIGNING_STATUS.txt")
+foreach(_record IN LISTS _required_package_records)
+    if(NOT EXISTS "${_package_dir}/${_record}")
+        message(FATAL_ERROR "PoC package record is missing: ${_package_dir}/${_record}")
+    endif()
+endforeach()
+
 ano_crypto_poc_run_logged(
     "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_EXAMPLE_CONFIGURE.log"
     "Configure packaged core PoC example"
@@ -107,6 +118,10 @@ file(WRITE "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_PACKAGE_SMOKE_SUMMARY.txt"
     "Example source: ${_example_source}\n"
     "Example build: ${_example_build}\n"
     "Example executable: ${_example_exe}\n"
+    "Package manifest: ${_package_dir}/PACKAGE_MANIFEST.md\n"
+    "Package review manifest: ${_package_dir}/PACKAGE_REVIEW_MANIFEST.md\n"
+    "SBOM status: ${_package_dir}/SBOM_STATUS.txt\n"
+    "Signing status: ${_package_dir}/SIGNING_STATUS.txt\n"
     "PoC package smoke result: ${_run_result}\n")
 
 message(STATUS "AnoCrypto-C PoC package smoke passed: ${ANO_CRYPTO_POC_SMOKE_DIR}")

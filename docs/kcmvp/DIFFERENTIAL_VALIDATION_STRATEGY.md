@@ -1,6 +1,6 @@
 # Differential Validation Strategy
 
-Status: P1-12 draft.
+Status: P1-13 draft.
 
 ## Purpose
 

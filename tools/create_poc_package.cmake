@@ -47,12 +47,15 @@ set(_doc_files
     LICENSE
     docs/business/POC_CUSTOMER_PACKAGE_V0.md
     docs/business/CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md
+    docs/business/POC_PACKAGE_REVIEW_MANIFEST.md
     docs/integration/SDK_INTEGRATION_GUIDE.md
     docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md
     docs/kcmvp/SERVICE_SCOPE_MATRIX.md
     docs/kcmvp/DIFFERENTIAL_VALIDATION_STRATEGY.md
     docs/kcmvp/RELEASE_EVIDENCE_WORKFLOW.md
     docs/kcmvp/REPRODUCIBLE_BUILD_NOTES.md
+    docs/kcmvp/SBOM_SIGNING_PLAN.md
+    docs/kcmvp/EVIDENCE_MANIFEST_POLICY.md
     docs/design/API_ABI_REVIEW_CHECKLIST.md
     docs/design/BLOCK_CIPHER_MODE_SELECTION.md
     docs/security/SIDE_CHANNEL_REVIEW_CHECKLIST.md
@@ -81,6 +84,35 @@ file(COPY "${ANO_CRYPTO_SOURCE_DIR}/examples/core_poc" DESTINATION "${_examples_
 file(COPY "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/README.md" DESTINATION "${_evidence_dir}")
 
 string(TIMESTAMP _created_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
+
+file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SBOM_STATUS.txt"
+    "AnoCrypto-C PoC package SBOM status\n"
+    "Generated UTC: ${_created_utc}\n"
+    "Status: placeholder only; no complete SBOM is generated for this P1-13 PoC package.\n"
+    "Package hash manifest: PACKAGE_MANIFEST.md\n"
+    "SBOM plan document: docs/kcmvp/SBOM_SIGNING_PLAN.md\n"
+    "Do not add secrets, private keys, tokens, entropy captures, generated secret bytes, customer data, or internal deployment details to SBOM inputs.\n")
+
+file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SIGNING_STATUS.txt"
+    "AnoCrypto-C PoC package signing status\n"
+    "Generated UTC: ${_created_utc}\n"
+    "Status: signing not performed for this P1-13 PoC package.\n"
+    "No private signing key, signing token, or detached signature file is included.\n"
+    "Future detached-signature workflow remains TODO until signing tool, signer identity, and verification policy are selected.\n")
+
+file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/PACKAGE_REVIEW_MANIFEST.md"
+    "# AnoCrypto-C PoC Package Review Manifest\n\n"
+    "Generated UTC: ${_created_utc}\n\n"
+    "Status: engineering package review aid.\n\n"
+    "## Required review points\n\n"
+    "- Confirm `PACKAGE_MANIFEST.md` lists only package-relative paths.\n"
+    "- Confirm `SBOM_STATUS.txt` is still accurate for this package.\n"
+    "- Confirm `SIGNING_STATUS.txt` is still accurate for this package.\n"
+    "- Confirm examples do not print key bytes, entropy bytes, seed material, nonce material, DRBG state, generated DRBG output, private keys, or tokens.\n"
+    "- Confirm install logs do not disclose internal deployment details before sharing.\n"
+    "- Confirm package contents match the intended customer PoC scope.\n"
+    "- Confirm customer secrets, customer data, private keys, signing keys, signing tokens, and entropy captures are not present.\n")
+
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/README.md"
 "# AnoCrypto-C PoC Package v0\n\n"
 "Generated UTC: ${_created_utc}\n\n"
@@ -89,7 +121,10 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/README.md"
 "- `sdk/`: installed headers, library, and `AnoCryptoC` CMake package files.\n"
 "- `examples/core_poc/`: standalone public-API integration example.\n"
 "- `docs/`: selected design, integration, evidence, and roadmap notes.\n"
-"- `evidence-template/`: release evidence template notes for customer review workflows.\n\n"
+"- `evidence-template/`: release evidence template notes for customer review workflows.\n"
+"- `PACKAGE_MANIFEST.md`: package-relative SHA-256 file manifest.\n"
+"- `PACKAGE_REVIEW_MANIFEST.md`: review notes before sharing.\n"
+"- `SBOM_STATUS.txt` and `SIGNING_STATUS.txt`: placeholder status records.\n\n"
 "## Build the PoC example\n\n"
 "```sh\n"
 "cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=$PWD/sdk\n"
@@ -97,7 +132,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/README.md"
 "./build-core-poc/anocrypto_c_core_poc\n"
 "```\n\n"
 "## Boundary\n\n"
-"This package is not official validation evidence. Review local paths, compiler identifiers, binary provenance, source provenance, and logs before sharing externally. Do not add secrets, entropy captures, generated secret bytes, private keys, tokens, or customer deployment details to this package.\n")
+"This package is not official validation evidence. Review local paths, compiler identifiers, binary provenance, source provenance, manifest files, SBOM/signing status placeholders, and logs before sharing externally. Do not add secrets, entropy captures, generated secret bytes, private keys, tokens, signing keys, signing tokens, customer data, or customer deployment details to this package.\n")
 
 file(GLOB_RECURSE _package_files
     LIST_DIRECTORIES false
@@ -109,6 +144,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/PACKAGE_MANIFEST.md"
 "# AnoCrypto-C PoC Package v0 Manifest\n\n"
 "Generated UTC: ${_created_utc}\n\n"
 "Status: engineering package draft.\n\n"
+"The manifest excludes itself and uses package-relative paths. Review `PACKAGE_REVIEW_MANIFEST.md`, `SBOM_STATUS.txt`, and `SIGNING_STATUS.txt` before external sharing.\n\n"
 "## Files\n\n")
 foreach(_rel IN LISTS _package_files)
     if(NOT _rel STREQUAL "PACKAGE_MANIFEST.md")

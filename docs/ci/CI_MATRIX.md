@@ -1,6 +1,6 @@
 # AnoCrypto-C CI Matrix Skeleton
 
-Status: P1-12 draft.
+Status: P1-13 draft.
 
 ## Purpose
 
@@ -19,12 +19,12 @@ This matrix records the first CI coverage skeleton for build, test, public-surfa
 | Installed-package smoke | Required | Required | Required | Uses `find_package(AnoCryptoC CONFIG REQUIRED)`. |
 | Customer PoC package smoke | Required | Optional | Optional | Stages package, configures packaged example, builds, and runs it. |
 | Public surface policy check | Required | Required | Required | Checks naming, claims boundary, headers, package template presence, and Linux exported symbols when available. |
-| Evidence draft target | Linux required | Optional | Optional | Cross-platform evidence layout still needs review. |
+| Evidence draft target | Linux required | Optional | Optional | Includes SBOM/signing placeholder status and evidence manifest in P1-13. |
 | Platform entropy provider branch | Linux provider | Apple provider | Windows provider | Provider tests must not print entropy bytes. |
 
 ## Suggested matrix axes
 
-| Axis | Values | P1-12 decision |
+| Axis | Values | P1-13 decision |
 |---|---|---|
 | OS | `ubuntu-latest`, `macos-latest`, `windows-latest` | Required skeleton |
 | Build type | `Debug`, `Release` | Start with `Debug`; add `Release` before release-candidate review |
@@ -32,7 +32,7 @@ This matrix records the first CI coverage skeleton for build, test, public-surfa
 | Compiler | Default OS compiler first | GCC/Clang/MSVC expansion TODO |
 | Entropy provider | Enabled by default | Required, but logs must be status-only |
 | Thread safety | Enabled by default | Required for current global-state seam |
-| Examples | `ANO_CRYPTO_BUILD_EXAMPLES=ON` | Required for P1-12 PoC smoke |
+| Examples | `ANO_CRYPTO_BUILD_EXAMPLES=ON` | Required for PoC smoke |
 | Internal symbol hiding | Off for internal test-hook build; on for release-style no-test build | Add dedicated release-style lane before release-candidate review |
 
 ## Workflow skeleton
@@ -46,5 +46,5 @@ The repository includes `.github/workflows/ci.yml` as a starter workflow. It is 
 3. Add customer PoC package smoke on macOS and Windows after path/executable lookup is reviewed.
 4. Add static library smoke checks if static packaging becomes a supported deliverable.
 5. Add artifact upload only after log redaction rules are reviewed.
-6. Add SBOM/signing jobs when the release process is defined.
+6. Replace SBOM/signing placeholders with reviewed generator/signing jobs when the release process is defined.
 7. Add ABI baseline comparison after the public ABI is frozen.
