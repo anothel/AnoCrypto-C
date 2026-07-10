@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <anocrypto/anocrypto.h>
+#include "ac_internal.h"
 
 #define ASSERT_STATUS(expr, expected) do { \
     ano_crypto_status_t _st = (expr); \
@@ -88,21 +89,18 @@ static int test_shutdown_blocks_services(void)
     return 0;
 }
 
-static int test_forced_selftest_failure_enters_error_state(void)
+static int test_internal_fatal_transition_enters_error_state(void)
 {
-#if defined(ANO_CRYPTO_ENABLE_TEST_HOOKS)
     ano_crypto_module_state_t state;
     ano_crypto_status_t last_error;
 
-    ASSERT_STATUS(ano_crypto_selftest_run(ANO_CRYPTO_SELFTEST_FLAG_FORCE_FAILURE_FOR_TEST),
-                  ANO_CRYPTO_ERR_SELF_TEST_FAILED);
+    ano_crypto_internal_module_mark_error(ANO_CRYPTO_ERR_SELF_TEST_FAILED);
     ASSERT_STATUS(ano_crypto_module_get_state(&state), ANO_CRYPTO_OK);
     ASSERT_TRUE(state == ANO_CRYPTO_MODULE_STATE_ERROR_STATE);
     ASSERT_STATUS(ano_crypto_module_get_last_error(&last_error), ANO_CRYPTO_OK);
     ASSERT_TRUE(last_error == ANO_CRYPTO_ERR_SELF_TEST_FAILED);
     ASSERT_STATUS(ano_crypto_module_require_operational(), ANO_CRYPTO_ERR_FATAL_STATE);
     ASSERT_STATUS(ano_crypto_module_init(0), ANO_CRYPTO_ERR_FATAL_STATE);
-#endif
     return 0;
 }
 
@@ -120,7 +118,7 @@ int main(void)
     if (test_shutdown_blocks_services() != 0) {
         return 1;
     }
-    if (test_forced_selftest_failure_enters_error_state() != 0) {
+    if (test_internal_fatal_transition_enters_error_state() != 0) {
         return 1;
     }
 

@@ -32,6 +32,9 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - CI matrix result summary
 - Customer PoC package smoke log
 - Customer PoC package manifest review
+- Entropy/health policy check result
+- Entropy/health review notes
+- Confirmation that the PoC SDK was rebuilt with entropy hooks off and internal symbol hiding on
 
 ## P1 Evidence Notes
 
@@ -73,8 +76,8 @@ ctest --test-dir build --output-on-failure
 Install smoke:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-16
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-16
+cmake --install build --prefix /tmp/anocrypto-c-p1-17
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-17
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -141,3 +144,15 @@ If present, review SHA-384/SHA-512 scope logs for:
 - Include `RANDOM_BOUNDARY_REVIEW_NOTES.txt`.
 - Confirm `ac_random.h` remains reserved unless public random generation has been reviewed and implemented.
 - Confirm logs do not contain entropy bytes, nonce seed material, DRBG state, or generated random bytes.
+
+## P1-17 Entropy/Health Review
+
+If present, review entropy failure-injection and health-test records for:
+
+- `ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF` in ordinary, evidence, Release, and clean PoC SDK configurations;
+- dedicated failure lane only for deterministic success/failure/partial-write coverage;
+- full output zeroization after provider or health-test failure;
+- sticky module `ERROR_STATE` and DRBG context invalidation after fatal health failure;
+- no installed internal entropy headers or exported test-hook symbols;
+- no entropy samples, deterministic hook byte sequences, seed material, DRBG state, or generated random bytes in logs/evidence;
+- explicit wording that duplicate-block candidates are engineering skeletons, not finalized source-specific tests.

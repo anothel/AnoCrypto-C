@@ -64,7 +64,11 @@ set(_required_package_records
     "SIGNING_STATUS.txt"
     "THREAD_SAFETY_PACKAGE_NOTES.txt"
     "SHA2_SCOPE_PACKAGE_NOTES.txt"
-    "RANDOM_BOUNDARY_PACKAGE_NOTES.txt")
+    "RANDOM_BOUNDARY_PACKAGE_NOTES.txt"
+    "ENTROPY_HEALTH_PACKAGE_NOTES.txt"
+    "CLEAN_BUILD_CONFIGURE.log"
+    "CLEAN_BUILD.log"
+    "INSTALL_PACKAGE.log")
 foreach(_record IN LISTS _required_package_records)
     if(NOT EXISTS "${_package_dir}/${_record}")
         message(FATAL_ERROR "PoC package record is missing: ${_package_dir}/${_record}")
@@ -128,6 +132,7 @@ file(WRITE "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_PACKAGE_SMOKE_SUMMARY.txt"
     "Thread-safety notes: ${_package_dir}/THREAD_SAFETY_PACKAGE_NOTES.txt\n"
     "SHA-2 scope notes: ${_package_dir}/SHA2_SCOPE_PACKAGE_NOTES.txt\n"
     "Random boundary notes: ${_package_dir}/RANDOM_BOUNDARY_PACKAGE_NOTES.txt\n"
+    "Entropy health boundary notes: ${_package_dir}/ENTROPY_HEALTH_PACKAGE_NOTES.txt\n"
     "PoC package smoke result: ${_run_result}\n")
 
 message(STATUS "AnoCrypto-C PoC package smoke passed: ${ANO_CRYPTO_POC_SMOKE_DIR}")

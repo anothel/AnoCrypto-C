@@ -1,7 +1,7 @@
 # AnoCrypto-C Source Manifest
 
-Status: P1-16 draft
-Date: 2026-07-08
+Status: P1-17 draft
+Date: 2026-07-11
 
 ## Purpose
 
@@ -328,3 +328,22 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - P1-16 does not import third-party random-service implementation code.
 - P1-16 does not store entropy samples, nonce seed material, generated random bytes, private keys, tokens, or customer data.
 - P1-16 keeps the internal platform entropy provider as a status-only engineering seam.
+
+## P1-17 Entropy Failure-Injection and Health-Test Inputs
+
+| ID | Source | Classification | Usage | Notes |
+|---|---|---|---|---|
+| DER-17001 | Fresh internal entropy failure-injection hook written in this repository | User-owned C99 test plumbing | Deterministic success, failure-before-write, and partial-write failure coverage | Compiled only with `ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS`; not installed or public ABI. |
+| DER-17002 | Fresh internal entropy health-test skeleton written in this repository | User-owned C99 implementation skeleton | Exercise bounded startup/continuous duplicate-block state and failure transitions | Engineering candidate only; not a copied or finalized RCT/APT design. |
+| DER-17003 | Fresh entropy negative/unit tests written in this repository | User-owned C99 test code | Cover source failure, partial output, zero length, oversized request, health failure, DRBG invalidation, and module error state | Synthetic in-memory patterns only; no operating-system entropy is stored or printed. |
+| DER-17004 | Fresh P1-17 entropy design and CI checklist documents | User-owned documentation | Record test/release boundary, health-test limitations, CI lane, and log/evidence rules | No third-party health-test wording or implementation copied. |
+| DER-17005 | Fresh entropy/health policy check and evidence workflow changes | User-owned CMake tooling | Verify hook default/guards, internal-only placement, PoC clean-build settings, and evidence review records | Engineering guardrail only; not official validation evidence. |
+| DER-17006 | Fresh PoC clean Release build boundary changes | User-owned CMake tooling | Rebuild SDK with tests/hooks off and internal symbol hiding on; scan headers/exports | Does not package internal entropy headers, hooks, captured entropy, or seed material. |
+
+## P1-17 Clean-room Notes
+
+- No third-party entropy provider, health-test implementation, threshold, test vector, or vendor CI workflow was imported.
+- Tests use fresh synthetic byte patterns in memory only; actual entropy output is neither stored as a fixture nor written to evidence.
+- The duplicate-block checks are explicitly limited to wiring/state-transition candidates pending selection and review of the actual noise-source boundary.
+- Logs and evidence remain status-only and exclude entropy material, seed material, DRBG state, generated secret bytes, private keys, tokens, customer data, and internal deployment details.
+- The test hook is internal, compile-time gated, disabled by default, and excluded from clean Release/PoC builds.

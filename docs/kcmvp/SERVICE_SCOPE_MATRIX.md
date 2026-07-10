@@ -1,6 +1,6 @@
 # AnoCrypto-C Service Scope Matrix
 
-Status: P1-16 draft.
+Status: P1-17 draft.
 
 ## Purpose
 
@@ -60,3 +60,7 @@ P1-15 does not add SHA-384/SHA-512 or HMAC-SHA-384/HMAC-SHA-512 processing imple
 ## P1-16 public random-service boundary conclusion
 
 P1-16 adds a reserved `ac_random.h` public boundary and fail-closed `ano_crypto_random_*` placeholders. It does not add implemented public random byte generation. The implemented customer-facing flow remains explicit-entropy DRBG plus SHA-256/HMAC-SHA-256 smoke checks until entropy, reseed, prediction-resistance, fork/process, health-test, and evidence requirements are reviewed.
+
+## P1-17 entropy/health boundary conclusion
+
+P1-17 adds internal deterministic failure injection, bounded health-test candidates, and fail-closed state transitions only. These are not customer-facing services and do not widen the installed public ABI. Ordinary and PoC builds keep the hook disabled. Public random generation remains reserved until source selection, reseed/fork/restart behavior, health testing, and evidence requirements are reviewed.

@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-16-random-boundary"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-17-entropy-health"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P1-16 C99 foundation; SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, HMAC key handle lifecycle, stale-handle/exhaustion tests, evidence archive/smoke-log collection, limited internal thread-safety locks, internal platform entropy provider seam, internal DRBG instantiate-from-entropy helper, DRBG boundary vectors, naming normalization, reproducible-build/ABI review checks, customer PoC package smoke, scope/validation planning documents, SBOM/signing placeholders, evidence/PoC manifests, thread-safety support-matrix checks, SHA-384/SHA-512 reserved-scope checks, and reserved public random-service boundary checks include engineering test coverage; SHA-384/SHA-512 processing, Hash_DRBG, block cipher scope, and implemented public random byte generation remain TODO";
+    out_identity->notes = "P1-17 C99 foundation; SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, HMAC key handle lifecycle, deterministic internal entropy failure-injection lane, entropy failure/partial/zero/oversized negative tests, disabled-by-default health-test candidate skeletons, fatal health failure DRBG/module state transitions, clean PoC rebuild without test hooks, evidence policy checks, thread-safety support-matrix checks, SHA-384/SHA-512 reserved-scope checks, and reserved public random-service boundary checks include engineering test coverage; final noise-source health-test selection, SHA-384/SHA-512 processing, Hash_DRBG, block cipher scope, and implemented public random byte generation remain TODO";
 
     return ANO_CRYPTO_OK;
 }

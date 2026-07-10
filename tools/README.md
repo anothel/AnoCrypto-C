@@ -18,7 +18,7 @@ Or run the script directly:
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-16 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-17 \
   -DANO_CRYPTO_RUN_CTEST=ON \
   -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
   -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -27,7 +27,7 @@ cmake \
   -P tools/collect_release_evidence.cmake
 ```
 
-P1-16 output includes source-file hashes, a source archive SHA-256, binary hashes, CTest output, public-surface check output, thread-safety policy check output, reproducible-build notes, scope-review notes, SBOM/signing placeholder status, an evidence manifest, install-prefix smoke logs, and optional customer PoC package smoke logs, random-service boundary checks, and random boundary review notes.
+P1-17 output includes source-file hashes, a source archive SHA-256, binary hashes, CTest output, public-surface check output, thread-safety policy check output, reproducible-build notes, scope-review notes, SBOM/signing placeholder status, an evidence manifest, install-prefix smoke logs, and optional customer PoC package smoke logs, random-service boundary checks, entropy/health policy checks, and entropy/health review notes.
 
 ## `check_public_surface.cmake`
 
@@ -53,7 +53,7 @@ Stages a customer PoC package v0 from a configured build tree.
 cmake --build build --target ano_crypto_create_poc_package
 ```
 
-The generated package contains an installed SDK prefix, the public `examples/core_poc` integration example, selected docs, a package manifest, a package review manifest, SBOM/signing placeholder status files, thread-safety package notes, SHA-2 scope notes, and random-boundary notes.
+The generated package contains a separately rebuilt clean SDK prefix, the public `examples/core_poc` integration example, selected docs, package manifest/review records, SBOM/signing placeholder status files, thread-safety/SHA-2/random-boundary notes, and entropy/health boundary notes.
 
 ## `run_poc_package_smoke.cmake`
 
@@ -78,3 +78,13 @@ Runs local policy checks for the P1-16 reserved public random-service boundary, 
 ```sh
 cmake --build build --target ano_crypto_random_boundary_policy_check
 ```
+
+## `check_entropy_health_policy.cmake`
+
+Runs local policy checks for the P1-17 entropy failure-injection and health-test boundary, including test-hook defaults/guards, internal-only placement, negative/error-state tests, dedicated CI lane, evidence outputs, and clean PoC build settings.
+
+```sh
+cmake --build build --target ano_crypto_entropy_health_policy_check
+```
+
+The script writes `policy-check/ENTROPY_HEALTH_CHECK.txt`. It is an engineering guardrail and does not record entropy bytes or establish a finalized health-test policy.

@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-16 draft.
+Status: P1-17 draft.
 
 ## Review scope
 
@@ -61,8 +61,9 @@ cmake --build build --target ano_crypto_public_surface_check
 cmake --build build --target ano_crypto_thread_safety_policy_check
 cmake --build build --target ano_crypto_sha2_scope_policy_check
 cmake --build build --target ano_crypto_random_boundary_policy_check
-cmake --install build --prefix /tmp/anocrypto-c-p1-16
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-16
+cmake --build build --target ano_crypto_entropy_health_policy_check
+cmake --install build --prefix /tmp/anocrypto-c-p1-17
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-17
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 cmake --build build --target ano_crypto_poc_package_smoke
@@ -91,3 +92,11 @@ The P1-14 support matrix does not add public symbols or public struct layouts. I
 ## P1-16 random-service ABI note
 
 `ac_random.h` is intentionally installed so downstream consumers can see the reserved boundary, but its processing functions are fail-closed placeholders. Before turning those placeholders into implemented random byte generation, review context ownership, reseed policy, prediction-resistance behavior, fork/process behavior, platform entropy evidence, and symbol-baseline impact.
+
+## P1-17 entropy testability ABI note
+
+- Entropy provider hooks and health-test state remain under `src/internal/` and are not installed.
+- `ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS` is `OFF` by default and cannot be enabled with `ANO_CRYPTO_BUILD_TESTS=OFF`.
+- No public status-enum value or public struct layout was added for the health-test skeleton; internal health failure maps to `ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED`.
+- PoC staging rebuilds with tests/hooks off and internal symbol hiding on, then scans public headers and shared-library exports for internal/test-hook leakage.
+- Windows shared-library auto-export is allowed only in internal test builds so existing internal-unit tests can link; it is not enabled in the tests-off Release/PoC configuration.

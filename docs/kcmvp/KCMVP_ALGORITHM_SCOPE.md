@@ -1,6 +1,6 @@
 # AnoCrypto-C Algorithm Scope
 
-Status: P1-16 draft.
+Status: P1-17 draft.
 
 ## Implemented candidate slice
 
@@ -72,3 +72,10 @@ KAT and CTest pass logs are engineering correctness evidence only. They do not r
 - `tests/negative/random_reserved_api_tests.c` verifies reserved behavior and output zeroization.
 - `docs/design/PUBLIC_RANDOM_API_DECISION.md` and `docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md` record the decision and evidence rules.
 - P1-16 does not add an implemented public random byte generation service.
+
+## P1-17 Entropy Testability Notes
+
+- No new public cryptographic algorithm or public random-generation service is added.
+- Entropy failure injection and health-test state remain internal engineering seams.
+- Health failure maps to the existing `ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED`; no public status enum expansion is made.
+- Final entropy source, health-test requirements, sample boundary, thresholds, restart handling, and validation mapping remain TODO / confirmation required.

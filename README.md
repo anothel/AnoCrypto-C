@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-16 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal platform entropy provider seam, internal DRBG instantiate/reseed helper, HMAC_DRBG boundary vectors, CMake package naming normalization, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, limited internal global-state locking, reproducible-build notes, CI matrix skeleton, API/ABI review checklist, public-surface policy check, release-evidence draft tooling, customer PoC package v0 skeleton, scope/validation planning documents, SBOM/signing placeholder manifests, thread-safety support-matrix checks, SHA-384/SHA-512 reserved-scope checks, and reserved public random-service boundary checks.
+Current status: P1-17 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs and negative tests, internal platform entropy provider seam, dedicated-build entropy failure injection, internal startup/continuous health-test candidates, sticky module error-state wiring for fatal health failure, internal DRBG instantiate/reseed helpers, HMAC_DRBG boundary vectors, CMake package naming normalization, HMAC key handle lifecycle, limited internal global-state locking, reproducible-build and CI skeletons, API/ABI and public-surface checks, release-evidence draft tooling, customer PoC package v0 clean-build boundary, SHA-384/SHA-512 reserved scope, and reserved public random-service boundary.
 
 Implemented processing scope:
 
@@ -16,6 +16,9 @@ Implemented processing scope:
 - Extended KAT executables for SHA-256, HMAC-SHA-256, HMAC key handle path, and HMAC_DRBG-SHA-256 public vectors
 - Negative API tests for hash/HMAC/DRBG/CSP/key argument handling, context lifecycle behavior, handle exhaustion, stale handle rejection, and DRBG helper failure cleanup
 - Internal entropy adapter seam with callback and platform OS provider tests
+- Dedicated-build deterministic entropy provider hook for success, failure, and partial-write negative paths; disabled by default and absent from public headers
+- Internal startup/continuous duplicate-block health-test candidates with operation-local or module-fatal policy wiring
+- Fatal health-test failure coverage for DRBG context zeroization and sticky module `ERROR_STATE` transition
 - Release evidence draft collection with source archive hash, public-surface check, reproducible-build notes, install smoke logs, PoC package smoke logs, scope-review notes, SBOM/signing placeholder status, and evidence manifest hashes
 - Limited internal locking for module/self-test/CSP global state
 - Thread-safety support matrix, CI checklist, and policy-check target
@@ -31,6 +34,7 @@ Skeleton-only / TODO scope:
 - HMAC-SHA-384/HMAC-SHA-512 ABI placeholders
 - Hash_DRBG-SHA-256 ABI placeholder
 - Implemented public random byte generation service and reviewed customer/platform entropy policy
+- Reviewed noise-source-specific startup/continuous health tests, thresholds, restart behavior, and source placement
 - Persistent keystore, key export, key wrapping, and multi-process CSP model
 - Windows-specific concurrent CSP/HMAC coverage and sanitizer lanes
 - Byte-identical source archive and binary reproducibility rules
@@ -49,8 +53,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-16
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-16
+cmake --install build --prefix /tmp/anocrypto-c-p1-17
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-17
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -68,8 +72,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-16
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-16
+cmake --install build --prefix /tmp/anocrypto-c-p1-17
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-17
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -100,9 +104,9 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_SURFACE_CHECK.txt`, `THREAD_SAFETY_CHECK.txt`, `SHA2_SCOPE_CHECK.txt`, `RANDOM_BOUNDARY_CHECK.txt`, `RANDOM_BOUNDARY_REVIEW_NOTES.txt`, `REPRODUCIBLE_BUILD_NOTES.txt`, `SCOPE_REVIEW_NOTES.txt`, `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST.sha256`, `ctest.log`, installed-package smoke logs, and PoC package smoke logs when the default P1-16 target is used.
+Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_SURFACE_CHECK.txt`, `THREAD_SAFETY_CHECK.txt`, `SHA2_SCOPE_CHECK.txt`, `RANDOM_BOUNDARY_CHECK.txt`, `RANDOM_BOUNDARY_REVIEW_NOTES.txt`, `REPRODUCIBLE_BUILD_NOTES.txt`, `SCOPE_REVIEW_NOTES.txt`, `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST.sha256`, `ctest.log`, installed-package smoke logs, and PoC package smoke logs when the default P1-17 target is used. The P1-17 target also writes `ENTROPY_HEALTH_CHECK.txt` and `ENTROPY_HEALTH_REVIEW_NOTES.txt`.
 
-## P1-16 random-service boundary, SHA-2 reserved scope, and retained thread-safety matrix
+## P1-17 entropy failure-injection and health-test skeleton
 
 - P1-10 reproducible build notes, CI matrix skeleton, API/ABI checklist, public-surface checks, and symbol-hiding option retained
 - P1-11 customer PoC package v0 staging and smoke retained
@@ -143,9 +147,21 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_
 - Error recovery policy after fatal state remains TODO.
 - Public build identity still exposes one versioned struct layout; field getters should be considered before ABI freeze.
 - Binary reproducibility across hosts/toolchains is not established yet.
-- Internal test-hook builds may expose internal symbols for internal-unit tests; release-style no-test builds should enable symbol hiding where supported.
+- The dedicated entropy failure-injection build exposes internal test symbols only to internal tests; ordinary, Release, and PoC builds keep the hook disabled, and release-style builds hide internal symbols where supported.
 - Customer PoC package v0 is an integration draft and still needs legal/evaluation notice review before external sharing.
 - P1-14 thread-safety support-matrix additions are retained.
 - P1-15 SHA-384/SHA-512 scope additions do not add new cryptographic algorithm implementations.
 - P1-16 random-service boundary additions do not add implemented public random byte generation.
 - This repository does not claim official validation or external review completion.
+- P1-17 health-test candidates are engineering skeletons, not finalized noise-source tests or validation evidence.
+
+### P1-17 entropy boundary additions
+
+- `ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS` defaults to `OFF` and cannot be enabled when tests are disabled.
+- A dedicated CI lane enables deterministic provider success/failure/partial-write behavior without using real entropy.
+- `src/internal/ac_entropy_health_internal.h` and `src/drbg/entropy_health.c` add bounded startup/continuous duplicate-block candidates for state-machine testing only.
+- Health-test failure zeroizes the requested output; a source configured with fatal policy also places the module in sticky `ERROR_STATE`.
+- Fatal reseed health failure invalidates the affected HMAC_DRBG context by zeroization.
+- PoC staging performs a separate clean shared-library build with tests/hooks off and internal symbol hiding on.
+- Evidence collection adds `ENTROPY_HEALTH_CHECK.txt` and `ENTROPY_HEALTH_REVIEW_NOTES.txt`.
+- Final noise-source-specific health tests and operational policy remain TODO / confirmation required.

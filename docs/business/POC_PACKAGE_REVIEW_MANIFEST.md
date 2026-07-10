@@ -1,6 +1,6 @@
 # Customer PoC Package Review Manifest
 
-Status: P1-15 draft.
+Status: P1-17 draft.
 
 ## Purpose
 
@@ -16,6 +16,11 @@ The PoC package should contain:
 - `SBOM_STATUS.txt`
 - `SIGNING_STATUS.txt`
 - `THREAD_SAFETY_PACKAGE_NOTES.txt`
+- `SHA2_SCOPE_PACKAGE_NOTES.txt`
+- `RANDOM_BOUNDARY_PACKAGE_NOTES.txt`
+- `ENTROPY_HEALTH_PACKAGE_NOTES.txt`
+- `CLEAN_BUILD_CONFIGURE.log`
+- `CLEAN_BUILD.log`
 - `INSTALL_PACKAGE.log`
 - `sdk/`
 - `examples/core_poc/`
@@ -33,6 +38,9 @@ Confirm:
 - SBOM status is clearly marked as placeholder unless an actual SBOM is generated later
 - signing status is clearly marked as not performed unless detached signature files are added later
 - thread-safety package notes match `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md` and current build options
+- clean SDK logs record tests/hooks off and internal symbol hiding on
+- installed headers and shared-library exports do not expose internal entropy or failure-injection hook symbols
+- entropy/health package notes do not imply finalized source-specific health tests
 - package contents match the intended customer PoC scope
 
 ## Customer-specific notes
@@ -49,3 +57,7 @@ Do not add customer secrets, customer certificates with private keys, production
 ## P1-14 thread-safety package note
 
 The generated package includes `THREAD_SAFETY_PACKAGE_NOTES.txt`. Review it with `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md` before customer sharing. The note must not imply concurrent mutation support for caller-owned hash, HMAC, or DRBG contexts.
+
+## P1-17 entropy/test-hook package note
+
+Review `ENTROPY_HEALTH_PACKAGE_NOTES.txt`, `CLEAN_BUILD_CONFIGURE.log`, and `CLEAN_BUILD.log` together. The packaged SDK must come from the separate clean build, not the internal failure-injection build. No internal entropy header, deterministic hook API, entropy capture, seed material, generated random bytes, or DRBG state may be included.

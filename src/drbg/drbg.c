@@ -557,6 +557,10 @@ ano_crypto_status_t ano_crypto_internal_hmac_drbg_sha256_reseed_from_entropy_sou
     st = ano_crypto_internal_entropy_source_get(source, entropy_input, sizeof(entropy_input));
     if (st != ANO_CRYPTO_OK) {
         ano_crypto_internal_zeroize(entropy_input, sizeof(entropy_input));
+        if (ano_crypto_module_require_operational() == ANO_CRYPTO_ERR_FATAL_STATE) {
+            /* A fatal entropy health-test failure invalidates the DRBG context. */
+            ano_crypto_internal_zeroize(ctx, sizeof(ano_crypto_drbg_ctx_internal_t));
+        }
         return st;
     }
 

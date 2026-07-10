@@ -18,6 +18,92 @@
 #include "ac_entropy_internal.h"
 #include "ac_internal.h"
 
+#if defined(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS)
+typedef struct ano_crypto_internal_entropy_test_hook_state_s {
+    uint32_t mode;
+    uint8_t seed;
+    uint8_t next;
+    size_t partial_len;
+} ano_crypto_internal_entropy_test_hook_state_t;
+
+static ano_crypto_internal_entropy_test_hook_state_t g_entropy_test_hook;
+
+static int ano_crypto_internal_entropy_test_hook_is_active(void)
+{
+    return g_entropy_test_hook.mode != ANO_CRYPTO_INTERNAL_ENTROPY_TEST_HOOK_OFF ? 1 : 0;
+}
+
+ano_crypto_status_t ano_crypto_internal_entropy_test_hook_configure(
+    uint32_t mode,
+    uint8_t seed,
+    size_t partial_len)
+{
+    if (mode != ANO_CRYPTO_INTERNAL_ENTROPY_TEST_HOOK_OFF &&
+        mode != ANO_CRYPTO_INTERNAL_ENTROPY_TEST_HOOK_DETERMINISTIC_SEQUENCE &&
+        mode != ANO_CRYPTO_INTERNAL_ENTROPY_TEST_HOOK_DETERMINISTIC_REPEAT &&
+        mode != ANO_CRYPTO_INTERNAL_ENTROPY_TEST_HOOK_FAIL &&
+        mode != ANO_CRYPTO_INTERNAL_ENTROPY_TEST_HOOK_PARTIAL_FAIL) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+    }
+
+    if (partial_len > ANO_CRYPTO_INTERNAL_ENTROPY_MAX_REQUEST_LEN) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+    }
+
+    ano_crypto_internal_zeroize(&g_entropy_test_hook, sizeof(g_entropy_test_hook));
+    g_entropy_test_hook.mode = mode;
+    g_entropy_test_hook.seed = seed;
+    g_entropy_test_hook.next = seed;
+    g_entropy_test_hook.partial_len = partial_len;
+    return ANO_CRYPTO_OK;
+}
+
+void ano_crypto_internal_entropy_test_hook_reset(void)
+{
+    ano_crypto_internal_zeroize(&g_entropy_test_hook, sizeof(g_entropy_test_hook));
+}
+
+static ano_crypto_status_t ano_crypto_internal_entropy_test_hook_read(
+    uint8_t *out,
+    size_t out_len)
+{
+    size_t i;
+    size_t partial_len;
+
+    switch (g_entropy_test_hook.mode) {
+    case ANO_CRYPTO_INTERNAL_ENTROPY_TEST_HOOK_DETERMINISTIC_SEQUENCE:
+        for (i = 0u; i < out_len; ++i) {
+            out[i] = g_entropy_test_hook.next;
+            ++g_entropy_test_hook.next;
+        }
+        return ANO_CRYPTO_OK;
+
+    case ANO_CRYPTO_INTERNAL_ENTROPY_TEST_HOOK_DETERMINISTIC_REPEAT:
+        for (i = 0u; i < out_len; ++i) {
+            out[i] = (uint8_t)(g_entropy_test_hook.seed + (uint8_t)i);
+        }
+        return ANO_CRYPTO_OK;
+
+    case ANO_CRYPTO_INTERNAL_ENTROPY_TEST_HOOK_FAIL:
+        return ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED;
+
+    case ANO_CRYPTO_INTERNAL_ENTROPY_TEST_HOOK_PARTIAL_FAIL:
+        partial_len = g_entropy_test_hook.partial_len;
+        if (partial_len > out_len) {
+            partial_len = out_len;
+        }
+        for (i = 0u; i < partial_len; ++i) {
+            out[i] = (uint8_t)(g_entropy_test_hook.seed + (uint8_t)i);
+        }
+        return ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED;
+
+    case ANO_CRYPTO_INTERNAL_ENTROPY_TEST_HOOK_OFF:
+    default:
+        return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+    }
+}
+#endif
+
 ano_crypto_status_t ano_crypto_internal_entropy_source_init_none(
     ano_crypto_internal_entropy_source_t *source)
 {
@@ -36,7 +122,8 @@ ano_crypto_status_t ano_crypto_internal_entropy_source_init_callback(
     void *user_context,
     size_t min_request_len)
 {
-    if (source == 0 || read_fn == 0 || min_request_len == 0u) {
+    if (source == 0 || read_fn == 0 || min_request_len == 0u ||
+        min_request_len > ANO_CRYPTO_INTERNAL_ENTROPY_MAX_REQUEST_LEN) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
@@ -52,7 +139,8 @@ ano_crypto_status_t ano_crypto_internal_entropy_source_init_os(
     ano_crypto_internal_entropy_source_t *source,
     size_t min_request_len)
 {
-    if (source == 0 || min_request_len == 0u) {
+    if (source == 0 || min_request_len == 0u ||
+        min_request_len > ANO_CRYPTO_INTERNAL_ENTROPY_MAX_REQUEST_LEN) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
@@ -69,8 +157,38 @@ ano_crypto_status_t ano_crypto_internal_entropy_source_init_os_reserved(
     return ano_crypto_internal_entropy_source_init_os(source, min_request_len);
 }
 
+ano_crypto_status_t ano_crypto_internal_entropy_source_attach_health_test(
+    ano_crypto_internal_entropy_source_t *source,
+    ano_crypto_internal_entropy_health_t *health,
+    uint32_t failure_policy)
+{
+    if (source == 0 || health == 0) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    if (source->kind != ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_CALLBACK &&
+        source->kind != ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_OS) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    if (failure_policy != ANO_CRYPTO_INTERNAL_ENTROPY_HEALTH_FAILURE_OPERATION_ONLY &&
+        failure_policy != ANO_CRYPTO_INTERNAL_ENTROPY_HEALTH_FAILURE_MODULE_FATAL) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+    }
+
+    source->health = health;
+    source->health_failure_policy = failure_policy;
+    return ANO_CRYPTO_OK;
+}
+
 int ano_crypto_internal_platform_entropy_is_available(void)
 {
+#if defined(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS)
+    if (ano_crypto_internal_entropy_test_hook_is_active()) {
+        return 1;
+    }
+#endif
+
 #if defined(ANO_CRYPTO_USE_LINUX_GETRANDOM) || \
     defined(ANO_CRYPTO_USE_WINDOWS_BCRYPTGENRANDOM) || \
     defined(ANO_CRYPTO_USE_APPLE_SECRANDOMCOPYBYTES)
@@ -82,6 +200,12 @@ int ano_crypto_internal_platform_entropy_is_available(void)
 
 const char *ano_crypto_internal_platform_entropy_provider_name(void)
 {
+#if defined(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS)
+    if (ano_crypto_internal_entropy_test_hook_is_active()) {
+        return "internal-test-hook";
+    }
+#endif
+
 #if defined(ANO_CRYPTO_USE_LINUX_GETRANDOM)
     return "linux-getrandom";
 #elif defined(ANO_CRYPTO_USE_WINDOWS_BCRYPTGENRANDOM)
@@ -95,6 +219,12 @@ const char *ano_crypto_internal_platform_entropy_provider_name(void)
 
 static ano_crypto_status_t platform_entropy_get_impl(uint8_t *out, size_t out_len)
 {
+#if defined(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS)
+    if (ano_crypto_internal_entropy_test_hook_is_active()) {
+        return ano_crypto_internal_entropy_test_hook_read(out, out_len);
+    }
+#endif
+
 #if defined(ANO_CRYPTO_USE_LINUX_GETRANDOM)
     size_t offset = 0u;
 
@@ -150,6 +280,10 @@ ano_crypto_status_t ano_crypto_internal_platform_entropy_get(
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
+    if (out_len > ANO_CRYPTO_INTERNAL_ENTROPY_MAX_REQUEST_LEN) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+    }
+
     if (!ano_crypto_internal_platform_entropy_is_available()) {
         ano_crypto_internal_zeroize(out, out_len);
         return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
@@ -167,6 +301,31 @@ ano_crypto_status_t ano_crypto_internal_platform_entropy_get(
     return ANO_CRYPTO_OK;
 }
 
+static ano_crypto_status_t ano_crypto_internal_entropy_apply_health_test(
+    const ano_crypto_internal_entropy_source_t *source,
+    uint8_t *out,
+    size_t out_len)
+{
+    ano_crypto_status_t st;
+
+    if (source->health == 0) {
+        return ANO_CRYPTO_OK;
+    }
+
+    st = ano_crypto_internal_entropy_health_evaluate(source->health, out, out_len);
+    if (st == ANO_CRYPTO_OK) {
+        return ANO_CRYPTO_OK;
+    }
+
+    ano_crypto_internal_zeroize(out, out_len);
+    if (source->health_failure_policy ==
+        ANO_CRYPTO_INTERNAL_ENTROPY_HEALTH_FAILURE_MODULE_FATAL) {
+        ano_crypto_internal_module_mark_error(ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED);
+    }
+
+    return ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED;
+}
+
 ano_crypto_status_t ano_crypto_internal_entropy_source_get(
     const ano_crypto_internal_entropy_source_t *source,
     uint8_t *out,
@@ -176,6 +335,10 @@ ano_crypto_status_t ano_crypto_internal_entropy_source_get(
 
     if (source == 0 || out == 0 || out_len == 0u) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    if (out_len > ANO_CRYPTO_INTERNAL_ENTROPY_MAX_REQUEST_LEN) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
     }
 
     if (source->min_request_len != 0u && out_len < source->min_request_len) {
@@ -192,20 +355,23 @@ ano_crypto_status_t ano_crypto_internal_entropy_source_get(
         st = source->read_fn(source->user_context, out, out_len);
         if (st != ANO_CRYPTO_OK) {
             ano_crypto_internal_zeroize(out, out_len);
-            return st == ANO_CRYPTO_OK ? ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED : st;
+            return st;
         }
-        return ANO_CRYPTO_OK;
+        break;
 
     case ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_OS:
         st = ano_crypto_internal_platform_entropy_get(out, out_len);
         if (st != ANO_CRYPTO_OK) {
             ano_crypto_internal_zeroize(out, out_len);
+            return st;
         }
-        return st;
+        break;
 
     case ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_NONE:
     default:
         ano_crypto_internal_zeroize(out, out_len);
         return ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED;
     }
+
+    return ano_crypto_internal_entropy_apply_health_test(source, out, out_len);
 }

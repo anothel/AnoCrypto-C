@@ -16,6 +16,11 @@ AnoCrypto-C-PoC-v0/
   SBOM_STATUS.txt
   SIGNING_STATUS.txt
   THREAD_SAFETY_PACKAGE_NOTES.txt
+  SHA2_SCOPE_PACKAGE_NOTES.txt
+  RANDOM_BOUNDARY_PACKAGE_NOTES.txt
+  ENTROPY_HEALTH_PACKAGE_NOTES.txt
+  CLEAN_BUILD_CONFIGURE.log
+  CLEAN_BUILD.log
   INSTALL_PACKAGE.log
   sdk/
     include/anocrypto/*.h
@@ -36,10 +41,12 @@ AnoCrypto-C-PoC-v0/
     design/API_ABI_REVIEW_CHECKLIST.md
     design/BLOCK_CIPHER_MODE_SELECTION.md
     design/C99_THREAD_SAFETY_POLICY.md
+    design/C99_ENTROPY_FAILURE_INJECTION_AND_HEALTH_TEST.md
     design/THREAD_SAFETY_SUPPORT_MATRIX.md
     security/SIDE_CHANNEL_REVIEW_CHECKLIST.md
     ci/CI_MATRIX.md
     ci/THREAD_SAFETY_CI_CHECKLIST.md
+    ci/ENTROPY_FAILURE_CI_CHECKLIST.md
     roadmap/C99_PRIORITY_TODO.md
   evidence-template/README.md
 ```
@@ -96,7 +103,7 @@ Run the package smoke flow:
 cmake --build build --target ano_crypto_poc_package_smoke
 ```
 
-The smoke target stages the package, configures `examples/core_poc` as a standalone installed-package consumer, builds it, and runs it.
+The smoke target first rebuilds the SDK in a separate clean shared-library configuration with tests off, entropy hooks off, and internal symbol hiding on. It then stages the package, checks installed headers and available shared-library exports for internal/test-hook leakage, configures `examples/core_poc` as a standalone installed-package consumer, builds it, and runs it.
 
 ## Evidence handling notes
 
@@ -107,6 +114,10 @@ Before sharing a package externally, review:
 - `SBOM_STATUS.txt`
 - `SIGNING_STATUS.txt`
 - `THREAD_SAFETY_PACKAGE_NOTES.txt`
+- `SHA2_SCOPE_PACKAGE_NOTES.txt`
+- `RANDOM_BOUNDARY_PACKAGE_NOTES.txt`
+- `ENTROPY_HEALTH_PACKAGE_NOTES.txt`
+- `CLEAN_BUILD_CONFIGURE.log` and `CLEAN_BUILD.log`
 - `INSTALL_PACKAGE.log`
 - generated example smoke logs
 - local absolute paths in logs
@@ -128,3 +139,9 @@ Do not add or retain secrets, entropy captures, generated secret bytes, private 
 ## Thread-safety support-matrix review
 
 For P1-14, review `THREAD_SAFETY_PACKAGE_NOTES.txt`, `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md`, and `docs/ci/THREAD_SAFETY_CI_CHECKLIST.md` together. The current support boundary is tied to `ANO_CRYPTO_ENABLE_THREAD_SAFETY=ON`, a reviewed platform lock branch, and caller serialization for shared operation contexts.
+
+## P1-17 entropy/test-hook package boundary
+
+The customer package must not contain internal entropy provider headers or deterministic failure-injection APIs. The generated SDK is therefore not copied from the test build; it is rebuilt with `ANO_CRYPTO_BUILD_TESTS=OFF`, `ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF`, and `ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON`.
+
+`ENTROPY_HEALTH_PACKAGE_NOTES.txt` records this boundary. Health-test candidates remain internal and disabled by default, and the package must not contain raw entropy, deterministic hook output, seed material, DRBG state, or generated random bytes.

@@ -291,18 +291,11 @@ ano_crypto_status_t ano_crypto_selftest_run(uint32_t flags)
 
     ano_crypto_selftest_set_last_flags(flags);
 
-#if defined(ANO_CRYPTO_ENABLE_TEST_HOOKS)
-    if ((flags & ANO_CRYPTO_SELFTEST_FLAG_FORCE_FAILURE_FOR_TEST) != 0u) {
-        ano_crypto_selftest_set_last_status(ANO_CRYPTO_ERR_SELF_TEST_FAILED);
-        ano_crypto_internal_module_mark_error(ANO_CRYPTO_ERR_SELF_TEST_FAILED);
-        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
-    }
-#else
+    /* High test-only flag values are never part of the installed/public ABI. */
     if ((flags & 0x80000000u) != 0u) {
         ano_crypto_selftest_set_last_status(ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER);
         return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
     }
-#endif
 
     st = ano_crypto_selftest_check_build_identity();
     if (st != ANO_CRYPTO_OK) {

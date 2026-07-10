@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P1-15 draft.
+Status: P1-17 draft.
 
 ## Purpose
 
@@ -41,6 +41,7 @@ Each task should follow this loop:
    - PoC smoke when customer-package behavior changes.
    - Public-surface check when naming, public headers, or symbols change.
    - Thread-safety policy check when synchronization code, CSP/key handle behavior, or concurrency wording changes.
+   - Entropy/health policy check when provider, failure handling, DRBG seed acquisition, health-test, or hook boundaries change.
 
 4. Update clean-room and claims records.
    - Record public standards and user-owned documents used as inputs.
@@ -120,12 +121,28 @@ P1-15 deliverables:
 - Evidence outputs for `SHA2_SCOPE_CHECK.txt` and `SHA2_SCOPE_REVIEW_NOTES.txt`.
 - PoC package output for `SHA2_SCOPE_PACKAGE_NOTES.txt`.
 
+## P1-17 placement
+
+P1-17 is the entropy provider failure-injection and health-test skeleton step after the P1-16 reserved public random boundary. It does not enable customer-facing random generation or select a finalized noise-source health-test policy.
+
+P1-17 deliverables:
+
+- Internal deterministic provider success/failure/partial-write hook guarded by a dedicated test-build option.
+- Source failure, partial output, zero-length, and oversized-request negative tests.
+- Internal bounded startup/continuous duplicate-block health-test candidates.
+- Fatal health failure transition to sticky module `ERROR_STATE` and DRBG context invalidation coverage.
+- Dedicated entropy failure CI lane and entropy/health policy check.
+- Evidence outputs and PoC clean-build checks proving hooks/internal symbols are not part of the customer SDK.
+- Clean-room records and explicit TODOs for source-specific health testing.
+
 ## Planned next sequence
 
 | Step | Candidate name | Scope |
 |---|---|---|
 | P1-15 | SHA-384/SHA-512 reserved scope decision | Completed as reserved-scope/KAT-plan guardrail without implementation. |
-| P1-16 | Public random API decision | Decide whether to expose `ano_crypto_random_*` or keep DRBG APIs lower-level until entropy policy is reviewed. |
+| P1-16 | Public random API decision | Completed as a reserved fail-closed boundary; public generation remains unimplemented. |
+| P1-17 | Entropy failure injection and health-test skeleton | Completed as internal testability/state-transition plumbing; final source-specific policy remains TODO. |
+| P1-18 candidate | Entropy source and operational health policy review | Select the actual source boundary and decide startup/continuous tests, restart/fork behavior, and fatality policy before public random generation. |
 | P2-01 | Block cipher implementation start | Start only after P1-12 selection criteria and customer/KCMVP scope are reviewed. |
 
 ## Stop conditions
