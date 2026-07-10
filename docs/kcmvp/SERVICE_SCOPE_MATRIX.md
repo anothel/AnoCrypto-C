@@ -1,6 +1,6 @@
 # AnoCrypto-C Service Scope Matrix
 
-Status: P1-15 draft.
+Status: P1-16 draft.
 
 ## Purpose
 
@@ -20,7 +20,7 @@ This matrix separates implemented services, ABI-reserved services, internal seam
 | HMAC_DRBG-SHA-256 | `ano_crypto_drbg_*` | Implemented deterministic core | Candidate DRBG core slice | Public-source KATs, boundary tests, negative tests | Public random service and entropy policy remain separate decisions. |
 | Internal entropy adapter | Internal only | Implemented seam | Internal support seam | Unit tests and provider status tests | Do not expose entropy bytes or provider internals in logs. |
 | Platform entropy provider | Internal only | Implemented Linux/Windows/Apple branch seam | Internal support seam | Status-only engineering tests | Hosted CI coverage still needs review. |
-| Public random service | No public header yet | Design draft only | Not in public ABI | Design notes only | Decide after entropy/reseed policy review. |
+| Public random service | `ac_random.h` reserved boundary | Fail-closed placeholders only | Reserved public ABI, not implemented random generation | Reserved API negative test, random boundary policy check, evidence notes | Decide after entropy/reseed/fork/health-test policy review. |
 | Block cipher/modes | No public header yet | Not implemented | Not in current candidate slice | Selection criteria only | Select algorithm/mode based on customer and validation-target inputs. |
 | KDF expansion | No public header yet | Not implemented | Deferred | None | Defer until block cipher and customer scope are clearer. |
 | Public-key primitives | No public header yet | Not implemented | Deferred | None | P2/P3 planning only. |
@@ -55,3 +55,8 @@ Do not start block cipher implementation yet. First collect customer/platform in
 ## P1-15 SHA-2 reserved scope conclusion
 
 P1-15 does not add SHA-384/SHA-512 or HMAC-SHA-384/HMAC-SHA-512 processing implementations. It adds reserved-API regression coverage, a KAT/evidence plan, and a scope policy check so the public metadata behavior remains explicit while implementation is deferred.
+
+
+## P1-16 public random-service boundary conclusion
+
+P1-16 adds a reserved `ac_random.h` public boundary and fail-closed `ano_crypto_random_*` placeholders. It does not add implemented public random byte generation. The implemented customer-facing flow remains explicit-entropy DRBG plus SHA-256/HMAC-SHA-256 smoke checks until entropy, reseed, prediction-resistance, fork/process, health-test, and evidence requirements are reviewed.

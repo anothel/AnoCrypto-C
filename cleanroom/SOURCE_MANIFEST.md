@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P1-15 draft
+Status: P1-16 draft
 Date: 2026-07-08
 
 ## Purpose
@@ -310,3 +310,21 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - No HMAC-SHA-384/HMAC-SHA-512 implementation code is imported or added.
 - No new non-public test vector data is imported.
 - No secret key, entropy sample, generated secret byte string, private key, token, customer data, or internal deployment detail is added.
+
+
+## P1-16 Random-Service Boundary Inputs
+
+| ID | Source | Classification | Usage | Notes |
+|---|---|---|---|---|
+| DER-16001 | Fresh `include/anocrypto/ac_random.h` written in this repository | User-owned API skeleton | Reserved public random-service boundary | No third-party implementation code imported. |
+| DER-16002 | Fresh `src/drbg/random.c` written in this repository | User-owned C99 implementation | Fail-closed random-service placeholders | Processing paths return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`; generated random bytes are not produced. |
+| DER-16003 | Fresh `tests/negative/random_reserved_api_tests.c` written in this repository | User-owned regression test | Verifies reserved random-service behavior and output zeroization | Uses local synthetic buffers only. |
+| DER-16004 | Fresh `docs/design/PUBLIC_RANDOM_API_DECISION.md` written in this repository | User-owned planning artifact | Records public random API reserved-boundary decision | No external wording copied. |
+| DER-16005 | Fresh `docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md` written in this repository | User-owned evidence planning artifact | Records DRBG/entropy evidence boundaries | Prohibits entropy, seed, and generated-byte logging. |
+| DER-16006 | Fresh `tools/check_random_boundary_policy.cmake` written in this repository | User-owned tooling | Verifies random-service boundary wiring | Engineering guardrail only. |
+
+## P1-16 Clean-room Notes
+
+- P1-16 does not import third-party random-service implementation code.
+- P1-16 does not store entropy samples, nonce seed material, generated random bytes, private keys, tokens, or customer data.
+- P1-16 keeps the internal platform entropy provider as a status-only engineering seam.

@@ -1,6 +1,6 @@
 # AnoCrypto-C Algorithm Scope
 
-Status: P1-15 draft.
+Status: P1-16 draft.
 
 ## Implemented candidate slice
 
@@ -10,7 +10,7 @@ Status: P1-15 draft.
 | MAC | HMAC-SHA-256 | Implemented | Public RFC KATs and long-key path coverage added. |
 | DRBG | HMAC_DRBG-SHA-256 | Implemented P1-9 engineering slice | Explicit entropy-input public API, startup KAT, public vector test, boundary tests, negative tests, and internal entropy-source instantiate/reseed helper. |
 | CSP/key | HMAC key import/use/destroy | Implemented P1-9 lifecycle slice | In-memory HMAC key handles only; no export, persistence, or keystore. |
-| Entropy provider | Internal platform provider seam | Implemented P1-9 internal seam | Linux/Windows/Apple branches selected at build time; internal helper can seed/reseed HMAC_DRBG; no public random service API. |
+| Entropy provider | Internal platform provider seam | Implemented P1-9 internal seam | Linux/Windows/Apple branches selected at build time; internal helper can seed/reseed HMAC_DRBG; reserved public random-service boundary only; implemented public random generation remains TODO. |
 
 ## ABI-reserved / not implemented
 
@@ -21,7 +21,7 @@ Status: P1-15 draft.
 | MAC | HMAC-SHA-384 | ABI-reserved, not implemented | MAC-size metadata query only; processing returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`. |
 | MAC | HMAC-SHA-512 | ABI-reserved, not implemented | MAC-size metadata query only; processing returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`. |
 | DRBG | Hash_DRBG-SHA-256 | Not implemented | Algorithm ID is reserved for API review. |
-| Random service | `ano_crypto_random_*` | Not implemented | Design draft only; no public header or ABI yet. |
+| Random service | `ano_crypto_random_*` | Reserved public ABI only | `ac_random.h` is installed, but processing functions return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`; no public random bytes are generated. |
 
 ## Important boundary
 
@@ -36,14 +36,14 @@ KAT and CTest pass logs are engineering correctness evidence only. They do not r
 3. Keep SHA-384/SHA-512 in P1-15 reserved scope until implementation/KAT/differential-validation entry criteria are ready.
 4. Add reproducible build notes.
 5. Add public support matrix for thread-safety and platform entropy provider behavior.
-6. Perform API/ABI review before adding public random-service APIs.
+6. Review P1-16 reserved `ac_random.h` before enabling public random byte generation.
 
 ## P1-9 CSP/Entropy/DRBG Notes
 
 - HMAC key handle lifecycle is implemented as an in-memory engineering slice only.
 - Internal platform entropy provider seam exists for selected OS branches.
 - P1-9 retains the internal DRBG helper that draws entropy/nonce through the adapter and zeroizes local seed material.
-- Public random service and validation-boundary mapping remain TODO.
+- Implemented public random service and validation-boundary mapping remain TODO; P1-16 only reserves the boundary.
 - These additions are not formal validation evidence.
 - Release evidence tooling captures source archive SHA-256 and installed-package smoke logs as engineering evidence inputs.
 
@@ -63,3 +63,12 @@ KAT and CTest pass logs are engineering correctness evidence only. They do not r
 - `tests/negative/sha2_reserved_api_tests.c` verifies metadata queries and `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` processing behavior.
 - `tools/check_sha2_scope_policy.cmake` verifies docs, tests, KAT manifest, evidence, and PoC package wiring.
 - P1-15 does not add a new cryptographic algorithm implementation.
+
+
+## P1-16 Random-Service Boundary Notes
+
+- `include/anocrypto/ac_random.h` reserves the public random-service boundary.
+- `src/drbg/random.c` fail-closes processing functions with `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` after validation and service gating.
+- `tests/negative/random_reserved_api_tests.c` verifies reserved behavior and output zeroization.
+- `docs/design/PUBLIC_RANDOM_API_DECISION.md` and `docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md` record the decision and evidence rules.
+- P1-16 does not add an implemented public random byte generation service.

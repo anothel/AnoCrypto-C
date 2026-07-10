@@ -1,6 +1,6 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-15 draft.
+Status: P1-16 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -29,7 +29,8 @@ Status: P1-15 draft.
 - internal platform entropy provider seam for Linux, Windows, and Apple provider branches
 - platform entropy provider smoke/status tests
 - internal HMAC_DRBG-SHA-256 instantiate/reseed helper driven by entropy source
-- random-service public API design draft without exposing public ABI
+- random-service public API design draft
+- reserved public `ac_random.h` boundary with fail-closed `ano_crypto_random_*` placeholders
 - HMAC_DRBG-SHA-256 boundary tests for personalization, additional input, reseed-after-generate, max request, and oversized request rejection
 - CMake package naming normalized to `AnoCryptoC` / `AnoCryptoC::AnoCryptoC`
 - reproducible build notes draft
@@ -55,15 +56,15 @@ Status: P1-15 draft.
 - P1-13 evidence workflow additions for `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, and `EVIDENCE_MANIFEST.sha256`
 - P1-14 thread-safety support matrix and CI checklist
 - P1-14 thread-safety policy check target and evidence/PoC package records
-- P1-15 SHA-384/SHA-512 reserved scope decision and KAT plan
-- P1-15 reserved SHA-2 API negative test and scope policy check target
-- P1-15 evidence/PoC package records for SHA-384/SHA-512 reserved scope
+- P1-16 SHA-384/SHA-512 reserved scope decision and KAT plan
+- P1-16 reserved SHA-2 API negative test and scope policy check target
+- P1-16 evidence/PoC package records for SHA-384/SHA-512 reserved scope
 
 ## Immediate P1 next items
 
 1. Review and harden CI matrix after first hosted runs on Linux, Windows, and Apple runners.
 2. Add Windows-specific concurrent CSP/HMAC coverage and sanitizer lanes where supported.
-3. Decide when to implement SHA-384/SHA-512 after P1-15 reserved-scope entry criteria are reviewed.
+3. Decide when to implement SHA-384/SHA-512 after P1-16 reserved-scope entry criteria are reviewed.
 4. Decide whether and when to expose public `ano_crypto_random_*` APIs.
 5. Add reproducible source archive timestamp normalization if byte-for-byte archives become a release requirement.
 6. Decide whether to replace the public build identity struct with field getters before ABI freeze.
@@ -80,3 +81,10 @@ Status: P1-15 draft.
 - Public-key primitive planning.
 - AnoCrypto C++ Wrapper boundary draft.
 - AnoSecureKit and AnoPKI integration boundary drafts.
+
+## P1-16 added scope
+
+- Reserved public `ac_random.h` boundary.
+- `ano_crypto_random_*` placeholders that return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` after validation and service gating.
+- Random-service reserved API negative regression test.
+- Random-service/DRBG/entropy boundary policy check and evidence notes.

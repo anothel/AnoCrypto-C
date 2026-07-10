@@ -1,6 +1,6 @@
 # AnoCrypto-C CI Matrix Skeleton
 
-Status: P1-15 draft.
+Status: P1-16 draft.
 
 ## Purpose
 
@@ -21,14 +21,15 @@ This matrix records the first CI coverage skeleton for build, test, public-surfa
 | Public surface policy check | Required | Required | Required | Checks naming, claims boundary, headers, package template presence, and Linux exported symbols when available. |
 | Thread-safety policy check | Required | Required | Required | Checks support-matrix docs, lock branches, CMake option, concurrent-test guard, evidence hook, and PoC package note. |
 | SHA-2 reserved scope policy check | Required | Required | Required | Checks SHA-384/SHA-512 reserved API docs, KAT plan, test, evidence hook, and PoC package note. |
-| Evidence draft target | Linux required | Optional | Optional | Includes SBOM/signing placeholder status, evidence manifest, and thread-safety check output in P1-15. |
+| Random-service boundary policy check | Required | Required | Required | Checks reserved `ac_random.h`, fail-closed placeholders, DRBG/entropy boundary docs, evidence hook, and PoC package note. |
+| Evidence draft target | Linux required | Optional | Optional | Includes SBOM/signing placeholder status, evidence manifest, and thread-safety check output in P1-16. |
 | Platform entropy provider branch | Linux provider | Apple provider | Windows provider | Provider tests must not print entropy bytes. |
 | Thread-safety ON lane | Required | Required | Required | Uses internal locking where supported. |
 | Thread-safety OFF lane | Required | Optional | Optional | Build/test only; not a concurrency-support lane. |
 
 ## Suggested matrix axes
 
-| Axis | Values | P1-15 decision |
+| Axis | Values | P1-16 decision |
 |---|---|---|
 | OS | `ubuntu-latest`, `macos-latest`, `windows-latest` | Required skeleton |
 | Build type | `Debug`, `Release` | Start with `Debug`; add `Release` before release-candidate review |
@@ -43,13 +44,14 @@ This matrix records the first CI coverage skeleton for build, test, public-surfa
 
 The repository includes `.github/workflows/ci.yml` as a starter workflow. It is intentionally conservative and should be treated as CI plumbing, not release approval.
 
-P1-15 workflow expectations:
+P1-16 workflow expectations:
 
 - Run default build/test/smoke lanes with `ANO_CRYPTO_ENABLE_THREAD_SAFETY=ON` on Linux, macOS, and Windows.
 - Run a Linux `ANO_CRYPTO_ENABLE_THREAD_SAFETY=OFF` lane to keep the non-concurrency-support build path explicit.
 - Run `ano_crypto_thread_safety_policy_check` in all default lanes.
 - Run `ano_crypto_sha2_scope_policy_check` in all default lanes.
-- Generate `THREAD_SAFETY_CHECK.txt` and `SHA2_SCOPE_CHECK.txt` in the Linux evidence draft.
+- Run `ano_crypto_random_boundary_policy_check` in all default lanes.
+- Generate `THREAD_SAFETY_CHECK.txt`, `SHA2_SCOPE_CHECK.txt`, and `RANDOM_BOUNDARY_CHECK.txt` in the Linux evidence draft.
 - Keep customer PoC package smoke on Linux until macOS/Windows package path handling is reviewed.
 
 ## Release-candidate TODO
@@ -62,3 +64,4 @@ P1-15 workflow expectations:
 6. Add artifact upload only after log redaction rules are reviewed.
 7. Replace SBOM/signing placeholders with reviewed generator/signing jobs when the release process is defined.
 8. Add ABI baseline comparison after the public ABI is frozen.
+9. Add public random-service generation lanes only after P1-16 reserved-boundary exit criteria are reviewed.

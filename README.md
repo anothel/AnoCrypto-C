@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-15 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal platform entropy provider seam, internal DRBG instantiate/reseed helper, HMAC_DRBG boundary vectors, CMake package naming normalization, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, limited internal global-state locking, reproducible-build notes, CI matrix skeleton, API/ABI review checklist, public-surface policy check, release-evidence draft tooling, customer PoC package v0 skeleton, scope/validation planning documents, SBOM/signing placeholder manifests, thread-safety support-matrix checks, and SHA-384/SHA-512 reserved-scope checks.
+Current status: P1-16 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs, negative tests, internal platform entropy provider seam, internal DRBG instantiate/reseed helper, HMAC_DRBG boundary vectors, CMake package naming normalization, HMAC key handle lifecycle slice, stale-handle/exhaustion tests, limited internal global-state locking, reproducible-build notes, CI matrix skeleton, API/ABI review checklist, public-surface policy check, release-evidence draft tooling, customer PoC package v0 skeleton, scope/validation planning documents, SBOM/signing placeholder manifests, thread-safety support-matrix checks, SHA-384/SHA-512 reserved-scope checks, and reserved public random-service boundary checks.
 
 Implemented processing scope:
 
@@ -11,6 +11,7 @@ Implemented processing scope:
 - HMAC-SHA-256 compute using an in-memory HMAC key handle
 - HMAC_DRBG-SHA-256 deterministic core API
 - Internal HMAC_DRBG-SHA-256 instantiate/reseed helper driven by entropy source
+- Reserved public `ac_random.h` boundary with fail-closed `ano_crypto_random_*` placeholders
 - Startup self-test KATs for SHA-256, HMAC-SHA-256, and HMAC_DRBG-SHA-256
 - Extended KAT executables for SHA-256, HMAC-SHA-256, HMAC key handle path, and HMAC_DRBG-SHA-256 public vectors
 - Negative API tests for hash/HMAC/DRBG/CSP/key argument handling, context lifecycle behavior, handle exhaustion, stale handle rejection, and DRBG helper failure cleanup
@@ -29,7 +30,7 @@ Skeleton-only / TODO scope:
 - SHA-384/SHA-512 ABI placeholders with P1-15 reserved-scope regression tests
 - HMAC-SHA-384/HMAC-SHA-512 ABI placeholders
 - Hash_DRBG-SHA-256 ABI placeholder
-- Public random service layer and reviewed customer/platform entropy policy
+- Implemented public random byte generation service and reviewed customer/platform entropy policy
 - Persistent keystore, key export, key wrapping, and multi-process CSP model
 - Windows-specific concurrent CSP/HMAC coverage and sanitizer lanes
 - Byte-identical source archive and binary reproducibility rules
@@ -48,8 +49,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-15
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-15
+cmake --install build --prefix /tmp/anocrypto-c-p1-16
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-16
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -67,8 +68,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-15
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-15
+cmake --install build --prefix /tmp/anocrypto-c-p1-16
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-16
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -99,9 +100,9 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_SURFACE_CHECK.txt`, `THREAD_SAFETY_CHECK.txt`, `SHA2_SCOPE_CHECK.txt`, `REPRODUCIBLE_BUILD_NOTES.txt`, `SCOPE_REVIEW_NOTES.txt`, `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST.sha256`, `ctest.log`, installed-package smoke logs, and PoC package smoke logs when the default P1-15 target is used.
+Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_SURFACE_CHECK.txt`, `THREAD_SAFETY_CHECK.txt`, `SHA2_SCOPE_CHECK.txt`, `RANDOM_BOUNDARY_CHECK.txt`, `RANDOM_BOUNDARY_REVIEW_NOTES.txt`, `REPRODUCIBLE_BUILD_NOTES.txt`, `SCOPE_REVIEW_NOTES.txt`, `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST.sha256`, `ctest.log`, installed-package smoke logs, and PoC package smoke logs when the default P1-16 target is used.
 
-## P1-15 SHA-384/SHA-512 reserved scope and retained thread-safety matrix
+## P1-16 random-service boundary, SHA-2 reserved scope, and retained thread-safety matrix
 
 - P1-10 reproducible build notes, CI matrix skeleton, API/ABI checklist, public-surface checks, and symbol-hiding option retained
 - P1-11 customer PoC package v0 staging and smoke retained
@@ -120,13 +121,21 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_
 - `tests/negative/sha2_reserved_api_tests.c` verifies size/name metadata and NOT_IMPLEMENTED processing behavior
 - Evidence workflow now writes `SHA2_SCOPE_CHECK.txt` and `SHA2_SCOPE_REVIEW_NOTES.txt`
 - PoC package now writes `SHA2_SCOPE_PACKAGE_NOTES.txt`
+- `include/anocrypto/ac_random.h` added as a reserved public random-service boundary
+- `src/drbg/random.c` returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` for random-service processing paths after validation and module service gating
+- `tests/negative/random_reserved_api_tests.c` verifies fail-closed placeholder behavior and output zeroization
+- `docs/design/PUBLIC_RANDOM_API_DECISION.md` records the public random API decision
+- `docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md` records DRBG/entropy evidence rules
+- `ano_crypto_random_boundary_policy_check` verifies random-service boundary wiring
+- Evidence workflow now writes `RANDOM_BOUNDARY_CHECK.txt` and `RANDOM_BOUNDARY_REVIEW_NOTES.txt`
+- PoC package now writes `RANDOM_BOUNDARY_PACKAGE_NOTES.txt`
 
 ## Important limitations
 
 - This is not an official validation result.
-- SHA-384, SHA-512, Hash_DRBG, block cipher APIs, and public random service APIs are not implemented yet.
+- SHA-384, SHA-512, Hash_DRBG, block cipher APIs, and public random byte generation are not implemented yet.
 - KAT pass results are correctness checks only and do not replace formal validation.
-- HMAC_DRBG-SHA-256 accepts explicit entropy input in public APIs; automatic public instantiation from OS entropy remains TODO.
+- HMAC_DRBG-SHA-256 accepts explicit entropy input in public APIs; automatic public random-service instantiation from OS entropy remains TODO.
 - The entropy callback seam is test/internal plumbing and is not an operational entropy source.
 - The platform entropy provider seam and DRBG helper are internal; provider/helper smoke tests are engineering checks only and do not store entropy bytes.
 - HMAC key handles are in-memory only; export, persistence, keystore integration, and full thread-safety support are not finalized.
@@ -138,4 +147,5 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_
 - Customer PoC package v0 is an integration draft and still needs legal/evaluation notice review before external sharing.
 - P1-14 thread-safety support-matrix additions are retained.
 - P1-15 SHA-384/SHA-512 scope additions do not add new cryptographic algorithm implementations.
+- P1-16 random-service boundary additions do not add implemented public random byte generation.
 - This repository does not claim official validation or external review completion.

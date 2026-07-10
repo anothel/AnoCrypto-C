@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-15 draft.
+Status: P1-16 draft.
 
 ## Review scope
 
@@ -8,7 +8,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 
 ## Naming and package identity
 
-| Item | Expected | P1-14 status |
+| Item | Expected | P1-16 status |
 |---|---|---|
 | Product spelling | `AnoCrypto-C` | OK |
 | Repository/archive slug | `anocrypto-c` | OK |
@@ -21,13 +21,13 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 
 ## Header ABI checklist
 
-| Rule | P1-14 status | Notes |
+| Rule | P1-16 status | Notes |
 |---|---|---|
 | Public cryptographic contexts do not expose internal struct layout. | OK | Hash/HMAC/DRBG contexts use caller-provided opaque buffers and size APIs. |
 | Public enum values are explicit. | OK | Current public enums use fixed numeric values. |
 | Processing APIs return `ano_crypto_status_t`. | OK | Name/status query helpers are documented exceptions. |
 | Outputs are returned through output parameters. | OK | Digest/MAC/DRBG APIs use output buffers and written lengths. |
-| Context size APIs exist where caller-provided storage is required. | OK | Hash, HMAC, and DRBG expose context-size queries. |
+| Context size APIs exist where caller-provided storage is required. | OK | Hash, HMAC, and DRBG expose implemented context-size queries; random context-size remains a reserved placeholder returning `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`. |
 | Buffer length errors are explicit. | OK | Negative tests cover representative short-buffer and invalid-argument cases. |
 | Public context mutation is not claimed thread-safe. | OK | Current support is limited to selected global state. |
 | Public build identity struct layout is frozen. | TODO | `ano_crypto_build_identity_t` is the only public struct layout; consider field getters before ABI freeze. |
@@ -36,7 +36,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 
 ## Per-header review notes
 
-| Header | P1-14 review note |
+| Header | P1-16 review note |
 |---|---|
 | `anocrypto.h` | Umbrella header only; no extra ABI. |
 | `ac_status.h` | Status enum values are explicit and append-only before internal error sentinel. |
@@ -46,7 +46,8 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 | `ac_selftest.h` | Test-only force flag is gated behind test-hook macro. |
 | `ac_hash.h` | Opaque buffer context; SHA-384/SHA-512 remain placeholders. |
 | `ac_hmac.h` | Opaque buffer context and in-memory HMAC key handle compute path. |
-| `ac_drbg.h` | Opaque buffer context; explicit entropy input; public random-service API remains deferred. |
+| `ac_drbg.h` | Opaque buffer context; explicit entropy input; implemented public random generation remains separate. |
+| `ac_random.h` | P1-16 reserved boundary; processing APIs return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`; no public random bytes are generated. |
 | `ac_csp.h` | Handle is integer-opaque to callers; state enum values are explicit. |
 | `ac_key.h` | Import/destroy/state query only; export and persistence are deferred. |
 
@@ -58,8 +59,10 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 cmake --build build --target ano_crypto_public_surface_check
 cmake --build build --target ano_crypto_thread_safety_policy_check
-cmake --install build --prefix /tmp/anocrypto-c-p1-15
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-15
+cmake --build build --target ano_crypto_sha2_scope_policy_check
+cmake --build build --target ano_crypto_random_boundary_policy_check
+cmake --install build --prefix /tmp/anocrypto-c-p1-16
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-16
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 cmake --build build --target ano_crypto_poc_package_smoke
@@ -84,3 +87,7 @@ Expected exported public names should use the `ano_crypto_` prefix. Internal `an
 ## P1-14 thread-safety ABI note
 
 The P1-14 support matrix does not add public symbols or public struct layouts. It documents current behavior for existing APIs and keeps caller-owned context serialization outside the library ABI.
+
+## P1-16 random-service ABI note
+
+`ac_random.h` is intentionally installed so downstream consumers can see the reserved boundary, but its processing functions are fail-closed placeholders. Before turning those placeholders into implemented random byte generation, review context ownership, reseed policy, prediction-resistance behavior, fork/process behavior, platform entropy evidence, and symbol-baseline impact.

@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-15 draft.
+Status: P1-16 draft.
 
 ## Purpose
 
@@ -15,7 +15,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-15/
+build/evidence/p1-16/
 ```
 
 ## Expected generated files
@@ -30,6 +30,9 @@ anocrypto-c-source.tar.gz
 BINARY_FILES.sha256
 PUBLIC_SURFACE_CHECK.txt
 THREAD_SAFETY_CHECK.txt
+SHA2_SCOPE_CHECK.txt
+RANDOM_BOUNDARY_CHECK.txt
+RANDOM_BOUNDARY_REVIEW_NOTES.txt
 REPRODUCIBLE_BUILD_NOTES.txt
 SCOPE_REVIEW_NOTES.txt
 SBOM_STATUS.txt
@@ -59,6 +62,8 @@ README.md
 - Confirm P1-12 scope-review notes still match the intended customer and validation-target candidate boundary.
 - Confirm P1-13 SBOM/signing placeholder status and evidence manifest are accurate.
 - Confirm P1-14 thread-safety support matrix and CI checklist match the current build configuration.
+- Confirm P1-15 SHA-384/SHA-512 reserved scope records remain accurate.
+- Confirm P1-16 random-service boundary notes match `ac_random.h` and do not imply implemented public random generation.
 
 ## P1-12 additions
 
@@ -95,7 +100,7 @@ README.md
 - Source archive timestamp normalization is still TODO if byte-for-byte archives become required.
 - Binary reproducibility across hosts/toolchains is still TODO.
 - No official validation evidence.
-- No public random-service API review record yet.
+- Public random-service API review record exists as a P1-16 reserved-boundary decision; implementation remains TODO.
 - No selected block cipher/mode implementation scope yet.
 - No differential-reference tool/source has been selected yet.
 
@@ -109,3 +114,22 @@ README.md
 - PoC package staging writes `THREAD_SAFETY_PACKAGE_NOTES.txt`.
 - PoC package smoke checks that thread-safety package notes exist.
 
+
+## P1-15 additions
+
+- SHA-384/SHA-512 reserved-scope decision added: `docs/design/SHA2_384_512_SCOPE_DECISION.md`.
+- SHA-384/SHA-512 KAT plan added: `docs/kcmvp/SHA2_384_512_KAT_PLAN.md`.
+- SHA-2 reserved scope policy check added: `tools/check_sha2_scope_policy.cmake`.
+- Evidence collection writes `SHA2_SCOPE_CHECK.txt` and `SHA2_SCOPE_REVIEW_NOTES.txt`.
+- PoC package staging writes `SHA2_SCOPE_PACKAGE_NOTES.txt`.
+
+## P1-16 additions
+
+- Reserved public random-service header added: `include/anocrypto/ac_random.h`.
+- Fail-closed placeholder implementation added: `src/drbg/random.c`.
+- Random reserved API regression test added: `tests/negative/random_reserved_api_tests.c`.
+- Public random API decision added: `docs/design/PUBLIC_RANDOM_API_DECISION.md`.
+- DRBG/entropy boundary evidence notes added: `docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md`.
+- Random boundary policy check added: `tools/check_random_boundary_policy.cmake`.
+- Evidence collection writes `RANDOM_BOUNDARY_CHECK.txt` and `RANDOM_BOUNDARY_REVIEW_NOTES.txt`.
+- PoC package staging writes `RANDOM_BOUNDARY_PACKAGE_NOTES.txt`.

@@ -1,5 +1,5 @@
 # AnoCrypto-C SHA-384/SHA-512 reserved scope policy check.
-# This is an engineering guardrail for P1-15 scope/evidence wiring.
+# This is an engineering guardrail for P1-16 scope/evidence wiring.
 
 cmake_minimum_required(VERSION 3.16)
 
@@ -47,7 +47,7 @@ ano_crypto_require_file("tests/negative/sha2_reserved_api_tests.c" "reserved SHA
 
 ano_crypto_require_text("include/anocrypto/ac_hash.h" "ANO_CRYPTO_HASH_SHA384_DIGEST_SIZE" "public SHA-384 digest-size macro")
 ano_crypto_require_text("include/anocrypto/ac_hash.h" "ANO_CRYPTO_HASH_SHA512_DIGEST_SIZE" "public SHA-512 digest-size macro")
-ano_crypto_require_text("src/selftest/kat_manifest.c" "p1-15-reserved-kat-plan" "KAT manifest reserved-plan entries")
+ano_crypto_require_text("src/selftest/kat_manifest.c" "p1-16-reserved-kat-plan" "KAT manifest reserved-plan entries")
 ano_crypto_require_text("CMakeLists.txt" "ano_crypto_sha2_reserved_api_tests" "CTest target for reserved SHA-2 API behavior")
 ano_crypto_require_text("CMakeLists.txt" "ano_crypto_sha2_scope_policy_check" "SHA-2 scope policy target")
 ano_crypto_require_text("tools/collect_release_evidence.cmake" "SHA2_SCOPE_CHECK.txt" "evidence SHA-2 scope check output")

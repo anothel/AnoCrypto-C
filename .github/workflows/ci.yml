@@ -33,7 +33,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=${{ matrix.thread_safety }}
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-15-sha2-scope-kat-plan
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-16-random-boundary
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -50,6 +50,9 @@ jobs:
 
       - name: SHA-2 scope policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_sha2_scope_policy_check
+
+      - name: Random boundary policy check
+        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_random_boundary_policy_check
 
       - name: Install
         run: cmake --install build --config ${{ matrix.build_type }} --prefix install-prefix
@@ -88,7 +91,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-15-sha2-scope-kat-plan
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-16-random-boundary
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build

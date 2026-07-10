@@ -1,11 +1,10 @@
 # C99 Random Service API Draft
 
-Status: P1-15 design draft only.
+Status: P1-16 reserved boundary draft.
 
 ## Purpose
 
-This document captures the future public random-service API direction without
-adding a public `ano_crypto_random_*` header in P1-8.
+This document captures the future public random-service API direction with a reserved public `ano_crypto_random_*` header in P1-16.
 
 The current implemented boundary remains:
 
@@ -13,13 +12,11 @@ The current implemented boundary remains:
 - internal platform entropy provider seam
 - internal HMAC_DRBG-SHA-256 instantiate/reseed helper driven by an entropy source
 
-P1-8 does not claim that the random-service API is stable, reviewed for a
-validation boundary, or ready for customer integration.
+P1-16 does not claim that random byte generation is implemented, reviewed for a validation boundary, or ready for customer integration.
 
 ## Candidate public API shape
 
-The following names are draft candidates only. They are not present in
-`include/anocrypto/` yet.
+The following names are present as reserved ABI placeholders in `include/anocrypto/ac_random.h`. They return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` where processing would otherwise occur.
 
 ```c
 ano_crypto_status_t ano_crypto_random_context_size(size_t *out_size);
@@ -64,9 +61,9 @@ ano_crypto_random_reseed
   -> zeroize local entropy buffer
 ```
 
-## P1-8 internal helper
+## P1-8 internal helper retained through P1-16
 
-P1-8 adds these internal helper functions in `src/internal/ac_drbg_internal.h`:
+P1-8 added these internal helper functions in `src/internal/ac_drbg_internal.h`:
 
 ```c
 ano_crypto_internal_hmac_drbg_sha256_instantiate_from_entropy_source(...);
@@ -77,9 +74,9 @@ They are intentionally internal. They are used to test the seam between the
 entropy adapter and the HMAC_DRBG-SHA-256 core before committing to a public
 random-service ABI.
 
-## Non-goals in P1-8
+## Non-goals in P1-16
 
-- no public `ano_crypto_random_*` header
+- no implemented public random byte generation
 - no public provider selection API
 - no prediction-resistance support
 - no fork/process-boundary reseed policy
@@ -107,4 +104,8 @@ random-service ABI.
 6. Add health-test and failure-injection evidence strategy.
 7. Review whether `ano_crypto_random_generate()` belongs in the validation
    target boundary or a higher-level AnoSecureKit-style layer.
-8. Perform API/ABI review before adding any public header.
+8. Perform API/ABI review before changing reserved placeholders into an implemented service.
+
+## P1-16 decision document
+
+See `docs/design/PUBLIC_RANDOM_API_DECISION.md` for the reserved-boundary decision and `docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md` for evidence handling rules.
