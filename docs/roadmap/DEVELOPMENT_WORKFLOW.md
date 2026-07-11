@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P1-22 draft.
+Status: P1-23 draft.
 
 ## Purpose
 
@@ -44,6 +44,7 @@ Each task should follow this loop:
    - Entropy/health policy check when provider, failure handling, DRBG seed acquisition, health-test, or hook boundaries change.
    - Entropy operational policy check when source classification, provider probe, restart/fork behavior, or process-boundary handling changes.
    - Random-service policy check when public random lifecycle, provider availability, source-backed ownership, output clearing, or reseed behavior changes.
+   - Differential/portability policy check when a reference provider, C representation assumption, endian/alignment handling, or hosted architecture lane changes.
 
 4. Update clean-room and claims records.
    - Record public standards and user-owned documents used as inputs.
@@ -199,6 +200,33 @@ P1-21 deliverables:
 - ABI-0 build-identity layout baseline and runtime/offset regression.
 - Concurrency/sanitizer policy, evidence, PoC, CI, and clean-room records.
 
+
+## P1-22 placement
+
+P1-22 implements SHA-384/SHA-512 and their HMAC variants behind the existing public algorithm identifiers without adding exported functions. It moves the historical P1-15 reservation into the active engineering slice together with KAT, negative, package, and evidence coverage.
+
+P1-22 deliverables:
+
+- SHA-384/SHA-512 one-shot and streaming implementation.
+- HMAC-SHA-384/HMAC-SHA-512 raw-key and CSP-handle paths.
+- Public-source startup/extended KATs and negative lifecycle tests.
+- Install/PoC smoke across all implemented SHA-2/HMAC variants.
+- SHA-512-family policy/evidence records and unchanged 53-symbol export baseline.
+
+## P1-23 placement
+
+P1-23 adds differential-validation automation and C representation/alignment portability hardening without changing the product algorithm or public ABI surface. OpenSSL 3.x is test-only and must remain outside the installed SDK and PoC runtime boundary.
+
+P1-23 deliverables:
+
+- Deterministic OpenSSL 3.x differential test for SHA-256/384/512 and HMAC variants.
+- One-shot/streaming, padding/block, long-key, larger-message, and intentionally unaligned coverage.
+- C99 compile guards for byte and integer widths plus status-only endian/alignment review.
+- Dedicated hosted differential job and Linux GCC `-m32` portability workflow.
+- Differential/portability policy target, evidence logs/template, provider provenance, and clean-room records.
+- PoC/install checks that exclude OpenSSL headers/libraries, differential sources, reference outputs, and runtime linkage.
+- Clean Release comparison preserving the stored 53-symbol ABI-0 baseline.
+
 ## Planned next sequence
 
 | Step | Candidate name | Scope |
@@ -211,7 +239,8 @@ P1-21 deliverables:
 | P1-20 | Random lifecycle and portability hardening | Completed with stress and reseed-limit recovery tests, fail-closed marker policy, VM lifecycle guidance, hosted status artifacts, and clean Release ABI-0 symbol checks. |
 | P1-21 | Concurrency and sanitizer hardening | Completed with Win32/pthread CSP/HMAC coverage, status-only thread artifacts, a required GCC ASan/UBSan lane, and build-identity ABI-0 layout decision. |
 | P1-22 | SHA-384/SHA-512 family implementation | Completed with existing public identifiers, startup/extended KATs, negative tests, install/PoC smoke, and unchanged 53-symbol export baseline. |
-| P1-23 candidate | SHA-512-family differential validation and hardening | Select an independent public provider, add deterministic comparisons and padding-boundary coverage, and review hosted 64-bit portability. |
+| P1-23 | SHA-512-family differential validation and portability | Completed with OpenSSL 3.x test-only deterministic comparisons, C99 representation/alignment checks, hosted artifact wiring, and unchanged public ABI. |
+| P1-24 candidate | Block-cipher/mode implementation entry gate | Reconfirm requirements, algorithm/mode/API/KAT/differential/evidence scope, and ABI impact before implementation. |
 | P2-01 | Block cipher implementation start | Start only after P1-12 selection criteria and customer/KCMVP scope are reviewed. |
 
 ## Stop conditions

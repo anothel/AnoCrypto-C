@@ -34,8 +34,9 @@ jobs:
           -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=${{ matrix.thread_safety }}
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
+          -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-22-sha512-family
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -74,6 +75,21 @@ jobs:
           path: hosted-thread-platform-review.txt
           if-no-files-found: error
 
+      - name: Capture hosted SHA-512 portability review
+        run: >
+          ctest --test-dir build
+          --build-config ${{ matrix.build_type }}
+          -R "^ano_crypto_sha512_portability_review$"
+          --verbose
+          --output-log hosted-sha512-portability-review.txt
+
+      - name: Upload hosted SHA-512 portability review
+        uses: actions/upload-artifact@v4
+        with:
+          name: hosted-sha512-portability-review-${{ runner.os }}-thread-safety-${{ matrix.thread_safety }}
+          path: hosted-sha512-portability-review.txt
+          if-no-files-found: error
+
       - name: Public surface check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_public_surface_check
 
@@ -85,6 +101,9 @@ jobs:
 
       - name: SHA-512-family implementation policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_sha512_family_policy_check
+
+      - name: Differential and portability policy check
+        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_differential_portability_policy_check
 
       - name: Random-service policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_random_service_policy_check
@@ -119,6 +138,109 @@ jobs:
         if: runner.os == 'Linux' && matrix.thread_safety == 'ON'
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_poc_package_smoke
 
+  differential-validation:
+    name: Linux OpenSSL 3.x differential validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install test-only reference provider
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl-dev
+
+      - name: Configure required differential lane
+        run: >
+          cmake -S . -B build-differential
+          -DANO_CRYPTO_BUILD_TESTS=ON
+          -DANO_CRYPTO_BUILD_EXAMPLES=OFF
+          -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
+          -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
+          -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
+          -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
+          -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
+          -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability-openssl
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build differential lane
+        run: cmake --build build-differential --parallel
+
+      - name: Run status-only differential validation
+        run: >
+          ctest --test-dir build-differential
+          -L differential
+          --verbose
+          --output-log differential-validation.txt
+
+      - name: Differential and portability policy check
+        run: cmake --build build-differential --target ano_crypto_differential_portability_policy_check
+
+      - name: Upload differential status artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sha2-hmac-openssl-differential-Linux
+          path: differential-validation.txt
+          if-no-files-found: error
+
+  sha512-portability-32bit:
+    name: Linux GCC 32-bit SHA-512 portability
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install multilib toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-multilib libc6-dev-i386
+
+      - name: Configure 32-bit build
+        env:
+          CC: gcc
+        run: >
+          cmake -S . -B build-32bit
+          -DANO_CRYPTO_BUILD_TESTS=ON
+          -DANO_CRYPTO_BUILD_EXAMPLES=OFF
+          -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
+          -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
+          -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
+          -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
+          -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability-linux32
+          -DCMAKE_C_FLAGS=-m32
+          -DCMAKE_EXE_LINKER_FLAGS=-m32
+          -DCMAKE_SHARED_LINKER_FLAGS=-m32
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build 32-bit lane
+        run: cmake --build build-32bit --parallel
+
+      - name: Run 32-bit test suite
+        run: ctest --test-dir build-32bit --output-on-failure
+
+      - name: Capture 32-bit portability review
+        run: >
+          ctest --test-dir build-32bit
+          -R "^ano_crypto_sha512_portability_review$"
+          --verbose
+          --output-log sha512-portability-32bit.txt
+
+      - name: Differential and portability policy check
+        run: cmake --build build-32bit --target ano_crypto_differential_portability_policy_check
+
+      - name: Upload 32-bit portability artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sha512-portability-Linux-32bit
+          path: sha512-portability-32bit.txt
+          if-no-files-found: error
+
   sanitizer:
     name: Linux GCC ASan+UBSan
     runs-on: ubuntu-latest
@@ -140,9 +262,10 @@ jobs:
           -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
+          -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_SANITIZER_MODE=address-undefined
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-22-sha512-family-GCC-asan-ubsan
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability-GCC-asan-ubsan
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build sanitizer lane
@@ -170,10 +293,11 @@ jobs:
           -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=ON
           -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=ON
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
+          -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-22-sha512-family-test-hook
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability-test-hook
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build dedicated test-hook lane
@@ -210,9 +334,10 @@ jobs:
           -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
           -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
+          -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-22-sha512-family-provider-disabled
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability-provider-disabled
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build provider-disabled lane
@@ -250,10 +375,11 @@ jobs:
           -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
           -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
           -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON
           -DBUILD_SHARED_LIBS=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-22-sha512-family-clean-release
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability-clean-release
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Compare clean Release exports with ABI-0 baseline
@@ -269,10 +395,15 @@ jobs:
   evidence-draft:
     name: Linux evidence draft
     runs-on: ubuntu-latest
-    needs: [build-test-smoke, sanitizer, clean-release-symbol-baseline]
+    needs: [build-test-smoke, differential-validation, sha512-portability-32bit, sanitizer, clean-release-symbol-baseline]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Install test-only reference provider
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl-dev
 
       - name: Configure
         run: >
@@ -284,8 +415,10 @@ jobs:
           -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
+          -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
+          -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-22-sha512-family
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
@@ -297,6 +430,6 @@ jobs:
       - name: Upload evidence draft
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p1-22-evidence-draft
-          path: build/evidence/p1-22
+          name: anocrypto-c-p1-23-evidence-draft
+          path: build/evidence/p1-23
           if-no-files-found: error

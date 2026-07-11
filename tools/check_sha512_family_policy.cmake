@@ -1,5 +1,5 @@
 # AnoCrypto-C SHA-384/SHA-512 family implementation policy check.
-# Engineering guardrail for P1-22 implementation, KAT, package, and evidence wiring.
+# Engineering guardrail for SHA-512-family implementation, KAT, package, and evidence wiring.
 
 cmake_minimum_required(VERSION 3.16)
 
@@ -86,7 +86,7 @@ ano_crypto_forbid_text("include/anocrypto/ac_hash.h" "ABI-reserved" "hash header
 ano_crypto_forbid_text("include/anocrypto/ac_hmac.h" "ABI-reserved" "HMAC header still claims reserved SHA-512-family processing")
 ano_crypto_forbid_text("src/selftest/kat_manifest.c" "p1-16-reserved-kat-plan" "KAT manifest still contains reserved SHA-512-family entries")
 
-list(APPEND _warnings "Independent external-provider differential automation remains a P1-23 candidate.")
+list(APPEND _warnings "OpenSSL differential coverage is checked separately; actual hosted 32-bit/Windows/macOS/big-endian artifacts remain review items.")
 list(APPEND _warnings "Official validation or KCMVP completion is not claimed by this engineering policy check.")
 
 string(TIMESTAMP _checked_utc "%Y-%m-%dT%H:%M:%SZ" UTC)

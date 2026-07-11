@@ -12,12 +12,13 @@ extern "C" {
 /*
  * P1 public API for SHA-2 hash services.
  *
- * P1-22 scope:
+ * P1-22 implementation scope:
  * - SHA-256, SHA-384, and SHA-512 one-shot and streaming processing are
  *   implemented and covered by public-source startup and extended KATs.
  * - Processing functions are state-gated and require an operational module.
  * - A context is algorithm-bound after init and must not be used through a
  *   different public service family.
+ * P1-23 validation scope: deterministic test-only differential and portability coverage; public ABI unchanged.
  */
 
 #define ANO_CRYPTO_HASH_SHA256_DIGEST_SIZE 32u

@@ -1,6 +1,6 @@
 # AnoCrypto-C Service Scope Matrix
 
-Status: P1-22 engineering draft.
+Status: P1-23 engineering draft.
 
 This matrix separates implemented core services, internal seams, and deferred product-layer functions. It is a planning and customer-PoC scoping artifact, not official validation evidence.
 
@@ -23,4 +23,4 @@ A service entering the implemented slice requires a documented parameter/lifecyc
 
 ## P1-22 SHA-512-family transition
 
-P1-15 reserved the SHA-384/SHA-512 identifiers. P1-22 implements the existing identifiers together with startup/extended KATs, negative tests, CSP handle coverage, PoC/install smoke, policy checks, and evidence notes. The public export list remains unchanged. Independent external-provider differential automation remains TODO.
+P1-15 reserved the SHA-384/SHA-512 identifiers. P1-22 implements the existing identifiers together with startup/extended KATs, negative tests, CSP handle coverage, PoC/install smoke, policy checks, and evidence notes. The public export list remains unchanged. P1-23 adds OpenSSL 3.x test-only differential automation and portability checks while preserving the public export list. Actual hosted 32-bit, Windows, macOS, and big-endian artifact review remains TODO.

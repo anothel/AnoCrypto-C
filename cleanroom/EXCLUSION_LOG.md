@@ -1,6 +1,6 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P1-22 draft
+Status: P1-23 draft
 Date: 2026-07-11
 
 ## Purpose
@@ -266,4 +266,16 @@ If excluded material is discovered:
 | EX-3103 | Partial implementation without startup KAT, extended KAT, negative tests, install/PoC coverage, and evidence updates | Scope/evidence mismatch | Excluded | `ano_crypto_sha512_family_policy_check` requires the complete P1-22 wiring. |
 | EX-3104 | Digest values, MAC values, HMAC key bytes, entropy, seed material, DRBG state, generated random values, private keys, tokens, or customer data in logs/evidence/packages | Sensitive information risk | Excluded | Tests and smoke flows emit names, lengths, statuses, and source IDs only. |
 | EX-3105 | Claiming official validation, completed KCMVP status, or universal constant-time behavior from P1-22 KAT/CI results | Claims risk | Excluded | P1-22 is engineering implementation and correctness evidence only. |
-| EX-3106 | Selecting an external differential provider without license/version/provenance and failure-triage review | Supply-chain and evidence risk | Deferred | P1-23 candidate requires an explicit provider decision first. |
+| EX-3106 | Selecting an external differential provider without license/version/provenance and failure-triage review | Supply-chain and evidence risk | Resolved by P1-23 gate | P1-23 records OpenSSL 3.x provenance, test-only linkage, logging limits, and failure triage; unreviewed additional providers remain excluded. |
+
+## P1-23 Additional Exclusions
+
+| ID | Excluded input or behavior | Risk | Decision | Note |
+|---|---|---|---|---|
+| EX-3201 | Copying OpenSSL implementation, constants, sample code, or test harness code into AnoCrypto-C | Provenance and maintenance risk | Excluded | OpenSSL is invoked only through public headers and a separately linked test target. |
+| EX-3202 | Linking OpenSSL into `anocrypto_c`, installing OpenSSL headers through AnoCrypto-C, or adding it to the customer PoC runtime dependency | Product boundary and licensing risk | Excluded | The provider is test-only and clean Release/PoC builds have tests disabled. |
+| EX-3203 | Logging differential digest/MAC bytes, generated HMAC keys/messages, entropy, seed, DRBG state, or random output | Sensitive/evidence expansion risk | Excluded | Status, provider version, comparison count, algorithm/path, and lengths are sufficient for triage. |
+| EX-3204 | Automatically rewriting implementation or KAT values after an OpenSSL mismatch | Common-defect and evidence-integrity risk | Excluded | Reproduction, public KAT, path isolation, and source review are required first. |
+| EX-3205 | Treating provider agreement as official validation or proof of implementation independence | Claims risk | Excluded | Differential validation is one engineering correctness layer only. |
+| EX-3206 | Claiming 32-bit, big-endian, Windows, or macOS support from workflow definitions without reviewing actual runs | Evidence/portability overstatement | Excluded | Hosted and non-native artifacts require explicit review. |
+| EX-3207 | Using unreviewed 32-bit OpenSSL packages merely to make the multilib lane pass | Supply-chain ambiguity | Excluded | The initial 32-bit lane disables external differential testing unless a provider package is separately reviewed. |

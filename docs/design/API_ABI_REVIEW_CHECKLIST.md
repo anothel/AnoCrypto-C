@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-22 draft.
+Status: P1-23 draft.
 
 ## Review scope
 
@@ -65,8 +65,8 @@ cmake --build build --target ano_crypto_random_service_policy_check
 cmake --build build --target ano_crypto_random_lifecycle_policy_check
 cmake --build build --target ano_crypto_clean_release_symbol_baseline_check
 cmake --build build --target ano_crypto_entropy_health_policy_check
-cmake --install build --prefix /tmp/anocrypto-c-p1-22
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-22
+cmake --install build --prefix /tmp/anocrypto-c-p1-23
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-23
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 cmake --build build --target ano_crypto_poc_package_smoke
@@ -140,3 +140,11 @@ P1-19 implements the existing `ac_random.h` symbols without adding a public func
 - `ano_crypto_build_identity_abi_tests` checks field ordering and query results without assuming one cross-platform byte size.
 - String pointers returned in the structure are module-owned and read-only for the loaded module lifetime.
 - Calling convention, alignment, pointer size, loader metadata, and semantic compatibility remain platform-specific review items.
+
+## P1-23 differential/provider boundary
+
+- No public function, enum value, macro, structure field, or exported symbol is added.
+- OpenSSL is linked only to the test executable and is absent from `anocrypto_c`, installed headers, package config files, and the PoC runtime.
+- Clean Release exports must remain equal to the stored 53-symbol ABI-0 baseline.
+- C99 representation checks are build prerequisites and are not new public ABI fields.
+- Any future support for a representation outside those prerequisites requires a separate ABI/portability review.

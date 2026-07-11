@@ -1,6 +1,6 @@
 # AnoCrypto-C KAT Tests
 
-Status: P1-22 engineering draft.
+Status: P1-23 engineering draft.
 
 Public-source coverage includes:
 
@@ -11,3 +11,5 @@ Public-source coverage includes:
 - Deterministic one-shot/streaming consistency and negative API boundaries.
 
 These tests are implementation correctness checks, not official validation evidence. Public HMAC keys and DRBG KAT inputs are synthetic fixtures, not operational secrets. Test output must not print digest values, MAC values, key material, entropy, seed material, DRBG state, or generated random bytes.
+
+Differential tests are separate from KAT provenance and live under `tests/differential/`. They compare values in memory and log only status/provider/count metadata.

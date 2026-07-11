@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-22 draft.
+Status: P1-23 draft.
 
 ## Purpose
 
@@ -15,7 +15,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-22/
+build/evidence/p1-23/
 ```
 
 ## Expected generated files
@@ -200,4 +200,20 @@ Review these with `ENTROPY_HEALTH_CHECK.txt` and `ENTROPY_HEALTH_REVIEW_NOTES.tx
 
 ## P1-22 SHA-512 Family Evidence
 
-Include and review `SHA512_FAMILY_CHECK.txt`, `SHA512_FAMILY_REVIEW_NOTES.txt`, the startup self-test result, `ano_crypto_sha512_family_kat_tests`, `ano_crypto_sha512_family_api_negative_tests`, HMAC key-handle KAT coverage, install/PoC smoke, and the clean 53-symbol export comparison. Store status and provenance only; do not retain digest, MAC, key, entropy, seed, DRBG-state, or generated-random values. Independent external-provider differential automation remains TODO.
+Include and review `SHA512_FAMILY_CHECK.txt`, `SHA512_FAMILY_REVIEW_NOTES.txt`, the startup self-test result, `ano_crypto_sha512_family_kat_tests`, `ano_crypto_sha512_family_api_negative_tests`, HMAC key-handle KAT coverage, install/PoC smoke, and the clean 53-symbol export comparison. Store status and provenance only; do not retain digest, MAC, key, entropy, seed, DRBG-state, or generated-random values. P1-23 records test-only OpenSSL differential and portability evidence separately from KAT provenance.
+
+
+## P1-23 Differential and Portability Evidence
+
+Include and review:
+
+- `DIFFERENTIAL_PORTABILITY_CHECK.txt`;
+- `DIFFERENTIAL_VALIDATION.log`;
+- `SHA512_PORTABILITY_REVIEW.log`;
+- `DIFFERENTIAL_PORTABILITY_REVIEW_NOTES.txt`;
+- OpenSSL provider decision/provenance record;
+- actual hosted differential and architecture artifacts when available;
+- clean Release dependency and 53-symbol export checks;
+- PoC package smoke and `DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt`.
+
+Confirm OpenSSL is linked only to the differential test executable, is absent from public headers and the customer SDK/runtime, and does not change the public symbol list. Logs may contain provider/version, compiler/target, length/case metadata, comparison counts, and status only. Digest, MAC, key, message, entropy, seed, DRBG state, random output, private keys, tokens, customer data, and internal deployment information are prohibited. Workflow definitions do not count as reviewed Linux 32-bit, Windows, macOS, or big-endian evidence without actual successful artifacts.

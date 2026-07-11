@@ -7,6 +7,8 @@ project(AnoCryptoC
 
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
+include(CheckCSourceCompiles)
+include(TestBigEndian)
 
 option(ANO_CRYPTO_BUILD_TESTS "Build AnoCrypto-C unit and smoke tests" ON)
 option(ANO_CRYPTO_BUILD_EXAMPLES "Build AnoCrypto-C example programs" ON)
@@ -15,6 +17,8 @@ option(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS "Enable internal entropy failure-inj
 option(ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS "Enable internal random lifecycle/reseed-limit hooks for dedicated test builds" OFF)
 option(ANO_CRYPTO_ENABLE_THREAD_SAFETY "Enable internal locks for module/self-test/CSP global state" ON)
 option(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER "Enable reviewed internal platform entropy provider where supported" ON)
+option(ANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS "Build test-only SHA-2/HMAC differential checks against OpenSSL 3.x when available" ON)
+option(ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER "Fail configuration when the test-only OpenSSL 3.x differential provider is unavailable" OFF)
 set(ANO_CRYPTO_SANITIZER_MODE "none" CACHE STRING "Sanitizer mode: none or address-undefined")
 set_property(CACHE ANO_CRYPTO_SANITIZER_MODE PROPERTY STRINGS none address-undefined)
 
@@ -36,6 +40,12 @@ endif()
 if(ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS AND NOT ANO_CRYPTO_BUILD_TESTS)
     message(FATAL_ERROR "ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS requires ANO_CRYPTO_BUILD_TESTS=ON and must not be enabled for release/PoC builds")
 endif()
+if(ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER AND NOT ANO_CRYPTO_BUILD_TESTS)
+    message(FATAL_ERROR "ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER requires ANO_CRYPTO_BUILD_TESTS=ON")
+endif()
+if(ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER AND NOT ANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS)
+    message(FATAL_ERROR "ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER requires ANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON")
+endif()
 
 if(ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS AND ANO_CRYPTO_BUILD_TESTS)
     message(WARNING "ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS is ON while internal tests are enabled; internal-unit tests that link through the shared library may fail on ELF toolchains")
@@ -44,6 +54,30 @@ endif()
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
+
+set(CMAKE_REQUIRED_QUIET ON)
+check_c_source_compiles("
+#include <limits.h>
+#include <stddef.h>
+#include <stdint.h>
+#if CHAR_BIT != 8
+#error AnoCrypto-C requires 8-bit bytes
+#endif
+typedef char ano_crypto_uint32_must_be_4[(sizeof(uint32_t) == 4u) ? 1 : -1];
+typedef char ano_crypto_uint64_must_be_8[(sizeof(uint64_t) == 8u) ? 1 : -1];
+typedef char ano_crypto_size_t_must_fit_uint64[(sizeof(size_t) <= sizeof(uint64_t)) ? 1 : -1];
+int main(void) { return 0; }
+" ANO_CRYPTO_C99_PORTABILITY_TYPES_OK)
+if(NOT ANO_CRYPTO_C99_PORTABILITY_TYPES_OK)
+    message(FATAL_ERROR "AnoCrypto-C requires CHAR_BIT=8, 32-bit uint32_t, 64-bit uint64_t, and size_t no wider than uint64_t")
+endif()
+
+test_big_endian(ANO_CRYPTO_TARGET_BIG_ENDIAN)
+if(ANO_CRYPTO_TARGET_BIG_ENDIAN)
+    set(ANO_CRYPTO_TARGET_ENDIAN "big")
+else()
+    set(ANO_CRYPTO_TARGET_ENDIAN "little")
+endif()
 
 if(ANO_CRYPTO_SANITIZER_MODE STREQUAL "address-undefined")
     if(NOT CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
@@ -56,7 +90,7 @@ elseif(NOT ANO_CRYPTO_SANITIZER_MODE STREQUAL "none")
 endif()
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-22-sha512-family" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-23-differential-portability" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -259,6 +293,15 @@ add_custom_target(ano_crypto_sha512_family_policy_check
     USES_TERMINAL
     COMMENT "Checking AnoCrypto-C SHA-384/SHA-512 family implementation policy")
 
+add_custom_target(ano_crypto_differential_portability_policy_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_DIFFERENTIAL_PORTABILITY_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/DIFFERENTIAL_PORTABILITY_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_differential_portability_policy.cmake
+    USES_TERMINAL
+    COMMENT "Checking AnoCrypto-C differential-validation and SHA-512 portability policy")
+
 add_custom_target(ano_crypto_random_service_policy_check
     COMMAND ${CMAKE_COMMAND}
         -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
@@ -410,6 +453,36 @@ if(ANO_CRYPTO_BUILD_TESTS)
     target_link_libraries(ano_crypto_sha512_family_api_negative_tests PRIVATE anocrypto_c)
     add_test(NAME ano_crypto_sha512_family_api_negative_tests COMMAND ano_crypto_sha512_family_api_negative_tests)
     set_tests_properties(ano_crypto_sha512_family_api_negative_tests PROPERTIES LABELS "negative;sha512-family")
+
+    add_executable(ano_crypto_sha512_portability_review
+        tests/operational/sha512_portability_review.c)
+    target_link_libraries(ano_crypto_sha512_portability_review PRIVATE anocrypto_c)
+    target_compile_definitions(ano_crypto_sha512_portability_review PRIVATE
+        ANO_CRYPTO_TEST_CMAKE_ENDIAN="${ANO_CRYPTO_TARGET_ENDIAN}")
+    add_test(NAME ano_crypto_sha512_portability_review COMMAND ano_crypto_sha512_portability_review)
+    set_tests_properties(ano_crypto_sha512_portability_review PROPERTIES LABELS "sha512-family;portability;operational-review")
+
+    set(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE OFF)
+    if(ANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS)
+        find_package(OpenSSL 3.0 QUIET COMPONENTS Crypto)
+        if(OpenSSL_FOUND AND TARGET OpenSSL::Crypto)
+            set(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE ON)
+            add_executable(ano_crypto_sha2_hmac_openssl_differential_tests
+                tests/differential/sha2_hmac_openssl_differential_tests.c)
+            target_link_libraries(ano_crypto_sha2_hmac_openssl_differential_tests PRIVATE
+                anocrypto_c
+                OpenSSL::Crypto)
+            add_test(NAME ano_crypto_sha2_hmac_openssl_differential_tests
+                COMMAND ano_crypto_sha2_hmac_openssl_differential_tests)
+            set_tests_properties(ano_crypto_sha2_hmac_openssl_differential_tests PROPERTIES
+                LABELS "differential;sha2;hmac;sha512-family")
+            message(STATUS "OpenSSL ${OPENSSL_VERSION} selected for test-only SHA-2/HMAC differential validation")
+        elseif(ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER)
+            message(FATAL_ERROR "OpenSSL 3.x Crypto was required for differential validation but was not found")
+        else()
+            message(STATUS "OpenSSL 3.x Crypto not found; test-only differential validation target is unavailable")
+        endif()
+    endif()
 
     add_executable(ano_crypto_random_service_tests
         tests/unit/random_service_tests.c)
@@ -596,13 +669,14 @@ if(ANO_CRYPTO_BUILD_TESTS)
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-22
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-23
             -DANO_CRYPTO_RUN_CTEST=ON
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
             -DANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON
             -DANO_CRYPTO_RUN_POC_PACKAGE_SMOKE=ON
             -DANO_CRYPTO_RUN_SHA512_FAMILY_CHECK=ON
+            -DANO_CRYPTO_RUN_DIFFERENTIAL_PORTABILITY_CHECK=ON
             -DANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK=ON
             -DANO_CRYPTO_RUN_RANDOM_LIFECYCLE_CHECK=ON
             -DANO_CRYPTO_RUN_EXPORTED_SYMBOL_CHECK=ON
@@ -611,12 +685,13 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-22 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-23 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_public_surface_check
         ano_crypto_thread_safety_policy_check
         ano_crypto_concurrency_sanitizer_policy_check
         ano_crypto_sha512_family_policy_check
+        ano_crypto_differential_portability_policy_check
         ano_crypto_random_service_policy_check
         ano_crypto_random_lifecycle_policy_check
         ano_crypto_entropy_health_policy_check
@@ -632,6 +707,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_hash_hmac_api_negative_tests
         ano_crypto_sha512_family_kat_tests
         ano_crypto_sha512_family_api_negative_tests
+        ano_crypto_sha512_portability_review
         ano_crypto_random_service_tests
         ano_crypto_random_lifecycle_stress_tests
         ano_crypto_random_platform_review
@@ -650,6 +726,10 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_thread_platform_review
         ano_crypto_build_identity_abi_tests
         ano_crypto_install_smoke_buildtree)
+
+    if(TARGET ano_crypto_sha2_hmac_openssl_differential_tests)
+        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_sha2_hmac_openssl_differential_tests)
+    endif()
 
     if(TARGET anocrypto_c_core_poc)
         add_dependencies(ano_crypto_collect_release_evidence anocrypto_c_core_poc)

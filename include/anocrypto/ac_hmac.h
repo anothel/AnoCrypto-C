@@ -14,12 +14,13 @@ extern "C" {
 /*
  * P1 public API for HMAC services.
  *
- * P1-22 scope:
+ * P1-22 implementation scope:
  * - HMAC-SHA-256, HMAC-SHA-384, and HMAC-SHA-512 one-shot and streaming
  *   processing are implemented and covered by public RFC 4231 KATs.
  * - The CSP HMAC-key handle compute path accepts all three SHA-2 variants.
  * - Key material and computed MAC bytes must never be logged by callers or by
  *   this library.
+ * P1-23 validation scope: deterministic test-only differential and portability coverage; public ABI unchanged.
  */
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_hmac_context_size(
     ano_crypto_hash_algorithm_t hash_algorithm,

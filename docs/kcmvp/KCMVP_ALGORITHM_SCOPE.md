@@ -1,6 +1,6 @@
 # AnoCrypto-C Algorithm Scope
 
-Status: P1-22 engineering draft.
+Status: P1-23 engineering draft.
 
 ## Implemented candidate slice
 
@@ -29,4 +29,4 @@ Status: P1-22 engineering draft.
 
 This file records implementation and evidence-preparation scope. It does not assert official validation status. Passing KATs and CTest are engineering correctness signals only.
 
-P1-22 does not add a public function or change the stored 53-symbol ABI-0 export list. Independent differential-provider automation and actual hosted Windows/macOS review remain TODO.
+P1-22 did not add a public function or change the stored 53-symbol ABI-0 export list. P1-23 adds OpenSSL 3.x test-only differential and portability checks without changing that public surface or introducing an SDK runtime dependency. Actual hosted 32-bit, Windows, macOS, and big-endian review remains TODO.

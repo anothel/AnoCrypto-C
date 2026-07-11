@@ -65,6 +65,7 @@ set(_required_package_records
     "THREAD_SAFETY_PACKAGE_NOTES.txt"
     "CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt"
     "SHA512_FAMILY_PACKAGE_NOTES.txt"
+    "DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt"
     "RANDOM_SERVICE_PACKAGE_NOTES.txt"
     "RANDOM_LIFECYCLE_PACKAGE_NOTES.txt"
     "ENTROPY_HEALTH_PACKAGE_NOTES.txt"
@@ -76,6 +77,24 @@ set(_required_package_records
 foreach(_record IN LISTS _required_package_records)
     if(NOT EXISTS "${_package_dir}/${_record}")
         message(FATAL_ERROR "PoC package record is missing: ${_package_dir}/${_record}")
+    endif()
+endforeach()
+
+file(GLOB_RECURSE _poc_package_files LIST_DIRECTORIES false "${_package_dir}/*")
+foreach(_poc_file IN LISTS _poc_package_files)
+    string(TOLOWER "${_poc_file}" _poc_file_lower)
+    if(_poc_file_lower MATCHES "(^|[/\\])(libcrypto|libssl|openssl)([./\\]|$)" OR
+       _poc_file_lower MATCHES "sha2_hmac_openssl_differential_tests\.c$" OR
+       _poc_file_lower MATCHES "sha512_portability_review\.c$")
+        message(FATAL_ERROR "PoC package contains test-only differential/provider artifact: ${_poc_file}")
+    endif()
+endforeach()
+
+file(GLOB_RECURSE _poc_public_headers LIST_DIRECTORIES false "${_sdk_prefix}/include/*.h")
+foreach(_poc_header IN LISTS _poc_public_headers)
+    file(READ "${_poc_header}" _poc_header_content)
+    if(_poc_header_content MATCHES "openssl/|OpenSSL::Crypto|EVP_Q_digest|EVP_MAC_fetch")
+        message(FATAL_ERROR "PoC public header exposes test-only provider detail: ${_poc_header}")
     endif()
 endforeach()
 
@@ -136,6 +155,7 @@ file(WRITE "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_PACKAGE_SMOKE_SUMMARY.txt"
     "Thread-safety notes: ${_package_dir}/THREAD_SAFETY_PACKAGE_NOTES.txt\n"
     "Concurrency/sanitizer notes: ${_package_dir}/CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt\n"
     "SHA-512-family notes: ${_package_dir}/SHA512_FAMILY_PACKAGE_NOTES.txt\n"
+    "Differential/portability notes: ${_package_dir}/DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt\n"
     "Random service notes: ${_package_dir}/RANDOM_SERVICE_PACKAGE_NOTES.txt\n"
     "Random lifecycle notes: ${_package_dir}/RANDOM_LIFECYCLE_PACKAGE_NOTES.txt\n"
     "Clean Release symbol baseline: ${_package_dir}/CLEAN_RELEASE_SYMBOL_BASELINE.log\n"

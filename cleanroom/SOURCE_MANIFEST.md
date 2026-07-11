@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P1-22 draft
+Status: P1-23 draft
 Date: 2026-07-11
 
 ## Purpose
@@ -443,4 +443,23 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - P1-15 reserved-scope files and behavior are retained only as historical records; P1-22 replaces the active reserved test and policy with implementation/KAT checks.
 - SHA-384/SHA-512 constants and expected outputs are limited to the recorded public specification and RFC sources.
 - No external SHA-512-family implementation source, test harness, provider wrapper, or proprietary validation asset was copied.
-- Independent differential-provider automation remains TODO until the provider, license, version, and evidence policy are reviewed.
+- P1-23 selects OpenSSL 3.x through a separate provider/license/evidence decision. The dependency remains test-only and no provider output or implementation code is committed.
+
+## P1-23 Differential Validation and Portability Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| SRC-3201 | OpenSSL 3.x public headers and `libcrypto` through CMake `OpenSSL::Crypto` | Public open-source test dependency | Independent test-only SHA-2 and HMAC differential provider | OpenSSL 3.0+ is published under Apache License 2.0 by the OpenSSL project. Review the exact packaged license before redistribution. No implementation source is copied. |
+| SRC-3202 | OpenSSL public EVP digest and EVP_MAC-HMAC documentation | Public documentation | API usage and provider return-code handling for the differential test executable | Documentation concepts only; no OpenSSL sample or test code copied. |
+| DER-3201 | Fresh `tests/differential/sha2_hmac_openssl_differential_tests.c` | User-owned generated C99 test source | In-memory deterministic comparison of public AnoCrypto-C SHA-2/HMAC outputs with OpenSSL 3.x | Prints provider/version/count/status only; output bytes and generated keys/messages are not retained. |
+| DER-3202 | Fresh `tests/operational/sha512_portability_review.c` | User-owned generated C99 test source | Alignment, endian, representation, and streaming portability review | Status-only output; no digest, MAC, or key bytes. |
+| DER-3203 | Fresh P1-23 provider decision, portability policy, CI checklist, evidence template, and CMake policy tooling | User-owned documentation/tooling | Fix provider provenance, test/product separation, 32-bit lane, and review boundaries | Workflow definitions require actual hosted artifact review before support wording changes. |
+
+## P1-23 Clean-room Notes
+
+- No OpenSSL implementation code, constants, test vectors, test harness source, or result bytes were copied into AnoCrypto-C.
+- OpenSSL is a test-only independently built provider and is not linked into the AnoCrypto-C product library, installed SDK, or customer PoC SDK.
+- Differential messages and HMAC keys are deterministic local fixtures generated at runtime and are not operational secrets.
+- Differential logs contain provider identity, version, comparison count, algorithm/path/length metadata on failure, and status only.
+- The Linux 32-bit workflow is a portability lane definition until an actual hosted result is reviewed.
+- Differential agreement, sanitizer results, and portability status do not establish official validation, side-channel resistance, or completed KCMVP status.

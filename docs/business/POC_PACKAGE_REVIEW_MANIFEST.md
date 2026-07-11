@@ -1,6 +1,6 @@
 # Customer PoC Package Review Manifest
 
-Status: P1-22 draft.
+Status: P1-23 draft.
 
 ## Purpose
 
@@ -88,3 +88,14 @@ Review `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt` and `CLEAN_RELEASE_SYMBOL_BASELINE.l
 ## P1-22 SHA-512-family package boundary
 
 Review `SHA512_FAMILY_PACKAGE_NOTES.txt`, the packaged example, and clean export-baseline log together. Confirm all three SHA-2 digest and HMAC variants are exercised, digest/MAC values are not printed, and no internal SHA-512 context or implementation header is installed. Independent differential-provider results are not claimed.
+
+
+## P1-23 differential and portability boundary
+
+- [ ] `DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt` is present.
+- [ ] Clean configure records OpenSSL differential tests OFF and provider requirement OFF.
+- [ ] Installed headers contain no OpenSSL include or provider API name.
+- [ ] Packaged shared libraries and examples do not require `libcrypto`/`libssl` because of the differential lane.
+- [ ] Differential and portability test source files are absent.
+- [ ] No digest, MAC, generated key/message, entropy, seed, DRBG state, or random output value is present.
+- [ ] Hosted 32-bit, Windows, macOS, and big-endian results are not represented as reviewed unless actual referenced artifacts exist.

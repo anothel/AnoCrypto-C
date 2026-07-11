@@ -1,7 +1,9 @@
 #include "ac_kat_manifest.h"
 
 /*
- * P1-22 KAT manifest.
+ * P1-22 KAT manifest, retained in P1-23.
+ * P1-23 differential tests are separate engineering comparisons and do not
+ * alter public KAT provenance entries.
  * SHA-256, SHA-384, SHA-512, their HMAC variants, and the
  * HMAC_DRBG-SHA-256 core are covered by startup or extended public-source
  * tests. Generated digest, MAC, entropy, and random output are never written

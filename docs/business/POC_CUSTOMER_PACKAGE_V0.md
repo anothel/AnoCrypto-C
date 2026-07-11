@@ -191,3 +191,13 @@ The generated SDK is configured with both test-hook options disabled and interna
 - The packaged example reports only status and output length; digest and MAC bytes are not printed or retained.
 - Internal SHA-512-family contexts, implementation headers, self-test helpers, and test executables are not installed.
 - `SHA512_FAMILY_PACKAGE_NOTES.txt` records the implementation/KAT boundary and leaves independent differential-provider automation as a follow-up item.
+
+
+## P1-23 differential and portability package boundary
+
+- OpenSSL 3.x is an internal test-only differential provider and is not shipped as a PoC SDK dependency.
+- Clean PoC SDK configuration disables OpenSSL differential discovery and provider requirements.
+- Package checks reject OpenSSL headers/libraries, differential test sources, portability test sources, and reference result files.
+- The package may include policy/decision documents describing the boundary, but it must not include digest/MAC comparison values.
+- Customer-facing support wording must not infer successful Linux 32-bit, Windows, macOS, or big-endian execution solely from workflow definitions.
+- PoC logs remain status-only and exclude digest, MAC, key, message, entropy, seed, DRBG state, random output, private keys, tokens, and customer data.

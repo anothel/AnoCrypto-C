@@ -1,6 +1,6 @@
 # SHA-384 / SHA-512 Implementation Decision
 
-Status: P1-22 engineering decision.
+Status: P1-23 engineering decision record.
 
 ## Decision
 
@@ -38,10 +38,14 @@ P1-22 engineering evidence includes:
 
 This is implementation correctness and engineering readiness evidence. It is not official validation evidence and does not assert KCMVP completion.
 
+## P1-23 hardening
+
+P1-23 adds deterministic OpenSSL 3.x test-only comparisons for SHA-256/384/512 and HMAC variants, intentionally unaligned inputs, a C99 representation compile guard, runtime/CMake endian review, and hosted/32-bit workflow wiring. OpenSSL remains outside the product and installed SDK dependency boundary.
+
 ## Remaining TODO
 
-- Add automated differential comparison against an independently selected public/reference provider.
-- Review 64-bit performance and portability on actual hosted Windows and Apple runners.
+- Review actual hosted Windows, Apple, Linux 32-bit, and any intended big-endian artifacts.
+- Review 64-bit performance and compiler output on the selected release toolchains.
 - Add a controlled length-counter boundary test seam if required; do not introduce a release test hook without a separate boundary review.
 - Extend side-channel and compiler-code-generation review for HMAC key-dependent paths.
 
