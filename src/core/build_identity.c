@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-25-aes-cbc"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-26-aes-hardening"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P1-25 C99 engineering slice; implemented services include SHA-256/384/512, matching HMAC variants, HMAC_DRBG-SHA-256, the source-backed random lifecycle, CSP-backed HMAC and AES keys, AES-128/192/256, and CBC without padding. Startup/extended KATs, negative tests, OpenSSL 3.x test-only differential lanes, portability regressions, concurrency coverage, Linux GCC address-and-undefined sanitizer coverage, build-identity ABI-0 policy, and clean Release exported-symbol checks are included. Prediction resistance, automatic VM snapshot/restore or suspend/resume detection, direct noise-source selection and final health-test thresholds, reviewed hosted Windows/macOS and 32-bit artifacts, big-endian execution evidence, ThreadSanitizer policy, Hash_DRBG, CTR, AEAD, padding helpers, CMAC/GMAC, domestic algorithms, hardware dispatch, and final side-channel/compiler-output review remain TODO";
+    out_identity->notes = "P1-26 C99 engineering slice; implemented services include SHA-256/384/512, matching HMAC variants, HMAC_DRBG-SHA-256, the source-backed random lifecycle, CSP-backed HMAC and AES keys, AES-128/192/256, and CBC without padding. P1-26 adds internal AES context integrity guards, fail-closed reinitialization, lifecycle/portability/concurrency regression, a larger OpenSSL 3.x test-only AES differential corpus, and compiler-output capture for manual target-specific review while preserving the 61-symbol ABI-0 baseline. Prediction resistance, automatic VM snapshot/restore or suspend/resume detection, direct noise-source selection and final health-test thresholds, reviewed hosted Windows/macOS, 32-bit, big-endian, and compiler-output artifacts, ThreadSanitizer policy, Hash_DRBG, CTR, AEAD, padding helpers, CMAC/GMAC, domestic algorithms, hardware dispatch, and completed side-channel review remain TODO";
 
     return ANO_CRYPTO_OK;
 }

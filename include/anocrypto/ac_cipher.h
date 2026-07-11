@@ -11,7 +11,7 @@ extern "C" {
 #endif
 
 /*
- * P1-25 public block-cipher slice.
+ * P1-25 public block-cipher slice, hardened through P1-26.
  *
  * Implemented scope:
  * - AES-128, AES-192, and AES-256 through an in-memory CSP key handle.
@@ -21,7 +21,8 @@ extern "C" {
  * - No implicit allocation, IV generation, padding, key export, or persistence.
  *
  * The context is caller-owned opaque storage. Successful uninit clears the
- * expanded key schedule and chaining state. Callers must still protect and
+ * expanded key schedule and chaining state. Failed reinitialization with a
+ * structurally valid context buffer invalidates the earlier schedule. Callers must still protect and
  * clear their own input/output/IV buffers according to product requirements.
  */
 

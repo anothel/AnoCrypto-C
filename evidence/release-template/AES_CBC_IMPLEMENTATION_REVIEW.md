@@ -1,6 +1,6 @@
 # AES/CBC Implementation Review
 
-- Version slice: P1-25
+- Version slice: P1-26
 - AES-128/192/256 primitive KAT: pending evidence run
 - CBC-AES128/192/256 KAT: pending evidence run
 - Startup self-test: pending evidence run

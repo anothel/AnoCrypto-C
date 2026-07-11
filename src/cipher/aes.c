@@ -3,6 +3,35 @@
 #include "ac_aes_internal.h"
 #include "ac_internal.h"
 
+
+static int ano_crypto_aes_context_valid(
+    const ano_crypto_internal_aes_ctx_t *ctx)
+{
+    uint32_t expected_round_key_size;
+
+    if (ctx == 0 ||
+        ctx->magic != ANO_CRYPTO_INTERNAL_AES_CTX_MAGIC ||
+        ctx->initialized == 0u) {
+        return 0;
+    }
+
+    switch (ctx->rounds) {
+    case 10u:
+        expected_round_key_size = ANO_CRYPTO_INTERNAL_AES128_ROUND_KEY_SIZE;
+        break;
+    case 12u:
+        expected_round_key_size = ANO_CRYPTO_INTERNAL_AES192_ROUND_KEY_SIZE;
+        break;
+    case 14u:
+        expected_round_key_size = ANO_CRYPTO_INTERNAL_AES256_ROUND_KEY_SIZE;
+        break;
+    default:
+        return 0;
+    }
+
+    return ctx->round_key_size == expected_round_key_size;
+}
+
 static uint8_t ano_crypto_aes_rotl8(uint8_t value, unsigned int shift)
 {
     return (uint8_t)((uint8_t)(value << shift) |
@@ -246,7 +275,13 @@ ano_crypto_status_t ano_crypto_internal_aes_init(
     size_t word_index;
     uint8_t rcon = 0x01u;
 
-    if (ctx == 0 || key == 0) {
+    if (ctx == 0) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    /* A failed reinitialization must not leave an earlier key schedule usable. */
+    ano_crypto_internal_zeroize(ctx, sizeof(*ctx));
+    if (key == 0) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
     if (key_len != 16u && key_len != 24u && key_len != 32u) {
@@ -256,7 +291,6 @@ ano_crypto_status_t ano_crypto_internal_aes_init(
     nk = key_len / 4u;
     nr = nk + 6u;
     total_words = 4u * (nr + 1u);
-    ano_crypto_internal_zeroize(ctx, sizeof(*ctx));
 
     for (word_index = 0u; word_index < key_len; ++word_index) {
         ctx->round_keys[word_index] = key[word_index];
@@ -290,6 +324,8 @@ ano_crypto_status_t ano_crypto_internal_aes_init(
     }
 
     ctx->rounds = (uint32_t)nr;
+    ctx->round_key_size = (uint32_t)(total_words * 4u);
+    ctx->magic = ANO_CRYPTO_INTERNAL_AES_CTX_MAGIC;
     ctx->initialized = 1u;
     return ANO_CRYPTO_OK;
 }
@@ -303,8 +339,7 @@ ano_crypto_status_t ano_crypto_internal_aes_encrypt_block(
     uint32_t round;
     size_t i;
 
-    if (ctx == 0 || input == 0 || output == 0 || ctx->initialized == 0u ||
-        (ctx->rounds != 10u && ctx->rounds != 12u && ctx->rounds != 14u)) {
+    if (!ano_crypto_aes_context_valid(ctx) || input == 0 || output == 0) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
@@ -341,8 +376,7 @@ ano_crypto_status_t ano_crypto_internal_aes_decrypt_block(
     uint32_t round;
     size_t i;
 
-    if (ctx == 0 || input == 0 || output == 0 || ctx->initialized == 0u ||
-        (ctx->rounds != 10u && ctx->rounds != 12u && ctx->rounds != 14u)) {
+    if (!ano_crypto_aes_context_valid(ctx) || input == 0 || output == 0) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 

@@ -34,7 +34,11 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - Customer PoC package manifest review
 - Entropy/health policy check result
 - Entropy/health review notes
-- Confirmation that the PoC SDK was rebuilt with entropy hooks off and internal symbol hiding on
+- Confirmation that the PoC SDK was rebuilt with entropy/random hooks off, OpenSSL differential tests off, sanitizer mode none, and internal symbol hiding on
+- AES/CBC implementation and hardening policy results
+- AES lifecycle/portability review log
+- AES compiler-output summary and disassembly for manual internal review
+- Clean Release 61-symbol baseline result
 
 ## P1 Evidence Notes
 
@@ -63,7 +67,7 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - `docs/ci/THREAD_SAFETY_CI_CHECKLIST.md` records the P1-14 thread-safety CI lanes and log-review rules.
 - `tools/check_thread_safety_policy.cmake` checks thread-safety policy/evidence wiring.
 - `tools/check_sha512_family_policy.cmake` checks SHA-384/SHA-512 implemented-scope wiring.
-- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, `THREAD_SAFETY_CHECK.txt`, `SHA512_FAMILY_CHECK.txt`, and `SHA512_FAMILY_REVIEW_NOTES.txt` for P1-23 evidence drafts.
+- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, `THREAD_SAFETY_CHECK.txt`, `SHA512_FAMILY_CHECK.txt`, AES/CBC hardening/compiler-review records, and related review notes for P1-26 evidence drafts.
 
 ## Commands
 
@@ -76,8 +80,8 @@ ctest --test-dir build --output-on-failure
 Install smoke:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-19
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-19
+cmake --install build --prefix /tmp/anocrypto-c-p1-26
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-26
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -101,12 +105,12 @@ cmake --build build --target ano_crypto_collect_release_evidence
 - Replace SBOM/signing placeholder fields with reviewed generator/signing outputs when tool and key-management policies are selected.
 - Add customer PoC legal/evaluation notice after legal review.
 - Add reviewed platform CI evidence for Linux, Windows, and Apple entropy provider branches.
-- Add Windows-specific concurrent CSP/HMAC coverage.
-- Add sanitizer lanes where supported by selected compiler/toolchain policy.
+- Review actual Windows and POSIX concurrent CSP HMAC/AES artifacts.
+- Retain the selected GCC ASan/UBSan lane and review Clang/ThreadSanitizer separately.
 - Add archive timestamp normalization if byte-identical source archives become required.
 - Review hosted random-service results, VM snapshot/suspend guidance, lifecycle stress, and final validation-boundary mapping.
-- Add first block cipher/mode implementation only after P1-12 scope inputs are reviewed.
-- Add differential tests only after a reviewed public/reference source or tool is selected.
+- Review P1-26 AES/CBC compiler-output, hosted 32-bit/big-endian, and target-specific timing/cache evidence before broader claims or mode expansion.
+- Keep OpenSSL differential validation test-only and select any additional provider through a separate provenance/license review.
 
 ## P1-14 Log Review
 
@@ -214,3 +218,29 @@ Review `SHA512_FAMILY_CHECK.txt`, `SHA512_FAMILY_REVIEW_NOTES.txt`, startup/exte
 ## P1-23 Differential and Portability Review
 
 Review `DIFFERENTIAL_PORTABILITY_CHECK.txt`, `DIFFERENTIAL_VALIDATION.log`, `SHA512_PORTABILITY_REVIEW.log`, and `DIFFERENTIAL_PORTABILITY_REVIEW_NOTES.txt`. Confirm OpenSSL is test-only and absent from product/installed/PoC runtime dependencies, the public symbol count remains 53, and logs retain only provider/version, architecture/representation metadata, comparison count, and status. Actual hosted 32-bit, Windows, macOS, and big-endian artifacts must not be marked reviewed unless the referenced runs completed successfully.
+
+
+## P1-26 AES/CBC Hardening Review
+
+Include and review:
+
+- `AES_CBC_IMPLEMENTATION_CHECK.txt`;
+- `AES_HARDENING_CHECK.txt`;
+- `AES_HARDENING_REVIEW.log`;
+- `AES_COMPILER_OUTPUT_REVIEW.txt`;
+- `AES_COMPILER_OUTPUT_DISASSEMBLY.txt`;
+- `AES_CBC_REVIEW_NOTES.txt`;
+- `DIFFERENTIAL_VALIDATION.log`;
+- `EXPORTED_SYMBOL_BASELINE_CHECK.txt`;
+- actual hosted AES hardening, 32-bit, big-endian, Windows, and macOS artifacts when available.
+
+Confirm that:
+
+- P1-26 retains the eight reviewed public cipher functions and 61-symbol baseline;
+- failed reinitialization invalidates the prior caller-owned cipher context;
+- lifecycle, unaligned/variable-chunk, exact in-place, CSP destruction-after-init, and HMAC/AES concurrency regression pass;
+- OpenSSL differential comparison reports 2,016 AES comparisons without output bytes;
+- compiler-output capture is treated as an internal manual-review artifact, not an automated constant-time or side-channel conclusion;
+- customer PoC and installed SDK exclude internal AES headers/source, hardening/lifecycle test source, OpenSSL provider artifacts, and compiler disassembly;
+- no AES key, IV, plaintext, ciphertext, expanded schedule, intermediate state, entropy, seed, DRBG state, random output, private key, signing key, token, or customer data appears in logs or packages;
+- hosted workflow definitions are not marked reviewed until actual artifact hashes, toolchains, reviewers, dates, limitations, and dispositions are recorded.

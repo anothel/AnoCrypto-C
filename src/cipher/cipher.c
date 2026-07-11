@@ -120,18 +120,13 @@ ano_crypto_status_t ano_crypto_cipher_init(
         return st;
     }
 
-    if (ctx == 0 || iv == 0 || key_handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
+    if (ctx == 0) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
-    }
-    if (flags != ANO_CRYPTO_CIPHER_FLAG_NONE) {
-        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
     }
     if (!ano_crypto_cipher_algorithm_supported(algorithm)) {
         return ANO_CRYPTO_ERR_UNSUPPORTED_ALGORITHM;
     }
-    if (!ano_crypto_cipher_mode_supported(mode) ||
-        !ano_crypto_cipher_direction_supported(direction) ||
-        iv_len != ANO_CRYPTO_CIPHER_CBC_IV_SIZE) {
+    if (!ano_crypto_cipher_mode_supported(mode)) {
         return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
     }
 
@@ -141,6 +136,20 @@ ano_crypto_status_t ano_crypto_cipher_init(
     }
     if (ctx_len < required_len) {
         return ANO_CRYPTO_ERR_BUFFER_TOO_SMALL;
+    }
+
+    /* Once the supplied storage is known to be large enough, failed
+     * reinitialization is fail-closed and invalidates any earlier schedule. */
+    internal_ctx = (ano_crypto_internal_cipher_ctx_t *)ctx;
+    ano_crypto_internal_zeroize(internal_ctx, required_len);
+
+    if (iv == 0 || key_handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+    if (flags != ANO_CRYPTO_CIPHER_FLAG_NONE ||
+        !ano_crypto_cipher_direction_supported(direction) ||
+        iv_len != ANO_CRYPTO_CIPHER_CBC_IV_SIZE) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
     }
 
     ano_crypto_internal_zeroize(key_material, sizeof(key_material));
@@ -161,8 +170,6 @@ ano_crypto_status_t ano_crypto_cipher_init(
         return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
     }
 
-    internal_ctx = (ano_crypto_internal_cipher_ctx_t *)ctx;
-    ano_crypto_internal_zeroize(internal_ctx, required_len);
     st = ano_crypto_internal_aes_init(
         &internal_ctx->aes, key_material, key_material_len);
     ano_crypto_internal_zeroize(key_material, sizeof(key_material));

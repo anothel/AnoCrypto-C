@@ -1,15 +1,17 @@
 # AnoCrypto-C CI Matrix Skeleton
 
-Status: P1-23 engineering draft.
+Status: P1-26 engineering draft.
 
 | Check | Linux | macOS | Windows | Notes |
 |---|---:|---:|---:|---|
 | C99 shared-library build | Required | Required | Required | Extensions off and strict warnings. |
-| Unit/KAT/negative tests | Required | Required | Required | SHA-2/HMAC output is status-only. |
+| Unit/KAT/negative tests | Required | Required | Required | SHA-2/HMAC and AES/CBC output is status-only. |
 | SHA-512-family implementation policy | Required | Required | Required | Source, KAT, negative, evidence, and PoC wiring. |
 | SHA-512 portability review | Required | Required | Required | Endian metadata, variable chunks, and unaligned input; no values. |
 | OpenSSL 3.x differential lane | Required dedicated job | Not selected | Not selected | Test-only provider; exact version/status artifact. |
-| Linux GCC `-m32` portability lane | Required workflow | N/A | N/A | Provider and OS entropy disabled; actual result needs review. |
+| Linux GCC `-m32` portability lane | Required workflow | N/A | N/A | SHA-512 and AES hardening reviews; actual result needs review. |
+| Linux s390x big-endian cross-run lane | Required workflow | N/A | N/A | Selected AES/SHA-512 tests; actual emulator/toolchain result needs review. |
+| AES compiler-output capture | GCC and Clang artifacts | Not selected | Not selected | Capture only; human review required and no automatic side-channel conclusion. |
 | Installed-package smoke | Required | Required | Required | All SHA-2/HMAC variants through installed API. |
 | Customer PoC package smoke | Required | Optional | Optional | No OpenSSL runtime dependency or result values. |
 | Public surface and 61-symbol baseline | Required | Required | Required | Tests/examples/hooks OFF; internal symbols hidden. |
@@ -18,8 +20,14 @@ Status: P1-23 engineering draft.
 | Random/entropy hardening lanes | Required | Optional | Optional | Dedicated hooks only in test builds. |
 | Evidence draft | Required | Optional | Optional | Engineering artifact; not release approval. |
 
-## P1-23 additions
+## P1-26 additions
 
+- Retain the P1-23 OpenSSL and SHA-512 portability boundaries.
+- Expand AES-CBC differential validation to 96 deterministic cases per key size and multiple processing paths.
+- Run AES hardening and 128-iteration lifecycle stress tests.
+- Capture GCC and Clang Release compiler output for manual review.
+- Add Linux 32-bit and s390x big-endian workflow structures for AES/SHA-512 portability.
+- Run `ano_crypto_aes_hardening_policy_check` in applicable jobs.
 - Discover OpenSSL 3.x only when test-only differential tests are enabled.
 - Require the provider in a dedicated Linux job and fail configure if absent.
 - Compare SHA-256/384/512 and HMAC variants over deterministic one-shot,

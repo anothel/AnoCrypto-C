@@ -36,7 +36,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-26-aes-hardening
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -90,6 +90,21 @@ jobs:
           path: hosted-sha512-portability-review.txt
           if-no-files-found: error
 
+      - name: Capture hosted AES/CBC hardening review
+        run: >
+          ctest --test-dir build
+          --build-config ${{ matrix.build_type }}
+          -R "^ano_crypto_aes_cbc_hardening_review$"
+          --verbose
+          --output-log hosted-aes-cbc-hardening-review.txt
+
+      - name: Upload hosted AES/CBC hardening review
+        uses: actions/upload-artifact@v4
+        with:
+          name: hosted-aes-cbc-hardening-review-${{ runner.os }}-thread-safety-${{ matrix.thread_safety }}
+          path: hosted-aes-cbc-hardening-review.txt
+          if-no-files-found: error
+
       - name: Public surface check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_public_surface_check
 
@@ -107,6 +122,9 @@ jobs:
 
       - name: AES-CBC implementation policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_aes_cbc_policy_check
+
+      - name: AES/CBC hardening policy check
+        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_aes_hardening_policy_check
 
       - name: Random-service policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_random_service_policy_check
@@ -166,7 +184,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
           -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc-openssl
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-26-aes-hardening-openssl
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build differential lane
@@ -185,6 +203,9 @@ jobs:
       - name: AES-CBC implementation policy check
         run: cmake --build build-differential --target ano_crypto_aes_cbc_policy_check
 
+      - name: AES/CBC hardening policy check
+        run: cmake --build build-differential --target ano_crypto_aes_hardening_policy_check
+
       - name: Upload differential status artifact
         uses: actions/upload-artifact@v4
         with:
@@ -192,8 +213,8 @@ jobs:
           path: differential-validation.txt
           if-no-files-found: error
 
-  sha512-portability-32bit:
-    name: Linux GCC 32-bit SHA-512 portability
+  core-portability-32bit:
+    name: Linux GCC 32-bit SHA-512 and AES portability
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -218,7 +239,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc-linux32
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-26-aes-hardening-linux32
           -DCMAKE_C_FLAGS=-m32
           -DCMAKE_EXE_LINKER_FLAGS=-m32
           -DCMAKE_SHARED_LINKER_FLAGS=-m32
@@ -230,21 +251,128 @@ jobs:
       - name: Run 32-bit test suite
         run: ctest --test-dir build-32bit --output-on-failure
 
-      - name: Capture 32-bit portability review
+      - name: Capture 32-bit SHA-512 portability review
         run: >
           ctest --test-dir build-32bit
           -R "^ano_crypto_sha512_portability_review$"
           --verbose
           --output-log sha512-portability-32bit.txt
 
+      - name: Capture 32-bit AES/CBC hardening review
+        run: >
+          ctest --test-dir build-32bit
+          -R "^ano_crypto_aes_cbc_hardening_review$"
+          --verbose
+          --output-log aes-cbc-hardening-32bit.txt
+
       - name: Differential and portability policy check
         run: cmake --build build-32bit --target ano_crypto_differential_portability_policy_check
 
-      - name: Upload 32-bit portability artifact
+      - name: AES/CBC hardening policy check
+        run: cmake --build build-32bit --target ano_crypto_aes_hardening_policy_check
+
+      - name: Upload 32-bit portability artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: sha512-portability-Linux-32bit
-          path: sha512-portability-32bit.txt
+          name: sha512-aes-portability-Linux-32bit
+          path: |
+            sha512-portability-32bit.txt
+            aes-cbc-hardening-32bit.txt
+          if-no-files-found: error
+
+  aes-compiler-output-review:
+    name: Linux ${{ matrix.cc }} AES compiler-output capture
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        cc: [gcc, clang]
+    env:
+      CC: ${{ matrix.cc }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Release capture build
+        run: >
+          cmake -S . -B build-aes-compiler-review
+          -DANO_CRYPTO_BUILD_TESTS=OFF
+          -DANO_CRYPTO_BUILD_EXAMPLES=OFF
+          -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
+          -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
+          -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
+          -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-26-aes-hardening-${{ matrix.cc }}-compiler-review
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Capture compiler output
+        run: cmake --build build-aes-compiler-review --target ano_crypto_aes_compiler_review --parallel
+
+      - name: AES/CBC hardening policy check
+        run: cmake --build build-aes-compiler-review --target ano_crypto_aes_hardening_policy_check
+
+      - name: Upload compiler-output artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aes-compiler-output-${{ matrix.cc }}-Linux
+          path: build-aes-compiler-review/policy-check/aes-compiler-review
+          if-no-files-found: error
+
+  aes-big-endian-s390x:
+    name: Linux s390x big-endian AES/SHA-512 cross-run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install s390x cross toolchain and emulator
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-s390x-linux-gnu libc6-dev-s390x-cross qemu-user
+
+      - name: Configure s390x build
+        run: >
+          cmake -S . -B build-s390x
+          -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/linux-s390x-gcc.cmake
+          -DANO_CRYPTO_BUILD_TESTS=ON
+          -DANO_CRYPTO_BUILD_EXAMPLES=OFF
+          -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
+          -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
+          -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
+          -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
+          -DBUILD_SHARED_LIBS=OFF
+          -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-26-aes-hardening-s390x
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build s390x lane
+        run: cmake --build build-s390x --parallel
+
+      - name: Run selected s390x AES/SHA-512 tests
+        run: >
+          ctest --test-dir build-s390x
+          -R "ano_crypto_(aes_cbc|cipher_api|sha512)"
+          --output-on-failure
+
+      - name: Capture s390x AES/CBC hardening review
+        run: >
+          ctest --test-dir build-s390x
+          -R "^ano_crypto_aes_cbc_hardening_review$"
+          --verbose
+          --output-log aes-cbc-hardening-s390x.txt
+
+      - name: AES/CBC hardening policy check
+        run: cmake --build build-s390x --target ano_crypto_aes_hardening_policy_check
+
+      - name: Upload s390x status artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aes-sha512-portability-Linux-s390x
+          path: aes-cbc-hardening-s390x.txt
           if-no-files-found: error
 
   sanitizer:
@@ -271,7 +399,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_SANITIZER_MODE=address-undefined
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc-GCC-asan-ubsan
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-26-aes-hardening-GCC-asan-ubsan
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build sanitizer lane
@@ -282,6 +410,9 @@ jobs:
 
       - name: Concurrency and sanitizer policy check
         run: cmake --build build-sanitizer --target ano_crypto_concurrency_sanitizer_policy_check
+
+      - name: AES/CBC hardening policy check
+        run: cmake --build build-sanitizer --target ano_crypto_aes_hardening_policy_check
 
   random-lifecycle-hardening:
     name: Linux random lifecycle hardening
@@ -303,7 +434,7 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc-test-hook
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-26-aes-hardening-test-hook
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build dedicated test-hook lane
@@ -343,7 +474,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc-provider-disabled
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-26-aes-hardening-provider-disabled
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build provider-disabled lane
@@ -360,6 +491,9 @@ jobs:
 
       - name: Entropy operational policy check
         run: cmake --build build-provider-disabled --target ano_crypto_entropy_operational_policy_check
+
+      - name: AES/CBC hardening policy check
+        run: cmake --build build-provider-disabled --target ano_crypto_aes_hardening_policy_check
 
   clean-release-symbol-baseline:
     name: ${{ matrix.os }} clean Release exported-symbol baseline
@@ -385,7 +519,7 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON
           -DBUILD_SHARED_LIBS=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc-clean-release
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-26-aes-hardening-clean-release
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Compare clean Release exports with ABI-0 baseline
@@ -401,7 +535,7 @@ jobs:
   evidence-draft:
     name: Linux evidence draft
     runs-on: ubuntu-latest
-    needs: [build-test-smoke, differential-validation, sha512-portability-32bit, sanitizer, clean-release-symbol-baseline]
+    needs: [build-test-smoke, differential-validation, core-portability-32bit, aes-compiler-output-review, aes-big-endian-s390x, sanitizer, clean-release-symbol-baseline]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -424,7 +558,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
           -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-26-aes-hardening
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
@@ -436,6 +570,6 @@ jobs:
       - name: Upload evidence draft
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p1-25-evidence-draft
-          path: build/evidence/p1-25
+          name: anocrypto-c-p1-26-evidence-draft
+          path: build/evidence/p1-26
           if-no-files-found: error

@@ -294,3 +294,16 @@ If excluded material is discovered:
 - No private KCMVP submission material or customer vectors were used.
 - OpenSSL remains a test-only differential provider and is excluded from the library, installed SDK, and customer PoC runtime.
 - Keys, expanded schedules, IVs, plaintext, ciphertext, and intermediate AES state are excluded from logs and evidence.
+
+## P1-26 AES/CBC Hardening Exclusions
+
+| ID | Excluded input or behavior | Risk | Decision | Note |
+|---|---|---|---|---|
+| EX-3401 | Third-party AES hardening patches, context-integrity layouts, compiler analysis scripts, lifecycle/concurrency harnesses, or CI fragments with unclear rights | Provenance risk | Excluded | P1-26 uses fresh project-owned C99 and CMake material. |
+| EX-3402 | Treating internal context magic or round-key-size checks as an authentication mechanism or a substitute for memory safety | Security overstatement | Excluded | The checks are bounded defense-in-depth and fail-closed lifecycle guards only. |
+| EX-3403 | Claiming universal constant-time, side-channel resistance, or external review from a table-free source design or captured disassembly | Claims and technical risk | Excluded | Compiler, optimization, target architecture, microarchitecture, timing/cache, and fault review require manual evidence. |
+| EX-3404 | Logging or packaging AES keys, expanded schedules, IVs, plaintext, ciphertext, intermediate state, differential output bytes, entropy, seed, DRBG state, random output, private keys, signing keys, tokens, or customer data | Sensitive information risk | Excluded | Tests, CI, evidence summaries, install smoke, and PoC remain status/count only. |
+| EX-3405 | Shipping OpenSSL, differential test source, internal AES headers/source, lifecycle tests, or compiler disassembly in the customer PoC package | Product boundary and disclosure risk | Excluded | OpenSSL and internal review artifacts remain test/evidence only. |
+| EX-3406 | Automatically declaring hosted Windows/macOS/32-bit/big-endian support because workflow YAML exists | Evidence overstatement | Excluded | Actual runs, artifact hashes, reviewer, limitations, and disposition are required. |
+| EX-3407 | Widening the P1-25 public cipher API or silently changing the 61-symbol baseline during hardening | ABI governance risk | Excluded | P1-26 retains eight public cipher functions, existing enums/layouts, and 61 public symbols. |
+| EX-3408 | Adding CTR, GCM, padding, CMAC/GMAC, hardware acceleration, or domestic algorithms without a separate decision gate | Scope-creep risk | Deferred | P1-27 must select a narrow next scope or pause algorithm expansion. |

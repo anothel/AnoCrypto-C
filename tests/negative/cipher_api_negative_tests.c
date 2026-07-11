@@ -58,6 +58,12 @@ int main(void)
     expect_status("init flags", ano_crypto_cipher_init(ctx, ctx_size, ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC, ANO_CRYPTO_CIPHER_DIRECTION_ENCRYPT, aes_handle, iv, sizeof(iv), 1u), ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER);
     expect_status("wrong key type", ano_crypto_cipher_init(ctx, ctx_size, ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC, ANO_CRYPTO_CIPHER_DIRECTION_ENCRYPT, hmac_handle, iv, sizeof(iv), 0u), ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER);
     expect_status("init good", ano_crypto_cipher_init(ctx, ctx_size, ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC, ANO_CRYPTO_CIPHER_DIRECTION_ENCRYPT, aes_handle, iv, sizeof(iv), 0u), ANO_CRYPTO_OK);
+    expect_status("failed reinit invalid direction", ano_crypto_cipher_init(ctx, ctx_size, ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC, (ano_crypto_cipher_direction_t)99, aes_handle, iv, sizeof(iv), 0u), ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER);
+    expect_status("failed reinit invalidates context", ano_crypto_cipher_update(ctx, input, 16u, output, sizeof(output), &written), ANO_CRYPTO_ERR_INVALID_ARGUMENT);
+    expect_status("reinit after invalid direction", ano_crypto_cipher_init(ctx, ctx_size, ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC, ANO_CRYPTO_CIPHER_DIRECTION_ENCRYPT, aes_handle, iv, sizeof(iv), 0u), ANO_CRYPTO_OK);
+    expect_status("failed reinit wrong key type", ano_crypto_cipher_init(ctx, ctx_size, ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC, ANO_CRYPTO_CIPHER_DIRECTION_ENCRYPT, hmac_handle, iv, sizeof(iv), 0u), ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER);
+    expect_status("wrong key reinit invalidates context", ano_crypto_cipher_update(ctx, input, 16u, output, sizeof(output), &written), ANO_CRYPTO_ERR_INVALID_ARGUMENT);
+    expect_status("reinit after wrong key", ano_crypto_cipher_init(ctx, ctx_size, ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC, ANO_CRYPTO_CIPHER_DIRECTION_ENCRYPT, aes_handle, iv, sizeof(iv), 0u), ANO_CRYPTO_OK);
 
     written = 123u;
     expect_status("update zero", ano_crypto_cipher_update(ctx, input, 0u, output, sizeof(output), &written), ANO_CRYPTO_ERR_INVALID_ARGUMENT);

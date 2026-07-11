@@ -166,7 +166,9 @@ set(_doc_files
     docs/design/BLOCK_CIPHER_MODE_SELECTION.md
     docs/design/C99_BLOCK_CIPHER_API_GATE.md
     docs/design/AES_CBC_IMPLEMENTATION_POLICY.md
+    docs/design/AES_CBC_HARDENING_POLICY.md
     docs/kcmvp/BLOCK_CIPHER_KAT_AND_EVIDENCE_PLAN.md
+    docs/kcmvp/AES_COMPILER_OUTPUT_REVIEW_PLAN.md
     docs/design/C99_THREAD_SAFETY_POLICY.md
     docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md
     docs/security/SIDE_CHANNEL_REVIEW_CHECKLIST.md
@@ -179,6 +181,7 @@ set(_doc_files
     docs/ci/RANDOM_SERVICE_CI_CHECKLIST.md
     docs/ci/RANDOM_LIFECYCLE_HARDENING_CI_CHECKLIST.md
     docs/ci/DIFFERENTIAL_PORTABILITY_CI_CHECKLIST.md
+    docs/ci/AES_HARDENING_CI_CHECKLIST.md
     docs/roadmap/DEVELOPMENT_WORKFLOW.md
     docs/roadmap/C99_PRIORITY_TODO.md)
 
@@ -208,6 +211,7 @@ file(COPY
     "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/SHA512_FAMILY_REVIEW.md"
     "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/DIFFERENTIAL_PORTABILITY_REVIEW.md"
     "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/AES_CBC_IMPLEMENTATION_REVIEW.md"
+    "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/AES_HARDENING_REVIEW.md"
     DESTINATION "${_evidence_dir}")
 
 # The customer package may describe the internal boundary, but it must not
@@ -233,6 +237,10 @@ set(_forbidden_internal_package_paths
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/sha2_hmac_openssl_differential_tests.c"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/aes_cbc_openssl_differential_tests.c"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/aes_cbc_hardening_review.c"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/aes_cbc_lifecycle_stress_tests.c"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/AES_COMPILER_OUTPUT_REVIEW.txt"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/AES_COMPILER_OUTPUT_DISASSEMBLY.txt"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/ac_aes_internal.h"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/ac_cipher_internal.h"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/src/cipher"
@@ -254,6 +262,8 @@ foreach(_package_file IN LISTS _package_boundary_files)
     if(_package_file_lower MATCHES "(^|[/\\])(libcrypto|libssl|openssl)([./\\]|$)" OR
        _package_file_lower MATCHES "(sha2_hmac|aes_cbc)_openssl_differential_tests\.c$" OR
        _package_file_lower MATCHES "sha512_portability_review\.c$" OR
+       _package_file_lower MATCHES "aes_cbc_(hardening_review|lifecycle_stress_tests)\.c$" OR
+       _package_file_lower MATCHES "aes_compiler_output_(review|disassembly)\.txt$" OR
        _package_file_lower MATCHES "ac_(aes|cipher)_internal\.h$")
         message(FATAL_ERROR "PoC package contains a test-only differential/provider artifact: ${_package_file}")
     endif()
@@ -264,7 +274,7 @@ string(TIMESTAMP _created_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SBOM_STATUS.txt"
     "AnoCrypto-C PoC package SBOM status\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: placeholder only; no complete SBOM is generated for this P1-25 PoC package.\n"
+    "Status: placeholder only; no complete SBOM is generated for this P1-26 PoC package.\n"
     "Package hash manifest: PACKAGE_MANIFEST.md\n"
     "SBOM plan document: docs/kcmvp/SBOM_SIGNING_PLAN.md\n"
     "Do not add secrets, private keys, tokens, entropy captures, generated secret bytes, customer data, or internal deployment details to SBOM inputs.\n")
@@ -272,14 +282,14 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SBOM_STATUS.txt"
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SIGNING_STATUS.txt"
     "AnoCrypto-C PoC package signing status\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: signing not performed for this P1-25 PoC package.\n"
+    "Status: signing not performed for this P1-26 PoC package.\n"
     "No private signing key, signing token, or detached signature file is included.\n"
     "Future detached-signature workflow remains TODO until signing tool, signer identity, and verification policy are selected.\n")
 
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/THREAD_SAFETY_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package thread-safety notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P1-25 support-matrix draft for customer PoC review.\n"
+    "Status: P1-26 support-matrix draft for customer PoC review.\n"
     "Support matrix: docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md\n"
     "CI checklist: docs/ci/THREAD_SAFETY_CI_CHECKLIST.md\n"
     "Build option: ANO_CRYPTO_ENABLE_THREAD_SAFETY controls internal global-state locking where supported.\n"
@@ -289,7 +299,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/THREAD_SAFETY_PACKAGE_NOTES.txt"
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package concurrency and sanitizer notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P1-25 engineering boundary; not official validation evidence.\n"
+    "Status: P1-26 engineering boundary; not official validation evidence.\n"
     "Cross-platform concurrency test: Win32 native threads or POSIX pthreads in internal test builds.\n"
     "Selected required diagnostic lane: Linux GCC address+undefined sanitizer. Clang runtime review and ThreadSanitizer remain TODO.\n"
     "The clean PoC SDK is rebuilt with ANO_CRYPTO_SANITIZER_MODE=none, tests/hooks OFF, and internal symbols hidden.\n"
@@ -300,18 +310,18 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/CONCURRENCY_SANITIZER_PACKAGE_NOTES.tx
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SHA512_FAMILY_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package SHA-384/SHA-512 family notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P1-25 engineering implementation summary for customer PoC review; not official validation evidence.\n"
+    "Status: P1-26 engineering implementation summary for customer PoC review; not official validation evidence.\n"
     "Implementation decision: docs/design/SHA2_384_512_SCOPE_DECISION.md\n"
     "KAT record: docs/kcmvp/SHA2_384_512_KAT_PLAN.md\n"
     "Current behavior: SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 one-shot, streaming, and HMAC key-handle processing are implemented.\n"
     "Startup KATs cover empty/abc and RFC 4231 cases 1/2; extended CTest coverage includes long messages, million-a, RFC 4231 cases 3/4/6/7, and negative API boundaries.\n"
     "PoC examples exercise all three SHA-2 digest and HMAC variants but report only status and byte counts; digest and MAC values are not printed.\n"
-    "P1-25 adds deterministic OpenSSL 3.x test-only differential and portability coverage; provider binaries, headers, source, and result values are excluded from this package.\n")
+    "P1-26 adds deterministic OpenSSL 3.x test-only differential and portability coverage; provider binaries, headers, source, and result values are excluded from this package.\n")
 
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package differential-validation and portability boundary notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P1-25 engineering package boundary; not official validation evidence.\n"
+    "Status: P1-26 engineering package boundary; not official validation evidence.\n"
     "OpenSSL 3.x is used only by an internal test executable for deterministic SHA-2/HMAC and AES-CBC comparison.\n"
     "The clean PoC SDK is configured with ANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF and ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=OFF.\n"
     "The installed SDK and public example do not include or require OpenSSL headers, libcrypto, differential-test source, reference outputs, or test corpus files.\n"
@@ -322,7 +332,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/AES_CBC_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package AES/CBC notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P1-25 engineering implementation summary; not official validation evidence.\n"
+    "Status: P1-26 engineering implementation summary; not official validation evidence.\n"
     "Public scope: AES-128/192/256 and CBC without padding through CSP-backed in-memory keys.\n"
     "API rules: caller-provided 16-byte IV, complete non-empty blocks, exact in-place allowed, partial overlap rejected.\n"
     "The package includes public ac_cipher.h and the product library, but excludes internal AES context headers, implementation source, KAT/differential source, and reference outputs.\n"
@@ -330,10 +340,21 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/AES_CBC_PACKAGE_NOTES.txt"
     "PoC output records status and byte counts only; AES keys, IVs, plaintext, ciphertext, expanded schedules, and comparison values are not printed.\n"
     "Compiler-output and target-specific side-channel review remain TODO before stronger implementation claims.\n")
 
+
+file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/AES_HARDENING_PACKAGE_NOTES.txt"
+    "AnoCrypto-C PoC package AES/CBC hardening notes\n"
+    "Generated UTC: ${_created_utc}\n"
+    "Status: P1-26 engineering boundary; not official validation evidence.\n"
+    "Public API boundary: the same eight cipher functions and 61-symbol clean Release baseline are retained.\n"
+    "Internal hardening: bounded context integrity metadata, fail-closed reinitialization, lifecycle/unaligned/streaming/concurrency regressions, and expanded test-only differential comparison.\n"
+    "Compiler-output capture and full disassembly are internal review evidence and are not included in this customer package. Manual compiler/target review remains required.\n"
+    "The package excludes internal AES source/context headers, hardening/lifecycle test source, OpenSSL differential source/provider artifacts, and compiler disassembly.\n"
+    "Package records contain status, counts, and policy only; keys, IVs, plaintext, ciphertext, expanded schedules, intermediate state, entropy, seed, DRBG state, and generated random values are excluded.\n")
+
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RANDOM_SERVICE_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package public random-service notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P1-25 engineering customer PoC boundary; not official validation evidence.\n"
+    "Status: P1-26 engineering customer PoC boundary; not official validation evidence.\n"
     "Public random API decision: docs/design/PUBLIC_RANDOM_API_DECISION.md\n"
     "Random service design: docs/design/C99_RANDOM_SERVICE_API_DRAFT.md\n"
     "Random service CI checklist: docs/ci/RANDOM_SERVICE_CI_CHECKLIST.md\n"
@@ -347,7 +368,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RANDOM_SERVICE_PACKAGE_NOTES.txt"
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RANDOM_LIFECYCLE_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package random lifecycle and portability notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P1-25 customer PoC boundary; not official validation evidence.\n"
+    "Status: P1-26 customer PoC boundary; not official validation evidence.\n"
     "Operational policy: docs/design/C99_RANDOM_OPERATIONAL_PORTABILITY_POLICY.md\n"
     "CI checklist: docs/ci/RANDOM_LIFECYCLE_HARDENING_CI_CHECKLIST.md\n"
     "Service availability requires a reviewed platform provider and a supported process marker; unsupported process-marker platforms fail closed.\n"
@@ -359,7 +380,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RANDOM_LIFECYCLE_PACKAGE_NOTES.txt"
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/ENTROPY_HEALTH_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package entropy/health-test boundary notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P1-25 engineering boundary summary.\n"
+    "Status: P1-26 engineering boundary summary.\n"
     "The SDK in this package is rebuilt with ANO_CRYPTO_BUILD_TESTS=OFF, ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF, ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF, and ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON.\n"
     "No internal entropy provider header or deterministic failure-injection API is installed.\n"
     "Health-test candidates remain internal, disabled by default, and require noise-source-specific review before operational policy selection.\n"
@@ -368,7 +389,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/ENTROPY_HEALTH_PACKAGE_NOTES.txt"
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package entropy operational policy notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P1-25 engineering boundary summary.\n"
+    "Status: P1-26 engineering boundary summary.\n"
     "OS APIs are classified internally as external conditioned random providers; the module raw-noise health skeleton is not attached to their output.\n"
     "The source-backed DRBG process-change guard is private implementation state and no process-guard type or function is installed.\n"
     "Explicit-entropy DRBG contexts remain caller-managed across process inheritance; this package does not claim automatic fork safety for that API.\n"
@@ -388,12 +409,14 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/PACKAGE_REVIEW_MANIFEST.md"
     "- Confirm `SHA512_FAMILY_PACKAGE_NOTES.txt` matches the current SHA-384/SHA-512 implementation and KAT boundary.\n"
     "- Confirm `DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt` records the test-only OpenSSL boundary and unreviewed hosted portability artifacts.\n"
     "- Confirm `AES_CBC_PACKAGE_NOTES.txt` records the public AES/CBC scope, internal-source exclusion, and remaining side-channel review.\n"
+    "- Confirm `AES_HARDENING_PACKAGE_NOTES.txt` records unchanged public API/symbol baseline, internal hardening, compiler-review boundary, and excluded artifacts.\n"
     "- Confirm `RANDOM_SERVICE_PACKAGE_NOTES.txt` matches the current public random-service implementation and stated limitations.\n"
     "- Confirm `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt` records fail-closed process-marker, VM clone/snapshot, suspend/resume, and hook boundaries.\n"
     "- Confirm `CLEAN_RELEASE_SYMBOL_BASELINE.log` reports the stored 61-symbol ABI-0 baseline match.\n"
     "- Confirm `ENTROPY_HEALTH_PACKAGE_NOTES.txt` records test hooks OFF and internal symbol hiding ON.\n"
     "- Confirm `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt` records external OS-provider classification, private process guard, and implemented public random service.\n"
-    "- Confirm installed headers and shared-library exports do not expose internal entropy, process-guard, reseed-limit, or failure-injection test-hook symbols.\n"
+    "- Confirm installed headers and shared-library exports do not expose internal entropy, process-guard, reseed-limit, failure-injection test-hook, or internal AES context symbols.\n"
+    "- Confirm compiler-output review/disassembly and AES hardening/lifecycle test sources are not in the customer package.\n"
     "- Confirm the SDK and example do not contain or depend on OpenSSL headers, libcrypto/libssl, differential source, or reference outputs.\n"
     "- Confirm examples do not print key bytes, entropy bytes, seed material, nonce material, DRBG state, generated DRBG output, private keys, or tokens.\n"
     "- Confirm install logs do not disclose internal deployment details before sharing.\n"
@@ -412,13 +435,14 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/README.md"
 "- `PACKAGE_MANIFEST.md`: package-relative SHA-256 file manifest.\n"
 "- `PACKAGE_REVIEW_MANIFEST.md`: review notes before sharing.\n"
 "- `SBOM_STATUS.txt` and `SIGNING_STATUS.txt`: placeholder status records.\n"
-"- `THREAD_SAFETY_PACKAGE_NOTES.txt`: P1-25 thread-safety support-matrix summary.\n"
-"- `CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt`: P1-25 cross-platform concurrency, diagnostic-lane, and build-identity ABI summary.\n"
-"- `SHA512_FAMILY_PACKAGE_NOTES.txt`: P1-25 SHA-384/SHA-512 family implementation and KAT summary.\n"
+"- `THREAD_SAFETY_PACKAGE_NOTES.txt`: P1-26 thread-safety support-matrix summary.\n"
+"- `CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt`: P1-26 cross-platform concurrency, diagnostic-lane, and build-identity ABI summary.\n"
+"- `SHA512_FAMILY_PACKAGE_NOTES.txt`: P1-26 SHA-384/SHA-512 family implementation and KAT summary.\n"
 "- `DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt`: test-only OpenSSL provider and portability-review boundary.\n"
 "- `AES_CBC_PACKAGE_NOTES.txt`: public AES/CBC scope, package boundary, and remaining review notes.\n"
-"- `RANDOM_SERVICE_PACKAGE_NOTES.txt`: P1-25 public random-service implementation summary.\n"
-"- `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt`: P1-25 lifecycle, process-marker, VM duplication, and clean export-baseline summary.\n"
+"- `AES_HARDENING_PACKAGE_NOTES.txt`: unchanged public API, lifecycle hardening, and compiler-review artifact boundary.\n"
+"- `RANDOM_SERVICE_PACKAGE_NOTES.txt`: P1-26 public random-service implementation summary.\n"
+"- `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt`: P1-26 lifecycle, process-marker, VM duplication, and clean export-baseline summary.\n"
 "- `CLEAN_RELEASE_SYMBOL_BASELINE.log`: clean shared-library comparison with the stored 61-symbol ABI-0 baseline.\n"
 "- `ENTROPY_HEALTH_PACKAGE_NOTES.txt`: clean-build and internal entropy/test-hook exclusion summary.\n"
 "- `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt`: OS-provider classification, private process-boundary guard, and implemented random-service summary.\n\n"

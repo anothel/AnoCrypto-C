@@ -479,3 +479,22 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 | SRC-1401 | NIST FIPS 197, Advanced Encryption Standard | AES-128/192/256 algorithm definition and cipher examples used for startup/extended KAT transcription. | Public standard; no external implementation code copied. |
 | SRC-1402 | NIST SP 800-38A, CBC mode examples | CBC-AES128/192/256 four-block encrypt/decrypt fixtures. | Public standard; no private submission data. |
 | SRC-1403 | OpenSSL 3.x public EVP cipher API | Test-only AES-CBC differential provider. | Build/test dependency only; excluded from product library, installed SDK, and PoC runtime. |
+
+## P1-26 AES/CBC Hardening Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| DER-3401 | Fresh internal AES context validation and fail-closed cipher reinitialization changes | User-owned C99 implementation | Harden caller-owned context lifecycle without changing the public API | No external implementation, table, code structure, or private material imported. |
+| DER-3402 | Fresh AES hardening, lifecycle stress, unaligned/streaming, and CSP HMAC/AES concurrency tests | User-owned C99 test code | Exercise corrupt/incomplete context rejection, 128 lifecycle iterations, variable chunks, exact in-place operation, and shared read-only key handles | Test data is deterministic and transient; key, IV, plaintext, ciphertext, and intermediate values are not printed or retained. |
+| SRC-3403 | OpenSSL 3.x public EVP cipher API through the P1-23 reviewed test-only provider boundary | Public open-source test dependency | Expand independent AES-CBC comparison to 96 deterministic cases per key size and multiple AnoCrypto-C processing paths | No OpenSSL implementation or test harness source is copied. Product and PoC binaries remain independent of OpenSSL. |
+| DER-3404 | Fresh compiler-output capture CMake tool and review plan | User-owned tooling/documentation | Retain compiler, target, binary hash, symbol markers, and disassembly for manual AES review | The tool makes no automated constant-time or side-channel conclusion. |
+| DER-3405 | Fresh Linux 32-bit and s390x cross-run workflow/toolchain definitions | User-owned build/CI material using public compiler interfaces | Prepare status-only portability evidence lanes | Workflow presence is not a successful hosted result; actual artifacts require review. |
+| DER-3406 | Fresh P1-26 policy, evidence, PoC, clean-room, and roadmap updates | User-owned project material | Keep implementation, package, ABI, logging, and claims boundaries aligned | Public cipher API remains eight functions and the clean Release baseline remains 61 symbols. |
+
+## P1-26 Clean-room Notes
+
+- No third-party AES core, S-box table, key-schedule source, compiler-analysis script, concurrency harness, or proprietary test structure was imported.
+- Public FIPS 197 and NIST SP 800-38A vectors recorded in P1-25 remain the correctness source; the enlarged OpenSSL comparison corpus is generated locally from deterministic non-secret recipes.
+- Compiler-output artifacts contain machine instructions and build metadata for the AnoCrypto-C binary under review, not runtime key/IV/plaintext/ciphertext values. They are internal evidence and require human disposition.
+- Keys, expanded schedules, IVs, plaintext, ciphertext, intermediate AES state, entropy, seed material, DRBG state, generated random output, private keys, signing keys, tokens, customer data, and internal deployment information remain excluded from logs and packages.
+- P1-26 does not add CTR, GCM, padding, CMAC/GMAC, hardware dispatch, or a new public API.

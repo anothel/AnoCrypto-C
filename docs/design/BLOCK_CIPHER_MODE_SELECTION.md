@@ -1,6 +1,6 @@
 # Block Cipher and Mode Selection Decision Record
 
-Status: P1-25 narrow implementation slice completed.
+Status: P1-26 narrow AES/CBC slice implemented and hardened without widening its public scope.
 
 ## Implemented decision
 
@@ -18,5 +18,5 @@ algorithm/mode decision.
 ## Deferred decisions
 
 AES-GCM, AES-CTR, CMAC/GMAC, padding helpers, hardware acceleration, and domestic
-algorithms remain outside P1-25. Higher-level envelope/nonce/storage policy remains
+algorithms remain outside P1-26. Higher-level envelope/nonce/storage policy remains
 an AnoSecureKit responsibility.

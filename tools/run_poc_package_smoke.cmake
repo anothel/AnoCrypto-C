@@ -67,6 +67,7 @@ set(_required_package_records
     "SHA512_FAMILY_PACKAGE_NOTES.txt"
     "DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt"
     "AES_CBC_PACKAGE_NOTES.txt"
+    "AES_HARDENING_PACKAGE_NOTES.txt"
     "RANDOM_SERVICE_PACKAGE_NOTES.txt"
     "RANDOM_LIFECYCLE_PACKAGE_NOTES.txt"
     "ENTROPY_HEALTH_PACKAGE_NOTES.txt"
@@ -87,6 +88,8 @@ foreach(_poc_file IN LISTS _poc_package_files)
     if(_poc_file_lower MATCHES "(^|[/\\])(libcrypto|libssl|openssl)([./\\]|$)" OR
        _poc_file_lower MATCHES "(sha2_hmac|aes_cbc)_openssl_differential_tests\.c$" OR
        _poc_file_lower MATCHES "sha512_portability_review\.c$" OR
+       _poc_file_lower MATCHES "aes_cbc_(hardening_review|lifecycle_stress_tests)\.c$" OR
+       _poc_file_lower MATCHES "aes_compiler_output_(review|disassembly)\.txt$" OR
        _poc_file_lower MATCHES "ac_(aes|cipher)_internal\.h$")
         message(FATAL_ERROR "PoC package contains test-only differential/provider artifact: ${_poc_file}")
     endif()
@@ -163,6 +166,7 @@ file(WRITE "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_PACKAGE_SMOKE_SUMMARY.txt"
     "SHA-512-family notes: ${_package_dir}/SHA512_FAMILY_PACKAGE_NOTES.txt\n"
     "Differential/portability notes: ${_package_dir}/DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt\n"
     "AES/CBC notes: ${_package_dir}/AES_CBC_PACKAGE_NOTES.txt\n"
+    "AES/CBC hardening notes: ${_package_dir}/AES_HARDENING_PACKAGE_NOTES.txt\n"
     "Random service notes: ${_package_dir}/RANDOM_SERVICE_PACKAGE_NOTES.txt\n"
     "Random lifecycle notes: ${_package_dir}/RANDOM_LIFECYCLE_PACKAGE_NOTES.txt\n"
     "Clean Release symbol baseline: ${_package_dir}/CLEAN_RELEASE_SYMBOL_BASELINE.log\n"

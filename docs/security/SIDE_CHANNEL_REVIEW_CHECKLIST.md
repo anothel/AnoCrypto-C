@@ -1,6 +1,6 @@
 # Side-Channel Review Checklist
 
-Status: P1-15 draft.
+Status: P1-26 draft; AES compiler-output capture is available but manual disposition remains required.
 
 ## Purpose
 
@@ -32,12 +32,13 @@ Run this checklist before merging changes that touch:
 | Platform differences | Are platform-specific entropy, threading, and visibility branches reviewed? | TODO |
 | Public claims | Do docs avoid stronger leakage-resistance wording than the evidence supports? | TODO |
 
-## Current P1-12 observations
+## Current P1-26 observations
 
 - SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, and HMAC key handle paths exist as an engineering P1 slice.
 - HMAC key material is in-memory only and is not exported by public API.
 - Entropy provider tests are status-only and must not log entropy bytes.
-- Further side-channel hardening work remains TODO before broader claims are made.
+- AES uses a table-free arithmetic implementation and P1-26 can capture compiler output for review. This does not automatically establish constant-time behavior.
+- Compiler/optimization/architecture-specific disassembly, timing/cache behavior, fault behavior, and supported-target review remain TODO before broader claims are made.
 
 ## Evidence record template
 

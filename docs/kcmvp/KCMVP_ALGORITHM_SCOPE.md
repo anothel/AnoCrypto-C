@@ -1,6 +1,6 @@
 # AnoCrypto-C Algorithm Scope
 
-Status: P1-25 engineering draft.
+Status: P1-26 engineering draft.
 
 ## Implemented candidate slice
 
@@ -21,7 +21,7 @@ Status: P1-25 engineering draft.
 | Area | Service | State |
 |---|---|---|
 | DRBG | Hash_DRBG-SHA-256 | Algorithm ID placeholder; not implemented. |
-| Block cipher/modes | AES-128/192/256 + CBC no-padding | Implemented P1-25 engineering slice with startup/extended KAT, negative, differential, install/PoC, and evidence checks. |
+| Block cipher/modes | AES-128/192/256 + CBC no-padding | Implemented in P1-25 and hardened in P1-26 with startup/extended KAT, negative, expanded differential, lifecycle/portability/concurrency, install/PoC, and evidence checks. |
 | Additional KDF/MAC | TBD | Deferred. |
 | Public-key primitives | TBD | Deferred to later planning. |
 
@@ -29,6 +29,6 @@ Status: P1-25 engineering draft.
 
 This file records implementation and evidence-preparation scope. It does not assert official validation status. Passing KATs and CTest are engineering correctness signals only.
 
-P1-22 did not add a public function and P1-23 added only test/evidence tooling, preserving the then-current 53-symbol ABI-0 list. P1-25 adds eight reviewed AES/CBC public symbols and updates the stored ABI-0 list to 61 names. Actual hosted 32-bit, Windows, macOS, big-endian, and target-specific side-channel review remains TODO.
+P1-22 did not add a public function and P1-23 added only test/evidence tooling, preserving the then-current 53-symbol ABI-0 list. P1-25 added eight reviewed AES/CBC public symbols and updated the stored ABI-0 list to 61 names. P1-26 preserves those functions and that baseline while hardening internal lifecycle, portability, concurrency, differential, and compiler-review workflows.
 
-P1-25 adds eight reviewed public cipher symbols and updates the stored ABI-0 export baseline from 53 to 61 entries. AEAD, CTR, padding helpers, CMAC/GMAC, hardware dispatch, and domestic algorithms remain deferred. Compiler-output and target-specific side-channel review remain TODO.
+AEAD, CTR, padding helpers, CMAC/GMAC, hardware dispatch, and domestic algorithms remain deferred. Actual hosted 32-bit, Windows, macOS, big-endian, manual compiler-output, and target-specific side-channel review remains TODO.

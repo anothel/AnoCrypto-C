@@ -1,6 +1,6 @@
 # Block Cipher KAT and Evidence Plan
 
-Status: P1-25 implemented engineering evidence slice.
+Status: P1-26 implemented and hardened engineering evidence slice.
 
 ## Public sources
 
@@ -18,7 +18,9 @@ submission material or third-party product implementation was used.
 - streaming and exact in-place regression;
 - invalid key/IV/input/output/mode/direction/overlap/context tests;
 - stale and wrong-type CSP handle tests;
-- OpenSSL 3.x test-only AES-CBC differential comparison;
+- OpenSSL 3.x test-only AES-CBC differential comparison with 96 deterministic cases per key size and one-shot, streaming, exact in-place, encrypt, and decrypt paths;
+- 128-iteration lifecycle stress, unaligned/variable-chunk portability, failed-reinitialization, internal-context guard, and cross-platform CSP HMAC/AES concurrency regression;
+- compiler-output capture artifacts for manual review without automated leakage-resistance conclusions;
 - install and PoC smoke without key/IV/plaintext/ciphertext output;
 - clean Release 61-symbol baseline check.
 
@@ -28,5 +30,5 @@ intermediate states are excluded.
 
 ## Remaining review
 
-Compiler-output and supported-target side-channel review, 32-bit/big-endian hosted
+Manual disposition of compiler-output artifacts and supported-target side-channel review, actual 32-bit/big-endian hosted
 results, hardware provider decisions, and final validation-target scope remain TODO.

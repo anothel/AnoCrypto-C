@@ -1,6 +1,6 @@
 # C99 Block Cipher API Decision
 
-Status: P1-25 reviewed API implemented.
+Status: P1-26 reviewed API retained; hardening adds no public cipher functions or enum values.
 
 ## Public API
 
@@ -26,6 +26,5 @@ cipher context before returning.
 
 ## ABI decision
 
-P1-25 deliberately adds `ac_cipher.h` and eight exported functions. The stored
-ABI-0 symbol baseline changes from 53 to 61 entries. Existing symbol names,
+P1-25 deliberately added `ac_cipher.h` and eight exported functions. P1-26 retains those same eight functions and the 61-entry ABI-0 symbol baseline while hardening internal context, lifecycle, testing, and review workflows. Existing symbol names,
 status values, enum values, and public structure layouts are unchanged.

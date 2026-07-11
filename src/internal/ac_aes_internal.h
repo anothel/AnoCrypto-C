@@ -7,10 +7,16 @@
 
 #define ANO_CRYPTO_INTERNAL_AES_BLOCK_SIZE 16u
 #define ANO_CRYPTO_INTERNAL_AES_MAX_ROUND_KEY_SIZE 240u
+#define ANO_CRYPTO_INTERNAL_AES128_ROUND_KEY_SIZE 176u
+#define ANO_CRYPTO_INTERNAL_AES192_ROUND_KEY_SIZE 208u
+#define ANO_CRYPTO_INTERNAL_AES256_ROUND_KEY_SIZE 240u
+#define ANO_CRYPTO_INTERNAL_AES_CTX_MAGIC 0x41455331u
 
 typedef struct ano_crypto_internal_aes_ctx_s {
     uint8_t round_keys[ANO_CRYPTO_INTERNAL_AES_MAX_ROUND_KEY_SIZE];
     uint32_t rounds;
+    uint32_t round_key_size;
+    uint32_t magic;
     uint32_t initialized;
 } ano_crypto_internal_aes_ctx_t;
 
