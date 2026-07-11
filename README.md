@@ -2,20 +2,20 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-21 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, an implemented public random-service lifecycle, cross-platform CSP/HMAC concurrency coverage, a required Linux GCC ASan/UBSan lane, status-only thread-platform artifacts, and a recorded build-identity ABI-0 layout decision. Actual hosted Linux/macOS/Windows artifacts still require review; evidence, install, and PoC outputs remain engineering drafts.
+Current status: P1-22 foundation with SHA-256, SHA-384, SHA-512, their HMAC variants, HMAC_DRBG-SHA-256, an implemented public random-service lifecycle, cross-platform CSP/HMAC concurrency coverage, a required Linux GCC ASan/UBSan lane, status-only hosted-review artifacts, and a recorded 53-symbol ABI-0 baseline. Actual hosted Linux/macOS/Windows artifacts still require review; evidence, install, and PoC outputs remain engineering drafts.
 
 Implemented processing scope:
 
-- SHA-256 one-shot and streaming API
-- HMAC-SHA-256 one-shot and streaming API
-- HMAC-SHA-256 compute using an in-memory HMAC key handle
+- SHA-256, SHA-384, and SHA-512 one-shot and streaming APIs
+- HMAC-SHA-256, HMAC-SHA-384, and HMAC-SHA-512 one-shot and streaming APIs
+- HMAC computation for all three SHA-2 variants using an in-memory HMAC key handle
 - HMAC_DRBG-SHA-256 deterministic core API
 - Internal HMAC_DRBG-SHA-256 instantiate/reseed helper driven by entropy source
 - Public `ano_crypto_random_*` lifecycle backed by the reviewed platform entropy seam and HMAC_DRBG-SHA-256
 - Bidirectional cross-API context separation between explicit-entropy DRBG and random-service generate/reseed operations
 - Process-change detection for source-backed random contexts, requiring explicit reseed before generation
-- Startup self-test KATs for SHA-256, HMAC-SHA-256, and HMAC_DRBG-SHA-256
-- Extended KAT executables for SHA-256, HMAC-SHA-256, HMAC key handle path, and HMAC_DRBG-SHA-256 public vectors
+- Startup self-test KATs for SHA-256/SHA-384/SHA-512, their HMAC variants, and HMAC_DRBG-SHA-256
+- Extended KAT executables for all implemented SHA-2/HMAC variants, HMAC key-handle paths, and HMAC_DRBG-SHA-256 public vectors
 - Negative API tests for hash/HMAC/DRBG/CSP/key argument handling, context lifecycle behavior, handle exhaustion, stale handle rejection, and DRBG helper failure cleanup
 - Internal entropy adapter seam with callback and platform OS provider tests
 - Dedicated-build deterministic entropy provider hook for success, failure, and partial-write negative paths; disabled by default and absent from public headers
@@ -35,8 +35,6 @@ Implemented processing scope:
 
 Skeleton-only / TODO scope:
 
-- SHA-384/SHA-512 ABI placeholders with P1-15 reserved-scope regression tests
-- HMAC-SHA-384/HMAC-SHA-512 ABI placeholders
 - Hash_DRBG-SHA-256 ABI placeholder
 - Direct noise-source selection, source-specific startup/continuous health tests, thresholds, and recovery policy
 - Cross-platform hosted-CI review of process-change behavior and unsupported-process-marker policy
@@ -58,8 +56,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-21
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-21
+cmake --install build --prefix /tmp/anocrypto-c-p1-22
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-22
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -77,8 +75,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-21
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-21
+cmake --install build --prefix /tmp/anocrypto-c-p1-22
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-22
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -109,7 +107,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, P1-21 concurrency/sanitizer, thread-platform, build-identity ABI, SHA-2 scope, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-21/`.
+Generated files include public-surface, thread-safety, P1-22 concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-22/`.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -124,12 +122,12 @@ Generated files include public-surface, thread-safety, P1-21 concurrency/sanitiz
 - PoC package now writes `THREAD_SAFETY_PACKAGE_NOTES.txt`
 - PoC package smoke checks that package manifest/review/status/thread-safety records exist
 - Clean-room source manifest and exclusion log updated for P1-14 thread-safety support-matrix additions
-- `docs/design/SHA2_384_512_SCOPE_DECISION.md` records the P1-15 SHA-384/SHA-512 reserved scope decision
+- `docs/design/SHA2_384_512_SCOPE_DECISION.md` records the P1-15 reservation history and P1-22 implementation decision
 - `docs/kcmvp/SHA2_384_512_KAT_PLAN.md` records the P1-15 KAT/evidence plan
-- `ano_crypto_sha2_scope_policy_check` verifies SHA-384/SHA-512 reserved-scope wiring
-- `tests/negative/sha2_reserved_api_tests.c` verifies size/name metadata and NOT_IMPLEMENTED processing behavior
-- Evidence workflow now writes `SHA2_SCOPE_CHECK.txt` and `SHA2_SCOPE_REVIEW_NOTES.txt`
-- PoC package now writes `SHA2_SCOPE_PACKAGE_NOTES.txt`
+- `ano_crypto_sha512_family_policy_check` verifies SHA-384/SHA-512 implementation, KAT, negative-test, evidence, and PoC wiring
+- `tests/kat/sha512_family_kat_tests.c` and `tests/negative/sha512_family_api_negative_tests.c` verify implemented processing and negative boundaries
+- Evidence workflow now writes `SHA512_FAMILY_CHECK.txt` and `SHA512_FAMILY_REVIEW_NOTES.txt`
+- PoC package now writes `SHA512_FAMILY_PACKAGE_NOTES.txt`
 - `include/anocrypto/ac_random.h` was introduced as a reserved boundary in P1-16 and is implemented in P1-19
 - `src/drbg/random.c` now drives source-backed HMAC_DRBG-SHA-256 through the reviewed platform entropy seam
 - `tests/unit/random_service_tests.c` verifies lifecycle, provider-disabled, cross-API misuse, output clearing, and POSIX fork/reseed behavior
@@ -166,7 +164,7 @@ Generated files include public-surface, thread-safety, P1-21 concurrency/sanitiz
 ## Important limitations
 
 - This is not an official validation result.
-- SHA-384, SHA-512, Hash_DRBG, and block cipher processing APIs are not implemented yet.
+- Hash_DRBG and block cipher processing APIs are not implemented; SHA-384/SHA-512 and their HMAC variants are implemented in the P1-22 engineering slice.
 - KAT pass results are correctness checks only and do not replace formal validation.
 - The explicit-entropy HMAC_DRBG-SHA-256 API remains caller-managed and separate from the public random service.
 - The entropy callback seam is test/internal plumbing and is not an operational entropy source.
@@ -179,7 +177,7 @@ Generated files include public-surface, thread-safety, P1-21 concurrency/sanitiz
 - The dedicated entropy failure-injection build exposes internal test symbols only to internal tests; ordinary, Release, and PoC builds keep the hook disabled, and release-style builds hide internal symbols where supported.
 - Customer PoC package v0 is an integration draft and still needs legal/evaluation notice review before external sharing.
 - P1-14 thread-safety support-matrix additions are retained.
-- P1-15 SHA-384/SHA-512 scope additions do not add new cryptographic algorithm implementations.
+- P1-15 was a historical reserved-scope step; P1-22 supersedes that processing boundary with implementation, KAT, negative-test, and evidence coverage.
 - P1-16 introduced the random-service boundary; P1-19 implements the existing symbols without adding new public functions.
 - This repository does not claim official validation or external review completion.
 - P1-17 health-test candidates are engineering skeletons, not finalized noise-source tests or validation evidence.
@@ -219,3 +217,14 @@ Generated files include public-surface, thread-safety, P1-21 concurrency/sanitiz
 - `ano_crypto_build_identity_t` retains ABI version 1 and its recorded field order without adding a public function or symbol.
 - `ano_crypto_concurrency_sanitizer_policy_check` verifies source, CI, evidence, PoC, and ABI decision wiring.
 - Hosted workflow configuration creates status-only thread artifacts, but actual runner results must be reviewed before widening platform support wording.
+
+
+## P1-22 SHA-512-family implementation
+
+- Implements SHA-384 and SHA-512 behind the existing algorithm identifiers without adding a public symbol.
+- Implements HMAC-SHA-384 and HMAC-SHA-512 for raw-key, streaming, and CSP HMAC key-handle paths.
+- Adds startup self-tests and extended public-source FIPS/RFC 4231 KAT coverage.
+- Adds negative context/state/output-size/cross-service regression tests.
+- Extends install and PoC smoke to all three SHA-2 digest and HMAC variants while suppressing digest/MAC output.
+- Replaces the historical reserved-scope policy with `ano_crypto_sha512_family_policy_check`.
+- Keeps independent external-provider differential automation and actual hosted Windows/macOS review as TODO.

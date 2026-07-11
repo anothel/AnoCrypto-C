@@ -24,16 +24,25 @@ int main(void)
         return 1;
     }
 
-    st = ano_crypto_hash_context_size(ANO_CRYPTO_HASH_ALG_SHA256, &size);
-    if (st != ANO_CRYPTO_OK || size == 0u) {
-        fprintf(stderr, "hash context size query failed: %s\n", ano_crypto_status_name(st));
-        return 1;
-    }
-
-    st = ano_crypto_hmac_context_size(ANO_CRYPTO_HASH_ALG_SHA256, &size);
-    if (st != ANO_CRYPTO_OK || size == 0u) {
-        fprintf(stderr, "hmac context size query failed: %s\n", ano_crypto_status_name(st));
-        return 1;
+    {
+        static const ano_crypto_hash_algorithm_t algorithms[] = {
+            ANO_CRYPTO_HASH_ALG_SHA256,
+            ANO_CRYPTO_HASH_ALG_SHA384,
+            ANO_CRYPTO_HASH_ALG_SHA512
+        };
+        size_t i;
+        for (i = 0u; i < (sizeof(algorithms) / sizeof(algorithms[0])); ++i) {
+            st = ano_crypto_hash_context_size(algorithms[i], &size);
+            if (st != ANO_CRYPTO_OK || size == 0u) {
+                fprintf(stderr, "hash context size query failed: %s\n", ano_crypto_status_name(st));
+                return 1;
+            }
+            st = ano_crypto_hmac_context_size(algorithms[i], &size);
+            if (st != ANO_CRYPTO_OK || size == 0u) {
+                fprintf(stderr, "hmac context size query failed: %s\n", ano_crypto_status_name(st));
+                return 1;
+            }
+        }
     }
 
     st = ano_crypto_drbg_context_size(ANO_CRYPTO_DRBG_ALG_HMAC_SHA256, &size);
@@ -56,24 +65,43 @@ int main(void)
 
     {
         static const uint8_t msg[] = { 'a', 'b', 'c' };
-        uint8_t digest[32];
-        size_t written = 0u;
-        st = ano_crypto_hash_digest(ANO_CRYPTO_HASH_ALG_SHA256,
-                                    msg, sizeof(msg), digest, sizeof(digest), &written);
-        if (st != ANO_CRYPTO_OK || written != sizeof(digest)) {
-            fprintf(stderr, "sha256 smoke failed: %s\n", ano_crypto_status_name(st));
-            return 1;
+        static const ano_crypto_hash_algorithm_t algorithms[] = {
+            ANO_CRYPTO_HASH_ALG_SHA256,
+            ANO_CRYPTO_HASH_ALG_SHA384,
+            ANO_CRYPTO_HASH_ALG_SHA512
+        };
+        uint8_t digest[ANO_CRYPTO_HASH_SHA512_DIGEST_SIZE];
+        size_t i;
+
+        for (i = 0u; i < (sizeof(algorithms) / sizeof(algorithms[0])); ++i) {
+            size_t expected = 0u;
+            size_t written = 0u;
+            st = ano_crypto_hash_digest_size(algorithms[i], &expected);
+            if (st != ANO_CRYPTO_OK) {
+                fprintf(stderr, "sha2 digest size smoke failed: %s\n", ano_crypto_status_name(st));
+                return 1;
+            }
+            st = ano_crypto_hash_digest(algorithms[i],
+                                        msg, sizeof(msg), digest, sizeof(digest), &written);
+            if (st != ANO_CRYPTO_OK || written != expected) {
+                fprintf(stderr, "sha2 digest smoke failed: %s\n", ano_crypto_status_name(st));
+                return 1;
+            }
+            (void)ano_crypto_csp_zeroize(digest, sizeof(digest));
         }
     }
-
-
 
     {
         static const uint8_t key[] = { 'J', 'e', 'f', 'e' };
         static const uint8_t msg[] = { 'a', 'b', 'c' };
+        static const ano_crypto_hash_algorithm_t algorithms[] = {
+            ANO_CRYPTO_HASH_ALG_SHA256,
+            ANO_CRYPTO_HASH_ALG_SHA384,
+            ANO_CRYPTO_HASH_ALG_SHA512
+        };
         ano_crypto_csp_handle_t handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
-        uint8_t mac[32];
-        size_t written = 0u;
+        uint8_t mac[ANO_CRYPTO_HASH_SHA512_DIGEST_SIZE];
+        size_t i;
 
         st = ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_HMAC,
                                           key, sizeof(key),
@@ -84,14 +112,25 @@ int main(void)
             return 1;
         }
 
-        st = ano_crypto_hmac_compute_with_key(ANO_CRYPTO_HASH_ALG_SHA256,
-                                              handle,
-                                              msg, sizeof(msg),
-                                              mac, sizeof(mac),
-                                              &written);
-        if (st != ANO_CRYPTO_OK || written != sizeof(mac)) {
-            fprintf(stderr, "hmac key handle smoke failed: %s\n", ano_crypto_status_name(st));
-            return 1;
+        for (i = 0u; i < (sizeof(algorithms) / sizeof(algorithms[0])); ++i) {
+            size_t expected = 0u;
+            size_t written = 0u;
+            st = ano_crypto_hmac_mac_size(algorithms[i], &expected);
+            if (st != ANO_CRYPTO_OK) {
+                (void)ano_crypto_key_destroy(handle);
+                return 1;
+            }
+            st = ano_crypto_hmac_compute_with_key(algorithms[i],
+                                                  handle,
+                                                  msg, sizeof(msg),
+                                                  mac, sizeof(mac),
+                                                  &written);
+            if (st != ANO_CRYPTO_OK || written != expected) {
+                fprintf(stderr, "hmac key handle smoke failed: %s\n", ano_crypto_status_name(st));
+                (void)ano_crypto_key_destroy(handle);
+                return 1;
+            }
+            (void)ano_crypto_csp_zeroize(mac, sizeof(mac));
         }
 
         st = ano_crypto_key_destroy(handle);

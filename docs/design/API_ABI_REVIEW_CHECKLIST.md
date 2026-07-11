@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-21 draft.
+Status: P1-22 draft.
 
 ## Review scope
 
@@ -44,7 +44,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 | `ac_build.h` | ABI version 1 field order is retained for the 0.x ABI-0 line; fields are not extended under the same version. |
 | `ac_module.h` | Module config remains opaque; module state enum values are explicit. |
 | `ac_selftest.h` | Test-only force flag is gated behind test-hook macro. |
-| `ac_hash.h` | Opaque buffer context; SHA-384/SHA-512 remain placeholders. |
+| `ac_hash.h` | Opaque buffer context; SHA-256/SHA-384/SHA-512 are implemented behind existing identifiers. |
 | `ac_hmac.h` | Opaque buffer context and in-memory HMAC key handle compute path. |
 | `ac_drbg.h` | Opaque buffer context; explicit entropy input; implemented public random generation remains separate. |
 | `ac_random.h` | P1-20 source-backed HMAC_DRBG-SHA-256 service; caller-owned opaque context, bounded request, fail-closed process-marker prerequisite, failure output clearing, and explicit VM/suspend limitations. |
@@ -60,13 +60,13 @@ ctest --test-dir build --output-on-failure
 cmake --build build --target ano_crypto_public_surface_check
 cmake --build build --target ano_crypto_thread_safety_policy_check
 cmake --build build --target ano_crypto_concurrency_sanitizer_policy_check
-cmake --build build --target ano_crypto_sha2_scope_policy_check
+cmake --build build --target ano_crypto_sha512_family_policy_check
 cmake --build build --target ano_crypto_random_service_policy_check
 cmake --build build --target ano_crypto_random_lifecycle_policy_check
 cmake --build build --target ano_crypto_clean_release_symbol_baseline_check
 cmake --build build --target ano_crypto_entropy_health_policy_check
-cmake --install build --prefix /tmp/anocrypto-c-p1-21
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-21
+cmake --install build --prefix /tmp/anocrypto-c-p1-22
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-22
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 cmake --build build --target ano_crypto_poc_package_smoke

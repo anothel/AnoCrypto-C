@@ -1,10 +1,10 @@
 # Customer PoC Package Review Manifest
 
-Status: P1-21 draft.
+Status: P1-22 draft.
 
 ## Purpose
 
-This document defines the review intent for the AnoCrypto-C customer PoC package v0. The package is a customer integration draft for C ABI, installed CMake package lookup, module lifecycle, self-test startup behavior, and limited SHA-256/HMAC-SHA-256/HMAC_DRBG-SHA-256 and public random-service smoke flows.
+This document defines the review intent for the AnoCrypto-C customer PoC package v0. The package is a customer integration draft for C ABI, installed CMake package lookup, module lifecycle, self-test startup behavior, and SHA-256/SHA-384/SHA-512, their HMAC variants, HMAC_DRBG-SHA-256, and public random-service smoke flows.
 
 ## Required package records
 
@@ -16,7 +16,8 @@ The PoC package should contain:
 - `SBOM_STATUS.txt`
 - `SIGNING_STATUS.txt`
 - `THREAD_SAFETY_PACKAGE_NOTES.txt`
-- `SHA2_SCOPE_PACKAGE_NOTES.txt`
+- `CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt`
+- `SHA512_FAMILY_PACKAGE_NOTES.txt`
 - `RANDOM_SERVICE_PACKAGE_NOTES.txt`
 - `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt`
 - `ENTROPY_HEALTH_PACKAGE_NOTES.txt`
@@ -82,3 +83,8 @@ Review `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt` and `CLEAN_RELEASE_SYMBOL_BASELINE.l
 - Internal Win32/pthread test helpers, backend metadata functions, sanitizer flags, and test executables are not installed as public API.
 - `CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt` records the required diagnostic lane, hosted-review limits, and build-identity ABI-0 decision.
 - Actual hosted artifacts remain separate engineering records and are not bundled as customer assurance.
+
+
+## P1-22 SHA-512-family package boundary
+
+Review `SHA512_FAMILY_PACKAGE_NOTES.txt`, the packaged example, and clean export-baseline log together. Confirm all three SHA-2 digest and HMAC variants are exercised, digest/MAC values are not printed, and no internal SHA-512 context or implementation header is installed. Independent differential-provider results are not claimed.

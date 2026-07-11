@@ -62,8 +62,8 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md` records the P1-14 public thread-safety support boundary.
 - `docs/ci/THREAD_SAFETY_CI_CHECKLIST.md` records the P1-14 thread-safety CI lanes and log-review rules.
 - `tools/check_thread_safety_policy.cmake` checks thread-safety policy/evidence wiring.
-- `tools/check_sha2_scope_policy.cmake` checks SHA-384/SHA-512 reserved-scope wiring.
-- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, `THREAD_SAFETY_CHECK.txt`, `SHA2_SCOPE_CHECK.txt`, and `SHA2_SCOPE_REVIEW_NOTES.txt` for P1-16 evidence drafts.
+- `tools/check_sha512_family_policy.cmake` checks SHA-384/SHA-512 implemented-scope wiring.
+- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, `THREAD_SAFETY_CHECK.txt`, `SHA512_FAMILY_CHECK.txt`, and `SHA512_FAMILY_REVIEW_NOTES.txt` for P1-22 evidence drafts.
 
 ## Commands
 
@@ -128,15 +128,9 @@ If present, review entropy/thread/helper test logs for:
 - evidence and package manifests use intended file paths only
 
 
-## P1-16 SHA-2 Scope Review
+## Historical P1-16 SHA-2 Reservation Review
 
-If present, review SHA-384/SHA-512 scope logs for:
-
-- reserved processing APIs return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`
-- metadata queries expose only name, digest size, MAC size, and opaque context size
-- KAT manifest entries remain `p1-16-reserved-kat-plan` until implementation evidence exists
-- no key bytes, entropy bytes, generated secret bytes, private keys, tokens, or customer data appear in logs
-- no wording implies SHA-384/SHA-512 processing implementation has been added
+P1-16/P1-15 reserved-processing records are historical only. For P1-22, confirm they are clearly marked as superseded and review the active `SHA512_FAMILY_CHECK.txt` and `SHA512_FAMILY_REVIEW_NOTES.txt` instead. No digest values, MAC values, key bytes, entropy, seed material, DRBG state, generated random bytes, private keys, tokens, or customer data may appear in evidence.
 
 ## P1-16/P1-19 random-service evidence
 
@@ -198,7 +192,7 @@ Include and review:
 Confirm the clean Release uses tests/examples/hooks OFF and internal symbol hiding ON, the expected and actual public symbol counts are both 53, unsupported process-marker platforms fail closed, VM duplication guidance is explicit, and no generated random bytes, entropy, seed material, or DRBG state are retained.
 
 
-## P1-21 Concurrency, Sanitizer, and Build Identity Review
+## P1-22 Concurrency, Sanitizer, and Build Identity Review
 
 Include and review:
 
@@ -210,3 +204,8 @@ Include and review:
 - actual hosted thread-platform artifacts when available.
 
 Confirm the cross-platform concurrency test uses native Win32 threads or pthreads, the clean Release/PoC sanitizer mode is `none`, the public symbol count remains 53, and build-identity ABI version 1 matches the recorded field order. Clang sanitizer runtime, ThreadSanitizer, and hosted Windows/macOS result review remain TODO until actual artifacts are retained.
+
+
+## P1-22 SHA-512 Family Review
+
+Review `SHA512_FAMILY_CHECK.txt`, `SHA512_FAMILY_REVIEW_NOTES.txt`, startup/extended KAT results, negative tests, install/PoC smoke, and the clean 53-symbol export baseline. Evidence must not retain digest values, MAC values, HMAC keys, entropy, seed material, DRBG state, or generated random bytes. Independent external-provider differential automation remains TODO.

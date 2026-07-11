@@ -10,15 +10,14 @@ extern "C" {
 #endif
 
 /*
- * P1 public API skeleton for hash services.
+ * P1 public API for SHA-2 hash services.
  *
- * P1-15 scope:
- * - SHA-256 processing is implemented and covered by public-source KATs.
- * - SHA-384/SHA-512 are ABI-reserved candidates. Their digest
- *   sizes and names are queryable, but processing APIs return
- *   ANO_CRYPTO_ERR_NOT_IMPLEMENTED until implementation, KAT, and review
- *   evidence are added.
+ * P1-22 scope:
+ * - SHA-256, SHA-384, and SHA-512 one-shot and streaming processing are
+ *   implemented and covered by public-source startup and extended KATs.
  * - Processing functions are state-gated and require an operational module.
+ * - A context is algorithm-bound after init and must not be used through a
+ *   different public service family.
  */
 
 #define ANO_CRYPTO_HASH_SHA256_DIGEST_SIZE 32u

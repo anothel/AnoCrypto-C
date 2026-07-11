@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-21 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-22 \
 #         -DANO_CRYPTO_RUN_CTEST=ON \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-21")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-22")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -50,8 +50,8 @@ if(NOT DEFINED ANO_CRYPTO_RUN_THREAD_SAFETY_CHECK)
     set(ANO_CRYPTO_RUN_THREAD_SAFETY_CHECK ON)
 endif()
 
-if(NOT DEFINED ANO_CRYPTO_RUN_SHA2_SCOPE_CHECK)
-    set(ANO_CRYPTO_RUN_SHA2_SCOPE_CHECK ON)
+if(NOT DEFINED ANO_CRYPTO_RUN_SHA512_FAMILY_CHECK)
+    set(ANO_CRYPTO_RUN_SHA512_FAMILY_CHECK ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK)
@@ -160,7 +160,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
 "Git status: ${_git_status}\n"
 "CMake command: ${CMAKE_COMMAND}\n"
 "CMake version: ${CMAKE_VERSION}\n"
-"Reproducible build status: P1-21 draft procedure; binary byte identity not claimed\n"
+"Reproducible build status: P1-22 draft procedure; binary byte identity not claimed\n"
 "Evidence status: engineering draft only\n"
 "Claims boundary: not official validation evidence\n")
 
@@ -318,25 +318,25 @@ else()
         "Concurrency/sanitizer policy check was not requested. Set ANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK=ON.\n")
 endif()
 
-if(ANO_CRYPTO_RUN_SHA2_SCOPE_CHECK)
-    set(_sha2_scope_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/SHA2_SCOPE_CHECK.txt")
+if(ANO_CRYPTO_RUN_SHA512_FAMILY_CHECK)
+    set(_sha512_family_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/SHA512_FAMILY_CHECK.txt")
     execute_process(
         COMMAND "${CMAKE_COMMAND}"
             -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
-            -DANO_CRYPTO_SHA2_SCOPE_CHECK_OUTPUT=${_sha2_scope_check_output}
-            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_sha2_scope_policy.cmake"
-        RESULT_VARIABLE _sha2_scope_check_result
-        OUTPUT_VARIABLE _sha2_scope_check_stdout
-        ERROR_VARIABLE _sha2_scope_check_stderr)
-    file(APPEND "${_sha2_scope_check_output}" "\nCommand output:\n${_sha2_scope_check_stdout}${_sha2_scope_check_stderr}\n")
-    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SHA-2 reserved scope check result: ${_sha2_scope_check_result}\n")
-    if(NOT _sha2_scope_check_result EQUAL 0)
-        message(FATAL_ERROR "SHA-2 reserved scope check failed; see ${_sha2_scope_check_output}")
+            -DANO_CRYPTO_SHA512_FAMILY_CHECK_OUTPUT=${_sha512_family_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_sha512_family_policy.cmake"
+        RESULT_VARIABLE _sha512_family_check_result
+        OUTPUT_VARIABLE _sha512_family_check_stdout
+        ERROR_VARIABLE _sha512_family_check_stderr)
+    file(APPEND "${_sha512_family_check_output}" "\nCommand output:\n${_sha512_family_check_stdout}${_sha512_family_check_stderr}\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SHA-512-family implementation check result: ${_sha512_family_check_result}\n")
+    if(NOT _sha512_family_check_result EQUAL 0)
+        message(FATAL_ERROR "SHA-512-family implementation check failed; see ${_sha512_family_check_output}")
     endif()
 else()
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA2_SCOPE_CHECK.txt"
-        "SHA-2 reserved scope check was not requested. Set ANO_CRYPTO_RUN_SHA2_SCOPE_CHECK=ON.\n")
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA512_FAMILY_CHECK.txt"
+        "SHA-512-family implementation check was not requested. Set ANO_CRYPTO_RUN_SHA512_FAMILY_CHECK=ON.\n")
 endif()
 
 if(ANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK)
@@ -449,7 +449,7 @@ endif()
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "AnoCrypto-C reproducible build evidence notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-21 draft procedure; binary byte identity is not claimed.\n"
+    "Status: P1-22 draft procedure; binary byte identity is not claimed.\n"
     "Source directory: ${ANO_CRYPTO_SOURCE_DIR}\n"
     "Build directory: ${ANO_CRYPTO_BUILD_DIR}\n"
     "Source archive content list: SOURCE_ARCHIVE_CONTENTS.txt\n"
@@ -457,7 +457,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "Binary hash list: BINARY_FILES.sha256\n"
     "Public surface check: PUBLIC_SURFACE_CHECK.txt\n"
     "Thread-safety policy check: THREAD_SAFETY_CHECK.txt\n"
-    "SHA-2 reserved scope check: SHA2_SCOPE_CHECK.txt\n"
+    "SHA-512-family implementation check: SHA512_FAMILY_CHECK.txt\n"
     "Random-service implementation policy check: RANDOM_SERVICE_CHECK.txt\n"
     "Random lifecycle hardening policy check: RANDOM_LIFECYCLE_HARDENING_CHECK.txt\n"
     "Clean Release exported-symbol baseline: EXPORTED_SYMBOL_BASELINE_CHECK.txt\n"
@@ -467,54 +467,44 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-21 evidence and scope-review notes\n"
+    "AnoCrypto-C P1-22 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: engineering planning artifact; P1-21 hardens the existing HMAC_DRBG-SHA-256 random-service lifecycle and portability boundary without adding a new algorithm.\n"
+    "Status: engineering planning artifact; P1-22 adds the SHA-384/SHA-512 hash and HMAC family behind existing public identifiers.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
-    "Differential validation strategy: docs/kcmvp/DIFFERENTIAL_VALIDATION_STRATEGY.md\n"
-    "Block cipher/mode selection gate: docs/design/BLOCK_CIPHER_MODE_SELECTION.md\n"
-    "Side-channel review checklist: docs/security/SIDE_CHANNEL_REVIEW_CHECKLIST.md\n"
-    "Customer PoC intake questionnaire: docs/business/CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md\n"
-    "Current implemented algorithm slice remains SHA-256, HMAC-SHA-256, and HMAC_DRBG-SHA-256; P1-21 retains reviewed OS-provider-backed random generation and adds fail-closed process-marker, lifecycle stress, and reseed-limit regression coverage.\n"
+    "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"
+    "SHA-512-family decision: docs/design/SHA2_384_512_SCOPE_DECISION.md\n"
+    "SHA-512-family KAT record: docs/kcmvp/SHA2_384_512_KAT_PLAN.md\n"
+    "SHA-512-family implementation check: SHA512_FAMILY_CHECK.txt\n"
+    "Current implemented algorithm slice includes SHA-256/SHA-384/SHA-512, their HMAC variants, and HMAC_DRBG-SHA-256.\n"
+    "The existing platform-provider-backed random service and CSP HMAC key lifecycle remain in the candidate engineering slice.\n"
     "Block cipher/mode implementation remains deferred until customer and validation-target candidate inputs are reviewed.\n"
-    "Differential tests remain deferred until a reviewed public/reference source or tool is selected.\n"
-    "SBOM/signing plan: docs/kcmvp/SBOM_SIGNING_PLAN.md\n"
-    "Evidence manifest policy: docs/kcmvp/EVIDENCE_MANIFEST_POLICY.md\n"
-    "PoC package review manifest: docs/business/POC_PACKAGE_REVIEW_MANIFEST.md\n"
-    "Thread-safety support matrix: docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md\n"
-    "Thread-safety CI checklist: docs/ci/THREAD_SAFETY_CI_CHECKLIST.md\n"
-    "Thread-safety evidence check: THREAD_SAFETY_CHECK.txt\n"
-    "SHA-384/SHA-512 scope decision: docs/design/SHA2_384_512_SCOPE_DECISION.md\n"
-    "SHA-384/SHA-512 KAT plan: docs/kcmvp/SHA2_384_512_KAT_PLAN.md\n"
-    "SHA-2 reserved scope check: SHA2_SCOPE_CHECK.txt\n"
-    "Random-service implementation policy check: RANDOM_SERVICE_CHECK.txt\n"
-    "Random lifecycle hardening policy check: RANDOM_LIFECYCLE_HARDENING_CHECK.txt\n"
-    "Clean Release exported-symbol baseline: EXPORTED_SYMBOL_BASELINE_CHECK.txt\n"
-    "Public random API decision: docs/design/PUBLIC_RANDOM_API_DECISION.md\n"
-    "DRBG/entropy boundary evidence notes: docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md\n"
-    "Entropy failure/health design: docs/design/C99_ENTROPY_FAILURE_INJECTION_AND_HEALTH_TEST.md\n"
-    "Entropy/health policy check: ENTROPY_HEALTH_CHECK.txt\n"
-    "P1-21 keeps SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 as reserved processing APIs that return ANO_CRYPTO_ERR_NOT_IMPLEMENTED.\n"
-    "Do not include secrets, entropy bytes, generated secret bytes, private keys, tokens, customer data, or internal deployment details in scope evidence.\n")
+    "Independent SHA-512-family differential-provider automation remains TODO.\n"
+    "Do not include digest values, MAC values, keys, entropy bytes, seed material, DRBG state, generated random bytes, private keys, tokens, customer data, or internal deployment details in scope evidence.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Scope review notes: SCOPE_REVIEW_NOTES.txt\n")
 
-file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA2_SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C SHA-384/SHA-512 scope review notes\n"
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA512_FAMILY_REVIEW_NOTES.txt"
+    "AnoCrypto-C SHA-384/SHA-512 family review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-21 planning and reserved-API regression evidence only.\n"
-    "Scope decision: docs/design/SHA2_384_512_SCOPE_DECISION.md\n"
-    "KAT plan: docs/kcmvp/SHA2_384_512_KAT_PLAN.md\n"
-    "Reserved API test: tests/negative/sha2_reserved_api_tests.c\n"
-    "Policy check: SHA2_SCOPE_CHECK.txt\n"
-    "Current behavior: size/name queries are available; SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 processing return ANO_CRYPTO_ERR_NOT_IMPLEMENTED.\n"
-    "No SHA-384/SHA-512 compression implementation, HMAC implementation, startup KAT, or differential validation code is added by P1-21.\n")
-file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SHA-2 scope review notes: SHA2_SCOPE_REVIEW_NOTES.txt\n")
+    "Status: P1-22 engineering implementation and KAT evidence; not official validation evidence.\n"
+    "Implementation decision: docs/design/SHA2_384_512_SCOPE_DECISION.md\n"
+    "KAT record: docs/kcmvp/SHA2_384_512_KAT_PLAN.md\n"
+    "Implementation: src/hash/sha512.c, src/hash/hash.c, src/mac/hmac.c\n"
+    "Startup self-tests: src/selftest/selftest.c\n"
+    "Extended KAT: tests/kat/sha512_family_kat_tests.c\n"
+    "Negative API test: tests/negative/sha512_family_api_negative_tests.c\n"
+    "CSP handle coverage: tests/kat/hmac_key_handle_kat_tests.c\n"
+    "Policy check: SHA512_FAMILY_CHECK.txt\n"
+    "Current behavior: SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 one-shot, streaming, and HMAC key-handle paths are implemented.\n"
+    "Public sources: SRC-1001 NIST FIPS 180-4 and SRC-1002 RFC 4231.\n"
+    "Independent external-provider differential automation remains TODO.\n"
+    "Evidence stores statuses and source identifiers only; digest values, MAC values, and HMAC key bytes are not retained.\n")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SHA-512-family review notes: SHA512_FAMILY_REVIEW_NOTES.txt\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RANDOM_SERVICE_REVIEW_NOTES.txt"
     "AnoCrypto-C random-service implementation review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-21 engineering lifecycle-hardening evidence; not official validation evidence.\n"
+    "Status: P1-22 engineering lifecycle-hardening evidence; not official validation evidence.\n"
     "Decision document: docs/design/PUBLIC_RANDOM_API_DECISION.md\n"
     "CI checklist: docs/ci/RANDOM_SERVICE_CI_CHECKLIST.md\n"
     "DRBG/entropy evidence notes: docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md\n"
@@ -531,7 +521,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Random service revi
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RANDOM_LIFECYCLE_REVIEW_NOTES.txt"
     "AnoCrypto-C random lifecycle and portability review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-21 engineering regression and policy evidence; not official validation evidence.\n"
+    "Status: P1-22 engineering regression and policy evidence; not official validation evidence.\n"
     "Policy: docs/design/C99_RANDOM_OPERATIONAL_PORTABILITY_POLICY.md\n"
     "CI checklist: docs/ci/RANDOM_LIFECYCLE_HARDENING_CI_CHECKLIST.md\n"
     "Lifecycle stress: tests/stress/random_lifecycle_stress_tests.c\n"
@@ -547,7 +537,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Random lifecycle re
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt"
     "AnoCrypto-C exported-symbol baseline review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-21 clean Release ABI guardrail; not a complete ABI compatibility claim.\n"
+    "Status: P1-22 clean Release ABI guardrail; not a complete ABI compatibility claim.\n"
     "Baseline: abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt\n"
     "Expected public symbol count: 53\n"
     "Automated result: EXPORTED_SYMBOL_BASELINE_CHECK.txt\n"
@@ -558,7 +548,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Exported symbol bas
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_HEALTH_REVIEW_NOTES.txt"
     "AnoCrypto-C entropy failure-injection and health-test review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-21 engineering testability and state-transition evidence only.\n"
+    "Status: P1-22 engineering testability and state-transition evidence only.\n"
     "Design: docs/design/C99_ENTROPY_FAILURE_INJECTION_AND_HEALTH_TEST.md\n"
     "CI checklist: docs/ci/ENTROPY_FAILURE_CI_CHECKLIST.md\n"
     "Policy check: ENTROPY_HEALTH_CHECK.txt\n"
@@ -571,7 +561,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Entropy health revi
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_OPERATIONAL_REVIEW_NOTES.txt"
     "AnoCrypto-C entropy source and operational process-boundary review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-21 engineering policy and regression evidence only.\n"
+    "Status: P1-22 engineering policy and regression evidence only.\n"
     "Design: docs/design/C99_ENTROPY_SOURCE_OPERATIONAL_POLICY.md\n"
     "CI checklist: docs/ci/ENTROPY_OPERATIONAL_CI_CHECKLIST.md\n"
     "Policy check: ENTROPY_OPERATIONAL_POLICY_CHECK.txt\n"
@@ -586,7 +576,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Entropy operational
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SBOM_STATUS.txt"
     "AnoCrypto-C SBOM status\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: placeholder only; no complete SBOM is generated by P1-21.\n"
+    "Status: placeholder only; no complete SBOM is generated by P1-22.\n"
     "Hash manifests available: SOURCE_FILES.sha256, SOURCE_ARCHIVE.sha256, BINARY_FILES.sha256, EVIDENCE_MANIFEST.sha256.\n"
     "Candidate SBOM formats: SPDX JSON or CycloneDX JSON after tool and schema review.\n"
     "SBOM plan: docs/kcmvp/SBOM_SIGNING_PLAN.md\n"
@@ -596,7 +586,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SBOM status: SBOM_S
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SIGNING_STATUS.txt"
     "AnoCrypto-C signing status\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: signing not performed by P1-21 evidence collection.\n"
+    "Status: signing not performed by P1-22 evidence collection.\n"
     "Private signing keys and signing tokens must not be stored in this repository, evidence directory, or PoC package.\n"
     "Candidate signed artifacts: source archive, source hash file, binary hash file, PoC package archive, SBOM, and evidence manifest after policy review.\n"
     "Preferred future approach: detached signatures with separately reviewed verification instructions.\n"
@@ -647,12 +637,12 @@ else()
 endif()
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CONCURRENCY_SANITIZER_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-21 concurrency and sanitizer review notes\n"
+    "AnoCrypto-C P1-22 concurrency and sanitizer review notes\n"
     "Status: engineering evidence only; not official validation evidence.\n"
     "Policy check: CONCURRENCY_SANITIZER_CHECK.txt\n"
     "Platform status: THREAD_PLATFORM_REVIEW.log\n"
     "Selected required sanitizer lane: Linux GCC address+undefined in hosted CI; Clang runtime review remains TODO.\n"
-    "ThreadSanitizer: not selected in P1-21; runtime/toolchain review remains TODO.\n"
+    "ThreadSanitizer: not selected in P1-22; runtime/toolchain review remains TODO.\n"
     "Build-identity ABI decision: docs/design/BUILD_IDENTITY_ABI_0_DECISION.md\n"
     "Actual hosted Linux/macOS/Windows artifacts require separate review before support wording is widened.\n"
     "Logs must not contain key bytes, MAC output, entropy, seed material, DRBG state, generated random bytes, private keys, tokens, or customer data.\n")
@@ -763,13 +753,13 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `BINARY_FILES.sha256`: SHA-256 hashes of build outputs matched by the script.\n"
 "- `PUBLIC_SURFACE_CHECK.txt`: repository naming, claims-boundary, header, and package identity check.\n"
 "- `THREAD_SAFETY_CHECK.txt`: support-matrix, CI-checklist, lock-branch, and build-option check.\n"
-"- `CONCURRENCY_SANITIZER_CHECK.txt`: P1-21 cross-platform concurrency, sanitizer-lane, and build-identity ABI policy check.\n"
+"- `CONCURRENCY_SANITIZER_CHECK.txt`: P1-22 cross-platform concurrency, sanitizer-lane, and build-identity ABI policy check.\n"
 "- `THREAD_PLATFORM_REVIEW.log`: status-only thread backend and concurrency-test availability review.\n"
 "- `CONCURRENCY_SANITIZER_REVIEW_NOTES.txt`: sanitizer selection and hosted-artifact review boundary.\n"
-"- `SHA2_SCOPE_CHECK.txt`: SHA-384/SHA-512 reserved-scope policy check.\n"
+"- `SHA512_FAMILY_CHECK.txt`: SHA-384/SHA-512 family implementation, KAT, negative-test, and package wiring check.\n"
 "- `RANDOM_SERVICE_CHECK.txt`: public random-service implementation policy check.\n"
 "- `RANDOM_SERVICE_REVIEW_NOTES.txt`: random-service implementation review notes.\n"
-"- `RANDOM_LIFECYCLE_HARDENING_CHECK.txt`: P1-21 lifecycle, process-marker, VM policy, hook, and ABI-baseline policy check.\n"
+"- `RANDOM_LIFECYCLE_HARDENING_CHECK.txt`: P1-22 lifecycle, process-marker, VM policy, hook, and ABI-baseline policy check.\n"
 "- `RANDOM_LIFECYCLE_REVIEW_NOTES.txt`: status-only lifecycle and portability review notes.\n"
 "- `EXPORTED_SYMBOL_BASELINE_CHECK.txt`: clean Release comparison against the stored 53-symbol ABI-0 baseline.\n"
 "- `EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt`: exported-symbol guardrail scope and limitations.\n"

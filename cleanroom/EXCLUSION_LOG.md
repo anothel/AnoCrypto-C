@@ -1,6 +1,6 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P1-21 draft
+Status: P1-22 draft
 Date: 2026-07-11
 
 ## Purpose
@@ -183,7 +183,7 @@ If excluded material is discovered:
 | EX-2401 | Third-party SHA-384/SHA-512 implementation code or snippets with unclear ownership | Code provenance risk | Excluded | P1-15 does not add a SHA-512-family implementation. |
 | EX-2402 | Third-party HMAC-SHA-384/HMAC-SHA-512 implementation code or snippets with unclear ownership | Code provenance risk | Excluded | P1-15 keeps these processing APIs reserved. |
 | EX-2403 | Unreviewed SHA-384/SHA-512 or HMAC-SHA-384/HMAC-SHA-512 vector files | Test provenance risk | Excluded | P1-15 records only a KAT plan and KAT manifest reserved entries. |
-| EX-2404 | Behavior that silently treats SHA-384/SHA-512 as implemented without startup KAT and evidence updates | Evidence/scope risk | Excluded | `sha2_reserved_api_tests` and `ano_crypto_sha2_scope_policy_check` keep the reserved state explicit. |
+| EX-2404 | Behavior that silently treats SHA-384/SHA-512 as implemented without startup KAT and evidence updates | Evidence/scope risk | Excluded | `sha2_reserved_api_tests` and `ano_crypto_sha2_scope_policy_check` were the historical P1-15 guardrails; P1-22 supersedes them with implementation/KAT policy checks. |
 | EX-2405 | Logs containing HMAC key bytes, entropy input, nonce material, DRBG state, generated DRBG bytes, private keys, tokens, customer data, or internal deployment details | Sensitive information risk | Excluded | P1-15 reserved-scope tests and package notes use status-only output. |
 
 
@@ -255,3 +255,15 @@ If excluded material is discovered:
 | EX-3004 | Enabling sanitizer instrumentation in the clean customer PoC SDK by default | Packaging and performance ambiguity | Excluded | Clean PoC SDK explicitly uses `ANO_CRYPTO_SANITIZER_MODE=none`. |
 | EX-3005 | Extending or reordering `ano_crypto_build_identity_t` while retaining ABI version 1 | ABI ambiguity | Excluded | P1-21 records and tests the existing ABI-0 field order. |
 | EX-3006 | Claiming ThreadSanitizer or Clang sanitizer coverage without a reviewed compatible runtime result | Evidence overstatement | Excluded | GCC ASan/UBSan is required; other sanitizer lanes remain TODO. |
+
+
+## P1-22 Additional Exclusions
+
+| ID | Excluded input or behavior | Risk | Decision | Note |
+|---|---|---|---|---|
+| EX-3101 | Third-party, employer-owned, vendor, or customer SHA-384/SHA-512/HMAC implementation code with unclear rights | Provenance risk | Excluded | P1-22 uses fresh C99 code based only on recorded public standards. |
+| EX-3102 | Unreviewed SHA-384/SHA-512 or HMAC vector files, generated fixtures, or copied test harnesses | Test provenance risk | Excluded | Only FIPS 180-4 and RFC 4231 values recorded in the manifest are used. |
+| EX-3103 | Partial implementation without startup KAT, extended KAT, negative tests, install/PoC coverage, and evidence updates | Scope/evidence mismatch | Excluded | `ano_crypto_sha512_family_policy_check` requires the complete P1-22 wiring. |
+| EX-3104 | Digest values, MAC values, HMAC key bytes, entropy, seed material, DRBG state, generated random values, private keys, tokens, or customer data in logs/evidence/packages | Sensitive information risk | Excluded | Tests and smoke flows emit names, lengths, statuses, and source IDs only. |
+| EX-3105 | Claiming official validation, completed KCMVP status, or universal constant-time behavior from P1-22 KAT/CI results | Claims risk | Excluded | P1-22 is engineering implementation and correctness evidence only. |
+| EX-3106 | Selecting an external differential provider without license/version/provenance and failure-triage review | Supply-chain and evidence risk | Deferred | P1-23 candidate requires an explicit provider decision first. |

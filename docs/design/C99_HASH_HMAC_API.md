@@ -1,93 +1,43 @@
 # C99 Hash and HMAC API Design
 
-Status: P1-15 draft.
+Status: P1-22 engineering draft.
 
-## Implemented P1 scope
+## Implemented services
 
-- `ANO_CRYPTO_HASH_ALG_SHA256`
-- `ano_crypto_hash_digest()` one-shot API
-- `ano_crypto_hash_init/update/final()` streaming API
-- `ano_crypto_hmac_compute()` one-shot API over SHA-256
-- `ano_crypto_hmac_init/update/final()` streaming API over SHA-256
+The existing public API supports:
 
-## P1-2/P1-4 coverage additions
-
-- Startup self-test now covers:
-  - SHA-256 empty message
-  - SHA-256 `abc`
-  - SHA-256 standard multi-block message
-  - HMAC-SHA-256 RFC 4231 test cases 1 and 2
-  - HMAC-SHA-256 RFC 4231 test case 6 for the long-key path
-- Extended KAT executable covers:
-  - SHA-256 standard multi-block message
-  - SHA-256 million-`a` vector
-  - HMAC-SHA-256 RFC 4231 test cases 3, 4, 6, and 7
-- Boundary consistency executable coverage is included through deterministic one-shot versus streaming comparisons.
+- SHA-256, SHA-384, and SHA-512 one-shot digests;
+- SHA-256, SHA-384, and SHA-512 streaming contexts;
+- HMAC over SHA-256, SHA-384, and SHA-512 in one-shot and streaming form;
+- HMAC computation through an in-memory CSP HMAC-key handle.
 
 ## ABI boundary
 
-Public context layouts are not exposed. Callers obtain context sizes with:
+Public context layouts are not exposed. Callers obtain storage requirements with:
 
-- `ano_crypto_hash_context_size()`
-- `ano_crypto_hmac_context_size()`
+- `ano_crypto_hash_context_size()`;
+- `ano_crypto_hmac_context_size()`.
 
-The current implementation uses caller-provided opaque buffers. The struct layout remains internal and may change before a public ABI freeze.
+The existing public function and algorithm identifiers are retained. P1-22 adds implementation behind reserved identifiers without adding a public symbol. Cross-service context use is rejected.
 
-## State gate
+## State and lifecycle rules
 
-All processing APIs call `ano_crypto_module_require_operational()` before performing cryptographic processing. Query APIs such as digest size and context size do not open cryptographic services and are allowed before initialization.
+- Query APIs are available before module initialization.
+- Processing APIs require the module to be operational.
+- Zero-length hash input is accepted.
+- Zero-length HMAC key and input are accepted.
+- Output capacity is validated before output is written.
+- A finalized context is cleared and cannot be reused.
+- Failed finalization due only to a short output buffer may be retried as documented by the tests.
+- HMAC temporary key blocks, inner digests, and handle snapshots are zeroized.
 
-Startup self-test uses internal SHA-256/HMAC-SHA-256 helpers so that self-test can run while the module is in `SELF_TEST_RUNNING`, without allowing external cryptographic service calls before the module reaches `OPERATIONAL`.
+## Self-test and correctness coverage
 
-## Implemented behavior
+Startup self-test covers SHA-2 and HMAC public vectors for all implemented variants. Extended CTest coverage includes public long-message and million-`a` digests, RFC 4231 long-key/long-data cases, streaming paths, CSP handle paths, and negative lifecycle checks.
 
-- SHA-256 supports zero-length input.
-- SHA-256 supports streaming updates.
-- HMAC-SHA-256 supports zero-length key and zero-length message inputs.
-- HMAC temporary key blocks and inner digests are explicitly zeroized after use.
-- Output buffer sizes are checked before writing results.
-- Finalized public contexts are zeroized and rejected on further use.
+## Remaining TODO
 
-## Reserved but not implemented
-
-- SHA-384
-- SHA-512
-- HMAC-SHA-384
-- HMAC-SHA-512
-
-These algorithm IDs remain ABI candidates. P1-15 fixes their metadata behavior: name, digest size, MAC size, and context size queries are allowed; processing APIs return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`.
-
-## TODO
-
-- Decide when SHA-384/SHA-512 move from P1-15 reserved scope into implemented scope.
-- Add differential validation strategy against an independently selected reference tool.
-- Document input/output aliasing policy per API.
-- Add constant-time and side-channel review checklist for HMAC key handling.
-- Add generated KAT evidence format if vectors move into separate manifest files.
-
-
-## P1-4/P1-5 HMAC key handle path
-
-P1-4 adds `ano_crypto_hmac_compute_with_key()` for HMAC-SHA-256 using an imported `ANO_CRYPTO_KEY_TYPE_HMAC` CSP handle. This path is intended to exercise key lifecycle and service-gate behavior without exposing raw key bytes after import.
-
-Current limits:
-
-- HMAC-SHA-256 only.
-- In-memory HMAC key handles only.
-- No key export, persistence, wrapping, or keystore integration.
-- No thread-safety guarantee yet.
-- Test keys are public synthetic KAT fixtures only.
-
-
-## P1-15 SHA-384/SHA-512 reserved scope
-
-P1-15 adds public digest/block size macros for SHA-256, SHA-384, and SHA-512 metadata. SHA-384/SHA-512 processing remains unimplemented.
-
-Current contract:
-
-- `ano_crypto_hash_algorithm_name()` returns `SHA-384` and `SHA-512`.
-- `ano_crypto_hash_digest_size()` returns 48 and 64 bytes.
-- `ano_crypto_hmac_mac_size()` returns the corresponding MAC size metadata.
-- `ano_crypto_hash_init()`, `ano_crypto_hash_digest()`, `ano_crypto_hmac_init()`, and `ano_crypto_hmac_compute()` return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` for SHA-384/SHA-512 variants.
-- `tests/negative/sha2_reserved_api_tests.c` locks this behavior.
-- `docs/design/SHA2_384_512_SCOPE_DECISION.md` and `docs/kcmvp/SHA2_384_512_KAT_PLAN.md` record the implementation entry criteria.
+- Record input/output aliasing rules per API.
+- Add independent external-provider differential automation.
+- Review compiler output and performance on the final supported platform/toolchain matrix.
+- Revisit opaque caller-owned context alignment before public ABI freeze.

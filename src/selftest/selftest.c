@@ -8,6 +8,7 @@
 #include "ac_internal.h"
 #include "ac_kat_manifest.h"
 #include "ac_sha256_internal.h"
+#include "ac_sha512_internal.h"
 #include "ac_thread_internal.h"
 
 static ano_crypto_status_t g_selftest_last_status = ANO_CRYPTO_ERR_NOT_INITIALIZED;
@@ -285,6 +286,209 @@ static ano_crypto_status_t ano_crypto_selftest_hmac_sha256_kat(void)
     return ANO_CRYPTO_OK;
 }
 
+
+static ano_crypto_status_t ano_crypto_selftest_sha512_family_kat(void)
+{
+    static const uint8_t msg_abc[] = { 'a', 'b', 'c' };
+    static const uint8_t sha384_empty[48] = {
+        0x38u, 0xb0u, 0x60u, 0xa7u, 0x51u, 0xacu, 0x96u, 0x38u,
+        0x4cu, 0xd9u, 0x32u, 0x7eu, 0xb1u, 0xb1u, 0xe3u, 0x6au,
+        0x21u, 0xfdu, 0xb7u, 0x11u, 0x14u, 0xbeu, 0x07u, 0x43u,
+        0x4cu, 0x0cu, 0xc7u, 0xbfu, 0x63u, 0xf6u, 0xe1u, 0xdau,
+        0x27u, 0x4eu, 0xdeu, 0xbfu, 0xe7u, 0x6fu, 0x65u, 0xfbu,
+        0xd5u, 0x1au, 0xd2u, 0xf1u, 0x48u, 0x98u, 0xb9u, 0x5bu
+    };
+    static const uint8_t sha384_abc[48] = {
+        0xcbu, 0x00u, 0x75u, 0x3fu, 0x45u, 0xa3u, 0x5eu, 0x8bu,
+        0xb5u, 0xa0u, 0x3du, 0x69u, 0x9au, 0xc6u, 0x50u, 0x07u,
+        0x27u, 0x2cu, 0x32u, 0xabu, 0x0eu, 0xdeu, 0xd1u, 0x63u,
+        0x1au, 0x8bu, 0x60u, 0x5au, 0x43u, 0xffu, 0x5bu, 0xedu,
+        0x80u, 0x86u, 0x07u, 0x2bu, 0xa1u, 0xe7u, 0xccu, 0x23u,
+        0x58u, 0xbau, 0xecu, 0xa1u, 0x34u, 0xc8u, 0x25u, 0xa7u
+    };
+    static const uint8_t sha512_empty[64] = {
+        0xcfu, 0x83u, 0xe1u, 0x35u, 0x7eu, 0xefu, 0xb8u, 0xbdu,
+        0xf1u, 0x54u, 0x28u, 0x50u, 0xd6u, 0x6du, 0x80u, 0x07u,
+        0xd6u, 0x20u, 0xe4u, 0x05u, 0x0bu, 0x57u, 0x15u, 0xdcu,
+        0x83u, 0xf4u, 0xa9u, 0x21u, 0xd3u, 0x6cu, 0xe9u, 0xceu,
+        0x47u, 0xd0u, 0xd1u, 0x3cu, 0x5du, 0x85u, 0xf2u, 0xb0u,
+        0xffu, 0x83u, 0x18u, 0xd2u, 0x87u, 0x7eu, 0xecu, 0x2fu,
+        0x63u, 0xb9u, 0x31u, 0xbdu, 0x47u, 0x41u, 0x7au, 0x81u,
+        0xa5u, 0x38u, 0x32u, 0x7au, 0xf9u, 0x27u, 0xdau, 0x3eu
+    };
+    static const uint8_t sha512_abc[64] = {
+        0xddu, 0xafu, 0x35u, 0xa1u, 0x93u, 0x61u, 0x7au, 0xbau,
+        0xccu, 0x41u, 0x73u, 0x49u, 0xaeu, 0x20u, 0x41u, 0x31u,
+        0x12u, 0xe6u, 0xfau, 0x4eu, 0x89u, 0xa9u, 0x7eu, 0xa2u,
+        0x0au, 0x9eu, 0xeeu, 0xe6u, 0x4bu, 0x55u, 0xd3u, 0x9au,
+        0x21u, 0x92u, 0x99u, 0x2au, 0x27u, 0x4fu, 0xc1u, 0xa8u,
+        0x36u, 0xbau, 0x3cu, 0x23u, 0xa3u, 0xfeu, 0xebu, 0xbdu,
+        0x45u, 0x4du, 0x44u, 0x23u, 0x64u, 0x3cu, 0xe8u, 0x0eu,
+        0x2au, 0x9au, 0xc9u, 0x4fu, 0xa5u, 0x4cu, 0xa4u, 0x9fu
+    };
+    uint8_t out[ANO_CRYPTO_SHA512_DIGEST_SIZE];
+    ano_crypto_internal_sha512_ctx_t ctx;
+    ano_crypto_status_t st;
+
+    st = ano_crypto_internal_sha384_digest(0, 0u, out);
+    if (st != ANO_CRYPTO_OK || !bytes_equal(out, sha384_empty, sizeof(sha384_empty))) {
+        ano_crypto_internal_zeroize(out, sizeof(out));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+    st = ano_crypto_internal_sha384_digest(msg_abc, sizeof(msg_abc), out);
+    if (st != ANO_CRYPTO_OK || !bytes_equal(out, sha384_abc, sizeof(sha384_abc))) {
+        ano_crypto_internal_zeroize(out, sizeof(out));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+    ano_crypto_internal_sha384_init(&ctx);
+    st = ano_crypto_internal_sha512_update(&ctx, msg_abc, 1u);
+    if (st == ANO_CRYPTO_OK) {
+        st = ano_crypto_internal_sha512_update(&ctx, msg_abc + 1u, 2u);
+    }
+    if (st == ANO_CRYPTO_OK) {
+        st = ano_crypto_internal_sha384_final(&ctx, out);
+    }
+    if (st != ANO_CRYPTO_OK || !bytes_equal(out, sha384_abc, sizeof(sha384_abc))) {
+        ano_crypto_internal_zeroize(&ctx, sizeof(ctx));
+        ano_crypto_internal_zeroize(out, sizeof(out));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+
+    st = ano_crypto_internal_sha512_digest(0, 0u, out);
+    if (st != ANO_CRYPTO_OK || !bytes_equal(out, sha512_empty, sizeof(sha512_empty))) {
+        ano_crypto_internal_zeroize(out, sizeof(out));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+    st = ano_crypto_internal_sha512_digest(msg_abc, sizeof(msg_abc), out);
+    if (st != ANO_CRYPTO_OK || !bytes_equal(out, sha512_abc, sizeof(sha512_abc))) {
+        ano_crypto_internal_zeroize(out, sizeof(out));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+    ano_crypto_internal_sha512_init(&ctx);
+    st = ano_crypto_internal_sha512_update(&ctx, msg_abc, 1u);
+    if (st == ANO_CRYPTO_OK) {
+        st = ano_crypto_internal_sha512_update(&ctx, msg_abc + 1u, 2u);
+    }
+    if (st == ANO_CRYPTO_OK) {
+        st = ano_crypto_internal_sha512_final(&ctx, out);
+    }
+    if (st != ANO_CRYPTO_OK || !bytes_equal(out, sha512_abc, sizeof(sha512_abc))) {
+        ano_crypto_internal_zeroize(&ctx, sizeof(ctx));
+        ano_crypto_internal_zeroize(out, sizeof(out));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+
+    ano_crypto_internal_zeroize(out, sizeof(out));
+    return ANO_CRYPTO_OK;
+}
+
+static ano_crypto_status_t ano_crypto_selftest_hmac_sha512_family_kat(void)
+{
+    static const uint8_t key_case1[20] = {
+        0x0bu, 0x0bu, 0x0bu, 0x0bu, 0x0bu, 0x0bu, 0x0bu, 0x0bu,
+        0x0bu, 0x0bu, 0x0bu, 0x0bu, 0x0bu, 0x0bu, 0x0bu, 0x0bu,
+        0x0bu, 0x0bu, 0x0bu, 0x0bu
+    };
+    static const uint8_t data_case1[] = { 'H', 'i', ' ', 'T', 'h', 'e', 'r', 'e' };
+    static const uint8_t key_case2[] = { 'J', 'e', 'f', 'e' };
+    static const uint8_t data_case2[] = {
+        'w','h','a','t',' ','d','o',' ','y','a',' ','w','a','n','t',' ',
+        'f','o','r',' ','n','o','t','h','i','n','g','?'
+    };
+    static const uint8_t hmac384_case1[48] = {
+        0xafu, 0xd0u, 0x39u, 0x44u, 0xd8u, 0x48u, 0x95u, 0x62u,
+        0x6bu, 0x08u, 0x25u, 0xf4u, 0xabu, 0x46u, 0x90u, 0x7fu,
+        0x15u, 0xf9u, 0xdau, 0xdbu, 0xe4u, 0x10u, 0x1eu, 0xc6u,
+        0x82u, 0xaau, 0x03u, 0x4cu, 0x7cu, 0xebu, 0xc5u, 0x9cu,
+        0xfau, 0xeau, 0x9eu, 0xa9u, 0x07u, 0x6eu, 0xdeu, 0x7fu,
+        0x4au, 0xf1u, 0x52u, 0xe8u, 0xb2u, 0xfau, 0x9cu, 0xb6u
+    };
+    static const uint8_t hmac384_case2[48] = {
+        0xafu, 0x45u, 0xd2u, 0xe3u, 0x76u, 0x48u, 0x40u, 0x31u,
+        0x61u, 0x7fu, 0x78u, 0xd2u, 0xb5u, 0x8au, 0x6bu, 0x1bu,
+        0x9cu, 0x7eu, 0xf4u, 0x64u, 0xf5u, 0xa0u, 0x1bu, 0x47u,
+        0xe4u, 0x2eu, 0xc3u, 0x73u, 0x63u, 0x22u, 0x44u, 0x5eu,
+        0x8eu, 0x22u, 0x40u, 0xcau, 0x5eu, 0x69u, 0xe2u, 0xc7u,
+        0x8bu, 0x32u, 0x39u, 0xecu, 0xfau, 0xb2u, 0x16u, 0x49u
+    };
+    static const uint8_t hmac512_case1[64] = {
+        0x87u, 0xaau, 0x7cu, 0xdeu, 0xa5u, 0xefu, 0x61u, 0x9du,
+        0x4fu, 0xf0u, 0xb4u, 0x24u, 0x1au, 0x1du, 0x6cu, 0xb0u,
+        0x23u, 0x79u, 0xf4u, 0xe2u, 0xceu, 0x4eu, 0xc2u, 0x78u,
+        0x7au, 0xd0u, 0xb3u, 0x05u, 0x45u, 0xe1u, 0x7cu, 0xdeu,
+        0xdau, 0xa8u, 0x33u, 0xb7u, 0xd6u, 0xb8u, 0xa7u, 0x02u,
+        0x03u, 0x8bu, 0x27u, 0x4eu, 0xaeu, 0xa3u, 0xf4u, 0xe4u,
+        0xbeu, 0x9du, 0x91u, 0x4eu, 0xebu, 0x61u, 0xf1u, 0x70u,
+        0x2eu, 0x69u, 0x6cu, 0x20u, 0x3au, 0x12u, 0x68u, 0x54u
+    };
+    static const uint8_t hmac512_case2[64] = {
+        0x16u, 0x4bu, 0x7au, 0x7bu, 0xfcu, 0xf8u, 0x19u, 0xe2u,
+        0xe3u, 0x95u, 0xfbu, 0xe7u, 0x3bu, 0x56u, 0xe0u, 0xa3u,
+        0x87u, 0xbdu, 0x64u, 0x22u, 0x2eu, 0x83u, 0x1fu, 0xd6u,
+        0x10u, 0x27u, 0x0cu, 0xd7u, 0xeau, 0x25u, 0x05u, 0x54u,
+        0x97u, 0x58u, 0xbfu, 0x75u, 0xc0u, 0x5au, 0x99u, 0x4au,
+        0x6du, 0x03u, 0x4fu, 0x65u, 0xf8u, 0xf0u, 0xe6u, 0xfdu,
+        0xcau, 0xeau, 0xb1u, 0xa3u, 0x4du, 0x4au, 0x6bu, 0x4bu,
+        0x63u, 0x6eu, 0x07u, 0x0au, 0x38u, 0xbcu, 0xe7u, 0x37u
+    };
+    uint8_t out[ANO_CRYPTO_HMAC_SHA512_MAC_SIZE];
+    ano_crypto_internal_hmac_sha512_family_ctx_t ctx;
+    ano_crypto_status_t st;
+
+    st = ano_crypto_internal_hmac_sha512_family_compute(
+        ANO_CRYPTO_HASH_ALG_SHA384,
+        key_case1, sizeof(key_case1), data_case1, sizeof(data_case1), out);
+    if (st != ANO_CRYPTO_OK || !bytes_equal(out, hmac384_case1, sizeof(hmac384_case1))) {
+        ano_crypto_internal_zeroize(out, sizeof(out));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+    st = ano_crypto_internal_hmac_sha512_family_init(
+        &ctx, ANO_CRYPTO_HASH_ALG_SHA384, key_case2, sizeof(key_case2));
+    if (st == ANO_CRYPTO_OK) {
+        st = ano_crypto_internal_hmac_sha512_family_update(&ctx, data_case2, 9u);
+    }
+    if (st == ANO_CRYPTO_OK) {
+        st = ano_crypto_internal_hmac_sha512_family_update(
+            &ctx, data_case2 + 9u, sizeof(data_case2) - 9u);
+    }
+    if (st == ANO_CRYPTO_OK) {
+        st = ano_crypto_internal_hmac_sha512_family_final(&ctx, out);
+    }
+    if (st != ANO_CRYPTO_OK || !bytes_equal(out, hmac384_case2, sizeof(hmac384_case2))) {
+        ano_crypto_internal_zeroize(&ctx, sizeof(ctx));
+        ano_crypto_internal_zeroize(out, sizeof(out));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+
+    st = ano_crypto_internal_hmac_sha512_family_compute(
+        ANO_CRYPTO_HASH_ALG_SHA512,
+        key_case1, sizeof(key_case1), data_case1, sizeof(data_case1), out);
+    if (st != ANO_CRYPTO_OK || !bytes_equal(out, hmac512_case1, sizeof(hmac512_case1))) {
+        ano_crypto_internal_zeroize(out, sizeof(out));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+    st = ano_crypto_internal_hmac_sha512_family_init(
+        &ctx, ANO_CRYPTO_HASH_ALG_SHA512, key_case2, sizeof(key_case2));
+    if (st == ANO_CRYPTO_OK) {
+        st = ano_crypto_internal_hmac_sha512_family_update(&ctx, data_case2, 9u);
+    }
+    if (st == ANO_CRYPTO_OK) {
+        st = ano_crypto_internal_hmac_sha512_family_update(
+            &ctx, data_case2 + 9u, sizeof(data_case2) - 9u);
+    }
+    if (st == ANO_CRYPTO_OK) {
+        st = ano_crypto_internal_hmac_sha512_family_final(&ctx, out);
+    }
+    if (st != ANO_CRYPTO_OK || !bytes_equal(out, hmac512_case2, sizeof(hmac512_case2))) {
+        ano_crypto_internal_zeroize(&ctx, sizeof(ctx));
+        ano_crypto_internal_zeroize(out, sizeof(out));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+
+    ano_crypto_internal_zeroize(out, sizeof(out));
+    return ANO_CRYPTO_OK;
+}
+
 ano_crypto_status_t ano_crypto_selftest_run(uint32_t flags)
 {
     ano_crypto_status_t st;
@@ -319,6 +523,20 @@ ano_crypto_status_t ano_crypto_selftest_run(uint32_t flags)
     }
 
     st = ano_crypto_selftest_hmac_sha256_kat();
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_selftest_set_last_status(st);
+        ano_crypto_internal_module_mark_error(st);
+        return st;
+    }
+
+    st = ano_crypto_selftest_sha512_family_kat();
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_selftest_set_last_status(st);
+        ano_crypto_internal_module_mark_error(st);
+        return st;
+    }
+
+    st = ano_crypto_selftest_hmac_sha512_family_kat();
     if (st != ANO_CRYPTO_OK) {
         ano_crypto_selftest_set_last_status(st);
         ano_crypto_internal_module_mark_error(st);

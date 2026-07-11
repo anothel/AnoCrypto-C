@@ -1,68 +1,51 @@
-# SHA-384 / SHA-512 KAT Plan
+# SHA-384 / SHA-512 KAT and Evidence Record
 
-Status: P1-15 draft.
+Status: P1-22 engineering record.
 
-## Purpose
+## Public sources
 
-This document records the KAT and evidence plan for SHA-384, SHA-512, HMAC-SHA-384, and HMAC-SHA-512 before implementation is added. It is a planning artifact only.
+| Source ID | Source | Use |
+|---|---|---|
+| SRC-1001 | NIST FIPS 180-4 | SHA-384/SHA-512 algorithm definition and public example digests. |
+| SRC-1002 | RFC 4231 | HMAC-SHA-384/HMAC-SHA-512 public test vectors. |
 
-## Current P1-15 state
+The source identifiers are recorded in `cleanroom/SOURCE_MANIFEST.md`. No third-party implementation code was imported.
 
-| Algorithm | Public API state | Processing state | KAT state | Evidence state |
-|---|---|---|---|---|
-| SHA-384 | Algorithm ID, name, digest size, context size reserved | Not implemented | Planned only | Scope check and reserved-API negative test |
-| SHA-512 | Algorithm ID, name, digest size, context size reserved | Not implemented | Planned only | Scope check and reserved-API negative test |
-| HMAC-SHA-384 | Inherits SHA-384 MAC size metadata | Not implemented | Planned only | Scope check and reserved-API negative test |
-| HMAC-SHA-512 | Inherits SHA-512 MAC size metadata | Not implemented | Planned only | Scope check and reserved-API negative test |
+## Implemented coverage
 
-## Candidate public vector sources
+| Service | Startup self-test | Extended CTest |
+|---|---|---|
+| SHA-384 | Empty, `abc`, streaming path | Standard long message, million-`a`, one-shot/streaming coverage, negative boundaries. |
+| SHA-512 | Empty, `abc`, streaming path | Standard long message, million-`a`, one-shot/streaming coverage, negative boundaries. |
+| HMAC-SHA-384 | RFC 4231 cases 1 and 2 | Cases 3, 4, 6, and 7; streaming path; CSP key-handle path. |
+| HMAC-SHA-512 | RFC 4231 cases 1 and 2 | Cases 3, 4, 6, and 7; streaming path; CSP key-handle path. |
 
-| Source ID | Candidate source | Intended use | Current status |
-|---|---|---|---|
-| SRC-1001 | NIST FIPS 180-4 Secure Hash Standard already recorded in clean-room manifest | SHA-384/SHA-512 algorithm specification and public example digests | Recorded, but SHA-384/SHA-512 processing not implemented |
-| SRC-1002 | RFC 4231 already recorded in clean-room manifest | HMAC-SHA-384/HMAC-SHA-512 public test vectors | Recorded, but HMAC-SHA-384/HMAC-SHA-512 processing not implemented |
-| TBD | Independently selected public/reference comparison source or tool | Differential validation after implementation | TODO |
+Relevant tests:
 
-## Planned vector classes
+- `tests/kat/sha512_family_kat_tests.c`
+- `tests/negative/sha512_family_api_negative_tests.c`
+- `tests/kat/hmac_key_handle_kat_tests.c`
+- startup KATs in `src/selftest/selftest.c`
+- manifest mapping in `src/selftest/kat_manifest.c`
 
-| Class | SHA-384 | SHA-512 | HMAC-SHA-384 | HMAC-SHA-512 |
-|---|---:|---:|---:|---:|
-| Empty message digest | Planned | Planned | Not applicable | Not applicable |
-| `abc` digest | Planned | Planned | Not applicable | Not applicable |
-| Multi-block message digest | Planned | Planned | Not applicable | Not applicable |
-| Million-character digest | Planned | Planned | Not applicable | Not applicable |
-| RFC 4231 short key | Not applicable | Not applicable | Planned | Planned |
-| RFC 4231 long key | Not applicable | Not applicable | Planned | Planned |
-| Streaming chunk-boundary consistency | Planned | Planned | Planned | Planned |
-| Negative output-size tests | Planned | Planned | Planned | Planned |
+## Logging rules
 
-## Logging and package rules
+- Record test name, source ID, status, compiler/build identity, and aggregate result only.
+- Do not print digest values, MAC values, HMAC key bytes, entropy, seed material, DRBG state, private keys, tokens, or customer data.
+- RFC 4231 keys are public synthetic test fixtures, not operational secrets.
+- Local streaming comparisons are deterministic API consistency tests, not an independent public source.
 
-- Do not log HMAC key bytes, entropy bytes, nonce material, DRBG state, generated DRBG bytes, private keys, tokens, customer data, or internal deployment details.
-- Public RFC HMAC keys are synthetic test-vector inputs only and must not be described as operational secrets.
-- Local chunk-boundary fixtures must be labeled deterministic API consistency tests, not public KAT sources.
-- Evidence should record source IDs, test names, and status, not sensitive values.
+## Evidence outputs
 
-## Required code updates when implementation starts
+P1-22 evidence drafts include:
 
-1. Add internal SHA-512-family context and compression code under `src/hash/` and `src/internal/`.
-2. Keep public context layout opaque and update only size-query behavior if needed.
-3. Add startup self-test entries or a documented startup-scope rationale.
-4. Add `tests/kat` executables for SHA-384/SHA-512 and HMAC variants.
-5. Update `src/selftest/kat_manifest.c` statuses from `p1-15-reserved-kat-plan` to implemented or extended-test statuses.
-6. Update `docs/kcmvp/SERVICE_SCOPE_MATRIX.md` and `docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md`.
-7. Update `evidence/release-template/README.md` and release evidence workflow notes.
-8. Keep the public-surface and SHA-2 scope policy checks passing.
-
-## P1-15 evidence files
-
-P1-15 evidence drafts should include:
-
-- `SHA2_SCOPE_CHECK.txt`
-- `SHA2_SCOPE_REVIEW_NOTES.txt`
-- `ctest.log` with `sha2_reserved_api_tests`
+- `SHA512_FAMILY_CHECK.txt`
+- `SHA512_FAMILY_REVIEW_NOTES.txt`
+- `ctest.log`
 - `PUBLIC_SURFACE_CHECK.txt`
-- `THREAD_SAFETY_CHECK.txt`
-- Existing install-smoke and PoC package smoke logs
+- `EXPORTED_SYMBOL_BASELINE_CHECK.txt`
+- install and PoC smoke logs
 
-These files are engineering review inputs and should be reviewed before external sharing.
+## Remaining validation work
+
+Independent external-provider differential automation is not yet part of the source tree. Provider/tool selection, licensing, supported versions, result normalization, and failure triage remain P1-23 TODOs.

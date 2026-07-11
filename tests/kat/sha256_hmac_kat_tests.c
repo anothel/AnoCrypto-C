@@ -175,22 +175,6 @@ static void test_hmac_sha256_streaming_api(void)
     expect_bytes("hmac streaming case2", out, hmac_case2, sizeof(out));
 }
 
-static void test_not_implemented_algorithms_stay_explicit(void)
-{
-    uint8_t out[64];
-    size_t written = 0u;
-
-    expect_status("sha512 digest explicit not implemented",
-                  ano_crypto_hash_digest(ANO_CRYPTO_HASH_ALG_SHA512,
-                                         0, 0u, out, sizeof(out), &written),
-                  ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
-
-    expect_status("hmac sha512 explicit not implemented",
-                  ano_crypto_hmac_compute(ANO_CRYPTO_HASH_ALG_SHA512,
-                                          (const uint8_t *)"k", 1u,
-                                          0, 0u, out, sizeof(out), &written),
-                  ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
-}
 
 int main(void)
 {
@@ -198,7 +182,6 @@ int main(void)
     test_sha256_streaming_api();
     test_hmac_sha256_compute_api();
     test_hmac_sha256_streaming_api();
-    test_not_implemented_algorithms_stay_explicit();
 
     expect_status("module shutdown", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
 

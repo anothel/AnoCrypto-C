@@ -47,7 +47,7 @@ static void test_gate_before_init(void)
                   ANO_CRYPTO_ERR_NOT_INITIALIZED);
 }
 
-static void test_query_processing_and_not_implemented_after_init(void)
+static void test_query_and_processing_after_init(void)
 {
     uint8_t out[64];
     uint8_t ctx[256];
@@ -112,10 +112,15 @@ static void test_query_processing_and_not_implemented_after_init(void)
         ++g_failures;
     }
 
-    expect_status("sha512 still not implemented",
+    written = 0u;
+    expect_status("sha512 after init",
                   ano_crypto_hash_digest(ANO_CRYPTO_HASH_ALG_SHA512,
                                          0, 0u, out, sizeof(out), &written),
-                  ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
+                  ANO_CRYPTO_OK);
+    if (written != ANO_CRYPTO_HASH_SHA512_DIGEST_SIZE) {
+        fprintf(stderr, "FAIL sha512 written: got %lu\n", (unsigned long)written);
+        ++g_failures;
+    }
 
     expect_status("hmac drbg instantiate after init",
                   ano_crypto_drbg_instantiate(ctx, sizeof(ctx),
@@ -159,7 +164,7 @@ static void test_zeroize_helper(void)
 int main(void)
 {
     test_gate_before_init();
-    test_query_processing_and_not_implemented_after_init();
+    test_query_and_processing_after_init();
     test_zeroize_helper();
 
     if (g_failures != 0) {

@@ -18,7 +18,7 @@ Or run the script directly:
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-21 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-22 \
   -DANO_CRYPTO_RUN_CTEST=ON \
   -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
   -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -27,7 +27,7 @@ cmake \
   -P tools/collect_release_evidence.cmake
 ```
 
-P1-21 output includes source-file hashes, a source archive SHA-256, binary hashes, CTest output, public-surface check output, thread-safety policy check output, reproducible-build notes, scope-review notes, SBOM/signing placeholder status, an evidence manifest, install-prefix smoke logs, and optional customer PoC package smoke logs, random-service implementation checks, entropy/health policy checks, and entropy/health review notes, entropy operational policy checks, and entropy operational review notes.
+P1-22 output includes source-file hashes, a source archive SHA-256, binary hashes, CTest output, public-surface check output, thread-safety policy check output, reproducible-build notes, scope-review notes, SBOM/signing placeholder status, an evidence manifest, install-prefix smoke logs, and optional customer PoC package smoke logs, random-service implementation checks, entropy/health policy checks, and entropy/health review notes, entropy operational policy checks, and entropy operational review notes.
 
 ## `check_public_surface.cmake`
 
@@ -53,7 +53,7 @@ Stages a customer PoC package v0 from a configured build tree.
 cmake --build build --target ano_crypto_create_poc_package
 ```
 
-The generated package contains a separately rebuilt clean SDK prefix, the public `examples/core_poc` integration example, selected docs, package manifest/review records, SBOM/signing placeholder status files, thread-safety/SHA-2/random-service notes, entropy/health boundary notes, and entropy operational policy notes.
+The generated package contains a separately rebuilt clean SDK prefix, the public `examples/core_poc` integration example, selected docs, package manifest/review records, SBOM/signing placeholder status files, thread-safety/SHA-512-family/random-service notes, entropy/health boundary notes, and entropy operational policy notes.
 
 ## `run_poc_package_smoke.cmake`
 
@@ -66,9 +66,13 @@ cmake --build build --target ano_crypto_poc_package_smoke
 The generated directories are engineering drafts only. Review them before sharing because they can contain local paths, compiler identifiers, and test logs.
 
 
-## `ano_crypto_sha2_scope_policy_check`
+## `ano_crypto_sha512_family_policy_check`
 
-Runs local policy checks for the P1-16 SHA-384/SHA-512 reserved scope decision, KAT plan, reserved-API test, KAT manifest status, evidence hook, and PoC package note.
+Runs local policy checks for the P1-22 SHA-384/SHA-512 and HMAC family implementation, startup/extended KATs, negative API tests, KAT manifest, evidence hook, and PoC package note.
+
+```sh
+cmake --build build --target ano_crypto_sha512_family_policy_check
+```
 
 
 ## `check_random_service_policy.cmake`

@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-21-concurrency-sanitizer-hardening"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-22-sha512-family"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P1-21 C99 foundation; SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, HMAC key handle lifecycle, reviewed platform entropy provider seams, random lifecycle hardening, cross-platform CSP/HMAC concurrency coverage, Linux GCC/Clang address-and-undefined sanitizer lanes, build-identity ABI-0 layout policy, and clean Release exported-symbol checks include engineering coverage; prediction resistance, automatic VM snapshot/restore or suspend/resume detection, direct noise-source selection and final health-test thresholds, completed hosted artifact review, ThreadSanitizer policy, SHA-384/SHA-512 processing, Hash_DRBG, and block cipher scope remain TODO";
+    out_identity->notes = "P1-22 C99 foundation; SHA-256, SHA-384, SHA-512, HMAC-SHA-256, HMAC-SHA-384, HMAC-SHA-512, HMAC_DRBG-SHA-256, HMAC key-handle lifecycle, reviewed platform entropy provider seams, random lifecycle hardening, cross-platform CSP/HMAC concurrency coverage, Linux GCC address-and-undefined sanitizer coverage, build-identity ABI-0 layout policy, and clean Release exported-symbol checks include engineering coverage; prediction resistance, automatic VM snapshot/restore or suspend/resume detection, direct noise-source selection and final health-test thresholds, completed hosted artifact review, ThreadSanitizer policy, independent SHA-512-family differential-provider automation, Hash_DRBG, and block cipher scope remain TODO";
 
     return ANO_CRYPTO_OK;
 }

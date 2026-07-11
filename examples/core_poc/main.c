@@ -28,24 +28,44 @@ static int check_status(const char *step, ano_crypto_status_t status)
 static int run_hash_smoke(void)
 {
     static const uint8_t message[] = { 'A', 'n', 'o', 'C', 'r', 'y', 'p', 't', 'o', '-', 'C', ' ', 'P', 'o', 'C' };
-    uint8_t digest[32];
-    size_t written = 0u;
-    ano_crypto_status_t status;
+    static const ano_crypto_hash_algorithm_t algorithms[] = {
+        ANO_CRYPTO_HASH_ALG_SHA256,
+        ANO_CRYPTO_HASH_ALG_SHA384,
+        ANO_CRYPTO_HASH_ALG_SHA512
+    };
+    uint8_t digest[ANO_CRYPTO_HASH_SHA512_DIGEST_SIZE];
+    size_t index;
 
-    status = ano_crypto_hash_digest(ANO_CRYPTO_HASH_ALG_SHA256,
-                                    message,
-                                    sizeof(message),
-                                    digest,
-                                    sizeof(digest),
-                                    &written);
-    if (status != ANO_CRYPTO_OK) {
-        return fail_status("SHA-256 digest", status);
-    }
-    if (written != sizeof(digest)) {
-        return fail_message("SHA-256 digest length mismatch");
+    for (index = 0u; index < (sizeof(algorithms) / sizeof(algorithms[0])); ++index) {
+        size_t expected = 0u;
+        size_t written = 0u;
+        ano_crypto_status_t status;
+
+        status = ano_crypto_hash_digest_size(algorithms[index], &expected);
+        if (status != ANO_CRYPTO_OK) {
+            return fail_status("SHA-2 digest size", status);
+        }
+        status = ano_crypto_hash_digest(algorithms[index],
+                                        message,
+                                        sizeof(message),
+                                        digest,
+                                        sizeof(digest),
+                                        &written);
+        if (status != ANO_CRYPTO_OK) {
+            (void)ano_crypto_csp_zeroize(digest, sizeof(digest));
+            return fail_status("SHA-2 digest", status);
+        }
+        if (written != expected) {
+            (void)ano_crypto_csp_zeroize(digest, sizeof(digest));
+            return fail_message("SHA-2 digest length mismatch");
+        }
+
+        printf("- %s digest smoke: PASS (%lu bytes written; digest not printed)\n",
+               ano_crypto_hash_algorithm_name(algorithms[index]),
+               (unsigned long)written);
+        (void)ano_crypto_csp_zeroize(digest, sizeof(digest));
     }
 
-    printf("- SHA-256 digest smoke: PASS (%lu bytes written)\n", (unsigned long)written);
     return 0;
 }
 
@@ -56,9 +76,14 @@ static int run_hmac_key_handle_smoke(void)
         'p', 'u', 'b', 'l', 'i', 'c', '-', 'p', 'o', 'c', '-', 'h', 'm', 'a', 'c', '-', 'k', 'e', 'y'
     };
     static const uint8_t message[] = { 'c', 'o', 'r', 'e', '-', 'p', 'o', 'c' };
+    static const ano_crypto_hash_algorithm_t algorithms[] = {
+        ANO_CRYPTO_HASH_ALG_SHA256,
+        ANO_CRYPTO_HASH_ALG_SHA384,
+        ANO_CRYPTO_HASH_ALG_SHA512
+    };
     ano_crypto_csp_handle_t handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
-    uint8_t mac[32];
-    size_t written = 0u;
+    uint8_t mac[ANO_CRYPTO_HASH_SHA512_DIGEST_SIZE];
+    size_t index;
     ano_crypto_status_t status;
 
     status = ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_HMAC,
@@ -73,20 +98,37 @@ static int run_hmac_key_handle_smoke(void)
         return fail_message("HMAC demo key import returned an invalid handle");
     }
 
-    status = ano_crypto_hmac_compute_with_key(ANO_CRYPTO_HASH_ALG_SHA256,
-                                              handle,
-                                              message,
-                                              sizeof(message),
-                                              mac,
-                                              sizeof(mac),
-                                              &written);
-    if (status != ANO_CRYPTO_OK) {
-        (void)ano_crypto_key_destroy(handle);
-        return fail_status("HMAC-SHA-256 with key handle", status);
-    }
-    if (written != sizeof(mac)) {
-        (void)ano_crypto_key_destroy(handle);
-        return fail_message("HMAC-SHA-256 length mismatch");
+    for (index = 0u; index < (sizeof(algorithms) / sizeof(algorithms[0])); ++index) {
+        size_t expected = 0u;
+        size_t written = 0u;
+
+        status = ano_crypto_hmac_mac_size(algorithms[index], &expected);
+        if (status != ANO_CRYPTO_OK) {
+            (void)ano_crypto_key_destroy(handle);
+            return fail_status("HMAC size", status);
+        }
+        status = ano_crypto_hmac_compute_with_key(algorithms[index],
+                                                  handle,
+                                                  message,
+                                                  sizeof(message),
+                                                  mac,
+                                                  sizeof(mac),
+                                                  &written);
+        if (status != ANO_CRYPTO_OK) {
+            (void)ano_crypto_csp_zeroize(mac, sizeof(mac));
+            (void)ano_crypto_key_destroy(handle);
+            return fail_status("HMAC with key handle", status);
+        }
+        if (written != expected) {
+            (void)ano_crypto_csp_zeroize(mac, sizeof(mac));
+            (void)ano_crypto_key_destroy(handle);
+            return fail_message("HMAC length mismatch");
+        }
+
+        printf("- HMAC-%s key-handle smoke: PASS (%lu bytes written; MAC not printed)\n",
+               ano_crypto_hash_algorithm_name(algorithms[index]),
+               (unsigned long)written);
+        (void)ano_crypto_csp_zeroize(mac, sizeof(mac));
     }
 
     status = ano_crypto_key_destroy(handle);
@@ -94,8 +136,6 @@ static int run_hmac_key_handle_smoke(void)
         return fail_status("HMAC demo key destroy", status);
     }
 
-    printf("- HMAC-SHA-256 key-handle smoke: PASS (%lu bytes written; MAC not printed)\n",
-           (unsigned long)written);
     return 0;
 }
 

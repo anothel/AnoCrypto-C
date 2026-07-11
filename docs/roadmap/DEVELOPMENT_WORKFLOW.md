@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P1-21 draft.
+Status: P1-22 draft.
 
 ## Purpose
 
@@ -11,7 +11,7 @@ This document explains the working flow used for AnoCrypto-C after the C99 reboo
 | Phase | Main goal | Exit signal |
 |---|---|---|
 | P0 Foundation | Repository, clean-room records, C ABI skeleton, module lifecycle, self-test, build identity, install smoke | A consumer can build, install, link, initialize, self-test, and shut down the module. |
-| P1 Core slice | Small algorithm slice, KATs, negative tests, entropy/DRBG/CSP seams, CI/reproducibility notes, API/ABI review, customer PoC package | The limited SHA-256/HMAC-SHA-256/HMAC_DRBG-SHA-256 slice has repeatable tests and engineering evidence. |
+| P1 Core slice | Small algorithm slice, KATs, negative tests, entropy/DRBG/CSP seams, CI/reproducibility notes, API/ABI review, customer PoC package | The SHA-256/SHA-384/SHA-512 hash and HMAC slice, HMAC_DRBG-SHA-256, random service, CSP lifecycle, and supporting evidence have repeatable tests and explicit scope records. |
 | P1 Scope lock | Decide the next validation-target candidate scope before expanding code | Algorithm scope, service matrix, differential-validation strategy, side-channel review checklist, and customer intake inputs are recorded. |
 | P1 Evidence/package hardening | SBOM/signing placeholders, package manifest review, and evidence manifest generation | Evidence and PoC packages have explicit status files and hash manifests without storing secrets or signing material. |
 | P2 Productization | Customer PoC hardening, toolchain support matrix, SecureKit/PKI boundary planning | A customer-specific PoC package can be reviewed without mixing core, SecureKit, and PKI scope. |
@@ -111,17 +111,17 @@ P1-14 deliverables:
 
 ## P1-15 placement
 
-P1-15 is the SHA-384/SHA-512 scope-decision step after the P1-14 thread-safety support-matrix step. It keeps SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 as reserved processing APIs and adds tests/evidence wiring so the deferred state is explicit.
+P1-15 was the historical SHA-384/SHA-512 reservation step after P1-14. P1-22 supersedes the active reserved behavior by implementing the existing identifiers together with KAT, negative-test, package, and evidence wiring.
 
 P1-15 deliverables:
 
 - SHA-384/SHA-512 scope decision document.
 - SHA-384/SHA-512 KAT/evidence plan.
 - Public hash digest/block size metadata macros.
-- Reserved-API negative test for SHA-384/SHA-512 and HMAC variants.
-- SHA-2 reserved scope policy check target.
-- Evidence outputs for `SHA2_SCOPE_CHECK.txt` and `SHA2_SCOPE_REVIEW_NOTES.txt`.
-- PoC package output for `SHA2_SCOPE_PACKAGE_NOTES.txt`.
+- Historical reserved-API negative test, removed after the P1-22 implementation transition.
+- P1-22 SHA-512-family implementation policy check target.
+- Evidence outputs for `SHA512_FAMILY_CHECK.txt` and `SHA512_FAMILY_REVIEW_NOTES.txt`.
+- PoC package output for `SHA512_FAMILY_PACKAGE_NOTES.txt`.
 
 ## P1-17 placement
 
@@ -210,7 +210,8 @@ P1-21 deliverables:
 | P1-19 | Public random-service implementation | Completed using the existing public symbols, platform entropy-backed HMAC_DRBG-SHA-256, source-backed ownership checks, fork/reseed handling, failure injection, and package/evidence updates. |
 | P1-20 | Random lifecycle and portability hardening | Completed with stress and reseed-limit recovery tests, fail-closed marker policy, VM lifecycle guidance, hosted status artifacts, and clean Release ABI-0 symbol checks. |
 | P1-21 | Concurrency and sanitizer hardening | Completed with Win32/pthread CSP/HMAC coverage, status-only thread artifacts, a required GCC ASan/UBSan lane, and build-identity ABI-0 layout decision. |
-| P1-22 candidate | SHA-384/SHA-512 entry gate | Re-check implementation criteria and either approve a KAT/evidence-backed implementation slice or keep the scope reserved. |
+| P1-22 | SHA-384/SHA-512 family implementation | Completed with existing public identifiers, startup/extended KATs, negative tests, install/PoC smoke, and unchanged 53-symbol export baseline. |
+| P1-23 candidate | SHA-512-family differential validation and hardening | Select an independent public provider, add deterministic comparisons and padding-boundary coverage, and review hosted 64-bit portability. |
 | P2-01 | Block cipher implementation start | Start only after P1-12 selection criteria and customer/KCMVP scope are reviewed. |
 
 ## Stop conditions

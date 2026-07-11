@@ -12,16 +12,14 @@ extern "C" {
 #endif
 
 /*
- * P1 public API skeleton for HMAC services.
+ * P1 public API for HMAC services.
  *
- * P1-15 scope:
- * - HMAC-SHA-256 processing is implemented and covered by public-source KATs.
- * - HMAC with SHA-384/SHA-512 is ABI-reserved. MAC sizes are
- *   queryable through the hash size API, but processing APIs return
- *   ANO_CRYPTO_ERR_NOT_IMPLEMENTED until implementation, KAT, and review
- *   evidence are added.
- * - P1-4/P1-5 add and test an HMAC-key handle compute path backed by the CSP skeleton.
- * - Key material must never be logged by callers or by this library.
+ * P1-22 scope:
+ * - HMAC-SHA-256, HMAC-SHA-384, and HMAC-SHA-512 one-shot and streaming
+ *   processing are implemented and covered by public RFC 4231 KATs.
+ * - The CSP HMAC-key handle compute path accepts all three SHA-2 variants.
+ * - Key material and computed MAC bytes must never be logged by callers or by
+ *   this library.
  */
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_hmac_context_size(
     ano_crypto_hash_algorithm_t hash_algorithm,
@@ -60,8 +58,8 @@ ANO_CRYPTO_API ano_crypto_status_t ano_crypto_hmac_compute(
     size_t *out_written);
 
 /*
- * P1-14 note: this API snapshots an in-memory HMAC key handle under the
- * internal CSP lock, computes using the local copy, then zeroizes the copy.
+ * This API snapshots an in-memory HMAC key handle under the internal CSP lock,
+ * computes with the local copy, and zeroizes the copy before returning.
  */
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_hmac_compute_with_key(
     ano_crypto_hash_algorithm_t hash_algorithm,

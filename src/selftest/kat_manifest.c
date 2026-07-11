@@ -1,40 +1,101 @@
 #include "ac_kat_manifest.h"
 
 /*
- * P1-20 KAT manifest.
- * The public random service reuses the HMAC_DRBG-SHA-256 core covered by the
- * startup KAT below. Generated random output is not a KAT fixture and is never
- * written to logs or evidence.
+ * P1-22 KAT manifest.
+ * SHA-256, SHA-384, SHA-512, their HMAC variants, and the
+ * HMAC_DRBG-SHA-256 core are covered by startup or extended public-source
+ * tests. Generated digest, MAC, entropy, and random output are never written
+ * to logs or release evidence.
  *
- * Vectors embedded in selftest.c, src/drbg/drbg.c, and tests/kat are limited to public
- * specification/test-vector inputs recorded in cleanroom/SOURCE_MANIFEST.md.
- * The HMAC test keys are public test-vector materials only and are not
- * operational secrets.
+ * Vectors embedded in selftest.c, src/drbg/drbg.c, and tests/kat are limited
+ * to public specification/test-vector inputs recorded in
+ * cleanroom/SOURCE_MANIFEST.md. HMAC test keys are public fixtures only and
+ * are not operational secrets.
  */
 static const ano_crypto_internal_kat_manifest_entry_t g_kat_manifest[] = {
     {
-        "hash.sha384.reserved-empty",
+        "hash.sha384.empty",
         "SHA-384",
-        "SRC-1001: NIST FIPS 180-4 Secure Hash Standard; P1-16 reserves API metadata only",
-        "p1-16-reserved-kat-plan"
+        "SRC-1001: NIST FIPS 180-4 Secure Hash Standard, SHA-384 example digest",
+        "p1-22-implemented-startup"
     },
     {
-        "hash.sha512.reserved-empty",
+        "hash.sha384.abc",
+        "SHA-384",
+        "SRC-1001: NIST FIPS 180-4 Secure Hash Standard, SHA-384 example digest",
+        "p1-22-implemented-startup"
+    },
+    {
+        "hash.sha512.empty",
         "SHA-512",
-        "SRC-1001: NIST FIPS 180-4 Secure Hash Standard; P1-16 reserves API metadata only",
-        "p1-16-reserved-kat-plan"
+        "SRC-1001: NIST FIPS 180-4 Secure Hash Standard, SHA-512 example digest",
+        "p1-22-implemented-startup"
     },
     {
-        "hmac.sha384.reserved-rfc4231",
+        "hash.sha512.abc",
+        "SHA-512",
+        "SRC-1001: NIST FIPS 180-4 Secure Hash Standard, SHA-512 example digest",
+        "p1-22-implemented-startup"
+    },
+    {
+        "hash.sha384.sha512-public-long",
+        "SHA-384",
+        "SRC-1001: NIST FIPS 180-4 Secure Hash Standard, SHA-384 multi-block example digest",
+        "p1-22-extended-kat-test"
+    },
+    {
+        "hash.sha512.sha512-public-long",
+        "SHA-512",
+        "SRC-1001: NIST FIPS 180-4 Secure Hash Standard, SHA-512 multi-block example digest",
+        "p1-22-extended-kat-test"
+    },
+    {
+        "hash.sha384.million-a",
+        "SHA-384",
+        "SRC-1001: NIST FIPS 180-4 Secure Hash Standard, SHA-384 million-character example digest",
+        "p1-22-extended-kat-test"
+    },
+    {
+        "hash.sha512.million-a",
+        "SHA-512",
+        "SRC-1001: NIST FIPS 180-4 Secure Hash Standard, SHA-512 million-character example digest",
+        "p1-22-extended-kat-test"
+    },
+    {
+        "hmac.sha384.rfc4231.tc1",
         "HMAC-SHA-384",
-        "SRC-1002: RFC 4231 HMAC-SHA-384 test vectors; P1-16 reserves API metadata only",
-        "p1-16-reserved-kat-plan"
+        "SRC-1002: RFC 4231 HMAC-SHA-384 Test Case 1",
+        "p1-22-implemented-startup"
     },
     {
-        "hmac.sha512.reserved-rfc4231",
+        "hmac.sha384.rfc4231.tc2",
+        "HMAC-SHA-384",
+        "SRC-1002: RFC 4231 HMAC-SHA-384 Test Case 2",
+        "p1-22-implemented-startup"
+    },
+    {
+        "hmac.sha512.rfc4231.tc1",
         "HMAC-SHA-512",
-        "SRC-1002: RFC 4231 HMAC-SHA-512 test vectors; P1-16 reserves API metadata only",
-        "p1-16-reserved-kat-plan"
+        "SRC-1002: RFC 4231 HMAC-SHA-512 Test Case 1",
+        "p1-22-implemented-startup"
+    },
+    {
+        "hmac.sha512.rfc4231.tc2",
+        "HMAC-SHA-512",
+        "SRC-1002: RFC 4231 HMAC-SHA-512 Test Case 2",
+        "p1-22-implemented-startup"
+    },
+    {
+        "hmac.sha384.rfc4231.extended",
+        "HMAC-SHA-384",
+        "SRC-1002: RFC 4231 HMAC-SHA-384 Test Cases 3, 4, 6, and 7",
+        "p1-22-extended-kat-test"
+    },
+    {
+        "hmac.sha512.rfc4231.extended",
+        "HMAC-SHA-512",
+        "SRC-1002: RFC 4231 HMAC-SHA-512 Test Cases 3, 4, 6, and 7",
+        "p1-22-extended-kat-test"
     },
     {
         "hash.sha256.empty",
@@ -141,8 +202,20 @@ static const ano_crypto_internal_kat_manifest_entry_t g_kat_manifest[] = {
     {
         "hmac.sha256.handle.rfc4231.tc2",
         "HMAC-SHA-256 with CSP handle",
-        "SRC-1002: RFC 4231 HMAC-SHA-256 Test Case 2 through P1 HMAC key handle path",
+        "SRC-1002: RFC 4231 HMAC-SHA-256 Test Case 2 through the HMAC key handle path",
         "p1-key-handle-kat-test"
+    },
+    {
+        "hmac.sha384.handle.rfc4231.tc2",
+        "HMAC-SHA-384 with CSP handle",
+        "SRC-1002: RFC 4231 HMAC-SHA-384 Test Case 2 through the HMAC key handle path",
+        "p1-22-key-handle-kat-test"
+    },
+    {
+        "hmac.sha512.handle.rfc4231.tc2",
+        "HMAC-SHA-512 with CSP handle",
+        "SRC-1002: RFC 4231 HMAC-SHA-512 Test Case 2 through the HMAC key handle path",
+        "p1-22-key-handle-kat-test"
     }
 };
 

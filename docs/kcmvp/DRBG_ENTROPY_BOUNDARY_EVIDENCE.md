@@ -51,7 +51,7 @@ Prohibited:
 - `ENTROPY_OPERATIONAL_REVIEW_NOTES.txt`
 - `PUBLIC_SURFACE_CHECK.txt`
 - `THREAD_SAFETY_CHECK.txt`
-- `SHA2_SCOPE_CHECK.txt`
+- `SHA512_FAMILY_CHECK.txt`
 - `ctest.log`
 - installed-package smoke logs
 - PoC package smoke logs

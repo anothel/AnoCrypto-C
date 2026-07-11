@@ -16,7 +16,8 @@ AnoCrypto-C-PoC-v0/
   SBOM_STATUS.txt
   SIGNING_STATUS.txt
   THREAD_SAFETY_PACKAGE_NOTES.txt
-  SHA2_SCOPE_PACKAGE_NOTES.txt
+  CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt
+  SHA512_FAMILY_PACKAGE_NOTES.txt
   RANDOM_SERVICE_PACKAGE_NOTES.txt
   RANDOM_LIFECYCLE_PACKAGE_NOTES.txt
   ENTROPY_HEALTH_PACKAGE_NOTES.txt
@@ -67,8 +68,8 @@ The packaged `examples/core_poc` project checks:
 - `include/anocrypto/anocrypto.h` availability
 - version and build identity query flow
 - module init/shutdown lifecycle
-- SHA-256 digest flow
-- HMAC-SHA-256 using an in-memory HMAC key handle
+- SHA-256/SHA-384/SHA-512 digest flows
+- HMAC-SHA-256/HMAC-SHA-384/HMAC-SHA-512 using an in-memory HMAC key handle
 - HMAC_DRBG-SHA-256 instantiate/generate/uninstantiate flow with deterministic public demo input
 - public random-service init/generate/reseed/uninit flow when a reviewed platform provider is available
 
@@ -122,7 +123,8 @@ Before sharing a package externally, review:
 - `SBOM_STATUS.txt`
 - `SIGNING_STATUS.txt`
 - `THREAD_SAFETY_PACKAGE_NOTES.txt`
-- `SHA2_SCOPE_PACKAGE_NOTES.txt`
+- `CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt`
+- `SHA512_FAMILY_PACKAGE_NOTES.txt`
 - `RANDOM_SERVICE_PACKAGE_NOTES.txt`
 - `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt`
 - `ENTROPY_HEALTH_PACKAGE_NOTES.txt`
@@ -181,3 +183,11 @@ The generated SDK is configured with both test-hook options disabled and interna
 - Internal Win32/pthread test helpers, backend metadata functions, sanitizer flags, and test executables are not installed as public API.
 - `CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt` records the required diagnostic lane, hosted-review limits, and build-identity ABI-0 decision.
 - Actual hosted artifacts remain separate engineering records and are not bundled as customer assurance.
+
+
+## P1-22 SHA-512-family package boundary
+
+- The packaged public SDK exercises SHA-256, SHA-384, SHA-512 and the matching HMAC services through the existing public identifiers.
+- The packaged example reports only status and output length; digest and MAC bytes are not printed or retained.
+- Internal SHA-512-family contexts, implementation headers, self-test helpers, and test executables are not installed.
+- `SHA512_FAMILY_PACKAGE_NOTES.txt` records the implementation/KAT boundary and leaves independent differential-provider automation as a follow-up item.

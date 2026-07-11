@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P1-21 draft
+Status: P1-22 draft
 Date: 2026-07-11
 
 ## Purpose
@@ -425,3 +425,22 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - No third-party concurrency harness, sanitizer suppression file, internal company test, or proprietary ABI layout was copied.
 - The required sanitizer lane is engineering diagnostics only. Clang runtime and ThreadSanitizer remain TODO pending reviewed hosted results.
 - The build-identity ABI file records the existing AnoCrypto-C field order; it does not import an external ABI design or make a broad compatibility claim.
+
+
+## P1-22 SHA-512-family Implementation Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| SRC-22001 | NIST FIPS 180-4 already recorded as SRC-1001 | Public standard and public examples | SHA-384/SHA-512 IVs, round constants, padding, length encoding, and public digest vectors | Specification and public vector input only; no sample implementation imported. |
+| SRC-22002 | RFC 4231 already recorded as SRC-1002 | Public RFC and public vectors | HMAC-SHA-384/HMAC-SHA-512 cases 1, 2, 3, 4, 6, and 7 | Synthetic public test keys only; not operational secrets. |
+| DER-22001 | Fresh `src/hash/sha512.c` and `src/internal/ac_sha512_internal.h` written in this repository | User-owned C99 implementation | Shared SHA-512-family core and SHA-384 derivation | No third-party implementation code, names, comments, or build structure imported. |
+| DER-22002 | Fresh P1-22 hash/HMAC dispatch and startup self-test updates | User-owned project code | Public one-shot/streaming and startup KAT integration | Existing public symbols retained; internal context layout remains private. |
+| DER-22003 | Fresh `tests/kat/sha512_family_kat_tests.c` and `tests/negative/sha512_family_api_negative_tests.c` | User-owned generated test code | Public-vector correctness and negative API regression | Test output is status-only; digest and MAC values are not printed. |
+| DER-22004 | Fresh P1-22 policy, evidence, PoC, install-smoke, CI, and documentation updates | User-owned project material | Keep implementation, KAT, package, and evidence boundaries aligned | No keys, entropy, seed material, DRBG state, generated random values, private keys, tokens, or customer data retained. |
+
+## P1-22 Clean-room Notes
+
+- P1-15 reserved-scope files and behavior are retained only as historical records; P1-22 replaces the active reserved test and policy with implementation/KAT checks.
+- SHA-384/SHA-512 constants and expected outputs are limited to the recorded public specification and RFC sources.
+- No external SHA-512-family implementation source, test harness, provider wrapper, or proprietary validation asset was copied.
+- Independent differential-provider automation remains TODO until the provider, license, version, and evidence policy are reviewed.
