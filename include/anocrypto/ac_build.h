@@ -24,8 +24,11 @@ typedef struct ano_crypto_build_identity_s {
 /*
  * Build identity query APIs are allowed in all module states, including error state.
  *
- * TODO(P1): Decide whether to replace this public struct with field-by-index getters
- * for stricter ABI evolution. The abi_version field is included as a P0 guardrail.
+ * ABI-0 decision (P1-21): retain this field order for the 0.x ABI-0 line. Fields
+ * must not be reordered, removed, or appended under the same abi_version. String
+ * pointers are module-owned, read-only, and valid for the loaded module lifetime.
+ * A future incompatible layout requires a new ABI version and separately reviewed
+ * API boundary; this engineering baseline is not a broad binary-compatibility claim.
  */
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_build_identity(
     ano_crypto_build_identity_t *out_identity);

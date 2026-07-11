@@ -18,7 +18,7 @@ Or run the script directly:
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-20 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-21 \
   -DANO_CRYPTO_RUN_CTEST=ON \
   -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
   -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -27,7 +27,7 @@ cmake \
   -P tools/collect_release_evidence.cmake
 ```
 
-P1-20 output includes source-file hashes, a source archive SHA-256, binary hashes, CTest output, public-surface check output, thread-safety policy check output, reproducible-build notes, scope-review notes, SBOM/signing placeholder status, an evidence manifest, install-prefix smoke logs, and optional customer PoC package smoke logs, random-service implementation checks, entropy/health policy checks, and entropy/health review notes, entropy operational policy checks, and entropy operational review notes.
+P1-21 output includes source-file hashes, a source archive SHA-256, binary hashes, CTest output, public-surface check output, thread-safety policy check output, reproducible-build notes, scope-review notes, SBOM/signing placeholder status, an evidence manifest, install-prefix smoke logs, and optional customer PoC package smoke logs, random-service implementation checks, entropy/health policy checks, and entropy/health review notes, entropy operational policy checks, and entropy operational review notes.
 
 ## `check_public_surface.cmake`
 
@@ -107,3 +107,11 @@ The script writes `policy-check/ENTROPY_OPERATIONAL_POLICY_CHECK.txt`. It is an 
 - `check_clean_release_symbols.cmake` creates a nested tests-off/hooks-off hidden-symbol Release build and runs the exported-symbol comparison.
 - `collect_release_evidence.cmake` stores lifecycle and clean-export reports while excluding the nested temporary build from the final evidence manifest.
 - `create_poc_package.cmake` runs the clean export comparison before installing the PoC SDK and includes only status/policy records.
+
+
+## P1-21 concurrency and sanitizer tools
+
+- `check_concurrency_sanitizer_policy.cmake` verifies the Win32/pthread concurrency test, thread-platform artifact, sanitizer mode, GCC hosted lane, PoC boundary, and build-identity ABI-0 decision.
+- `ano_crypto_thread_platform_review` records backend/availability/test-presence/sanitizer-mode metadata only.
+- `ANO_CRYPTO_SANITIZER_MODE=address-undefined` instruments supported GCC/Clang-family diagnostic builds; the required CI lane is Linux GCC.
+- Actual hosted artifacts must be reviewed separately before platform support wording changes.

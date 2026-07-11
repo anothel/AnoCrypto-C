@@ -196,3 +196,17 @@ Include and review:
 - hosted Linux, Windows, and Apple `ano_crypto_random_platform_review` artifacts when available.
 
 Confirm the clean Release uses tests/examples/hooks OFF and internal symbol hiding ON, the expected and actual public symbol counts are both 53, unsupported process-marker platforms fail closed, VM duplication guidance is explicit, and no generated random bytes, entropy, seed material, or DRBG state are retained.
+
+
+## P1-21 Concurrency, Sanitizer, and Build Identity Review
+
+Include and review:
+
+- `CONCURRENCY_SANITIZER_CHECK.txt`;
+- `THREAD_PLATFORM_REVIEW.log`;
+- `CONCURRENCY_SANITIZER_REVIEW_NOTES.txt`;
+- GCC ASan/UBSan CTest result;
+- `ano_crypto_build_identity_abi_tests` result;
+- actual hosted thread-platform artifacts when available.
+
+Confirm the cross-platform concurrency test uses native Win32 threads or pthreads, the clean Release/PoC sanitizer mode is `none`, the public symbol count remains 53, and build-identity ABI version 1 matches the recorded field order. Clang sanitizer runtime, ThreadSanitizer, and hosted Windows/macOS result review remain TODO until actual artifacts are retained.

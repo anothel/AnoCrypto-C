@@ -1,16 +1,18 @@
 # C99 Thread-Safety Policy
 
-Status: P1-15 draft.
+Status: P1-21 draft.
 
 ## Goal
 
 This document records the current thread-safety boundary for AnoCrypto-C. It is a design and engineering-test artifact, not a broad concurrency guarantee.
 
-P1-14 adds a public support matrix and CI checklist:
+P1-21 retains the public support matrix and adds cross-platform concurrency and sanitizer review records:
 
 - `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md`
 - `docs/ci/THREAD_SAFETY_CI_CHECKLIST.md`
 - `tools/check_thread_safety_policy.cmake`
+- `docs/ci/CONCURRENCY_SANITIZER_CI_CHECKLIST.md`
+- `tools/check_concurrency_sanitizer_policy.cmake`
 
 ## Current policy
 
@@ -59,9 +61,9 @@ The option is ON by default. If thread support is disabled or unavailable, calle
 Existing tests:
 
 - `ano_crypto_thread_lock_tests`: basic internal lock seam smoke test.
-- `ano_crypto_csp_thread_safety_tests`: POSIX-style concurrent HMAC key import/use/destroy loop when thread safety and pthread support are available.
+- `ano_crypto_csp_thread_safety_tests`: Win32 native-thread or POSIX pthread concurrent HMAC import/use/destroy and shared-handle compute loops when the reviewed backend is available.
 
-P1-14 adds:
+P1-21 evidence wiring includes:
 
 - `ano_crypto_thread_safety_policy_check`: confirms the support matrix, CI checklist, lock sources, build option, test guard, evidence hook, and PoC package note are present.
 - `THREAD_SAFETY_CHECK.txt`: generated in release evidence drafts.
@@ -71,8 +73,8 @@ The concurrent test uses public synthetic HMAC fixture bytes only and must not p
 
 ## TODO
 
-1. Add Windows-specific concurrent CSP/HMAC coverage.
-2. Add sanitizer lanes where supported by the selected compiler/toolchain policy.
+1. Review actual hosted Windows/macOS/Linux thread artifacts before widening support wording.
+2. Review Clang sanitizer runtime and ThreadSanitizer separately from the required GCC ASan/UBSan lane.
 3. Review whether module init should block, reject, or otherwise define concurrent startup races more precisely.
 4. Add per-header guidance only where wording is stable enough for a public support boundary.
 5. Decide if future CSP operations require per-slot locks instead of one global lock.

@@ -1,10 +1,10 @@
 # Thread-Safety CI Checklist
 
-Status: P1-14 draft.
+Status: P1-21 draft.
 
 ## Purpose
 
-This checklist records the CI lanes and local commands needed to keep the P1-14 thread-safety support matrix aligned with source code, tests, and evidence. It is CI plumbing and engineering evidence only.
+This checklist records the CI lanes and local commands needed to keep the P1-21 thread-safety support matrix aligned with source code, tests, and evidence. It is CI plumbing and engineering evidence only.
 
 ## Required local checks
 
@@ -18,6 +18,7 @@ cmake -S . -B build \
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 cmake --build build --target ano_crypto_thread_safety_policy_check
+cmake --build build --target ano_crypto_concurrency_sanitizer_policy_check
 cmake --build build --target ano_crypto_public_surface_check
 cmake --build build --target ano_crypto_poc_package_smoke
 cmake --build build --target ano_crypto_collect_release_evidence
@@ -43,9 +44,10 @@ The OFF lane is not a concurrency-support lane. It confirms that the build confi
 |---|---|---:|---|---|
 | Default Linux | Ubuntu | ON | Build, CTest, policy checks, install smoke, PoC smoke | Primary CI lane for current concurrent CSP/HMAC smoke. |
 | Default macOS | macOS | ON | Build, CTest, policy checks, install smoke | Confirms Apple platform branch builds and basic tests pass. |
-| Default Windows | Windows | ON | Build, CTest, policy checks, install smoke | Confirms Windows lock branch compiles and basic global-state paths run. |
+| Default Windows | Windows | ON | Build, CTest, policy checks, install smoke, native concurrency test | Upload status-only thread-platform artifact; actual result review is required. |
 | Linux explicit OFF | Ubuntu | OFF | Build, CTest, thread-safety policy check | Confirms unsupported concurrency configuration remains documented and buildable. |
-| Linux evidence draft | Ubuntu | ON | `ano_crypto_collect_release_evidence` | Captures `THREAD_SAFETY_CHECK.txt` with evidence outputs. |
+| Linux evidence draft | Ubuntu | ON | `ano_crypto_collect_release_evidence` | Captures thread-safety, concurrency/sanitizer, ABI, and status-only platform records. |
+| Linux GCC sanitizer | Ubuntu | ON | Full CTest with ASan/UBSan | Required P1-21 diagnostic lane; no secret-bearing fixtures or output. |
 | Release-style symbol check | Ubuntu | ON | Build with tests OFF and symbol hiding ON | Confirms no `ano_crypto_internal_*` exports in the public-style shared library. |
 
 ## Log review
@@ -62,12 +64,12 @@ The OFF lane is not a concurrency-support lane. It confirms that the build confi
 | CSP concurrent smoke fails | Check global lock branch, CSP slot lifecycle, handle generation, and snapshot rule. |
 | OFF lane unexpectedly runs concurrent CSP/HMAC smoke | Check CMake guard around `ano_crypto_csp_thread_safety_tests`. |
 | Public-surface check reports internal exports | Check test hooks and `ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS` configuration. |
-| Windows lane builds but lacks concurrent stress coverage | Keep Windows support wording limited until a Windows-specific test is added. |
+| Windows concurrency or platform artifact fails | Keep Windows support wording limited and review native thread/lock backend logs. |
 | Evidence lacks thread-safety record | Check `tools/collect_release_evidence.cmake` generated `THREAD_SAFETY_CHECK.txt`. |
 
 ## TODO
 
-1. Add hosted CI artifact retention rules only after log redaction policy is reviewed.
-2. Add a Windows-specific concurrent CSP/HMAC test.
-3. Add compiler sanitizer lanes after compiler/toolchain policy is selected.
-4. Add a release-style symbol check job before release-candidate review.
+1. Review and retain actual hosted Linux/macOS/Windows artifacts after successful workflow runs.
+2. Review Clang sanitizer runtime and ThreadSanitizer before adding them as required lanes.
+3. Define concurrent module init/shutdown race semantics.
+4. Keep release-style symbol and build-identity ABI checks in release-candidate review.

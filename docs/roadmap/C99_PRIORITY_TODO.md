@@ -1,6 +1,6 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-20 draft.
+Status: P1-21 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -20,19 +20,21 @@ Status: P1-20 draft.
 - P1-19 install/PoC smoke, CI/policy/evidence updates, and no-new-public-symbol guard.
 - P1-20 random lifecycle stress, reseed-limit/failure-recovery regression, and fail-closed process-marker policy.
 - P1-20 VM snapshot/clone/suspend guidance, hosted status-only review artifacts, and clean Release ABI-0 symbol-baseline automation.
+- P1-21 cross-platform Win32/pthread CSP/HMAC concurrency regression and thread-platform status artifact.
+- P1-21 required Linux GCC ASan/UBSan lane, sanitizer-mode guard, and concurrency/sanitizer policy check.
+- P1-21 build-identity ABI-0 field-order decision and regression test without new public symbols.
 
 ## Immediate P1 next items
 
-1. Review actual hosted Linux, Windows, and Apple random-service/provider artifacts and record platform-specific limitations.
-2. Add Windows-specific concurrent CSP/HMAC coverage and sanitizer lanes where supported.
+1. Review actual hosted Linux, Windows, and Apple random/thread artifacts and record platform-specific limitations.
+2. Review the hosted Clang sanitizer runtime before making it a required lane; evaluate ThreadSanitizer separately.
 3. Decide when to implement SHA-384/SHA-512 after the P1-15 entry criteria are reviewed.
 4. Select a direct noise source only if required, then define source-specific startup/continuous health tests, thresholds, false-positive handling, and recovery policy.
 5. Add reproducible source-archive timestamp normalization if byte-for-byte archives become a release requirement.
-6. Decide whether to replace the public build-identity struct with field getters before ABI freeze.
-7. Add package license/evaluation notice after legal review.
-8. Select the first block cipher/mode only after customer and validation-target candidate inputs are reviewed.
-9. Add differential tests only after a reviewed public/reference source or tool is selected.
-10. Replace SBOM/signing placeholders with reviewed generator/signing outputs after tool and key-management policy are selected.
+6. Add package license/evaluation notice after legal review.
+7. Select the first block cipher/mode only after customer and validation-target candidate inputs are reviewed.
+8. Add differential tests only after a reviewed public/reference source or tool is selected.
+9. Replace SBOM/signing placeholders with reviewed generator/signing outputs after tool and key-management policy are selected.
 
 ## P2 candidates
 
@@ -87,12 +89,23 @@ Random-service lifecycle and operational portability hardening:
 - unsupported process-marker policy;
 - clean Release symbol-baseline automation.
 
-## P1-21 candidate
+## P1-21 scope
 
-Cross-platform evidence closure and concurrency hardening:
+Cross-platform concurrency, sanitizer, and build-identity ABI hardening:
 
-- review real hosted Linux/Windows/Apple artifacts;
-- add Windows-specific CSP/HMAC concurrency coverage;
-- select sanitizer/toolchain lanes;
-- decide whether ABI-0 build-identity struct exposure changes before freeze;
-- keep algorithm scope unchanged unless the SHA-384/SHA-512 entry gate is separately approved.
+- Win32 `CreateThread` and POSIX pthread branches in one CSP/HMAC concurrency regression;
+- status-only thread backend artifact on normal hosted lanes;
+- required Linux GCC AddressSanitizer/UndefinedBehaviorSanitizer lane;
+- Clang sanitizer runtime and ThreadSanitizer explicitly deferred pending reviewed hosted results;
+- retained build-identity ABI version 1 layout with no new public symbol;
+- policy, evidence, PoC, CI, and clean-room updates;
+- algorithm scope unchanged.
+
+## P1-22 candidate
+
+SHA-384/SHA-512 entry-gate decision:
+
+- re-check P1-15 implementation entry criteria and public-vector provenance;
+- decide implement/defer with no placeholder ambiguity;
+- if approved, stage internal SHA-512 core and SHA-384 derivation with KAT/differential/evidence plan;
+- otherwise choose reproducible archive normalization as the next non-algorithm hardening task.

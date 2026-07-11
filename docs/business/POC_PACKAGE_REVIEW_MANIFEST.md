@@ -1,6 +1,6 @@
 # Customer PoC Package Review Manifest
 
-Status: P1-20 draft.
+Status: P1-21 draft.
 
 ## Purpose
 
@@ -74,3 +74,11 @@ Review `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt` together with the clean build log
 ## P1-20 lifecycle and export-baseline package note
 
 Review `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt` and `CLEAN_RELEASE_SYMBOL_BASELINE.log` together. Confirm the log reports 53 expected and actual public symbols, both test hooks were disabled, internal symbol hiding was enabled, and no internal test/reseed/process helper entered the installed SDK. Symbol-name equality is a guardrail only and does not replace broader ABI or platform review.
+
+
+## P1-21 concurrency and sanitizer package boundary
+
+- The package is rebuilt with `ANO_CRYPTO_SANITIZER_MODE=none`, tests/hooks OFF, and internal symbols hidden.
+- Internal Win32/pthread test helpers, backend metadata functions, sanitizer flags, and test executables are not installed as public API.
+- `CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt` records the required diagnostic lane, hosted-review limits, and build-identity ABI-0 decision.
+- Actual hosted artifacts remain separate engineering records and are not bundled as customer assurance.

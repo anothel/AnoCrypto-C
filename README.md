@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-20 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs and negative tests, internal platform entropy provider seam, dedicated-build entropy failure injection, internal health-test candidates, explicit OS-provider classification, source-backed process-change reseed guard, and an implemented public random-service lifecycle on reviewed Linux, Windows, and Apple provider branches. Evidence, install, and PoC outputs remain engineering drafts.
+Current status: P1-21 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, an implemented public random-service lifecycle, cross-platform CSP/HMAC concurrency coverage, a required Linux GCC ASan/UBSan lane, status-only thread-platform artifacts, and a recorded build-identity ABI-0 layout decision. Actual hosted Linux/macOS/Windows artifacts still require review; evidence, install, and PoC outputs remain engineering drafts.
 
 Implemented processing scope:
 
@@ -26,9 +26,9 @@ Implemented processing scope:
 - Private process identity guard for source-backed DRBG state; generation after process change requires reseed and clears output
 - Release evidence draft collection with source archive hash, public-surface check, reproducible-build notes, install smoke logs, PoC package smoke logs, scope-review notes, SBOM/signing placeholder status, and evidence manifest hashes
 - Limited internal locking for module/self-test/CSP global state
-- Thread-safety support matrix, CI checklist, and policy-check target
+- Thread-safety support matrix, cross-platform Win32/pthread CSP/HMAC test, status-only platform review, CI checklist, and policy-check targets
 - CI matrix skeleton for Linux, macOS, and Windows build/test/install-smoke paths
-- API/ABI review checklist for public headers, package identity, and symbol-surface TODOs
+- API/ABI review checklist, stored 53-symbol baseline, and build-identity ABI-0 field-order baseline
 - Release-style internal symbol hiding option for supported compilers
 - Customer PoC package v0 staging, package manifest/review records, and standalone public-API example smoke
 - Development workflow, service scope matrix, differential validation strategy, block-cipher selection gate, side-channel checklist, customer PoC intake questionnaire, SBOM/signing plan, and evidence manifest policy drafts
@@ -41,7 +41,7 @@ Skeleton-only / TODO scope:
 - Direct noise-source selection, source-specific startup/continuous health tests, thresholds, and recovery policy
 - Cross-platform hosted-CI review of process-change behavior and unsupported-process-marker policy
 - Persistent keystore, key export, key wrapping, and multi-process CSP model
-- Windows-specific concurrent CSP/HMAC coverage and sanitizer lanes
+- Actual hosted Windows/macOS/Linux thread and random artifacts; Clang sanitizer runtime and ThreadSanitizer policy review
 - Byte-identical source archive and binary reproducibility rules
 - Complete SBOM generation and detached-signature workflow
 - PoC package legal/evaluation notice and customer-specific support boundary
@@ -58,8 +58,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-20
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-20
+cmake --install build --prefix /tmp/anocrypto-c-p1-21
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-21
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -77,8 +77,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-20
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-20
+cmake --install build --prefix /tmp/anocrypto-c-p1-21
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-21
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -109,7 +109,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, SHA-2 scope, random-service, P1-20 lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-20/`.
+Generated files include public-surface, thread-safety, P1-21 concurrency/sanitizer, thread-platform, build-identity ABI, SHA-2 scope, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-21/`.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -208,3 +208,14 @@ Generated files include public-surface, thread-safety, SHA-2 scope, random-servi
 - `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the current 53-name ABI-0 public symbol baseline.
 - Clean Release, evidence, and PoC flows compare shared-library exports with that baseline and keep both internal test-hook options disabled.
 - Hosted CI collects status-only platform review artifacts; actual hosted results still require review.
+
+## P1-21 concurrency, sanitizer, and build-identity ABI hardening
+
+- `tests/unit/csp_thread_safety_tests.c` now uses Win32 native threads on Windows and pthreads on POSIX-like systems.
+- The concurrency regression covers repeated per-thread import/compute/destroy cycles and concurrent compute operations sharing one read-only HMAC handle.
+- `ano_crypto_thread_platform_review` emits backend name, availability, concurrency-test presence, and sanitizer mode only.
+- `ANO_CRYPTO_SANITIZER_MODE=address-undefined` enables GCC/Clang-family AddressSanitizer and UndefinedBehaviorSanitizer instrumentation; the required hosted lane is Linux GCC.
+- Local GCC ASan/UBSan full CTest is part of the P1-21 engineering evidence. Clang runtime and ThreadSanitizer remain separate review items.
+- `ano_crypto_build_identity_t` retains ABI version 1 and its recorded field order without adding a public function or symbol.
+- `ano_crypto_concurrency_sanitizer_policy_check` verifies source, CI, evidence, PoC, and ABI decision wiring.
+- Hosted workflow configuration creates status-only thread artifacts, but actual runner results must be reviewed before widening platform support wording.

@@ -1,6 +1,6 @@
 # C99 Random Service Design
 
-Status: P1-20 implemented and lifecycle-hardened engineering design.
+Status: P1-21 implemented and lifecycle-hardened engineering design.
 
 ## Purpose
 

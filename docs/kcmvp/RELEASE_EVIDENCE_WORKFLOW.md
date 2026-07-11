@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-20 draft.
+Status: P1-21 draft.
 
 ## Purpose
 
@@ -15,7 +15,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-20/
+build/evidence/p1-21/
 ```
 
 ## Expected generated files
@@ -186,3 +186,13 @@ Review these with `ENTROPY_HEALTH_CHECK.txt` and `ENTROPY_HEALTH_REVIEW_NOTES.tx
 - Clean shared Release builds compare exports with that baseline while tests/examples/hooks are off and internal symbol hiding is on.
 - Evidence collection writes `RANDOM_LIFECYCLE_HARDENING_CHECK.txt`, `RANDOM_LIFECYCLE_REVIEW_NOTES.txt`, `EXPORTED_SYMBOL_BASELINE_CHECK.txt`, and `EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt`.
 - Symbol-name equality is not a complete ABI compatibility claim; public type sizes, calling conventions, semantics, and platform metadata remain separately reviewable.
+
+
+## P1-21 additions
+
+- `CONCURRENCY_SANITIZER_CHECK.txt` records cross-platform concurrency, sanitizer-mode, CI, PoC, and build-identity ABI policy wiring.
+- `THREAD_PLATFORM_REVIEW.log` records thread backend, availability, concurrency-test presence, and sanitizer mode only.
+- `CONCURRENCY_SANITIZER_REVIEW_NOTES.txt` records the required GCC ASan/UBSan lane and explicitly leaves Clang runtime/ThreadSanitizer review open.
+- `ano_crypto_build_identity_abi_tests` checks ABI-version-1 field ordering and query results without assuming a single cross-platform struct size.
+- Hosted Linux/macOS/Windows artifacts must be reviewed separately; workflow configuration alone is not evidence of a pass.
+- Concurrency/sanitizer records must not contain key bytes, MAC output, entropy, seed material, DRBG state, generated random bytes, private keys, tokens, or customer data.

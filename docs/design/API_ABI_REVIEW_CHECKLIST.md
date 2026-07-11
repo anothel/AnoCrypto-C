@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-20 draft.
+Status: P1-21 draft.
 
 ## Review scope
 
@@ -8,7 +8,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 
 ## Naming and package identity
 
-| Item | Expected | P1-20 status |
+| Item | Expected | P1-21 status |
 |---|---|---|
 | Product spelling | `AnoCrypto-C` | OK |
 | Repository/archive slug | `anocrypto-c` | OK |
@@ -21,7 +21,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 
 ## Header ABI checklist
 
-| Rule | P1-20 status | Notes |
+| Rule | P1-21 status | Notes |
 |---|---|---|
 | Public cryptographic contexts do not expose internal struct layout. | OK | Hash/HMAC/DRBG contexts use caller-provided opaque buffers and size APIs. |
 | Public enum values are explicit. | OK | Current public enums use fixed numeric values. |
@@ -30,18 +30,18 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 | Context size APIs exist where caller-provided storage is required. | OK | Hash, HMAC, DRBG, and the P1-20 random service exposes implemented context-size queries; random returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` when the reviewed provider or process marker is unavailable. |
 | Buffer length errors are explicit. | OK | Negative tests cover representative short-buffer and invalid-argument cases. |
 | Public context mutation is not claimed thread-safe. | OK | Current support is limited to selected global state. |
-| Public build identity struct layout is frozen. | TODO | `ano_crypto_build_identity_t` is the only public struct layout; consider field getters before ABI freeze. |
+| Public build identity struct layout is recorded. | OK for ABI-0 engineering baseline | P1-21 retains ABI version 1 and records the exact field order in `abi/ANOCRYPTO_C_0_BUILD_IDENTITY_LAYOUT.md`; no broad binary-compatibility claim is made. |
 | Symbol visibility policy is finalized. | Partial | `ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS` hides internal symbols for no-test release-style builds on supported ELF/Mach-O compilers; internal test-hook builds may still expose internal symbols for internal-unit tests. |
 | Static library support policy is finalized. | TODO | Shared-library boundary remains the first candidate boundary. |
 
 ## Per-header review notes
 
-| Header | P1-20 review note |
+| Header | P1-21 review note |
 |---|---|
 | `anocrypto.h` | Umbrella header only; no extra ABI. |
 | `ac_status.h` | Status enum values are explicit and append-only before internal error sentinel. |
 | `ac_version.h` | Version queries are state-independent. |
-| `ac_build.h` | Public struct layout is tracked as an ABI TODO. |
+| `ac_build.h` | ABI version 1 field order is retained for the 0.x ABI-0 line; fields are not extended under the same version. |
 | `ac_module.h` | Module config remains opaque; module state enum values are explicit. |
 | `ac_selftest.h` | Test-only force flag is gated behind test-hook macro. |
 | `ac_hash.h` | Opaque buffer context; SHA-384/SHA-512 remain placeholders. |
@@ -59,13 +59,14 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 cmake --build build --target ano_crypto_public_surface_check
 cmake --build build --target ano_crypto_thread_safety_policy_check
+cmake --build build --target ano_crypto_concurrency_sanitizer_policy_check
 cmake --build build --target ano_crypto_sha2_scope_policy_check
 cmake --build build --target ano_crypto_random_service_policy_check
 cmake --build build --target ano_crypto_random_lifecycle_policy_check
 cmake --build build --target ano_crypto_clean_release_symbol_baseline_check
 cmake --build build --target ano_crypto_entropy_health_policy_check
-cmake --install build --prefix /tmp/anocrypto-c-p1-20
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-20
+cmake --install build --prefix /tmp/anocrypto-c-p1-21
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-21
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 cmake --build build --target ano_crypto_poc_package_smoke
@@ -81,7 +82,7 @@ Expected exported public names should use the `ano_crypto_` prefix. Internal `an
 
 ## Before public ABI freeze
 
-1. Decide whether to replace `ano_crypto_build_identity_t` with field-by-field getters.
+1. Keep the ABI-version-1 build-identity field order unchanged; use a separately reviewed ABI version or API for incompatible growth.
 2. Decide whether to add a stricter version script/export map per platform.
 3. Decide whether static libraries are supported and what ABI commitments apply.
 4. Keep the stored 53-symbol ABI-0 baseline under review; any intentional public symbol change requires a separate API/ABI decision before updating it.
@@ -129,3 +130,13 @@ P1-19 implements the existing `ac_random.h` symbols without adding a public func
 - Clean shared Release builds are compared against `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt`; the current baseline contains 53 `ano_crypto_*` symbols.
 - Symbol-name equality is only one ABI guardrail. Calling conventions, public type sizes, the existing build-identity struct, semantic behavior, and platform loader metadata remain separate review items.
 - VM snapshot/clone and suspend/resume handling is documented as an integration policy and adds no public reset callback or platform-specific ABI.
+
+
+## P1-21 concurrency and build-identity ABI note
+
+- P1-21 adds no public function, enum value, macro, or exported symbol.
+- The Win32/pthread concurrency tests and backend metadata remain internal test/evidence surfaces.
+- `ano_crypto_build_identity_t` ABI version 1 keeps the field order recorded in `abi/ANOCRYPTO_C_0_BUILD_IDENTITY_LAYOUT.md`.
+- `ano_crypto_build_identity_abi_tests` checks field ordering and query results without assuming one cross-platform byte size.
+- String pointers returned in the structure are module-owned and read-only for the loaded module lifetime.
+- Calling convention, alignment, pointer size, loader metadata, and semantic compatibility remain platform-specific review items.

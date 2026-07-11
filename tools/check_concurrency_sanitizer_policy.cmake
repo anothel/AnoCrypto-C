@@ -1,0 +1,97 @@
+# AnoCrypto-C P1-21 concurrency, sanitizer, and build-identity ABI policy check.
+# Engineering guardrail only; not formal validation evidence.
+
+cmake_minimum_required(VERSION 3.16)
+
+if(NOT DEFINED ANO_CRYPTO_SOURCE_DIR)
+    get_filename_component(ANO_CRYPTO_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
+endif()
+if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
+    set(ANO_CRYPTO_BUILD_DIR "${ANO_CRYPTO_SOURCE_DIR}/build")
+endif()
+if(NOT DEFINED ANO_CRYPTO_CONCURRENCY_SANITIZER_CHECK_OUTPUT)
+    set(ANO_CRYPTO_CONCURRENCY_SANITIZER_CHECK_OUTPUT
+        "${ANO_CRYPTO_BUILD_DIR}/policy-check/CONCURRENCY_SANITIZER_CHECK.txt")
+endif()
+
+get_filename_component(ANO_CRYPTO_SOURCE_DIR "${ANO_CRYPTO_SOURCE_DIR}" ABSOLUTE)
+get_filename_component(_out_dir "${ANO_CRYPTO_CONCURRENCY_SANITIZER_CHECK_OUTPUT}" DIRECTORY)
+file(MAKE_DIRECTORY "${_out_dir}")
+
+set(_violations "")
+set(_notes "")
+
+function(require_file rel description)
+    if(NOT EXISTS "${ANO_CRYPTO_SOURCE_DIR}/${rel}")
+        list(APPEND _violations "missing ${description}: ${rel}")
+        set(_violations "${_violations}" PARENT_SCOPE)
+    endif()
+endfunction()
+
+function(require_text rel needle description)
+    if(EXISTS "${ANO_CRYPTO_SOURCE_DIR}/${rel}")
+        file(READ "${ANO_CRYPTO_SOURCE_DIR}/${rel}" _content)
+        string(FIND "${_content}" "${needle}" _pos)
+        if(_pos EQUAL -1)
+            list(APPEND _violations "missing ${description} in ${rel}")
+            set(_violations "${_violations}" PARENT_SCOPE)
+        endif()
+    endif()
+endfunction()
+
+require_file("tests/unit/csp_thread_safety_tests.c" "cross-platform CSP/HMAC concurrency test")
+require_file("tests/operational/thread_platform_review.c" "thread platform status review")
+require_file("tests/unit/build_identity_abi_tests.c" "build-identity ABI test")
+require_file("docs/ci/CONCURRENCY_SANITIZER_CI_CHECKLIST.md" "concurrency/sanitizer checklist")
+require_file("docs/ci/HOSTED_PLATFORM_ARTIFACT_REVIEW.md" "hosted artifact review template")
+require_file("docs/design/BUILD_IDENTITY_ABI_0_DECISION.md" "build-identity ABI decision")
+require_file("abi/ANOCRYPTO_C_0_BUILD_IDENTITY_LAYOUT.md" "build-identity ABI layout baseline")
+require_file("evidence/release-template/CONCURRENCY_SANITIZER_REVIEW.md" "evidence review template")
+
+require_text("CMakeLists.txt" "ANO_CRYPTO_SANITIZER_MODE" "sanitizer cache mode")
+require_text("CMakeLists.txt" "-fsanitize=address,undefined" "address/undefined sanitizer flags")
+require_text("CMakeLists.txt" "ano_crypto_thread_platform_review" "thread platform review target")
+require_text("CMakeLists.txt" "ano_crypto_build_identity_abi_tests" "build identity ABI test target")
+require_text("CMakeLists.txt" "WIN32 OR CMAKE_USE_PTHREADS_INIT" "cross-platform concurrency test guard")
+require_text("tests/unit/csp_thread_safety_tests.c" "CreateThread" "Windows native thread branch")
+require_text("tests/unit/csp_thread_safety_tests.c" "pthread_create" "POSIX pthread branch")
+require_text("src/core/thread_lock.c" "windows-critical-section" "Windows backend metadata")
+require_text("src/core/thread_lock.c" "pthread-mutex" "pthread backend metadata")
+require_text("include/anocrypto/ac_build.h" "ABI-0 decision (P1-21)" "public ABI decision wording")
+require_text("abi/ANOCRYPTO_C_0_BUILD_IDENTITY_LAYOUT.md" "Fields must not be reordered" "layout mutation rule")
+require_text(".github/workflows/ci.yml" "sanitizer" "sanitizer CI job")
+require_text(".github/workflows/ci.yml" "hosted-thread-platform-review" "hosted thread artifact upload")
+require_text("tools/collect_release_evidence.cmake" "CONCURRENCY_SANITIZER_CHECK.txt" "evidence policy output")
+require_text("tools/create_poc_package.cmake" "CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt" "PoC package boundary note")
+
+set(_cache "${ANO_CRYPTO_BUILD_DIR}/CMakeCache.txt")
+if(EXISTS "${_cache}")
+    file(READ "${_cache}" _cache_content)
+    if(_cache_content MATCHES "ANO_CRYPTO_SANITIZER_MODE:STRING=([^\n\r]+)")
+        list(APPEND _notes "configured sanitizer mode: ${CMAKE_MATCH_1}")
+    endif()
+    if(_cache_content MATCHES "ANO_CRYPTO_ENABLE_THREAD_SAFETY:BOOL=ON")
+        list(APPEND _notes "thread safety configured ON")
+    else()
+        list(APPEND _notes "thread safety configured OFF or unavailable; concurrent support is not claimed")
+    endif()
+endif()
+
+list(LENGTH _violations _violation_count)
+file(WRITE "${ANO_CRYPTO_CONCURRENCY_SANITIZER_CHECK_OUTPUT}"
+    "AnoCrypto-C P1-21 concurrency/sanitizer policy check\n"
+    "Status: engineering guardrail only\n"
+    "Violations: ${_violation_count}\n")
+foreach(_note IN LISTS _notes)
+    file(APPEND "${ANO_CRYPTO_CONCURRENCY_SANITIZER_CHECK_OUTPUT}" "NOTE: ${_note}\n")
+endforeach()
+foreach(_violation IN LISTS _violations)
+    file(APPEND "${ANO_CRYPTO_CONCURRENCY_SANITIZER_CHECK_OUTPUT}" "FAIL: ${_violation}\n")
+endforeach()
+
+if(_violation_count GREATER 0)
+    message(FATAL_ERROR "P1-21 concurrency/sanitizer policy check failed; see ${ANO_CRYPTO_CONCURRENCY_SANITIZER_CHECK_OUTPUT}")
+endif()
+
+file(APPEND "${ANO_CRYPTO_CONCURRENCY_SANITIZER_CHECK_OUTPUT}" "PASS\n")
+message(STATUS "P1-21 concurrency/sanitizer policy check passed")

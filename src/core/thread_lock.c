@@ -39,6 +39,16 @@ void ano_crypto_internal_global_unlock(void)
     LeaveCriticalSection(&g_ano_crypto_global_lock);
 }
 
+int ano_crypto_internal_thread_safety_available(void)
+{
+    return 1;
+}
+
+const char *ano_crypto_internal_thread_backend_name(void)
+{
+    return "windows-critical-section";
+}
+
 #  elif defined(__unix__) || defined(__APPLE__)
 #    include <pthread.h>
 
@@ -56,6 +66,16 @@ ano_crypto_status_t ano_crypto_internal_global_lock(void)
 void ano_crypto_internal_global_unlock(void)
 {
     (void)pthread_mutex_unlock(&g_ano_crypto_global_lock);
+}
+
+int ano_crypto_internal_thread_safety_available(void)
+{
+    return 1;
+}
+
+const char *ano_crypto_internal_thread_backend_name(void)
+{
+    return "pthread-mutex";
 }
 
 #  else
@@ -76,6 +96,16 @@ void ano_crypto_internal_global_unlock(void)
 {
 }
 
+int ano_crypto_internal_thread_safety_available(void)
+{
+    return 0;
+}
+
+const char *ano_crypto_internal_thread_backend_name(void)
+{
+    return "unsupported-noop";
+}
+
 #  endif
 #else
 
@@ -86,6 +116,16 @@ ano_crypto_status_t ano_crypto_internal_global_lock(void)
 
 void ano_crypto_internal_global_unlock(void)
 {
+}
+
+int ano_crypto_internal_thread_safety_available(void)
+{
+    return 0;
+}
+
+const char *ano_crypto_internal_thread_backend_name(void)
+{
+    return "disabled-noop";
 }
 
 #endif

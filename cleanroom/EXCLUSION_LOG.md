@@ -1,6 +1,6 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P1-20 draft
+Status: P1-21 draft
 Date: 2026-07-11
 
 ## Purpose
@@ -244,3 +244,14 @@ If excluded material is discovered:
 | EX-2906 | Claiming automatic VM/checkpoint/suspend detection | Support and claims risk | Excluded | No host-specific detection interface is implemented. |
 | EX-2907 | Automatically rewriting the exported-symbol baseline after an ABI difference | ABI governance risk | Excluded | Missing or unexpected symbols fail the check and require explicit review. |
 | EX-2908 | Treating 53-symbol name equality as complete ABI compatibility or official validation evidence | Claims risk | Excluded | Calling convention, type size, layout, semantics, and platform metadata remain separate review items. |
+
+## P1-21 Additional Exclusions
+
+| ID | Excluded input or behavior | Risk | Decision | Note |
+|---|---|---|---|---|
+| EX-3001 | Third-party or employer-owned concurrency harnesses, sanitizer suppressions, and Windows synchronization wrappers with unclear rights | Provenance risk | Excluded | P1-21 uses fresh project-owned C99 test code and public platform API concepts only. |
+| EX-3002 | Treating workflow YAML or an uploaded status artifact as proof that every hosted platform passed | Evidence/claims risk | Excluded | Actual workflow runs must be reviewed and referenced separately. |
+| EX-3003 | Printing HMAC keys, MAC output, entropy, seed material, DRBG state, or generated random bytes to diagnose races or sanitizer failures | Sensitive material disclosure | Excluded | Tests and artifacts record status/backend/mode only. |
+| EX-3004 | Enabling sanitizer instrumentation in the clean customer PoC SDK by default | Packaging and performance ambiguity | Excluded | Clean PoC SDK explicitly uses `ANO_CRYPTO_SANITIZER_MODE=none`. |
+| EX-3005 | Extending or reordering `ano_crypto_build_identity_t` while retaining ABI version 1 | ABI ambiguity | Excluded | P1-21 records and tests the existing ABI-0 field order. |
+| EX-3006 | Claiming ThreadSanitizer or Clang sanitizer coverage without a reviewed compatible runtime result | Evidence overstatement | Excluded | GCC ASan/UBSan is required; other sanitizer lanes remain TODO. |

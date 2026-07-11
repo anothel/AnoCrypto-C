@@ -1,6 +1,6 @@
 # anocrypto-c KAT Tests
 
-Status: P1-20 draft.
+Status: P1-21 draft.
 
 This directory contains public-source known-answer tests for the currently implemented algorithm slice:
 

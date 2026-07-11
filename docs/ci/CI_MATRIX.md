@@ -1,6 +1,6 @@
 # AnoCrypto-C CI Matrix Skeleton
 
-Status: P1-20 engineering draft.
+Status: P1-21 engineering draft.
 
 ## Purpose
 
@@ -17,7 +17,7 @@ This matrix records build, test, package, random-lifecycle, exported-symbol, and
 | Installed-package smoke | Required | Required | Required | Uses `find_package(AnoCryptoC CONFIG REQUIRED)`. |
 | Customer PoC package smoke | Required | Optional | Optional | Linux remains the package-path reference lane. |
 | Public-surface policy | Required | Required | Required | Naming, claims, headers, package identity, and available symbol scan. |
-| Thread-safety policy | Required | Required | Required | Includes one Linux thread-safety-OFF lane. |
+| Thread-safety policy | Required | Required | Required | Includes one Linux OFF lane and status-only thread backend artifact. |
 | SHA-2 reserved-scope policy | Required | Required | Required | SHA-384/SHA-512 processing remains reserved. |
 | Random-service policy | Required | Required | Required | Context ownership, output clearing, provider-disabled and process-change behavior. |
 | Random lifecycle hardening policy | Required | Required | Required | Process-marker fail-closed rule, VM policy, test-hook boundary, lifecycle tests, ABI baseline files. |
@@ -26,9 +26,10 @@ This matrix records build, test, package, random-lifecycle, exported-symbol, and
 | Dedicated random hardening lane | Linux required | Not default | Not default | Both internal hooks ON, OS provider OFF; not a Release/PoC binary. |
 | Provider-disabled lane | Linux required | Optional | Optional | Confirms explicit service unavailability. |
 | Clean Release exported-symbol baseline | Required | Required | Required | Tests/examples/hooks OFF, internal symbols hidden, shared library compared with the stored 53-symbol ABI-0 list. |
-| Evidence draft | Linux required | Optional | Optional | Includes lifecycle and clean-export reports plus status-only test/package records. |
+| GCC ASan/UBSan | Required | Not selected | Not selected | Full Linux CTest with `ANO_CRYPTO_SANITIZER_MODE=address-undefined`. |
+| Evidence draft | Linux required | Optional | Optional | Includes lifecycle, concurrency/sanitizer, ABI, and clean-export reports plus status-only records. |
 
-## P1-20 matrix axes
+## P1-21 matrix axes
 
 | Axis | Values | Decision |
 |---|---|---|
@@ -38,7 +39,8 @@ This matrix records build, test, package, random-lifecycle, exported-symbol, and
 | OS entropy provider | ON in normal lanes, OFF in dedicated negative lane | Provider output is never uploaded. |
 | Entropy test hook | OFF normally, ON only in dedicated hardening lane | Cannot be enabled with tests OFF. |
 | Random lifecycle test hook | OFF normally, ON only in dedicated hardening lane | Cannot be enabled with tests OFF. |
-| Thread safety | ON normally, Linux OFF smoke | OFF does not claim concurrent safety. |
+| Thread safety | ON normally, Linux OFF smoke | Win32/pthread concurrency test runs only with a reviewed backend; OFF does not claim concurrent safety. |
+| Sanitizer | `none`, Linux GCC `address-undefined` | Clang runtime and ThreadSanitizer remain TODO. |
 | Internal symbols | Visible only as needed by internal test builds; hidden in clean Release/PoC | Installed public surface must remain unchanged. |
 
 ## Workflow expectations
@@ -46,12 +48,13 @@ This matrix records build, test, package, random-lifecycle, exported-symbol, and
 The repository workflow must:
 
 1. Run default test/smoke lanes on Linux, macOS, and Windows.
-2. Capture `ano_crypto_random_platform_review` with CTest `--output-log` and upload that status-only file per hosted OS.
+2. Capture both random and thread platform review tests with CTest `--output-log` and upload status-only files per hosted OS.
 3. Run `ano_crypto_random_lifecycle_policy_check` in normal, provider-disabled, and dedicated hardening lanes.
 4. Enable both test-hook options only in the dedicated Linux random-hardening lane.
 5. Run a clean Release exported-symbol comparison on all three hosted operating systems.
 6. Generate `RANDOM_LIFECYCLE_HARDENING_CHECK.txt`, `RANDOM_LIFECYCLE_REVIEW_NOTES.txt`, `EXPORTED_SYMBOL_BASELINE_CHECK.txt`, and `EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt` in the Linux evidence draft.
-7. Keep entropy, seed material, DRBG state, and generated random output out of artifacts.
+7. Run the required Linux GCC ASan/UBSan full CTest lane.
+8. Keep keys, MAC output, entropy, seed material, DRBG state, and generated random output out of artifacts.
 
 ## Hosted-result boundary
 
@@ -59,8 +62,8 @@ The workflow records expected jobs, but repository changes alone do not prove th
 
 ## Remaining TODO
 
-1. Add a second Linux compiler lane and sanitizer coverage after test-runtime policy review.
-2. Add Windows-specific concurrency stress before widening Windows thread-safety wording.
+1. Review hosted Clang sanitizer runtime and ThreadSanitizer before adding required lanes.
+2. Review real Windows concurrency artifacts before widening Windows thread-safety wording.
 3. Review macOS PoC packaging and Windows DLL runtime-path handling before requiring PoC smoke there.
 4. Add static-library checks only if static delivery becomes supported.
 5. Replace SBOM/signing placeholders after tool, signer, and secret-handling policy selection.

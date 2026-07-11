@@ -1,6 +1,6 @@
 # Public Random API Decision
 
-Status: P1-20 implemented and lifecycle-hardened engineering boundary.
+Status: P1-21 implemented and lifecycle-hardened engineering boundary.
 
 ## Decision
 

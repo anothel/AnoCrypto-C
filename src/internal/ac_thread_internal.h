@@ -6,7 +6,7 @@
 /*
  * Internal process-wide lock seam.
  *
- * P1-14 policy:
+ * P1-21 policy:
  * - This lock protects anocrypto-c global module/self-test/CSP table state.
  * - Caller-provided operation contexts remain caller-owned and are not made
  *   concurrently mutable by this lock.
@@ -15,5 +15,9 @@
  */
 ano_crypto_status_t ano_crypto_internal_global_lock(void);
 void ano_crypto_internal_global_unlock(void);
+
+/* Status-only implementation metadata for internal tests/evidence. */
+int ano_crypto_internal_thread_safety_available(void);
+const char *ano_crypto_internal_thread_backend_name(void);
 
 #endif /* ANO_CRYPTO_THREAD_INTERNAL_H */

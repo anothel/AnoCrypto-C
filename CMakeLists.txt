@@ -15,6 +15,8 @@ option(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS "Enable internal entropy failure-inj
 option(ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS "Enable internal random lifecycle/reseed-limit hooks for dedicated test builds" OFF)
 option(ANO_CRYPTO_ENABLE_THREAD_SAFETY "Enable internal locks for module/self-test/CSP global state" ON)
 option(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER "Enable reviewed internal platform entropy provider where supported" ON)
+set(ANO_CRYPTO_SANITIZER_MODE "none" CACHE STRING "Sanitizer mode: none or address-undefined")
+set_property(CACHE ANO_CRYPTO_SANITIZER_MODE PROPERTY STRINGS none address-undefined)
 
 if(NOT DEFINED ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS)
     if(ANO_CRYPTO_BUILD_TESTS)
@@ -43,8 +45,18 @@ set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
+if(ANO_CRYPTO_SANITIZER_MODE STREQUAL "address-undefined")
+    if(NOT CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+        message(FATAL_ERROR "ANO_CRYPTO_SANITIZER_MODE=address-undefined requires a reviewed GCC/Clang-family compiler")
+    endif()
+    add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address,undefined)
+elseif(NOT ANO_CRYPTO_SANITIZER_MODE STREQUAL "none")
+    message(FATAL_ERROR "Unsupported ANO_CRYPTO_SANITIZER_MODE='${ANO_CRYPTO_SANITIZER_MODE}'; expected none or address-undefined")
+endif()
+
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-20-random-lifecycle-hardening" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-21-concurrency-sanitizer-hardening" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -116,12 +128,16 @@ target_compile_definitions(anocrypto_c
         ANO_CRYPTO_BUILD_FINGERPRINT="${ANO_CRYPTO_BUILD_FINGERPRINT}")
 
 if(ANO_CRYPTO_ENABLE_THREAD_SAFETY)
-    find_package(Threads QUIET)
-    if(Threads_FOUND)
+    if(WIN32)
         target_compile_definitions(anocrypto_c PRIVATE ANO_CRYPTO_ENABLE_THREAD_SAFETY)
-        target_link_libraries(anocrypto_c PRIVATE Threads::Threads)
     else()
-        message(WARNING "ANO_CRYPTO_ENABLE_THREAD_SAFETY is ON, but CMake Threads was not found; using unsupported no-op fallback")
+        find_package(Threads QUIET)
+        if(Threads_FOUND)
+            target_compile_definitions(anocrypto_c PRIVATE ANO_CRYPTO_ENABLE_THREAD_SAFETY)
+            target_link_libraries(anocrypto_c PRIVATE Threads::Threads)
+        else()
+            message(WARNING "ANO_CRYPTO_ENABLE_THREAD_SAFETY is ON, but CMake Threads was not found; using unsupported no-op fallback")
+        endif()
     endif()
 endif()
 
@@ -222,6 +238,15 @@ add_custom_target(ano_crypto_thread_safety_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_thread_safety_policy.cmake
     USES_TERMINAL
     COMMENT "Checking AnoCrypto-C thread-safety policy and support matrix")
+
+add_custom_target(ano_crypto_concurrency_sanitizer_policy_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_CONCURRENCY_SANITIZER_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/CONCURRENCY_SANITIZER_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_concurrency_sanitizer_policy.cmake
+    USES_TERMINAL
+    COMMENT "Checking AnoCrypto-C cross-platform concurrency, sanitizer, and build-identity ABI policy")
 
 
 add_custom_target(ano_crypto_sha2_scope_policy_check
@@ -516,13 +541,39 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
     add_test(NAME ano_crypto_thread_lock_tests COMMAND ano_crypto_thread_lock_tests)
 
-    if(ANO_CRYPTO_ENABLE_THREAD_SAFETY AND CMAKE_USE_PTHREADS_INIT)
+    set(ANO_CRYPTO_CONCURRENT_CSP_TEST_AVAILABLE OFF)
+    if(ANO_CRYPTO_ENABLE_THREAD_SAFETY)
+        if(WIN32 OR CMAKE_USE_PTHREADS_INIT)
+            set(ANO_CRYPTO_CONCURRENT_CSP_TEST_AVAILABLE ON)
+        endif()
+    endif()
+
+    if(ANO_CRYPTO_CONCURRENT_CSP_TEST_AVAILABLE)
         add_executable(ano_crypto_csp_thread_safety_tests
             tests/unit/csp_thread_safety_tests.c)
-        target_link_libraries(ano_crypto_csp_thread_safety_tests PRIVATE anocrypto_c Threads::Threads)
-
+        target_link_libraries(ano_crypto_csp_thread_safety_tests PRIVATE anocrypto_c)
+        if(TARGET Threads::Threads)
+            target_link_libraries(ano_crypto_csp_thread_safety_tests PRIVATE Threads::Threads)
+        endif()
         add_test(NAME ano_crypto_csp_thread_safety_tests COMMAND ano_crypto_csp_thread_safety_tests)
+        set_tests_properties(ano_crypto_csp_thread_safety_tests PROPERTIES LABELS "thread-safety;concurrency")
     endif()
+
+    add_executable(ano_crypto_thread_platform_review
+        tests/operational/thread_platform_review.c)
+    target_link_libraries(ano_crypto_thread_platform_review PRIVATE anocrypto_c)
+    target_include_directories(ano_crypto_thread_platform_review PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
+    target_compile_definitions(ano_crypto_thread_platform_review PRIVATE
+        ANO_CRYPTO_TEST_CONCURRENT_CSP_AVAILABLE=$<BOOL:${ANO_CRYPTO_CONCURRENT_CSP_TEST_AVAILABLE}>
+        ANO_CRYPTO_TEST_SANITIZER_MODE="${ANO_CRYPTO_SANITIZER_MODE}")
+    add_test(NAME ano_crypto_thread_platform_review COMMAND ano_crypto_thread_platform_review)
+    set_tests_properties(ano_crypto_thread_platform_review PROPERTIES LABELS "thread-safety;operational-review")
+
+    add_executable(ano_crypto_build_identity_abi_tests
+        tests/unit/build_identity_abi_tests.c)
+    target_link_libraries(ano_crypto_build_identity_abi_tests PRIVATE anocrypto_c)
+    add_test(NAME ano_crypto_build_identity_abi_tests COMMAND ano_crypto_build_identity_abi_tests)
+    set_tests_properties(ano_crypto_build_identity_abi_tests PROPERTIES LABELS "abi;build-identity")
 
     add_executable(ano_crypto_install_smoke_buildtree
         tests/install_smoke/main.c)
@@ -538,7 +589,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-20
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-21
             -DANO_CRYPTO_RUN_CTEST=ON
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
@@ -550,12 +601,14 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_EXPORTED_SYMBOL_CHECK=ON
             -DANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK=ON
             -DANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK=ON
+            -DANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-20 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-21 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_public_surface_check
         ano_crypto_thread_safety_policy_check
+        ano_crypto_concurrency_sanitizer_policy_check
         ano_crypto_sha2_scope_policy_check
         ano_crypto_random_service_policy_check
         ano_crypto_random_lifecycle_policy_check
@@ -586,6 +639,8 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_entropy_health_error_state_tests
         ano_crypto_drbg_entropy_helper_tests
         ano_crypto_thread_lock_tests
+        ano_crypto_thread_platform_review
+        ano_crypto_build_identity_abi_tests
         ano_crypto_install_smoke_buildtree)
 
     if(TARGET anocrypto_c_core_poc)

@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P1-20 draft
+Status: P1-21 draft
 Date: 2026-07-11
 
 ## Purpose
@@ -408,3 +408,20 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - Lifecycle and reseed-limit tests use transient in-memory buffers; generated output, provider output, entropy, seed material, and DRBG state are not retained.
 - VM snapshot/restore, clone, checkpoint, and suspend/resume behavior is documented as an integration boundary rather than implemented by copying vendor-specific code.
 - The exported-symbol baseline contains only public symbol names and no binary, private API, secret, or customer information.
+
+## P1-21 Concurrency, Sanitizer, and Build-Identity ABI Inputs
+
+| ID | Source | Classification | Use | Boundary |
+|---|---|---|---|---|
+| SRC-21001 | ISO C99 language and CMake project configuration already used by this repository | Public standard / project-owned build design | Cross-platform test and sanitizer option plumbing | No third-party implementation copied. |
+| SRC-21002 | Public Win32 thread API concepts (`CreateThread`, `WaitForSingleObject`, `CloseHandle`) | Public platform API | Windows branch of the project-owned CSP/HMAC concurrency regression | API use only; no external source code or proprietary test structure copied. |
+| SRC-21003 | Public POSIX pthread API concepts | Public platform API | POSIX branch of the same project-owned concurrency regression | API use only. |
+| SRC-21004 | GCC/Clang sanitizer command-line interface concepts | Public compiler documentation concept | `address-undefined` diagnostic build mode | Diagnostic tooling only; not a security certification or production build requirement. |
+| DER-21005 | Fresh P1-21 concurrency test, status-only platform review, ABI layout regression, policy scripts, docs, CI, evidence, and PoC updates | User-owned generated project material | P1-21 implementation and review guardrails | No keys, MAC output, entropy, seed material, DRBG state, generated random bytes, private keys, tokens, or customer data retained. |
+
+## P1-21 Clean-room Notes
+
+- The Win32 and pthread test branches were written specifically for AnoCrypto-C from public API concepts.
+- No third-party concurrency harness, sanitizer suppression file, internal company test, or proprietary ABI layout was copied.
+- The required sanitizer lane is engineering diagnostics only. Clang runtime and ThreadSanitizer remain TODO pending reviewed hosted results.
+- The build-identity ABI file records the existing AnoCrypto-C field order; it does not import an external ABI design or make a broad compatibility claim.
