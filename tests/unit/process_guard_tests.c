@@ -135,7 +135,7 @@ static void test_source_backed_drbg_after_fork(size_t ctx_size)
         int child_failed = 0;
 
         memset(out, 0xa5, sizeof(out));
-        st = ano_crypto_drbg_generate(
+        st = ano_crypto_internal_hmac_drbg_sha256_generate_source_backed(
             ctx, out, sizeof(out), 0, 0u, ANO_CRYPTO_DRBG_FLAG_NONE);
         if (st != ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED ||
             !buffer_is_zero(out, sizeof(out))) {
@@ -149,7 +149,7 @@ static void test_source_backed_drbg_after_fork(size_t ctx_size)
         }
 
         memset(out, 0, sizeof(out));
-        st = ano_crypto_drbg_generate(
+        st = ano_crypto_internal_hmac_drbg_sha256_generate_source_backed(
             ctx, out, sizeof(out), 0, 0u, ANO_CRYPTO_DRBG_FLAG_NONE);
         if (st != ANO_CRYPTO_OK) {
             child_failed = 1;

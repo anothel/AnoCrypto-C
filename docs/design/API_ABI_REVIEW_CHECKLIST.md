@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-18 draft.
+Status: P1-19 draft.
 
 ## Review scope
 
@@ -27,7 +27,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 | Public enum values are explicit. | OK | Current public enums use fixed numeric values. |
 | Processing APIs return `ano_crypto_status_t`. | OK | Name/status query helpers are documented exceptions. |
 | Outputs are returned through output parameters. | OK | Digest/MAC/DRBG APIs use output buffers and written lengths. |
-| Context size APIs exist where caller-provided storage is required. | OK | Hash, HMAC, and DRBG expose implemented context-size queries; random context-size remains a reserved placeholder returning `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`. |
+| Context size APIs exist where caller-provided storage is required. | OK | Hash, HMAC, DRBG, and the P1-19 random service expose implemented context-size queries; random returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` only when no reviewed platform provider is compiled in. |
 | Buffer length errors are explicit. | OK | Negative tests cover representative short-buffer and invalid-argument cases. |
 | Public context mutation is not claimed thread-safe. | OK | Current support is limited to selected global state. |
 | Public build identity struct layout is frozen. | TODO | `ano_crypto_build_identity_t` is the only public struct layout; consider field getters before ABI freeze. |
@@ -47,7 +47,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 | `ac_hash.h` | Opaque buffer context; SHA-384/SHA-512 remain placeholders. |
 | `ac_hmac.h` | Opaque buffer context and in-memory HMAC key handle compute path. |
 | `ac_drbg.h` | Opaque buffer context; explicit entropy input; implemented public random generation remains separate. |
-| `ac_random.h` | P1-16 reserved boundary; processing APIs return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`; no public random bytes are generated. |
+| `ac_random.h` | P1-19 implemented source-backed HMAC_DRBG-SHA-256 service; caller-owned opaque context, bounded request, failure output clearing, and explicit unsupported flags. |
 | `ac_csp.h` | Handle is integer-opaque to callers; state enum values are explicit. |
 | `ac_key.h` | Import/destroy/state query only; export and persistence are deferred. |
 
@@ -60,10 +60,10 @@ ctest --test-dir build --output-on-failure
 cmake --build build --target ano_crypto_public_surface_check
 cmake --build build --target ano_crypto_thread_safety_policy_check
 cmake --build build --target ano_crypto_sha2_scope_policy_check
-cmake --build build --target ano_crypto_random_boundary_policy_check
+cmake --build build --target ano_crypto_random_service_policy_check
 cmake --build build --target ano_crypto_entropy_health_policy_check
-cmake --install build --prefix /tmp/anocrypto-c-p1-18
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-18
+cmake --install build --prefix /tmp/anocrypto-c-p1-19
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-19
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 cmake --build build --target ano_crypto_poc_package_smoke
@@ -91,7 +91,7 @@ The P1-14 support matrix does not add public symbols or public struct layouts. I
 
 ## P1-16 random-service ABI note
 
-`ac_random.h` is intentionally installed so downstream consumers can see the reserved boundary, but its processing functions are fail-closed placeholders. Before turning those placeholders into implemented random byte generation, review context ownership, reseed policy, prediction-resistance behavior, fork/process behavior, platform entropy evidence, and symbol-baseline impact.
+P1-19 implements the existing `ac_random.h` symbols without adding a public function. Context ownership remains caller-provided opaque storage; source-backed context marking prevents explicit DRBG contexts from being accepted by the random service. Prediction resistance and VM snapshot/restore detection remain unsupported. The public symbol-name baseline must remain unchanged from P1-18.
 
 ## P1-17 entropy testability ABI note
 
@@ -101,10 +101,18 @@ The P1-14 support matrix does not add public symbols or public struct layouts. I
 - PoC staging rebuilds with tests/hooks off and internal symbol hiding on, then scans public headers and shared-library exports for internal/test-hook leakage.
 - Windows shared-library auto-export is allowed only in internal test builds so existing internal-unit tests can link; it is not enabled in the tests-off Release/PoC configuration.
 
-## P1-18 entropy operational ABI note
+## P1-19 entropy operational ABI note
 
 - Source class, health owner, restart policy, operational probe, and process guard remain private under `src/internal/` or internal source files.
-- No public function, enum value, installed struct, or public macro was added for P1-18.
+- No public function, enum value, installed struct, or public macro was added for P1-19.
 - The private DRBG context size increased; callers are required to query `ano_crypto_drbg_context_size()` for each build and must not persist or hard-code the size.
 - Clean Release/PoC builds keep internal symbol hiding enabled and must not export `ano_crypto_internal_*`, entropy hook, or process-guard names.
-- Compare the P1-17 and P1-18 exported public symbol-name lists; any difference requires review before handoff.
+- Compare the P1-17 and P1-19 exported public symbol-name lists; any difference requires review before handoff.
+
+## P1-19 random-service ABI note
+
+- No new exported public function is added.
+- `ANO_CRYPTO_RANDOM_MAX_REQUEST_SIZE` documents the per-call ceiling.
+- Private context layout may change before ABI freeze; callers must query size for each build.
+- Installed headers expose no provider callback, entropy source class, health-test state, or process-guard type.
+- Random-service contexts are mutable caller-owned storage and require external synchronization.

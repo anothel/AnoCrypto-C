@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P1-18 draft.
+Status: P1-19 draft.
 
 ## Purpose
 
@@ -43,6 +43,7 @@ Each task should follow this loop:
    - Thread-safety policy check when synchronization code, CSP/key handle behavior, or concurrency wording changes.
    - Entropy/health policy check when provider, failure handling, DRBG seed acquisition, health-test, or hook boundaries change.
    - Entropy operational policy check when source classification, provider probe, restart/fork behavior, or process-boundary handling changes.
+   - Random-service policy check when public random lifecycle, provider availability, source-backed ownership, output clearing, or reseed behavior changes.
 
 4. Update clean-room and claims records.
    - Record public standards and user-owned documents used as inputs.
@@ -64,7 +65,7 @@ Each task should follow this loop:
 6. Package outputs.
    - Create a full changed ZIP.
    - Create a patch against the previous step.
-   - Include a recommended commit message.
+   - Include one recommended commit title that represents the complete task, because each task is committed as one commit.
 
 ## P1-12 placement
 
@@ -138,7 +139,7 @@ P1-17 deliverables:
 
 ## P1-18 placement
 
-P1-18 is the entropy source and operational policy step after the P1-17 failure-injection/health skeleton. It classifies OS APIs as external conditioned random providers, separates raw-noise health ownership from provider output, adds a status-only operational probe, and adds a private process-change reseed guard for source-backed DRBG state. It does not implement public random generation or finalize a direct noise-source test design.
+P1-18 is the entropy source and operational policy step after the P1-17 failure-injection/health skeleton. It classifies OS APIs as external conditioned random providers, separates raw-noise health ownership from provider output, adds a status-only operational probe, and adds a private process-change reseed guard for source-backed DRBG state. At that step, public random generation was still deferred.
 
 P1-18 deliverables:
 
@@ -151,15 +152,32 @@ P1-18 deliverables:
 - Public symbol/header scan showing no new internal policy surface.
 - Clean-room records for public standards and platform documentation used as design inputs.
 
+## P1-19 placement
+
+P1-19 is the public random-service implementation step after the P1-18 entropy operational gate. It changes behavior behind the P1-16 reserved symbols but does not add an exported public function or expose internal provider/process metadata.
+
+P1-19 deliverables:
+
+- Platform entropy-backed HMAC_DRBG-SHA-256 implementation for `ano_crypto_random_*`.
+- Caller-owned opaque context size/init/generate/reseed/uninit lifecycle.
+- Source-backed ownership marker that rejects explicit-entropy DRBG contexts.
+- Output clearing on random-generation failures and bounded request size.
+- Process-change/fork regression requiring a successful child reseed.
+- Provider-disabled and deterministic failure/partial-write lanes.
+- Installed-package and customer PoC random lifecycle smoke without byte output.
+- Random-service policy, evidence, CI, package, and clean-room records.
+- Public symbol-name comparison against the P1-18 baseline.
+
 ## Planned next sequence
 
 | Step | Candidate name | Scope |
 |---|---|---|
 | P1-15 | SHA-384/SHA-512 reserved scope decision | Completed as reserved-scope/KAT-plan guardrail without implementation. |
-| P1-16 | Public random API decision | Completed as a reserved fail-closed boundary; public generation remains unimplemented. |
+| P1-16 | Public random API decision | Completed as a reserved fail-closed boundary that was subsequently implemented in P1-19 without adding public symbols. |
 | P1-17 | Entropy failure injection and health-test skeleton | Completed as internal testability/state-transition plumbing; final source-specific policy remains TODO. |
 | P1-18 | Entropy source and operational policy review | Completed as source classification, external-provider health ownership, status-only probe, and source-backed process-change reseed guard; direct noise-source thresholds remain TODO. |
-| P1-19 candidate | Public random-service implementation gate | Re-review context ownership, reseed/prediction-resistance policy, unsupported process-marker behavior, hosted CI results, and validation-boundary impact before implementing generation. |
+| P1-19 | Public random-service implementation | Completed using the existing public symbols, platform entropy-backed HMAC_DRBG-SHA-256, source-backed ownership checks, fork/reseed handling, failure injection, and package/evidence updates. |
+| P1-20 candidate | Random lifecycle and portability hardening | Review hosted results, add lifecycle/reseed-limit stress, define VM snapshot/suspend guidance, and automate clean Release symbol-baseline checks. |
 | P2-01 | Block cipher implementation start | Start only after P1-12 selection criteria and customer/KCMVP scope are reviewed. |
 
 ## Stop conditions

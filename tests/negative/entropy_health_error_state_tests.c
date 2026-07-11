@@ -65,18 +65,9 @@ int main(void)
     repeat_source_t provider;
     ano_crypto_module_state_t module_state;
     ano_crypto_status_t last_error;
-    uint8_t initial_entropy[ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_ENTROPY_INPUT_SIZE];
-    uint8_t nonce[ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_NONCE_SIZE];
     uint8_t *ctx;
     size_t ctx_size = 0u;
-    size_t i;
 
-    for (i = 0u; i < sizeof(initial_entropy); ++i) {
-        initial_entropy[i] = (uint8_t)(0x10u + (uint8_t)i);
-    }
-    for (i = 0u; i < sizeof(nonce); ++i) {
-        nonce[i] = (uint8_t)(0x90u + (uint8_t)i);
-    }
     provider.first = 0x40u;
 
     expect_status("module init", ano_crypto_module_init(0), ANO_CRYPTO_OK);
@@ -92,18 +83,15 @@ int main(void)
     }
     memset(ctx, 0, ctx_size);
 
-    expect_status("explicit instantiate",
-                  ano_crypto_drbg_instantiate(
-                      ctx, ctx_size, ANO_CRYPTO_DRBG_ALG_HMAC_SHA256,
-                      initial_entropy, sizeof(initial_entropy),
-                      nonce, sizeof(nonce),
-                      0, 0u, ANO_CRYPTO_DRBG_FLAG_NONE),
-                  ANO_CRYPTO_OK);
-
     expect_status("source init",
                   ano_crypto_internal_entropy_source_init_callback_noise_candidate(
                       &source, repeat_entropy, &provider,
-                      ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_ENTROPY_INPUT_SIZE),
+                      ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_NONCE_SIZE),
+                  ANO_CRYPTO_OK);
+    expect_status("source-backed instantiate",
+                  ano_crypto_internal_hmac_drbg_sha256_instantiate_from_entropy_source(
+                      ctx, ctx_size, &source,
+                      0, 0u, ANO_CRYPTO_DRBG_FLAG_NONE),
                   ANO_CRYPTO_OK);
     expect_status("continuous health init",
                   ano_crypto_internal_entropy_health_init(
@@ -140,8 +128,6 @@ int main(void)
                   ANO_CRYPTO_ERR_FATAL_STATE);
 
     ano_crypto_internal_entropy_health_reset(&health);
-    memset(initial_entropy, 0, sizeof(initial_entropy));
-    memset(nonce, 0, sizeof(nonce));
     free(ctx);
 
     if (g_failures != 0) {

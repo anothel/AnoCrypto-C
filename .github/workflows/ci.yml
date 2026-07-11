@@ -34,7 +34,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=${{ matrix.thread_safety }}
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-18-entropy-operational-policy
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-19-random-service
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -52,8 +52,8 @@ jobs:
       - name: SHA-2 scope policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_sha2_scope_policy_check
 
-      - name: Random boundary policy check
-        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_random_boundary_policy_check
+      - name: Random-service policy check
+        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_random_service_policy_check
 
       - name: Entropy and health-test policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_entropy_health_policy_check
@@ -100,7 +100,7 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-18-entropy-operational-policy-test-hook
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-19-random-service-test-hook
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build dedicated test-hook lane
@@ -114,6 +114,41 @@ jobs:
 
       - name: Entropy operational policy check
         run: cmake --build build-entropy-failure --target ano_crypto_entropy_operational_policy_check
+
+      - name: Random-service policy check
+        run: cmake --build build-entropy-failure --target ano_crypto_random_service_policy_check
+
+  random-provider-disabled:
+    name: Linux random provider disabled
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure provider-disabled build
+        run: >
+          cmake -S . -B build-provider-disabled
+          -DANO_CRYPTO_BUILD_TESTS=ON
+          -DANO_CRYPTO_BUILD_EXAMPLES=OFF
+          -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
+          -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
+          -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
+          -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-19-random-service-provider-disabled
+          -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build provider-disabled lane
+        run: cmake --build build-provider-disabled --parallel
+
+      - name: Run provider-disabled tests
+        run: ctest --test-dir build-provider-disabled --output-on-failure
+
+      - name: Random-service policy check
+        run: cmake --build build-provider-disabled --target ano_crypto_random_service_policy_check
+
+      - name: Entropy operational policy check
+        run: cmake --build build-provider-disabled --target ano_crypto_entropy_operational_policy_check
 
   evidence-draft:
     name: Linux evidence draft
@@ -131,8 +166,9 @@ jobs:
           -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
           -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
+          -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-18-entropy-operational-policy
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-19-random-service
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build

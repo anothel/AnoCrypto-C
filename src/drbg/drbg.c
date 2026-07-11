@@ -575,6 +575,13 @@ ano_crypto_status_t ano_crypto_internal_hmac_drbg_sha256_reseed_from_entropy_sou
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
+    if (((ano_crypto_drbg_ctx_internal_t *)ctx)->magic != ANO_CRYPTO_DRBG_CTX_MAGIC ||
+        ((ano_crypto_drbg_ctx_internal_t *)ctx)->algorithm !=
+            (uint32_t)ANO_CRYPTO_DRBG_ALG_HMAC_SHA256 ||
+        ((ano_crypto_drbg_ctx_internal_t *)ctx)->source_backed == 0u) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
     st = reject_unsupported_flags(flags);
     if (st != ANO_CRYPTO_OK) {
         return st;
@@ -597,6 +604,48 @@ ano_crypto_status_t ano_crypto_internal_hmac_drbg_sha256_reseed_from_entropy_sou
 
     ano_crypto_internal_zeroize(entropy_input, sizeof(entropy_input));
     return st;
+}
+
+ano_crypto_status_t ano_crypto_internal_hmac_drbg_sha256_generate_source_backed(
+    void *ctx,
+    uint8_t *out,
+    size_t out_len,
+    const uint8_t *additional_input,
+    size_t additional_input_len,
+    uint32_t flags)
+{
+    ano_crypto_drbg_ctx_internal_t *internal_ctx;
+
+    if (ctx == 0 || out == 0 || out_len == 0u ||
+        !is_absent_or_valid(additional_input, additional_input_len)) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    internal_ctx = (ano_crypto_drbg_ctx_internal_t *)ctx;
+    if (internal_ctx->magic != ANO_CRYPTO_DRBG_CTX_MAGIC ||
+        internal_ctx->algorithm != (uint32_t)ANO_CRYPTO_DRBG_ALG_HMAC_SHA256 ||
+        internal_ctx->source_backed == 0u) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    {
+        ano_crypto_status_t st;
+
+        st = ano_crypto_module_require_operational();
+        if (st != ANO_CRYPTO_OK) {
+            return st;
+        }
+        st = reject_unsupported_flags(flags);
+        if (st != ANO_CRYPTO_OK) {
+            return st;
+        }
+        return hmac_drbg_generate_core(
+            internal_ctx,
+            out,
+            out_len,
+            additional_input,
+            additional_input_len);
+    }
 }
 
 ano_crypto_status_t ano_crypto_drbg_reseed(
@@ -631,6 +680,9 @@ ano_crypto_status_t ano_crypto_drbg_reseed(
 
     if (internal_ctx->algorithm != (uint32_t)ANO_CRYPTO_DRBG_ALG_HMAC_SHA256) {
         return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+    }
+    if (internal_ctx->source_backed != 0u) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
     return hmac_drbg_reseed_core(internal_ctx, entropy_input, entropy_input_len, additional_input, additional_input_len);
@@ -669,6 +721,9 @@ ano_crypto_status_t ano_crypto_drbg_generate(
 
     if (internal_ctx->algorithm != (uint32_t)ANO_CRYPTO_DRBG_ALG_HMAC_SHA256) {
         return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+    }
+    if (internal_ctx->source_backed != 0u) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
     return hmac_drbg_generate_core(internal_ctx, out, out_len, additional_input, additional_input_len);

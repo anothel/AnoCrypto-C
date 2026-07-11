@@ -17,8 +17,9 @@ AnoCrypto-C-PoC-v0/
   SIGNING_STATUS.txt
   THREAD_SAFETY_PACKAGE_NOTES.txt
   SHA2_SCOPE_PACKAGE_NOTES.txt
-  RANDOM_BOUNDARY_PACKAGE_NOTES.txt
+  RANDOM_SERVICE_PACKAGE_NOTES.txt
   ENTROPY_HEALTH_PACKAGE_NOTES.txt
+  ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt
   CLEAN_BUILD_CONFIGURE.log
   CLEAN_BUILD.log
   INSTALL_PACKAGE.log
@@ -47,6 +48,8 @@ AnoCrypto-C-PoC-v0/
     ci/CI_MATRIX.md
     ci/THREAD_SAFETY_CI_CHECKLIST.md
     ci/ENTROPY_FAILURE_CI_CHECKLIST.md
+    ci/ENTROPY_OPERATIONAL_CI_CHECKLIST.md
+    ci/RANDOM_SERVICE_CI_CHECKLIST.md
     roadmap/C99_PRIORITY_TODO.md
   evidence-template/README.md
 ```
@@ -63,8 +66,9 @@ The packaged `examples/core_poc` project checks:
 - SHA-256 digest flow
 - HMAC-SHA-256 using an in-memory HMAC key handle
 - HMAC_DRBG-SHA-256 instantiate/generate/uninstantiate flow with deterministic public demo input
+- public random-service init/generate/reseed/uninit flow when a reviewed platform provider is available
 
-The example does not print raw key bytes, entropy input, nonce input, DRBG state, or generated DRBG bytes.
+The example does not print raw key bytes, entropy input, nonce input, DRBG state, generated DRBG bytes, or public random-service output. It prints only status and byte counts.
 
 ## Customer evaluation boundaries
 
@@ -85,7 +89,7 @@ Out of scope for v0:
 - persistent keystore integration
 - formal side-channel review
 - performance commitments
-- public random-service API commitment
+- prediction-resistance, VM snapshot/restore detection, suspend/resume detection, or final validation-boundary commitment
 - binary reproducibility commitment across hosts
 - concurrent mutation support for a single caller-owned hash, HMAC, or DRBG context
 
@@ -115,8 +119,9 @@ Before sharing a package externally, review:
 - `SIGNING_STATUS.txt`
 - `THREAD_SAFETY_PACKAGE_NOTES.txt`
 - `SHA2_SCOPE_PACKAGE_NOTES.txt`
-- `RANDOM_BOUNDARY_PACKAGE_NOTES.txt`
+- `RANDOM_SERVICE_PACKAGE_NOTES.txt`
 - `ENTROPY_HEALTH_PACKAGE_NOTES.txt`
+- `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt`
 - `CLEAN_BUILD_CONFIGURE.log` and `CLEAN_BUILD.log`
 - `INSTALL_PACKAGE.log`
 - generated example smoke logs
@@ -146,6 +151,6 @@ The customer package must not contain internal entropy provider headers or deter
 
 `ENTROPY_HEALTH_PACKAGE_NOTES.txt` records this boundary. Health-test candidates remain internal and disabled by default, and the package must not contain raw entropy, deterministic hook output, seed material, DRBG state, or generated random bytes.
 
-## P1-18 entropy operational package boundary
+## P1-19 entropy operational package boundary
 
-The package includes `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt` and the public policy documents, but it must not contain internal source-policy headers, process-guard headers/sources, operational unit tests, or internal symbols. The note records that OS APIs are treated as external conditioned providers, the process guard is private, and public random generation remains reserved.
+The package includes `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt` and the public policy documents, but it must not contain internal source-policy headers, process-guard headers/sources, operational unit tests, or internal symbols. The note records that OS APIs are treated as external conditioned providers, the process guard is private, and the public random service is implemented on reviewed provider branches with the documented P1-19 limitations.

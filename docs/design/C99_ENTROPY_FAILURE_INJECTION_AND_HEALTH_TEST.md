@@ -1,6 +1,6 @@
 # C99 Entropy Failure Injection and Health-Test Skeleton
 
-Status: P1-18 retained engineering design.
+Status: P1-19 retained engineering design.
 
 ## Scope
 
@@ -108,12 +108,12 @@ Tests may compare synthetic buffers in memory. They must clear temporary buffers
 - Decide whether an entropy acquisition failure outside startup is operation-local or module-fatal for each future public random service.
 - Add platform-specific provider fault simulation where the operating system test environment supports it without production hooks.
 
-## P1-18 placement restriction
+## P1-19 placement restriction
 
-P1-18 narrows where this skeleton may be used:
+P1-19 narrows where this skeleton may be used:
 
 - OS-provider output is classified as external conditioned provider output and must not be passed through this raw-noise candidate skeleton.
 - Ordinary/unclassified callbacks are caller-owned and cannot attach the module health state.
 - Only `ano_crypto_internal_entropy_source_init_callback_noise_candidate()` creates the explicit internal raw-noise engineering class that may attach the skeleton.
 - The duplicate-block logic remains disabled by default and does not define final RCT/APT thresholds, sample representation, or recovery policy.
-- `docs/design/C99_ENTROPY_SOURCE_OPERATIONAL_POLICY.md` is the controlling P1-18 source-placement and process-boundary decision.
+- `docs/design/C99_ENTROPY_SOURCE_OPERATIONAL_POLICY.md` is the controlling P1-19 source-placement and process-boundary decision.

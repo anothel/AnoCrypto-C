@@ -1,6 +1,6 @@
 # Entropy Operational Policy CI Checklist
 
-Status: P1-18 engineering checklist.
+Status: P1-19 engineering checklist.
 
 ## Required normal lanes
 

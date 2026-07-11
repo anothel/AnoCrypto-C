@@ -1,6 +1,6 @@
 # anocrypto-c KAT Tests
 
-Status: P1-18 draft.
+Status: P1-19 draft.
 
 This directory contains public-source known-answer tests for the currently implemented algorithm slice:
 
@@ -10,7 +10,7 @@ This directory contains public-source known-answer tests for the currently imple
 - HMAC key handle path: RFC 4231 Test Case 2 through the in-memory CSP handle lifecycle.
 - API consistency checks: deterministic chunk-boundary tests compare one-shot and streaming APIs.
 - SHA-384/SHA-512 reserved KAT plan: manifest entries only; processing remains not implemented in P1-16.
-- Random-service reserved API tests live under `tests/negative/` because no random KAT is enabled for P1-16 public random placeholders.
+- P1-19 random-service lifecycle tests live under `tests/unit/`; the service uses the existing HMAC_DRBG-SHA-256 KAT-covered core, while generated random output is never stored as a KAT fixture or printed.
 
 Important boundaries:
 

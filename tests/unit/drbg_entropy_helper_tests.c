@@ -165,7 +165,7 @@ static void test_callback_instantiate_matches_explicit(size_t ctx_size)
                       ctx_explicit, ctx_size, ANO_CRYPTO_DRBG_ALG_HMAC_SHA256,
                       entropy, sizeof(entropy), nonce, sizeof(nonce), 0, 0u,
                       ANO_CRYPTO_DRBG_FLAG_NONE), ANO_CRYPTO_OK);
-    expect_status("helper generate", ano_crypto_drbg_generate(
+    expect_status("helper generate", ano_crypto_internal_hmac_drbg_sha256_generate_source_backed(
                       ctx_helper, generated_from_helper, sizeof(generated_from_helper),
                       0, 0u, ANO_CRYPTO_DRBG_FLAG_NONE), ANO_CRYPTO_OK);
     expect_status("explicit generate", ano_crypto_drbg_generate(
@@ -231,7 +231,7 @@ static void test_reseed_from_callback_matches_explicit(size_t ctx_size)
     expect_status("explicit reseed", ano_crypto_drbg_reseed(
                       ctx_explicit, reseed_entropy, sizeof(reseed_entropy), 0, 0u,
                       ANO_CRYPTO_DRBG_FLAG_NONE), ANO_CRYPTO_OK);
-    expect_status("helper generate after reseed", ano_crypto_drbg_generate(
+    expect_status("helper generate after reseed", ano_crypto_internal_hmac_drbg_sha256_generate_source_backed(
                       ctx_helper, generated_from_helper, sizeof(generated_from_helper),
                       0, 0u, ANO_CRYPTO_DRBG_FLAG_NONE), ANO_CRYPTO_OK);
     expect_status("explicit generate after reseed", ano_crypto_drbg_generate(
@@ -298,7 +298,7 @@ static void test_os_source_path(size_t ctx_size)
         ctx, ctx_size, &source, 0, 0u, ANO_CRYPTO_DRBG_FLAG_NONE);
     if (ano_crypto_internal_platform_entropy_is_available()) {
         expect_status("os helper instantiate", st, ANO_CRYPTO_OK);
-        expect_status("os helper generate", ano_crypto_drbg_generate(
+        expect_status("os helper generate", ano_crypto_internal_hmac_drbg_sha256_generate_source_backed(
                           ctx, generated, sizeof(generated), 0, 0u,
                           ANO_CRYPTO_DRBG_FLAG_NONE), ANO_CRYPTO_OK);
         memset(generated, 0, sizeof(generated));

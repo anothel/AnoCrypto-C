@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-18-entropy-operational-policy"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-19-random-service"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P1-18 C99 foundation; SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, HMAC key handle lifecycle, dedicated entropy failure-injection lane, external conditioned OS-provider classification, status-only provider operational probe, internal raw-noise health-test ownership boundary, source-backed DRBG process-change reseed guard, clean PoC rebuild without test hooks, evidence policy checks, thread-safety support-matrix checks, SHA-384/SHA-512 reserved-scope checks, and reserved public random-service boundary checks include engineering test coverage; direct noise-source selection and final health-test thresholds, cross-platform process-boundary review, SHA-384/SHA-512 processing, Hash_DRBG, block cipher scope, and implemented public random byte generation remain TODO";
+    out_identity->notes = "P1-19 C99 foundation; SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, HMAC key handle lifecycle, reviewed platform entropy provider seams, dedicated entropy failure-injection lane, internal raw-noise health-test ownership boundary, source-backed process-change reseed guard, and public random-service init/generate/reseed/uninit flow include engineering test coverage; prediction resistance, VM snapshot/restore detection, direct noise-source selection and final health-test thresholds, hosted cross-platform review, SHA-384/SHA-512 processing, Hash_DRBG, and block cipher scope remain TODO";
 
     return ANO_CRYPTO_OK;
 }

@@ -1,6 +1,6 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P1-18 draft
+Status: P1-19 draft
 Date: 2026-07-11
 
 ## Purpose
@@ -142,7 +142,7 @@ If excluded material is discovered:
 | EX-2001 | Third-party SDK integration samples, package scripts, CMake consumer templates, or vendor packaging workflows with unclear ownership | Code provenance risk | Excluded | P1-11 PoC package scripts and example are fresh C99/CMake files written in this repository. |
 | EX-2002 | PoC packages containing secrets, entropy captures, generated secret bytes, private keys, tokens, customer data, or internal deployment details | Sensitive information risk | Excluded | P1-11 package smoke and manifest are status/package-structure evidence only and must be reviewed before sharing. |
 | EX-2003 | Treating a customer PoC package smoke run as official validation evidence or broad environment suitability proof | Claims risk | Excluded | The package smoke only checks local installed-package integration and public-API smoke behavior. |
-| EX-2004 | Public random-service API commitment through the PoC package before provider/reseed/fork-safety/API review | API/support risk | Deferred | The PoC example uses explicit-entropy HMAC_DRBG flow only and does not expose new public random APIs. |
+| EX-2004 | Public random-service API commitment through the PoC package before provider/reseed/fork-safety/API review | API/support risk | Resolved by P1-19 gate | The PoC now exercises the reviewed lifecycle but retains explicit operational and validation limitations. |
 | EX-2005 | Legal/evaluation license language without review | Legal/process risk | Deferred | Package notice text remains TODO pending legal review. |
 
 ## P1-12 Additional Exclusions
@@ -216,5 +216,18 @@ If excluded material is discovered:
 | EX-2703 | Public ABI exposure of source classes, health owners, restart policies, raw-noise candidate types, or process guards | ABI/support risk | Excluded | These remain internal implementation metadata. |
 | EX-2704 | Provider output, seed material, nonce material, DRBG state, generated random output, private keys, tokens, or customer data in tests/evidence/packages | Sensitive information risk | Excluded | P1-18 tests and records remain status-only. |
 | EX-2705 | Claiming automatic fork/process protection for public explicit-entropy DRBG contexts | Support boundary risk | Excluded | The guard applies only to internally source-backed contexts. |
-| EX-2706 | Enabling public random generation before context ownership, unsupported process-marker behavior, reseed/prediction-resistance policy, hosted CI, and validation-boundary review | API and operational risk | Deferred | Public random processing stays reserved. |
+| EX-2706 | Enabling public random generation before context ownership, process-marker behavior, reseed/prediction-resistance policy, and validation-boundary review | API and operational risk | Resolved by P1-19 gate | P1-19 implements the service with explicit ownership/reseed limits; hosted review and final validation mapping remain TODO. |
 | EX-2707 | Treating a provider operational probe as entropy-quality evidence | Evidence risk | Excluded | The probe checks call-path/status only and clears temporary storage. |
+
+## P1-19 Additional Exclusions
+
+| ID | Material / behavior | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-2801 | Third-party random-service, DRBG wrapper, fork-recovery, or provider code with unclear ownership | Code provenance risk | Excluded | P1-19 uses fresh project-owned C99 code over existing user-owned seams. |
+| EX-2802 | Provider output, entropy/nonce seed material, DRBG state, generated random bytes, private keys, tokens, customer data, or deployment details in logs/evidence/packages | Sensitive information risk | Excluded | Tests and smoke programs report status and byte counts only. |
+| EX-2803 | Public provider callbacks, source classes, health-test internals, process markers, or test-hook types | ABI/support risk | Excluded | These remain internal and are scanned out of installed headers and clean PoC packages. |
+| EX-2804 | Automatic post-fork generation without a successful child reseed | State-reuse risk | Excluded | A detected process change returns `ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED` and clears output. |
+| EX-2805 | Accepting caller-entropy DRBG contexts through the public random-service API | Cross-API ownership risk | Excluded | Source-backed context marking separates the two lifecycle families. |
+| EX-2806 | Prediction-resistance, VM snapshot/restore detection, suspend/resume detection, or unsupported-platform availability claims | Support/claims risk | Deferred | Current APIs reject prediction-resistance and document the remaining operational gaps. |
+| EX-2807 | Treating the P1-19 implementation or CI results as official validation evidence or broad platform assurance | Claims risk | Excluded | Hosted-run review and final validation-target mapping remain TODO. |
+| EX-2808 | Retaining deterministic hook output or operating-system random output as a test fixture | Sensitive/misleading evidence risk | Excluded | Failure-injection tests compare transient behavior only and retain no output artifact. |

@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <anocrypto/anocrypto.h>
 
 int main(void)
@@ -136,6 +137,59 @@ int main(void)
         if (st != ANO_CRYPTO_OK) {
             fprintf(stderr, "hmac-drbg uninstantiate smoke failed: %s\n", ano_crypto_status_name(st));
             return 1;
+        }
+    }
+
+    {
+        size_t random_ctx_size = 0u;
+
+        if (ano_crypto_random_is_available()) {
+            uint8_t *random_ctx;
+            uint8_t random_output[32];
+
+            st = ano_crypto_random_context_size(&random_ctx_size);
+            if (st != ANO_CRYPTO_OK || random_ctx_size == 0u) {
+                fprintf(stderr, "random context size smoke failed: %s\n", ano_crypto_status_name(st));
+                return 1;
+            }
+
+            random_ctx = (uint8_t *)malloc(random_ctx_size);
+            if (random_ctx == 0) {
+                fprintf(stderr, "random context allocation failed\n");
+                return 1;
+            }
+
+            st = ano_crypto_random_init(
+                random_ctx, random_ctx_size, 0, 0u, ANO_CRYPTO_RANDOM_FLAG_NONE);
+            if (st != ANO_CRYPTO_OK) {
+                fprintf(stderr, "random init smoke failed: %s\n", ano_crypto_status_name(st));
+                free(random_ctx);
+                return 1;
+            }
+
+            st = ano_crypto_random_generate(
+                random_ctx, random_output, sizeof(random_output),
+                0, 0u, ANO_CRYPTO_RANDOM_FLAG_NONE);
+            if (st != ANO_CRYPTO_OK) {
+                fprintf(stderr, "random generate smoke failed: %s\n", ano_crypto_status_name(st));
+                (void)ano_crypto_random_uninit(random_ctx, random_ctx_size);
+                free(random_ctx);
+                return 1;
+            }
+
+            st = ano_crypto_random_uninit(random_ctx, random_ctx_size);
+            (void)ano_crypto_csp_zeroize(random_output, sizeof(random_output));
+            free(random_ctx);
+            if (st != ANO_CRYPTO_OK) {
+                fprintf(stderr, "random uninit smoke failed: %s\n", ano_crypto_status_name(st));
+                return 1;
+            }
+        } else {
+            st = ano_crypto_random_context_size(&random_ctx_size);
+            if (st != ANO_CRYPTO_ERR_NOT_IMPLEMENTED || random_ctx_size != 0u) {
+                fprintf(stderr, "random unavailable boundary smoke failed: %s\n", ano_crypto_status_name(st));
+                return 1;
+            }
         }
     }
 

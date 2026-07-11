@@ -29,4 +29,13 @@ ano_crypto_status_t ano_crypto_internal_hmac_drbg_sha256_reseed_from_entropy_sou
     size_t additional_input_len,
     uint32_t flags);
 
+/* Generate only from a context created through the entropy-source helper. */
+ano_crypto_status_t ano_crypto_internal_hmac_drbg_sha256_generate_source_backed(
+    void *ctx,
+    uint8_t *out,
+    size_t out_len,
+    const uint8_t *additional_input,
+    size_t additional_input_len,
+    uint32_t flags);
+
 #endif /* ANO_CRYPTO_DRBG_INTERNAL_H */

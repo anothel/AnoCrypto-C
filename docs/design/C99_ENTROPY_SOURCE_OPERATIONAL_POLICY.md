@@ -1,14 +1,14 @@
 # C99 Entropy Source and Operational Policy
 
-Status: P1-18 engineering policy draft.
+Status: P1-19 engineering policy draft.
 
 ## Purpose
 
-P1-18 fixes the internal classification, health-test ownership, provider probe, and process-boundary policy that must be reviewed before any public random-generation service is enabled.
+P1-19 fixes the internal classification, health-test ownership, provider probe, and process-boundary policy that must be reviewed before any public random-generation service is enabled.
 
 This document is an engineering boundary record. It does not establish entropy quality, platform certification, formal validation status, or suitability for every customer environment.
 
-## P1-18 decision summary
+## P1-19 decision summary
 
 1. Linux `getrandom()`, Windows `BCryptGenRandom()`, and Apple `SecRandomCopyBytes()` are treated as **external conditioned random providers**.
 2. AnoCrypto-C does not treat those API outputs as direct raw-noise samples.
@@ -17,12 +17,12 @@ This document is an engineering boundary record. It does not establish entropy q
 5. The platform-provider operational probe records only availability/status and always zeroizes its temporary buffer.
 6. A source-backed internal HMAC_DRBG context records the creating process identity. A detected process change causes generation to fail with `ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED` and clears caller output.
 7. Successful reseed from the configured source refreshes the process marker.
-8. The public explicit-entropy DRBG API remains caller-managed; P1-18 does not silently claim that caller-provided entropy contexts are automatically fork-safe.
-9. The public random API remains reserved and returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` for processing operations.
+8. The public explicit-entropy DRBG API remains caller-managed; P1-19 does not silently claim that caller-provided entropy contexts are automatically fork-safe.
+9. P1-19 implements the existing public random API over a reviewed platform provider and source-backed HMAC_DRBG-SHA-256; provider-disabled builds report unavailable and return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` from processing operations.
 
 ## Source classes
 
-| Internal class | Examples | Health-test owner | P1-18 handling |
+| Internal class | Examples | Health-test owner | P1-19 handling |
 |---|---|---|---|
 | `NONE` | Unconfigured source | None | Reject requests. |
 | `CALLBACK_UNSPECIFIED` | Test/customer integration callback without raw-source classification | Caller/integrator | No module health-test attachment. Callback contract and restart policy remain caller-defined. |
@@ -35,7 +35,7 @@ The raw-noise class is internal and is not installed or exported as public ABI.
 
 A health test intended to observe a noise source must be placed at the source boundary before conditioning when such a boundary is available and within the module design. The current OS APIs expose an already conditioned provider service, not direct access to raw samples. Applying the current duplicate-block candidate to those returned bytes would test a different layer and could create misleading evidence.
 
-Therefore P1-18 records provider health-test ownership as external and keeps module health-test candidates detached from OS-provider output.
+Therefore P1-19 records provider health-test ownership as external and keeps module health-test candidates detached from OS-provider output.
 
 ## Operational probe
 
@@ -63,7 +63,7 @@ The probe is an availability/path check. It is not an entropy-quality test.
 | Reseed succeeds after process change | `ANO_CRYPTO_OK` | Process marker refreshed | Unchanged |
 | Reseed source fails after process change | Source failure status | Entropy temporary cleared; DRBG context remains unusable until a successful reviewed recovery path | Unchanged unless fatal health policy applies |
 
-A transient provider failure is not automatically promoted to module-fatal state in P1-18. The fatal transition remains reserved for an explicitly configured module-fatal health-test policy.
+A transient provider failure is not automatically promoted to module-fatal state in P1-19. The fatal transition remains reserved for an explicitly configured module-fatal health-test policy.
 
 ## Process and fork boundary
 
@@ -75,7 +75,7 @@ The process guard is embedded only in the private DRBG context implementation.
 - Reseed from the internal source updates the marker after the DRBG update succeeds.
 - On targets without a reviewed process identity primitive, the guard stays inactive and the limitation must remain documented.
 
-P1-18 does not add at-fork callbacks, background reseeding, global random state, or a public process-reset API.
+P1-19 does not add at-fork callbacks, background reseeding, global random state, or a public process-reset API.
 
 ## Startup and continuous health-test policy
 
@@ -122,7 +122,7 @@ Prohibited records:
 - Microsoft `BCryptGenRandom` documentation.
 - Apple Security framework `SecRandomCopyBytes` documentation.
 
-These references are used to establish terminology and boundary questions. P1-18 does not copy third-party implementation code or source-specific thresholds.
+These references are used to establish terminology and boundary questions. P1-19 does not copy third-party implementation code or source-specific thresholds.
 
 ## TODO / confirmation required
 
@@ -131,5 +131,5 @@ These references are used to establish terminology and boundary questions. P1-18
 3. Decide whether unsupported process identity must disable a future public random service.
 4. Select a direct noise source only if a customer/validation scope requires one.
 5. For any direct noise source, define sample representation, startup test, continuous test, thresholds, false-positive handling, and recovery policy.
-6. Decide whether the public random service uses caller-owned opaque storage or library-owned handles.
-7. Keep public random generation reserved until the above items and cross-platform CI evidence are reviewed.
+6. Retain the P1-19 caller-owned opaque-storage model unless a later ABI review approves a different ownership model.
+7. Add hosted Windows/macOS evidence and review VM snapshot/restore plus suspend/resume policy before expanding lifecycle claims.

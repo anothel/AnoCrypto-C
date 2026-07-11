@@ -1,4 +1,4 @@
-# AnoCrypto-C P1-18 entropy source and operational process-boundary policy check.
+# AnoCrypto-C P1-19 entropy source and operational process-boundary policy check.
 # Engineering guardrail only; not official entropy-source or validation evidence.
 
 cmake_minimum_required(VERSION 3.16)
@@ -83,8 +83,8 @@ ano_crypto_require_text("tests/negative/platform_entropy_failure_injection_tests
     "partial operational probe failure"
     "operational probe failure-injection coverage")
 ano_crypto_require_text("include/anocrypto/ac_random.h"
-    "ANO_CRYPTO_RANDOM_SERVICE_RESERVED 0u"
-    "public random service remains reserved")
+    "ANO_CRYPTO_RANDOM_SERVICE_IMPLEMENTED 1u"
+    "public random service implementation marker")
 ano_crypto_require_text("tools/collect_release_evidence.cmake"
     "ENTROPY_OPERATIONAL_POLICY_CHECK.txt"
     "evidence operational policy output")
@@ -148,5 +148,5 @@ file(APPEND "${ANO_CRYPTO_ENTROPY_OPERATIONAL_CHECK_OUTPUT}"
     "Boundary: platform OS APIs are treated as external conditioned random providers, not direct raw-noise interfaces.\n"
     "Health policy: P1-17 duplicate-block candidates can attach only to explicitly classified internal raw-noise test callbacks.\n"
     "Process policy: source-backed DRBG state requires reseed after a detected process identity change.\n"
-    "Public API: random generation remains reserved and no internal policy type is installed.\n")
+    "Public API: random generation uses source-backed HMAC_DRBG state and no internal entropy/process policy type is installed.\n")
 message(STATUS "AnoCrypto-C entropy operational policy check passed: ${ANO_CRYPTO_ENTROPY_OPERATIONAL_CHECK_OUTPUT}")

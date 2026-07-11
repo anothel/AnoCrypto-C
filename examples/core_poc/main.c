@@ -172,6 +172,65 @@ static int run_drbg_smoke(void)
     return 0;
 }
 
+static int run_random_service_smoke(void)
+{
+    uint8_t output[32];
+    void *ctx = NULL;
+    size_t ctx_size = 0u;
+    ano_crypto_status_t status;
+
+    if (!ano_crypto_random_is_available()) {
+        printf("- public random service: UNAVAILABLE on this build\n");
+        return 0;
+    }
+
+    status = ano_crypto_random_context_size(&ctx_size);
+    if (status != ANO_CRYPTO_OK || ctx_size == 0u) {
+        return fail_status("random context size", status);
+    }
+
+    ctx = malloc(ctx_size);
+    if (ctx == NULL) {
+        return fail_message("random context allocation failed");
+    }
+    (void)memset(ctx, 0, ctx_size);
+
+    status = ano_crypto_random_init(
+        ctx, ctx_size, NULL, 0u, ANO_CRYPTO_RANDOM_FLAG_NONE);
+    if (status != ANO_CRYPTO_OK) {
+        free(ctx);
+        return fail_status("random init", status);
+    }
+
+    status = ano_crypto_random_generate(
+        ctx, output, sizeof(output), NULL, 0u, ANO_CRYPTO_RANDOM_FLAG_NONE);
+    if (status != ANO_CRYPTO_OK) {
+        (void)ano_crypto_random_uninit(ctx, ctx_size);
+        free(ctx);
+        return fail_status("random generate", status);
+    }
+
+    status = ano_crypto_random_reseed(
+        ctx, NULL, 0u, ANO_CRYPTO_RANDOM_FLAG_NONE);
+    if (status != ANO_CRYPTO_OK) {
+        (void)ano_crypto_random_uninit(ctx, ctx_size);
+        (void)ano_crypto_csp_zeroize(output, sizeof(output));
+        free(ctx);
+        return fail_status("random reseed", status);
+    }
+
+    status = ano_crypto_random_uninit(ctx, ctx_size);
+    (void)ano_crypto_csp_zeroize(output, sizeof(output));
+    free(ctx);
+    if (status != ANO_CRYPTO_OK) {
+        return fail_status("random uninit", status);
+    }
+
+    printf("- public random service: PASS (%lu bytes generated; output not printed)\n",
+           (unsigned long)sizeof(output));
+    return 0;
+}
+
 int main(void)
 {
     const char *version = NULL;
@@ -221,6 +280,8 @@ int main(void)
     } else if (run_hmac_key_handle_smoke() != 0) {
         result = 1;
     } else if (run_drbg_smoke() != 0) {
+        result = 1;
+    } else if (run_random_service_smoke() != 0) {
         result = 1;
     }
 

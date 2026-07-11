@@ -1,85 +1,37 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-18 draft.
+Status: P1-19 draft.
 
 ## Completed P0/P1 foundation items
 
-- C99 repository skeleton
-- clean-room source manifest and exclusion log
-- public C ABI header skeletons
-- module lifecycle/state-machine skeleton
-- startup self-test framework skeleton
-- build/version identity APIs
-- CMake build/install/export skeleton
-- unit, negative, KAT, and install smoke test skeletons
-- SHA-256 implementation
-- HMAC-SHA-256 implementation
-- public-source SHA-256/HMAC-SHA-256 KAT coverage
-- extended chunk-boundary consistency tests
-- HMAC_DRBG-SHA-256 deterministic core implementation
-- public-source HMAC_DRBG-SHA-256 KAT coverage
-- internal entropy adapter seam and unit tests
-- in-memory HMAC CSP/key handle lifecycle slice
-- engineering release evidence collection script
-- install-prefix smoke log capture in the evidence script
-- source archive SHA-256 generation in the evidence script
-- CSP handle table exhaustion and stale-handle reuse tests
-- limited module/self-test/CSP global-state lock seam and thread-safety policy draft
-- POSIX concurrent CSP/HMAC smoke test
-- internal platform entropy provider seam for Linux, Windows, and Apple provider branches
-- platform entropy provider smoke/status tests
-- internal HMAC_DRBG-SHA-256 instantiate/reseed helper driven by entropy source
-- random-service public API design draft
-- reserved public `ac_random.h` boundary with fail-closed `ano_crypto_random_*` placeholders
-- HMAC_DRBG-SHA-256 boundary tests for personalization, additional input, reseed-after-generate, max request, and oversized request rejection
-- CMake package naming normalized to `AnoCryptoC` / `AnoCryptoC::AnoCryptoC`
-- reproducible build notes draft
-- CI matrix skeleton and GitHub workflow starter
-- API/ABI review checklist
-- public surface policy check target
-- P1-10 evidence workflow additions for reproducibility and public surface review
-- customer PoC package v0 staging target
-- standalone public-API core PoC example using `find_package(AnoCryptoC)`
-- build-tree and installed-package PoC smoke flows
-- P1-11 evidence workflow additions for PoC package smoke logs
-- SDK integration guide and customer PoC package notes
-- P1-12 development workflow plan
-- P1-12 service scope matrix
-- P1-12 differential validation strategy draft
-- P1-12 block cipher/mode selection gate
-- P1-12 side-channel review checklist
-- P1-12 customer PoC intake questionnaire
-- P1-12 evidence workflow additions for scope-review notes
-- P1-13 SBOM/signing placeholder plan
-- P1-13 evidence manifest policy
-- P1-13 PoC package review manifest and package status records
-- P1-13 evidence workflow additions for `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, and `EVIDENCE_MANIFEST.sha256`
-- P1-14 thread-safety support matrix and CI checklist
-- P1-14 thread-safety policy check target and evidence/PoC package records
-- P1-15 SHA-384/SHA-512 reserved scope decision and KAT plan
-- P1-15 reserved SHA-2 API negative test and scope policy check target
-- P1-15 evidence/PoC package records for SHA-384/SHA-512 reserved scope
-- P1-16 reserved public random-service boundary and fail-closed placeholder checks
-- P1-17 entropy provider failure-injection seam and dedicated CI lane
-- P1-17 internal startup/continuous health-test candidate skeleton and fatal state-transition tests
-- P1-17 entropy/health policy, evidence, and clean PoC package boundary checks
-- P1-18 OS-provider classification and health-test ownership boundary
-- P1-18 status-only provider operational probe and source-backed process-change reseed guard
-- P1-18 entropy operational tests, policy check, evidence outputs, and PoC package boundary records
+- C99 repository skeleton and clean-room records.
+- Public C ABI skeleton, module lifecycle, startup self-test, build/version identity, install/export package, and smoke tests.
+- SHA-256, HMAC-SHA-256, and HMAC_DRBG-SHA-256 deterministic core with public-source KATs and boundary tests.
+- Internal entropy adapter and Linux/Windows/Apple platform provider seams.
+- In-memory HMAC CSP/key handle lifecycle slice and thread-safety support boundary.
+- Reproducible-build notes, CI starter, API/ABI checklist, public-surface policy, evidence collection, and customer PoC package v0.
+- Service-scope, differential-validation, block-cipher decision, side-channel, SBOM/signing, and evidence-manifest planning records.
+- SHA-384/SHA-512 reserved scope and negative-policy checks.
+- P1-16 reserved public random-service ABI boundary.
+- P1-17 entropy failure injection, health-test skeleton, fatal state-transition tests, and clean PoC hook boundary.
+- P1-18 OS-provider classification, status-only operational probe, and source-backed process-change guard.
+- P1-19 implementation of the existing `ano_crypto_random_*` symbols using platform entropy-backed HMAC_DRBG-SHA-256.
+- P1-19 random lifecycle, cross-API misuse, process/fork, provider-disabled, and failure-injection tests.
+- P1-19 install/PoC smoke, CI/policy/evidence updates, and no-new-public-symbol guard.
 
 ## Immediate P1 next items
 
-1. Review and harden CI matrix after first hosted runs on Linux, Windows, and Apple runners.
-2. Add Windows-specific concurrent CSP/HMAC coverage and sanitizer lanes where supported.
-3. Decide when to implement SHA-384/SHA-512 after P1-15 reserved-scope entry criteria are reviewed.
-4. Select a direct noise source only if required, then define source-specific startup/continuous health tests, thresholds, false-positive handling, and recovery policy.
-5. Review hosted Linux/Windows/Apple process-boundary results and decide unsupported-process-marker policy.
-6. Decide whether and when to implement public `ano_crypto_random_*` APIs after the P1-18 operational gate.
-7. Add reproducible source archive timestamp normalization if byte-for-byte archives become a release requirement.
-8. Decide whether to replace the public build identity struct with field getters before ABI freeze.
-9. Add exported-symbol baseline comparison after symbol visibility policy is chosen.
+1. Review actual hosted Linux, Windows, and Apple random-service/provider results and record any platform-specific limitations.
+2. Add long-running random lifecycle/reseed-limit stress tests that never retain or print generated bytes.
+3. Define operational guidance for VM snapshot/restore, clone, suspend/resume, and process-marker-unavailable platforms.
+4. Add a clean Release exported-symbol baseline comparison to CI after the baseline storage policy is selected.
+5. Add Windows-specific concurrent CSP/HMAC coverage and sanitizer lanes where supported.
+6. Decide when to implement SHA-384/SHA-512 after the P1-15 entry criteria are reviewed.
+7. Select a direct noise source only if required, then define source-specific startup/continuous health tests, thresholds, false-positive handling, and recovery policy.
+8. Add reproducible source-archive timestamp normalization if byte-for-byte archives become a release requirement.
+9. Decide whether to replace the public build-identity struct with field getters before ABI freeze.
 10. Add package license/evaluation notice after legal review.
-11. Select first block cipher/mode only after customer and validation-target candidate inputs are reviewed.
+11. Select the first block cipher/mode only after customer and validation-target candidate inputs are reviewed.
 12. Add differential tests only after a reviewed public/reference source or tool is selected.
 13. Replace SBOM/signing placeholders with reviewed generator/signing outputs after tool and key-management policy are selected.
 
@@ -91,29 +43,47 @@ Status: P1-18 draft.
 - AnoCrypto C++ Wrapper boundary draft.
 - AnoSecureKit and AnoPKI integration boundary drafts.
 
-## P1-16 added scope
+## P1-16 scope
 
 - Reserved public `ac_random.h` boundary.
-- `ano_crypto_random_*` placeholders that return `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` after validation and service gating.
-- Random-service reserved API negative regression test.
-- Random-service/DRBG/entropy boundary policy check and evidence notes.
+- Fail-closed `ano_crypto_random_*` placeholders.
+- Reserved-boundary regression and policy/evidence notes.
 
-## P1-17 added scope
+## P1-17 scope
 
-- Dedicated-build entropy provider success/failure/partial-write test hook, default off.
-- Negative tests for source failure, partial output, zero length, oversized request, and minimum request bounds.
-- Internal startup and continuous duplicate-block health-test candidates.
-- Module-fatal health failure transition, DRBG context invalidation, and sticky service-gate coverage.
-- Entropy/health policy check, dedicated CI lane, evidence review records, and clean PoC SDK rebuild/scan.
-- No public random implementation, public hook API, or finalized health-test claim.
+- Dedicated-build entropy provider success/failure/partial-write hook, default off.
+- Source failure, partial output, zero-length, oversized-request, and minimum-request tests.
+- Internal startup/continuous duplicate-block health-test candidates.
+- Module-fatal health failure, DRBG invalidation, and sticky service-gate coverage.
+- Entropy/health policy, CI, evidence, and clean PoC checks.
 
-## P1-18 added scope
+## P1-18 scope
 
-- Internal source classification: none, unclassified callback, external conditioned provider, and raw-noise engineering candidate.
-- Explicit health-test ownership and restart-policy metadata without public ABI exposure.
-- Status-only operational probe restricted to the OS-provider class.
-- P1-17 duplicate-block health skeleton restricted to an explicit internal raw-noise engineering callback.
-- Private source-backed DRBG process marker; generation after a detected process change returns `ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED` and clears output.
-- Successful source-backed reseed refreshes the process marker.
-- Entropy operational unit/fork tests, policy target, CI checklist, evidence outputs, and clean PoC package notes.
-- Public random generation remains reserved.
+- Internal entropy source classification, health-test ownership, and restart metadata.
+- Status-only operational probe for reviewed OS-provider branches.
+- Raw-noise health skeleton restricted to explicit internal engineering callbacks.
+- Private process marker for source-backed DRBG state and reseed-after-process-change behavior.
+- Operational tests, policy target, CI/evidence records, and clean PoC notes.
+
+## P1-19 scope
+
+- Existing public random symbols implemented without adding a public function.
+- Fixed platform entropy -> internal adapter -> HMAC_DRBG-SHA-256 service flow.
+- Caller-owned opaque context with bidirectional source-backed/explicit-entropy ownership enforcement.
+- Generation failure output clearing and 65,536-byte per-request limit.
+- Explicit rejection of prediction-resistance requests and cross-API DRBG contexts.
+- Child/process-change generation blocked until a source-backed reseed succeeds.
+- Provider-disabled and deterministic failure/partial-write test lanes.
+- Install consumer and PoC lifecycle smoke without generated-byte output.
+- Random-service policy/evidence/package records and clean Release ABI review.
+
+## P1-20 candidate
+
+Random-service lifecycle and operational portability hardening:
+
+- hosted-run result review;
+- repeated init/generate/reseed/uninit stress;
+- reseed-limit and failure recovery regression;
+- VM snapshot/clone/suspend guidance;
+- unsupported process-marker policy;
+- clean Release symbol-baseline automation.
