@@ -90,7 +90,7 @@ elseif(NOT ANO_CRYPTO_SANITIZER_MODE STREQUAL "none")
 endif()
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-26-aes-hardening" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-27-cmac-entry-gate" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -346,6 +346,15 @@ add_custom_target(ano_crypto_aes_hardening_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_aes_hardening_policy.cmake
     USES_TERMINAL
     COMMENT "Checking P1-26 AES/CBC lifecycle, differential, compiler-review, and ABI policy")
+
+add_custom_target(ano_crypto_cmac_entry_gate_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_CMAC_ENTRY_GATE_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/CMAC_ENTRY_GATE_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_cmac_entry_gate.cmake
+    USES_TERMINAL
+    COMMENT "Checking P1-27 CMAC selection, no-implementation boundary, and unchanged ABI policy")
 
 add_custom_target(ano_crypto_differential_portability_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -767,7 +776,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-26
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-27
             -DANO_CRYPTO_RUN_CTEST=ON
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
@@ -776,6 +785,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_SHA512_FAMILY_CHECK=ON
             -DANO_CRYPTO_RUN_AES_CBC_CHECK=ON
             -DANO_CRYPTO_RUN_AES_HARDENING_CHECK=ON
+            -DANO_CRYPTO_RUN_CMAC_ENTRY_GATE_CHECK=ON
             -DANO_CRYPTO_RUN_AES_COMPILER_REVIEW=ON
             -DANO_CRYPTO_RUN_DIFFERENTIAL_PORTABILITY_CHECK=ON
             -DANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK=ON
@@ -786,7 +796,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-26 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-27 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_public_surface_check
         ano_crypto_thread_safety_policy_check
@@ -795,6 +805,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_differential_portability_policy_check
         ano_crypto_aes_cbc_policy_check
         ano_crypto_aes_hardening_policy_check
+        ano_crypto_cmac_entry_gate_check
         ano_crypto_aes_compiler_review
         ano_crypto_random_service_policy_check
         ano_crypto_random_lifecycle_policy_check

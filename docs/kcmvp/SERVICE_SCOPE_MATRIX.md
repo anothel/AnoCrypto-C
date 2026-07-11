@@ -1,6 +1,6 @@
 # AnoCrypto-C Service Scope Matrix
 
-Status: P1-26 engineering draft.
+Status: P1-27 engineering draft.
 
 This matrix separates implemented core services, internal seams, and deferred product-layer functions. It is a planning and customer-PoC scoping artifact, not official validation evidence.
 
@@ -15,6 +15,7 @@ This matrix separates implemented core services, internal seams, and deferred pr
 | Entropy adapter and OS provider | Internal only | Implemented seam | Status-only provider tests and dedicated failure injection; provider bytes never logged. |
 | Public random service | `ano_crypto_random_*` | Implemented over platform entropy and HMAC_DRBG-SHA-256 | Lifecycle/failure/fork/stress tests; snapshot/clone/suspend automatic detection remains unsupported. |
 | AES block cipher/CBC | `ano_crypto_cipher_*` | Implemented in P1-25; hardened in P1-26 | AES-128/192/256 primitive, CBC without padding, startup/extended KAT, negative, expanded differential, lifecycle/portability/concurrency, install/PoC, and compiler-capture evidence. |
+| AES-CMAC | None | P1-27 selected entry gate; not implemented | Dedicated key-purpose and full-tag-only API/KAT/evidence plan; 61-symbol baseline unchanged. |
 | KDF expansion, additional modes, public key | None | Deferred | Selection gates and planning only. |
 | AnoSecureKit / AnoPKI workflows | Outside core | Separate product layers | Must not be mixed into the core module boundary. |
 
@@ -29,3 +30,7 @@ P1-15 reserved the SHA-384/SHA-512 identifiers. P1-22 implements the existing id
 ## P1-26 AES/CBC transition
 
 P1-24 approved the entry gate. P1-25 added the reviewed `ac_cipher.h` surface, CSP-backed AES keys, table-free arithmetic portable core, CBC no-padding lifecycle, KAT/negative/differential coverage, and a reviewed 61-symbol ABI-0 baseline. P1-26 preserves that public surface and adds internal context validation, fail-closed reinitialization, lifecycle/unaligned/concurrency regression, an expanded differential corpus, and compiler-output capture. Manual compiler-output and target-specific side-channel review remain TODO.
+
+## P1-27 CMAC selection transition
+
+P1-27 selects a future AES-CMAC slice before AES-CTR. The gate proposes AES-128/192/256, full 16-byte tags, streaming compute, one-shot compute, and one-shot verification using a dedicated CMAC-purpose CSP handle. It adds no CMAC code, public header, enum value, function, or exported symbol. CTR counter construction and exhaustion policy remain deferred to a separate decision.

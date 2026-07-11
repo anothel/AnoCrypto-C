@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-26 engineering slice with SHA-256, SHA-384, SHA-512 and their HMAC variants, HMAC_DRBG-SHA-256, the public random lifecycle, AES-128/192/256, AES-CBC without padding, CSP-backed HMAC/AES keys, cross-platform concurrency coverage, Linux GCC ASan/UBSan, deterministic OpenSSL 3.x test-only differential validation, C99 portability checks, AES context/lifecycle hardening, compiler-output capture for manual review, and the reviewed 61-symbol ABI-0 baseline. Actual hosted Linux 32-bit, Windows, macOS, big-endian, and target-specific compiler/side-channel artifacts still require review; evidence, install, and PoC outputs remain engineering drafts.
+Current status: P1-27 engineering slice retaining SHA-256, SHA-384, SHA-512 and their HMAC variants, HMAC_DRBG-SHA-256, the public random lifecycle, AES-128/192/256, AES-CBC without padding, CSP-backed HMAC/AES keys, cross-platform concurrency coverage, Linux GCC ASan/UBSan, deterministic OpenSSL 3.x test-only differential validation, C99 portability checks, AES context/lifecycle hardening, compiler-output capture for manual review, and the reviewed 61-symbol ABI-0 baseline. P1-27 selects a future narrow AES-CMAC slice through a no-implementation entry gate with dedicated key-purpose, full-tag-only API, public KAT/evidence, package, and unchanged-ABI policy. Actual hosted Linux 32-bit, Windows, macOS, big-endian, and target-specific compiler/side-channel artifacts still require review; evidence, install, and PoC outputs remain engineering drafts.
 
 Implemented processing scope:
 
@@ -13,6 +13,7 @@ Implemented processing scope:
 - AES-CBC without padding, caller-provided 16-byte IV, complete blocks only, exact in-place support, and partial-overlap rejection
 - Startup and extended public-source AES/CBC KATs plus negative and OpenSSL test-only differential coverage
 - P1-26 AES private-context integrity guards, fail-closed reinitialization, 128-iteration lifecycle stress, unaligned byte-buffer/streaming/in-place portability regression, and shared/per-thread CSP AES concurrency coverage
+- P1-27 CMAC selection/API/KAT/evidence gate; no CMAC code, public header, enum, function, or symbol is added
 - AES Release compiler-output capture with compiler/target/library metadata and a manual-review-only interpretation boundary
 - HMAC_DRBG-SHA-256 deterministic core API
 - Internal HMAC_DRBG-SHA-256 instantiate/reseed helper driven by entropy source
@@ -51,7 +52,7 @@ Skeleton-only / TODO scope:
 - Byte-identical source archive and binary reproducibility rules
 - Complete SBOM generation and detached-signature workflow
 - PoC package legal/evaluation notice and customer-specific support boundary
-- Human review of captured AES compiler output and target-specific side-channel behavior; CTR, AEAD, padding helpers, CMAC/GMAC, and domestic-algorithm decisions
+- Human review of captured AES compiler output and target-specific side-channel behavior; CMAC implementation, CTR counter policy, AEAD, padding helpers, GMAC, and domestic-algorithm decisions
 
 ## Build
 
@@ -64,8 +65,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-26
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-26
+cmake --install build --prefix /tmp/anocrypto-c-p1-27
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-27
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -83,8 +84,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-26
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-26
+cmake --install build --prefix /tmp/anocrypto-c-p1-27
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-27
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -115,7 +116,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-26/`. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, CMAC entry-gate, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-27/`. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -273,4 +274,13 @@ P1-24 was the implementation entry gate. It added no block-cipher code or public
 - Adds `ano_crypto_aes_compiler_review`, which captures Release-library disassembly and metadata for manual target-specific review without making an automated side-channel verdict.
 - Adds hosted workflow structure for GCC/Clang compiler artifacts, 32-bit AES portability, and s390x big-endian cross-run evidence. Workflow presence does not mean those artifacts have been reviewed.
 
-The next candidate is P1-27: decide whether to enter a narrowly scoped AES-CTR or CMAC gate, or instead pause algorithm expansion for hosted-artifact and legal/package review.
+## P1-27 CMAC entry gate
+
+- Selects AES-CMAC before AES-CTR as the next narrow algorithm candidate.
+- Proposes AES-128/192/256, full 16-byte tags, streaming compute, one-shot compute, and one-shot verification.
+- Requires a dedicated CMAC-purpose CSP handle before implementation; generic AES encryption handles must not be silently reused.
+- Adds public-vector KAT/evidence, CI-policy, release-review, PoC-package, and clean-room planning records.
+- Adds no `ac_cmac.h`, CMAC implementation, key-type enum value, public function, or exported symbol.
+- Retains the 61-symbol ABI-0 baseline and leaves AES-CTR, truncation, AEAD, GMAC, and protocol construction deferred.
+
+The next candidate is P1-28: implement the reviewed narrow AES-CMAC slice if the P1-27 API and key-purpose gate is accepted.

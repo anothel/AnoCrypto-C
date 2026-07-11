@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-23 draft.
+Status: P1-27 draft.
 
 ## Review scope
 
@@ -8,7 +8,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 
 ## Naming and package identity
 
-| Item | Expected | P1-21 status |
+| Item | Expected | P1-27 status |
 |---|---|---|
 | Product spelling | `AnoCrypto-C` | OK |
 | Repository/archive slug | `anocrypto-c` | OK |
@@ -21,13 +21,13 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 
 ## Header ABI checklist
 
-| Rule | P1-21 status | Notes |
+| Rule | P1-27 status | Notes |
 |---|---|---|
 | Public cryptographic contexts do not expose internal struct layout. | OK | Hash/HMAC/DRBG contexts use caller-provided opaque buffers and size APIs. |
 | Public enum values are explicit. | OK | Current public enums use fixed numeric values. |
 | Processing APIs return `ano_crypto_status_t`. | OK | Name/status query helpers are documented exceptions. |
 | Outputs are returned through output parameters. | OK | Digest/MAC/DRBG APIs use output buffers and written lengths. |
-| Context size APIs exist where caller-provided storage is required. | OK | Hash, HMAC, DRBG, and the P1-20 random service exposes implemented context-size queries; random returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` when the reviewed provider or process marker is unavailable. |
+| Context size APIs exist where caller-provided storage is required. | OK | Hash, HMAC, DRBG, random, and cipher services expose implemented context-size queries; random returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` when the reviewed provider or process marker is unavailable. |
 | Buffer length errors are explicit. | OK | Negative tests cover representative short-buffer and invalid-argument cases. |
 | Public context mutation is not claimed thread-safe. | OK | Current support is limited to selected global state. |
 | Public build identity struct layout is recorded. | OK for ABI-0 engineering baseline | P1-21 retains ABI version 1 and records the exact field order in `abi/ANOCRYPTO_C_0_BUILD_IDENTITY_LAYOUT.md`; no broad binary-compatibility claim is made. |
@@ -36,7 +36,7 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 
 ## Per-header review notes
 
-| Header | P1-21 review note |
+| Header | P1-27 review note |
 |---|---|
 | `anocrypto.h` | Umbrella header only; no extra ABI. |
 | `ac_status.h` | Status enum values are explicit and append-only before internal error sentinel. |
@@ -49,7 +49,9 @@ This checklist covers the public C headers under `include/anocrypto/`, the CMake
 | `ac_drbg.h` | Opaque buffer context; explicit entropy input; implemented public random generation remains separate. |
 | `ac_random.h` | P1-20 source-backed HMAC_DRBG-SHA-256 service; caller-owned opaque context, bounded request, fail-closed process-marker prerequisite, failure output clearing, and explicit VM/suspend limitations. |
 | `ac_csp.h` | Handle is integer-opaque to callers; state enum values are explicit. |
-| `ac_key.h` | Import/destroy/state query only; export and persistence are deferred. |
+| `ac_key.h` | Import/destroy/state query only; export and persistence are deferred. P1-27 does not yet add a CMAC key-purpose enum. |
+| `ac_cipher.h` | AES-128/192/256 and CBC no-padding; opaque context, CSP key handle, exact in-place only, and 8 reviewed functions. |
+| `ac_cmac.h` | Absent in P1-27; future API proposal only. |
 
 ## Required local checks
 
@@ -61,12 +63,15 @@ cmake --build build --target ano_crypto_public_surface_check
 cmake --build build --target ano_crypto_thread_safety_policy_check
 cmake --build build --target ano_crypto_concurrency_sanitizer_policy_check
 cmake --build build --target ano_crypto_sha512_family_policy_check
+cmake --build build --target ano_crypto_aes_cbc_policy_check
+cmake --build build --target ano_crypto_aes_hardening_policy_check
+cmake --build build --target ano_crypto_cmac_entry_gate_check
 cmake --build build --target ano_crypto_random_service_policy_check
 cmake --build build --target ano_crypto_random_lifecycle_policy_check
-cmake --build build --target ano_crypto_clean_release_symbol_baseline_check
+cmake --build build --target ano_crypto_exported_symbol_baseline_check
 cmake --build build --target ano_crypto_entropy_health_policy_check
-cmake --install build --prefix /tmp/anocrypto-c-p1-23
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-23
+cmake --install build --prefix /tmp/anocrypto-c-p1-27
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-27
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 cmake --build build --target ano_crypto_poc_package_smoke
@@ -148,3 +153,11 @@ P1-19 implements the existing `ac_random.h` symbols without adding a public func
 - Clean Release exports must remain equal to the stored 61-symbol ABI-0 baseline.
 - C99 representation checks are build prerequisites and are not new public ABI fields.
 - Any future support for a representation outside those prerequisites requires a separate ABI/portability review.
+
+## P1-27 CMAC entry-gate ABI note
+
+- P1-27 adds no public header, function, enum value, macro, structure field, or exported symbol.
+- `ac_cmac.h`, `ANO_CRYPTO_KEY_TYPE_CMAC`, CMAC source, and CMAC tests remain absent.
+- The proposed future surface has eight reviewed function candidates and a dedicated CMAC key purpose, but these are not declarations available to callers.
+- The stored clean Release ABI-0 baseline remains 61 names.
+- Any P1-28 implementation must record the exact enum and symbol delta before the baseline is updated.

@@ -1,6 +1,6 @@
 # AnoCrypto-C CI Matrix Skeleton
 
-Status: P1-26 engineering draft.
+Status: P1-27 engineering draft.
 
 | Check | Linux | macOS | Windows | Notes |
 |---|---:|---:|---:|---|
@@ -47,3 +47,11 @@ Workflow definitions and artifact upload steps do not prove successful hosted
 execution. Actual Linux 32-bit, Windows, macOS, and any future big-endian
 results must be retained and reviewed before portability support wording is
 changed. Clang sanitizer runtime and ThreadSanitizer remain follow-up items.
+
+## P1-27 CMAC entry-gate addition
+
+The normal Linux/macOS/Windows matrix runs
+`ano_crypto_cmac_entry_gate_check`. The target verifies that the selection,
+API, KAT/evidence, package, and release-review records exist while CMAC public
+headers, implementation sources, key-type enum values, and exported symbols
+remain absent. Workflow configuration is not CMAC implementation evidence.

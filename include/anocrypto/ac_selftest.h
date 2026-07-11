@@ -16,7 +16,7 @@ extern "C" {
 /*
  * Runs the current startup self-test sequence.
  *
- * The P1-26 sequence includes build/manifest checks, SHA-2/HMAC KATs,
+ * The P1-27 sequence retains build/manifest checks, SHA-2/HMAC KATs,
  * AES-128/192/256 and CBC path KATs, and HMAC_DRBG-SHA-256 KATs.
  *
  * A self-test failure must move the module to ERROR_STATE.

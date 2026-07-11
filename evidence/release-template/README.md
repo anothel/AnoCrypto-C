@@ -67,7 +67,7 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - `docs/ci/THREAD_SAFETY_CI_CHECKLIST.md` records the P1-14 thread-safety CI lanes and log-review rules.
 - `tools/check_thread_safety_policy.cmake` checks thread-safety policy/evidence wiring.
 - `tools/check_sha512_family_policy.cmake` checks SHA-384/SHA-512 implemented-scope wiring.
-- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, `THREAD_SAFETY_CHECK.txt`, `SHA512_FAMILY_CHECK.txt`, AES/CBC hardening/compiler-review records, and related review notes for P1-26 evidence drafts.
+- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, `THREAD_SAFETY_CHECK.txt`, `SHA512_FAMILY_CHECK.txt`, AES/CBC hardening/compiler-review records, and related review notes plus CMAC entry-gate records for P1-27 evidence drafts.
 
 ## Commands
 
@@ -244,3 +244,13 @@ Confirm that:
 - customer PoC and installed SDK exclude internal AES headers/source, hardening/lifecycle test source, OpenSSL provider artifacts, and compiler disassembly;
 - no AES key, IV, plaintext, ciphertext, expanded schedule, intermediate state, entropy, seed, DRBG state, random output, private key, signing key, token, or customer data appears in logs or packages;
 - hosted workflow definitions are not marked reviewed until actual artifact hashes, toolchains, reviewers, dates, limitations, and dispositions are recorded.
+
+## P1-27 CMAC Entry Gate Review
+
+- Review `CMAC_ENTRY_GATE_CHECK.txt` and `CMAC_ENTRY_GATE_REVIEW_NOTES.txt`.
+- Confirm no CMAC public header, enum value, function, implementation, KAT, or
+  exported symbol was added.
+- Confirm the current clean Release baseline remains 61 names.
+- Confirm the selected future scope requires a dedicated CMAC key purpose,
+  full 16-byte tags, public-source vectors, and value-free evidence logs.
+- Do not represent the gate as implementation or validation evidence.

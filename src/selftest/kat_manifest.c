@@ -1,7 +1,7 @@
 #include "ac_kat_manifest.h"
 
 /*
- * P1-26 KAT manifest.
+ * P1-27 retained KAT manifest; no CMAC KAT is implemented by the entry gate.
  * P1-23 differential tests are separate engineering comparisons and do not
  * alter public KAT provenance entries.
  * SHA-256, SHA-384, SHA-512, their HMAC variants, and the

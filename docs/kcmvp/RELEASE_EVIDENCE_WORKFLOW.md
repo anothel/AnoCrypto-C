@@ -217,3 +217,10 @@ Include and review:
 - PoC package smoke and `DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt`.
 
 Confirm OpenSSL is linked only to the differential test executable, is absent from public headers and the customer SDK/runtime, and does not change the public symbol list. Logs may contain provider/version, compiler/target, length/case metadata, comparison counts, and status only. Digest, MAC, key, message, entropy, seed, DRBG state, random output, private keys, tokens, customer data, and internal deployment information are prohibited. Workflow definitions do not count as reviewed Linux 32-bit, Windows, macOS, or big-endian evidence without actual successful artifacts.
+
+## P1-27 CMAC entry gate
+
+The evidence target writes `CMAC_ENTRY_GATE_CHECK.txt` and
+`CMAC_ENTRY_GATE_REVIEW_NOTES.txt`. These records prove only that the selected
+CMAC planning documents and no-implementation/unchanged-ABI guardrails were
+checked. They are not CMAC KAT, implementation, or validation evidence.

@@ -32,3 +32,10 @@ intermediate states are excluded.
 
 Manual disposition of compiler-output artifacts and supported-target side-channel review, actual 32-bit/big-endian hosted
 results, hardware provider decisions, and final validation-target scope remain TODO.
+
+## P1-27 CMAC planning boundary
+
+AES/CBC evidence remains unchanged. P1-27 selects a separate AES-CMAC entry
+gate and records its public-vector and evidence plan in
+`CMAC_KAT_AND_EVIDENCE_PLAN.md`. No CMAC KAT result is claimed by P1-27 and the
+61-symbol baseline is unchanged.

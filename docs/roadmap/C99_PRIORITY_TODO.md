@@ -1,69 +1,72 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-26 AES/CBC hardening completed; P1-27 scope decision pending.
+Status: P1-27 CMAC entry gate completed; P1-28 implementation decision is ready for review.
 
-## Completed foundation through P1-26
+## Completed foundation through P1-27
 
 - C99 repository, clean-room records, stable public C ABI skeleton, lifecycle,
   self-test, build identity, install/export package, evidence, and PoC flows.
 - SHA-256/SHA-384/SHA-512 and HMAC variants, HMAC_DRBG-SHA-256, entropy seam,
   public random lifecycle, CSP HMAC/AES handles, thread/concurrency guardrails,
   GCC ASan/UBSan, and explicit exported-symbol baselines.
-- P1-23 deterministic OpenSSL 3.x test-only differential comparison and C99
-  representation, unaligned/endian, and Linux 32-bit workflow guardrails.
-- P1-24 reviewed block-cipher entry gate.
-- P1-25 AES-128/192/256 primitive, CBC without padding, CSP lifecycle,
-  startup/extended KATs, negative/differential tests, install/PoC/evidence,
-  and the reviewed 61-symbol ABI-0 baseline.
-- P1-26 internal AES-context integrity and fail-closed reinitialization,
-  128-iteration lifecycle stress, variable-chunk/unaligned regression,
-  CSP HMAC/AES concurrency coverage, expanded OpenSSL AES-CBC differential
-  corpus, and compiler-output capture for manual review.
+- Deterministic OpenSSL 3.x test-only differential comparison and C99
+  representation, unaligned/endian, Linux 32-bit, and big-endian workflow
+  guardrails.
+- AES-128/192/256 primitive and CBC without padding with CSP lifecycle,
+  startup/extended KAT, negative/differential tests, install/PoC/evidence,
+  lifecycle/concurrency regression, compiler-output capture, and the reviewed
+  61-symbol ABI-0 baseline.
+- P1-27 decision selecting a narrow AES-CMAC candidate before AES-CTR, with a
+  dedicated key-purpose requirement, full-tag-only API proposal, public-vector
+  KAT/evidence plan, and automated no-implementation/unchanged-ABI checks.
 
 ## Immediate P1 next items
 
-1. Review actual hosted P1-23 through P1-26 Windows, macOS, Linux 32-bit, and
-   s390x big-endian artifacts; record toolchain, commit, artifact hash,
-   reviewer, limitations, and disposition.
-2. Manually review retained GCC/Clang AES compiler-output artifacts for each
+1. Review and approve or revise the P1-27 CMAC API and dedicated key-purpose
+   decision before adding public declarations.
+2. If approved, implement P1-28 as one narrow slice:
+   - dedicated CMAC key type or equally explicit usage authorization;
+   - AES-128/192/256 CMAC;
+   - full 16-byte tags only;
+   - streaming compute, one-shot compute, and one-shot verification;
+   - startup and extended public-source KATs;
+   - negative, differential, install, PoC, evidence, and symbol-delta checks.
+3. Review actual hosted Windows, macOS, Linux 32-bit, and s390x big-endian
+   artifacts; record toolchain, commit, artifact hash, reviewer, limitations,
+   and disposition.
+4. Manually review retained GCC/Clang AES compiler-output artifacts for each
    intended target and optimization profile. Do not infer a general
    leakage-resistance claim from the capture workflow.
-3. Choose one P1-27 direction through a separate decision gate:
-   - narrow AES-CTR with counter construction/exhaustion and overlap policy;
-   - CMAC with key-purpose and CSP service-scope policy; or
-   - pause algorithm expansion and focus on hosted evidence, legal package
-     notice, SBOM/signing tooling, and target-specific review.
-4. Evaluate Clang sanitizer runtime and ThreadSanitizer separately.
-5. Select a direct noise source only if required, then define source-specific
-   health tests.
-6. Add package legal/evaluation notice after legal review.
+5. Evaluate Clang sanitizer runtime and ThreadSanitizer separately.
+6. Add package legal/evaluation notice only after legal review.
 7. Replace SBOM/signing placeholders after tool and key-management policy
    selection.
 
-## Deferred P2 candidates
+## Deferred P1/P2 candidates
 
-- AEAD, padding helpers, GMAC, or broader mode suites only after separate gates.
-- KDF/MAC expansion beyond a reviewed requirement.
+- AES-CTR requires a separate counter construction, uniqueness, exhaustion,
+  clone/snapshot, and recovery gate.
+- AEAD, padding helpers, GMAC, or broader mode suites require separate gates.
+- KDF expansion beyond a reviewed requirement.
+- Direct noise source selection and source-specific health tests.
 - Public-key primitive planning.
 - AnoCrypto C++ Wrapper, AnoSecureKit, and AnoPKI boundary work.
 
-## P1-26 placement
+## P1-27 placement
 
-P1-26 hardens the P1-25 AES/CBC implementation without changing public
-functions, enum values, public layouts, or the 61-symbol baseline. It adds
-internal context validation, fail-closed reinitialization, longer lifecycle and
-concurrency regression, expanded test-only differential comparison, and
-compiler-output artifacts for human review.
+P1-27 is a scope and API/evidence gate. It adds no CMAC implementation, public
+header, enum value, function, or exported symbol. It retains the P1-26 AES/CBC
+implementation and the 61-symbol baseline.
 
-P1-26 does not add CTR, GCM, padding, CMAC/GMAC, hardware acceleration, or a
-new algorithm. It does not claim that the portable implementation is constant
-time on every compiler/CPU, and hosted workflow definitions are not recorded as
-successful evidence until their artifacts are reviewed.
+The gate chooses CMAC before CTR because the current core already contains a
+narrow confidentiality mode, while CTR would introduce counter ownership and
+reuse risks that require a separate policy decision. The CMAC decision does not
+approve a protocol construction or replace AEAD.
 
 ## Planned next sequence
 
 | Step | Candidate name | Scope |
 |---|---|---|
-| P1-25 | AES/CBC implementation | Completed with CSP key lifecycle, KAT/negative/differential tests, package/evidence wiring, and 61-symbol baseline. |
-| P1-26 | AES/CBC hardening | Completed without public ABI widening; lifecycle, portability, concurrency, expanded differential, and compiler-output capture. |
-| P1-27 | Scope decision gate | Select narrow AES-CTR, CMAC, or a non-algorithm evidence/productization step after hosted/manual review. |
+| P1-26 | AES/CBC hardening | Completed without public ABI widening. |
+| P1-27 | CMAC entry gate | Completed with selection, API/key-purpose proposal, KAT/evidence plan, package/evidence notes, and unchanged 61-symbol baseline. |
+| P1-28 | AES-CMAC implementation | Candidate: dedicated-purpose CSP handle, AES-128/192/256, full tags, compute/verify, KAT/negative/differential/install/PoC/evidence, reviewed symbol delta. |

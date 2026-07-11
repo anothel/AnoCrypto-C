@@ -201,3 +201,9 @@ The generated SDK is configured with both test-hook options disabled and interna
 - The package may include policy/decision documents describing the boundary, but it must not include digest/MAC comparison values.
 - Customer-facing support wording must not infer successful Linux 32-bit, Windows, macOS, or big-endian execution solely from workflow definitions.
 - PoC logs remain status-only and exclude digest, MAC, key, message, entropy, seed, DRBG state, random output, private keys, tokens, and customer data.
+
+## P1-27 CMAC planning boundary
+
+The package includes `CMAC_ENTRY_GATE_PACKAGE_NOTES.txt` and the corresponding
+planning documents. The installed SDK does not include `ac_cmac.h`, a CMAC key
+type, implementation, or exported function. The note is for scope review only.

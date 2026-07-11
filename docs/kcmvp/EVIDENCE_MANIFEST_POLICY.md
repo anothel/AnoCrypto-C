@@ -55,3 +55,10 @@ The PoC package manifest should include only package-relative files staged for t
 - Add CI artifact manifest after hosted workflow review.
 - Add exported-symbol baseline hash if a stable baseline file is introduced.
 - Add SBOM hash once a real SBOM generator is selected.
+
+## P1-27 CMAC gate records
+
+Include `CMAC_ENTRY_GATE_CHECK.txt` and `CMAC_ENTRY_GATE_REVIEW_NOTES.txt` in
+the generated manifest. The files may contain scope, status, symbol count, and
+review metadata only; they must not contain CMAC keys, messages, subkeys,
+intermediate state, or tags.

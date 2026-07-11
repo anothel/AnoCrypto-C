@@ -498,3 +498,21 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - Compiler-output artifacts contain machine instructions and build metadata for the AnoCrypto-C binary under review, not runtime key/IV/plaintext/ciphertext values. They are internal evidence and require human disposition.
 - Keys, expanded schedules, IVs, plaintext, ciphertext, intermediate AES state, entropy, seed material, DRBG state, generated random output, private keys, signing keys, tokens, customer data, and internal deployment information remain excluded from logs and packages.
 - P1-26 does not add CTR, GCM, padding, CMAC/GMAC, hardware dispatch, or a new public API.
+
+## P1-27 CMAC Entry Gate Inputs
+
+| ID | Input | Classification | Use | Boundary |
+|---|---|---|---|---|
+| PUB-3501 | NIST SP 800-38B AES-CMAC specification and public examples | Public standard | Define future CMAC algorithm and KAT planning scope | No third-party implementation code copied. |
+| DER-3502 | Existing project-owned AES/CBC, CSP, API/ABI, evidence, PoC, and policy structure | User-owned project material | Derive a narrow CMAC entry gate and dedicated key-purpose requirement | P1-27 adds no CMAC implementation or public ABI. |
+| DER-3503 | Fresh P1-27 CMake policy, documentation, evidence-template, PoC-note, roadmap, and clean-room updates | User-owned project material | Keep no-implementation and 61-symbol boundaries mechanically checked | Policy output contains status only and no cryptographic values. |
+
+## P1-27 Clean-room Notes
+
+- The decision uses public algorithm requirements and fresh project-owned text.
+- No external CMAC source, subkey-generation routine, KAT harness, function
+  naming scheme, internal layout, build structure, or private validation
+  material was copied.
+- P1-27 records planned public vector provenance but stores no CMAC key,
+  message, subkey, intermediate, or tag fixture.
+- AES-CTR, truncation, GCM/GMAC, and protocol constructions remain deferred.

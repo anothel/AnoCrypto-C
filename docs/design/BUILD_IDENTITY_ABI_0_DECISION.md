@@ -1,6 +1,6 @@
 # Build Identity ABI-0 Decision
 
-Status: P1-26 engineering decision retained.
+Status: P1-27 engineering decision retained.
 
 ## Decision
 
@@ -25,3 +25,9 @@ Replacing the structure now would add public API surface without a demonstrated 
 - Confirm Windows calling convention and DLL import/export metadata in real hosted artifacts.
 - Record type sizes and alignment per supported architecture before any binary-compatibility commitment.
 - Revisit field getters if long-term ABI evolution requires independently extensible metadata.
+
+## P1-27 CMAC entry-gate retention
+
+P1-27 adds no build-identity field, public enum, public function, or exported
+symbol. The future CMAC API and dedicated key-purpose enum proposal remain
+planning records only. The clean Release ABI-0 list remains 61 names.

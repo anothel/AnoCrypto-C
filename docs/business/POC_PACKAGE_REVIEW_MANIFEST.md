@@ -1,6 +1,6 @@
 # Customer PoC Package Review Manifest
 
-Status: P1-23 draft.
+Status: P1-27 draft.
 
 ## Purpose
 
@@ -18,6 +18,7 @@ The PoC package should contain:
 - `THREAD_SAFETY_PACKAGE_NOTES.txt`
 - `CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt`
 - `SHA512_FAMILY_PACKAGE_NOTES.txt`
+- `CMAC_ENTRY_GATE_PACKAGE_NOTES.txt`
 - `RANDOM_SERVICE_PACKAGE_NOTES.txt`
 - `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt`
 - `ENTROPY_HEALTH_PACKAGE_NOTES.txt`
@@ -99,3 +100,11 @@ Review `SHA512_FAMILY_PACKAGE_NOTES.txt`, the packaged example, and clean export
 - [ ] Differential and portability test source files are absent.
 - [ ] No digest, MAC, generated key/message, entropy, seed, DRBG state, or random output value is present.
 - [ ] Hosted 32-bit, Windows, macOS, and big-endian results are not represented as reviewed unless actual referenced artifacts exist.
+
+## P1-27 CMAC entry-gate package boundary
+
+- [ ] `CMAC_ENTRY_GATE_PACKAGE_NOTES.txt` is present.
+- [ ] The installed SDK does not contain `ac_cmac.h` or a CMAC public symbol.
+- [ ] The package does not contain CMAC implementation, KAT, differential, key, message, subkey, intermediate, or tag material.
+- [ ] The note records AES-CMAC as a future candidate and AES-CTR as deferred, not implemented.
+- [ ] The clean Release symbol report remains 61 expected and actual names.

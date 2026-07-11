@@ -307,3 +307,14 @@ If excluded material is discovered:
 | EX-3406 | Automatically declaring hosted Windows/macOS/32-bit/big-endian support because workflow YAML exists | Evidence overstatement | Excluded | Actual runs, artifact hashes, reviewer, limitations, and disposition are required. |
 | EX-3407 | Widening the P1-25 public cipher API or silently changing the 61-symbol baseline during hardening | ABI governance risk | Excluded | P1-26 retains eight public cipher functions, existing enums/layouts, and 61 public symbols. |
 | EX-3408 | Adding CTR, GCM, padding, CMAC/GMAC, hardware acceleration, or domestic algorithms without a separate decision gate | Scope-creep risk | Deferred | P1-27 must select a narrow next scope or pause algorithm expansion. |
+
+## P1-27 CMAC Entry Gate Exclusions
+
+| ID | Excluded material or action | Risk | Action | Note |
+|---|---|---|---|---|
+| EX-3501 | Third-party CMAC implementation, subkey routine, API surface, tests, build fragments, or fixtures with unclear rights | Provenance risk | Excluded | P1-27 uses only public requirements and fresh project-owned planning material. |
+| EX-3502 | Private submission vectors, internal certification documents, or customer CMAC data | Confidentiality and rights risk | Excluded | Only public-source vector planning is allowed. |
+| EX-3503 | Reusing generic AES encryption handles for CMAC without explicit purpose authorization | Key-separation and service-scope risk | Excluded | A dedicated CMAC-purpose handle is required before implementation. |
+| EX-3504 | Adding `ac_cmac.h`, CMAC source, enum value, function, or symbol during the decision gate | API/ABI governance risk | Excluded | The 61-symbol baseline remains unchanged in P1-27. |
+| EX-3505 | Adding AES-CTR without counter construction, uniqueness, exhaustion, clone, and recovery policy | Misuse and state-management risk | Excluded | CTR remains a separate future gate. |
+| EX-3506 | Logging CMAC key, message, subkey, intermediate, or tag values | Sensitive-material exposure risk | Excluded | Gate, CI, evidence, and PoC records are status/policy only. |

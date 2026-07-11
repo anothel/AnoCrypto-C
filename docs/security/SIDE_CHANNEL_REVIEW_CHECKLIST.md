@@ -59,3 +59,11 @@ Follow-up TODOs:
 Reviewer:
 Date:
 ```
+
+## P1-27 CMAC planning note
+
+No CMAC implementation exists in P1-27. A later implementation must separately
+review AES subkey generation, final-block selection, full-tag verification,
+compiler output, target timing/cache behavior, and fault behavior. The proposed
+constant-work comparison requirement is an implementation target, not a
+completed side-channel conclusion.
