@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-19 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-20 \
 #         -DANO_CRYPTO_RUN_CTEST=ON \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-19")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-20")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -56,6 +56,14 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK)
     set(ANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_RANDOM_LIFECYCLE_CHECK)
+    set(ANO_CRYPTO_RUN_RANDOM_LIFECYCLE_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_EXPORTED_SYMBOL_CHECK)
+    set(ANO_CRYPTO_RUN_EXPORTED_SYMBOL_CHECK ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK)
@@ -148,7 +156,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
 "Git status: ${_git_status}\n"
 "CMake command: ${CMAKE_COMMAND}\n"
 "CMake version: ${CMAKE_VERSION}\n"
-"Reproducible build status: P1-19 draft procedure; binary byte identity not claimed\n"
+"Reproducible build status: P1-20 draft procedure; binary byte identity not claimed\n"
 "Evidence status: engineering draft only\n"
 "Claims boundary: not official validation evidence\n")
 
@@ -327,6 +335,50 @@ else()
         "Random-service implementation policy check was not requested. Set ANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK=ON.\n")
 endif()
 
+if(ANO_CRYPTO_RUN_RANDOM_LIFECYCLE_CHECK)
+    set(_random_lifecycle_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/RANDOM_LIFECYCLE_HARDENING_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+            -DANO_CRYPTO_RANDOM_LIFECYCLE_CHECK_OUTPUT=${_random_lifecycle_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_random_lifecycle_policy.cmake"
+        RESULT_VARIABLE _random_lifecycle_check_result
+        OUTPUT_VARIABLE _random_lifecycle_check_stdout
+        ERROR_VARIABLE _random_lifecycle_check_stderr)
+    file(APPEND "${_random_lifecycle_check_output}" "\nCommand output:\n${_random_lifecycle_check_stdout}${_random_lifecycle_check_stderr}\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Random lifecycle hardening policy check result: ${_random_lifecycle_check_result}\n")
+    if(NOT _random_lifecycle_check_result EQUAL 0)
+        message(FATAL_ERROR "random lifecycle hardening policy check failed; see ${_random_lifecycle_check_output}")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RANDOM_LIFECYCLE_HARDENING_CHECK.txt"
+        "Random lifecycle hardening policy check was not requested. Set ANO_CRYPTO_RUN_RANDOM_LIFECYCLE_CHECK=ON.\n")
+endif()
+
+if(ANO_CRYPTO_RUN_EXPORTED_SYMBOL_CHECK)
+    set(_symbol_check_work_dir "${ANO_CRYPTO_EVIDENCE_DIR}/clean-release-symbol-work")
+    set(_symbol_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/EXPORTED_SYMBOL_BASELINE_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_SYMBOL_WORK_DIR=${_symbol_check_work_dir}
+            -DANO_CRYPTO_SYMBOL_REPORT=${_symbol_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_clean_release_symbols.cmake"
+        RESULT_VARIABLE _symbol_check_result
+        OUTPUT_VARIABLE _symbol_check_stdout
+        ERROR_VARIABLE _symbol_check_stderr)
+    file(APPEND "${_symbol_check_output}" "\nCommand output:\n${_symbol_check_stdout}${_symbol_check_stderr}\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Clean Release exported-symbol baseline result: ${_symbol_check_result}\n")
+    file(REMOVE_RECURSE "${_symbol_check_work_dir}")
+    if(NOT _symbol_check_result EQUAL 0)
+        message(FATAL_ERROR "clean Release exported-symbol baseline check failed; see ${_symbol_check_output}")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/EXPORTED_SYMBOL_BASELINE_CHECK.txt"
+        "Clean Release exported-symbol baseline check was not requested. Set ANO_CRYPTO_RUN_EXPORTED_SYMBOL_CHECK=ON.\n")
+endif()
+
 if(ANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK)
     set(_entropy_health_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_HEALTH_CHECK.txt")
     execute_process(
@@ -372,7 +424,7 @@ endif()
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "AnoCrypto-C reproducible build evidence notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-19 draft procedure; binary byte identity is not claimed.\n"
+    "Status: P1-20 draft procedure; binary byte identity is not claimed.\n"
     "Source directory: ${ANO_CRYPTO_SOURCE_DIR}\n"
     "Build directory: ${ANO_CRYPTO_BUILD_DIR}\n"
     "Source archive content list: SOURCE_ARCHIVE_CONTENTS.txt\n"
@@ -382,22 +434,24 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "Thread-safety policy check: THREAD_SAFETY_CHECK.txt\n"
     "SHA-2 reserved scope check: SHA2_SCOPE_CHECK.txt\n"
     "Random-service implementation policy check: RANDOM_SERVICE_CHECK.txt\n"
+    "Random lifecycle hardening policy check: RANDOM_LIFECYCLE_HARDENING_CHECK.txt\n"
+    "Clean Release exported-symbol baseline: EXPORTED_SYMBOL_BASELINE_CHECK.txt\n"
     "Entropy/health policy check: ENTROPY_HEALTH_CHECK.txt\n"
     "Entropy operational policy check: ENTROPY_OPERATIONAL_POLICY_CHECK.txt\n"
     "TODO: normalize archive timestamps if byte-for-byte source archives become a release requirement.\n"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-19 evidence and scope-review notes\n"
+    "AnoCrypto-C P1-20 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: engineering planning artifact; P1-19 enables the existing HMAC_DRBG-SHA-256 core through the public random-service boundary without adding a new algorithm.\n"
+    "Status: engineering planning artifact; P1-20 hardens the existing HMAC_DRBG-SHA-256 random-service lifecycle and portability boundary without adding a new algorithm.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Differential validation strategy: docs/kcmvp/DIFFERENTIAL_VALIDATION_STRATEGY.md\n"
     "Block cipher/mode selection gate: docs/design/BLOCK_CIPHER_MODE_SELECTION.md\n"
     "Side-channel review checklist: docs/security/SIDE_CHANNEL_REVIEW_CHECKLIST.md\n"
     "Customer PoC intake questionnaire: docs/business/CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md\n"
-    "Current implemented algorithm slice remains SHA-256, HMAC-SHA-256, and HMAC_DRBG-SHA-256; P1-19 exposes reviewed OS-provider-backed random generation using that DRBG core.\n"
+    "Current implemented algorithm slice remains SHA-256, HMAC-SHA-256, and HMAC_DRBG-SHA-256; P1-20 retains reviewed OS-provider-backed random generation and adds fail-closed process-marker, lifecycle stress, and reseed-limit regression coverage.\n"
     "Block cipher/mode implementation remains deferred until customer and validation-target candidate inputs are reviewed.\n"
     "Differential tests remain deferred until a reviewed public/reference source or tool is selected.\n"
     "SBOM/signing plan: docs/kcmvp/SBOM_SIGNING_PLAN.md\n"
@@ -410,30 +464,32 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
     "SHA-384/SHA-512 KAT plan: docs/kcmvp/SHA2_384_512_KAT_PLAN.md\n"
     "SHA-2 reserved scope check: SHA2_SCOPE_CHECK.txt\n"
     "Random-service implementation policy check: RANDOM_SERVICE_CHECK.txt\n"
+    "Random lifecycle hardening policy check: RANDOM_LIFECYCLE_HARDENING_CHECK.txt\n"
+    "Clean Release exported-symbol baseline: EXPORTED_SYMBOL_BASELINE_CHECK.txt\n"
     "Public random API decision: docs/design/PUBLIC_RANDOM_API_DECISION.md\n"
     "DRBG/entropy boundary evidence notes: docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md\n"
     "Entropy failure/health design: docs/design/C99_ENTROPY_FAILURE_INJECTION_AND_HEALTH_TEST.md\n"
     "Entropy/health policy check: ENTROPY_HEALTH_CHECK.txt\n"
-    "P1-19 keeps SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 as reserved processing APIs that return ANO_CRYPTO_ERR_NOT_IMPLEMENTED.\n"
+    "P1-20 keeps SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 as reserved processing APIs that return ANO_CRYPTO_ERR_NOT_IMPLEMENTED.\n"
     "Do not include secrets, entropy bytes, generated secret bytes, private keys, tokens, customer data, or internal deployment details in scope evidence.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Scope review notes: SCOPE_REVIEW_NOTES.txt\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA2_SCOPE_REVIEW_NOTES.txt"
     "AnoCrypto-C SHA-384/SHA-512 scope review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-19 planning and reserved-API regression evidence only.\n"
+    "Status: P1-20 planning and reserved-API regression evidence only.\n"
     "Scope decision: docs/design/SHA2_384_512_SCOPE_DECISION.md\n"
     "KAT plan: docs/kcmvp/SHA2_384_512_KAT_PLAN.md\n"
     "Reserved API test: tests/negative/sha2_reserved_api_tests.c\n"
     "Policy check: SHA2_SCOPE_CHECK.txt\n"
     "Current behavior: size/name queries are available; SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 processing return ANO_CRYPTO_ERR_NOT_IMPLEMENTED.\n"
-    "No SHA-384/SHA-512 compression implementation, HMAC implementation, startup KAT, or differential validation code is added by P1-19.\n")
+    "No SHA-384/SHA-512 compression implementation, HMAC implementation, startup KAT, or differential validation code is added by P1-20.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SHA-2 scope review notes: SHA2_SCOPE_REVIEW_NOTES.txt\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RANDOM_SERVICE_REVIEW_NOTES.txt"
     "AnoCrypto-C random-service implementation review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-19 engineering implementation evidence; not official validation evidence.\n"
+    "Status: P1-20 engineering lifecycle-hardening evidence; not official validation evidence.\n"
     "Decision document: docs/design/PUBLIC_RANDOM_API_DECISION.md\n"
     "CI checklist: docs/ci/RANDOM_SERVICE_CI_CHECKLIST.md\n"
     "DRBG/entropy evidence notes: docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md\n"
@@ -443,14 +499,41 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RANDOM_SERVICE_REVIEW_NOTES.txt"
     "Failure-injection test: tests/negative/random_service_failure_injection_tests.c\n"
     "Policy check: RANDOM_SERVICE_CHECK.txt\n"
     "Current behavior: the public service instantiates and reseeds HMAC_DRBG-SHA-256 through the reviewed platform entropy seam where available.\n"
-    "A detected process change requires explicit random_reseed before generation; prediction resistance and VM snapshot/restore detection remain unsupported.\n"
+    "A detected process change requires explicit random_reseed before generation. Missing process-marker support fails closed; VM snapshot/restore and clone events require external discard-and-reinitialize policy because automatic detection is not implemented.\n"
     "Generated random bytes, raw entropy, nonce seed material, DRBG state, private keys, tokens, and customer data must not be stored in evidence.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Random service review notes: RANDOM_SERVICE_REVIEW_NOTES.txt\n")
+
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RANDOM_LIFECYCLE_REVIEW_NOTES.txt"
+    "AnoCrypto-C random lifecycle and portability review notes\n"
+    "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
+    "Status: P1-20 engineering regression and policy evidence; not official validation evidence.\n"
+    "Policy: docs/design/C99_RANDOM_OPERATIONAL_PORTABILITY_POLICY.md\n"
+    "CI checklist: docs/ci/RANDOM_LIFECYCLE_HARDENING_CI_CHECKLIST.md\n"
+    "Lifecycle stress: tests/stress/random_lifecycle_stress_tests.c\n"
+    "Hosted platform status review: tests/operational/random_platform_review.c\n"
+    "Dedicated reseed-limit regression: tests/negative/random_reseed_limit_tests.c\n"
+    "Policy check: RANDOM_LIFECYCLE_HARDENING_CHECK.txt\n"
+    "Current behavior: service availability requires both a reviewed platform provider and a supported process marker. Unsupported process-marker platforms fail closed.\n"
+    "VM snapshot/restore or clone events are not detected automatically; known duplication events require discarding inherited state and independently reinitializing each instance.\n"
+    "Suspend/resume handling remains a product integration policy. Strict threat models should discard and reinitialize state; any explicit reseed-only policy requires documented platform review.\n"
+    "Evidence records status, operation counts, and policy only. Generated bytes, entropy, seed material, and DRBG state are prohibited.\n")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Random lifecycle review notes: RANDOM_LIFECYCLE_REVIEW_NOTES.txt\n")
+
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt"
+    "AnoCrypto-C exported-symbol baseline review notes\n"
+    "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
+    "Status: P1-20 clean Release ABI guardrail; not a complete ABI compatibility claim.\n"
+    "Baseline: abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt\n"
+    "Expected public symbol count: 53\n"
+    "Automated result: EXPORTED_SYMBOL_BASELINE_CHECK.txt\n"
+    "The check compares a clean shared Release build with test hooks disabled and internal symbol hiding enabled.\n"
+    "Public struct layout, calling convention, type size, semantic compatibility, and platform-specific binary details remain separate review items.\n")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Exported symbol baseline review notes: EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_HEALTH_REVIEW_NOTES.txt"
     "AnoCrypto-C entropy failure-injection and health-test review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-19 engineering testability and state-transition evidence only.\n"
+    "Status: P1-20 engineering testability and state-transition evidence only.\n"
     "Design: docs/design/C99_ENTROPY_FAILURE_INJECTION_AND_HEALTH_TEST.md\n"
     "CI checklist: docs/ci/ENTROPY_FAILURE_CI_CHECKLIST.md\n"
     "Policy check: ENTROPY_HEALTH_CHECK.txt\n"
@@ -463,7 +546,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Entropy health revi
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_OPERATIONAL_REVIEW_NOTES.txt"
     "AnoCrypto-C entropy source and operational process-boundary review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-19 engineering policy and regression evidence only.\n"
+    "Status: P1-20 engineering policy and regression evidence only.\n"
     "Design: docs/design/C99_ENTROPY_SOURCE_OPERATIONAL_POLICY.md\n"
     "CI checklist: docs/ci/ENTROPY_OPERATIONAL_CI_CHECKLIST.md\n"
     "Policy check: ENTROPY_OPERATIONAL_POLICY_CHECK.txt\n"
@@ -478,7 +561,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Entropy operational
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SBOM_STATUS.txt"
     "AnoCrypto-C SBOM status\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: placeholder only; no complete SBOM is generated by P1-19.\n"
+    "Status: placeholder only; no complete SBOM is generated by P1-20.\n"
     "Hash manifests available: SOURCE_FILES.sha256, SOURCE_ARCHIVE.sha256, BINARY_FILES.sha256, EVIDENCE_MANIFEST.sha256.\n"
     "Candidate SBOM formats: SPDX JSON or CycloneDX JSON after tool and schema review.\n"
     "SBOM plan: docs/kcmvp/SBOM_SIGNING_PLAN.md\n"
@@ -488,7 +571,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SBOM status: SBOM_S
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SIGNING_STATUS.txt"
     "AnoCrypto-C signing status\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: signing not performed by P1-19 evidence collection.\n"
+    "Status: signing not performed by P1-20 evidence collection.\n"
     "Private signing keys and signing tokens must not be stored in this repository, evidence directory, or PoC package.\n"
     "Candidate signed artifacts: source archive, source hash file, binary hash file, PoC package archive, SBOM, and evidence manifest after policy review.\n"
     "Preferred future approach: detached signatures with separately reviewed verification instructions.\n"
@@ -628,6 +711,10 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `SHA2_SCOPE_CHECK.txt`: SHA-384/SHA-512 reserved-scope policy check.\n"
 "- `RANDOM_SERVICE_CHECK.txt`: public random-service implementation policy check.\n"
 "- `RANDOM_SERVICE_REVIEW_NOTES.txt`: random-service implementation review notes.\n"
+"- `RANDOM_LIFECYCLE_HARDENING_CHECK.txt`: P1-20 lifecycle, process-marker, VM policy, hook, and ABI-baseline policy check.\n"
+"- `RANDOM_LIFECYCLE_REVIEW_NOTES.txt`: status-only lifecycle and portability review notes.\n"
+"- `EXPORTED_SYMBOL_BASELINE_CHECK.txt`: clean Release comparison against the stored 53-symbol ABI-0 baseline.\n"
+"- `EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt`: exported-symbol guardrail scope and limitations.\n"
 "- `ENTROPY_HEALTH_CHECK.txt`: entropy failure-injection and health-test boundary policy check.\n"
 "- `ENTROPY_HEALTH_REVIEW_NOTES.txt`: health-test state-transition and logging review notes.\n"
 "- `ENTROPY_OPERATIONAL_POLICY_CHECK.txt`: source classification, health ownership, operational probe, and process-boundary policy check.\n"
@@ -654,6 +741,9 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- Confirm no secrets, entropy bytes, generated secret bytes, private keys, tokens, or internal deployment details are present.\n"
 "- Confirm platform entropy evidence records provider/status only and does not contain entropy bytes.\n"
 "- Confirm random-service evidence records status and lifecycle results only and does not contain generated bytes.\n"
+"- Confirm lifecycle evidence records only counts, statuses, provider classification, and process-marker support; no generated output is retained.\n"
+"- Confirm clean Release exports match `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` and any intended ABI change is reviewed before updating the baseline.\n"
+"- Confirm VM snapshot/restore, clone, and suspend/resume limitations remain explicit in customer-facing integration notes.\n"
 "- Confirm entropy/health evidence contains no raw entropy, deterministic hook bytes, seed material, or DRBG state.\n"
 "- Confirm operational evidence classifies OS providers as external conditioned services and contains no provider output.\n"
 "- Confirm source-backed DRBG process-change evidence records only status and output-clearing results.\n"

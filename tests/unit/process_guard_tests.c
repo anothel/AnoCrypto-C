@@ -72,13 +72,31 @@ static void test_pure_process_guard(void)
     uint64_t marker;
 
     memset(&guard, 0, sizeof(guard));
-    expect_status("inactive guard permits use",
+    expect_status("inactive guard fails closed",
+                  ano_crypto_internal_process_guard_check_marker(&guard, 7u),
+                  ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
+    expect_status("zero marker init fails closed",
+                  ano_crypto_internal_process_guard_init_marker(&guard, 0u),
+                  ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
+    expect_true("zero marker leaves guard clear",
+                guard.active == 0u && guard.process_marker == 0u);
+    expect_status("explicit marker init",
+                  ano_crypto_internal_process_guard_init_marker(&guard, 7u),
+                  ANO_CRYPTO_OK);
+    expect_status("explicit marker same process",
                   ano_crypto_internal_process_guard_check_marker(&guard, 7u),
                   ANO_CRYPTO_OK);
+    expect_status("explicit marker unavailable fails closed",
+                  ano_crypto_internal_process_guard_check_marker(&guard, 0u),
+                  ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
 
-    expect_status("guard init", ano_crypto_internal_process_guard_init(&guard), ANO_CRYPTO_OK);
     marker = ano_crypto_internal_process_marker_current();
     if (marker != 0u) {
+        expect_true("process guard capability",
+                    ano_crypto_internal_process_guard_is_supported() != 0);
+        expect_status("guard init",
+                      ano_crypto_internal_process_guard_init(&guard),
+                      ANO_CRYPTO_OK);
         expect_status("same process marker",
                       ano_crypto_internal_process_guard_check_marker(&guard, marker),
                       ANO_CRYPTO_OK);
@@ -86,7 +104,11 @@ static void test_pure_process_guard(void)
                       ano_crypto_internal_process_guard_check_marker(&guard, marker + 1u),
                       ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED);
     } else {
-        expect_true("unsupported platform leaves guard inactive", guard.active == 0u);
+        expect_true("process guard capability unavailable",
+                    ano_crypto_internal_process_guard_is_supported() == 0);
+        expect_status("unsupported platform guard init fails closed",
+                      ano_crypto_internal_process_guard_init(&guard),
+                      ANO_CRYPTO_ERR_NOT_IMPLEMENTED);
     }
 
     ano_crypto_internal_process_guard_reset(&guard);

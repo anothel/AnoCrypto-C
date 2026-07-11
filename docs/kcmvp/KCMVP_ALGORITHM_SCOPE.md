@@ -1,6 +1,6 @@
 # AnoCrypto-C Algorithm Scope
 
-Status: P1-19 draft.
+Status: P1-20 draft.
 
 ## Implemented candidate slice
 

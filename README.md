@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-19 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs and negative tests, internal platform entropy provider seam, dedicated-build entropy failure injection, internal health-test candidates, explicit OS-provider classification, source-backed process-change reseed guard, and an implemented public random-service lifecycle on reviewed Linux, Windows, and Apple provider branches. Evidence, install, and PoC outputs remain engineering drafts.
+Current status: P1-20 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs and negative tests, internal platform entropy provider seam, dedicated-build entropy failure injection, internal health-test candidates, explicit OS-provider classification, source-backed process-change reseed guard, and an implemented public random-service lifecycle on reviewed Linux, Windows, and Apple provider branches. Evidence, install, and PoC outputs remain engineering drafts.
 
 Implemented processing scope:
 
@@ -58,8 +58,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-19
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-19
+cmake --install build --prefix /tmp/anocrypto-c-p1-20
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-20
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -77,8 +77,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-19
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-19
+cmake --install build --prefix /tmp/anocrypto-c-p1-20
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-20
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -109,7 +109,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_SURFACE_CHECK.txt`, `THREAD_SAFETY_CHECK.txt`, `SHA2_SCOPE_CHECK.txt`, `RANDOM_SERVICE_CHECK.txt`, `RANDOM_SERVICE_REVIEW_NOTES.txt`, `ENTROPY_HEALTH_CHECK.txt`, `ENTROPY_HEALTH_REVIEW_NOTES.txt`, `ENTROPY_OPERATIONAL_POLICY_CHECK.txt`, `ENTROPY_OPERATIONAL_REVIEW_NOTES.txt`, `REPRODUCIBLE_BUILD_NOTES.txt`, `SCOPE_REVIEW_NOTES.txt`, `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST.sha256`, `ctest.log`, installed-package smoke logs, and PoC package smoke logs when the default P1-19 target is used.
+Generated files include public-surface, thread-safety, SHA-2 scope, random-service, P1-20 lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-20/`.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -196,3 +196,15 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_
 - PoC staging performs a separate clean shared-library build with tests/hooks off and internal symbol hiding on.
 - Evidence collection adds `ENTROPY_HEALTH_CHECK.txt` and `ENTROPY_HEALTH_REVIEW_NOTES.txt`.
 - Final direct-noise-source tests, thresholds, and recovery policy remain TODO / confirmation required.
+
+
+## P1-20 random lifecycle and portability hardening
+
+- The public random service now fails closed when either the reviewed platform provider or process marker is unavailable.
+- `ano_crypto_random_lifecycle_stress_tests` repeatedly exercises init/generate/reseed/uninit while zeroizing transient output.
+- A dedicated tests-only hook verifies the HMAC_DRBG `2^48` reseed-counter boundary, failed-reseed persistence, recovery, and no-wrap behavior.
+- Known VM snapshot/restore or clone events require inherited contexts to be discarded and each instance independently reinitialized; automatic detection is not implemented.
+- Suspend/resume handling remains a consuming-product policy.
+- `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the current 53-name ABI-0 public symbol baseline.
+- Clean Release, evidence, and PoC flows compare shared-library exports with that baseline and keep both internal test-hook options disabled.
+- Hosted CI collects status-only platform review artifacts; actual hosted results still require review.

@@ -1,9 +1,10 @@
 #include "ac_kat_manifest.h"
 
 /*
- * P1-16 KAT manifest.
- * Random-service public placeholders have no KAT entry because random byte
- * generation remains not implemented in P1-16.
+ * P1-20 KAT manifest.
+ * The public random service reuses the HMAC_DRBG-SHA-256 core covered by the
+ * startup KAT below. Generated random output is not a KAT fixture and is never
+ * written to logs or evidence.
  *
  * Vectors embedded in selftest.c, src/drbg/drbg.c, and tests/kat are limited to public
  * specification/test-vector inputs recorded in cleanroom/SOURCE_MANIFEST.md.

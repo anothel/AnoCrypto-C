@@ -31,10 +31,11 @@ jobs:
           -DANO_CRYPTO_BUILD_EXAMPLES=ON
           -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
           -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=${{ matrix.thread_safety }}
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-19-random-service
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-20-random-lifecycle-hardening
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -42,6 +43,21 @@ jobs:
 
       - name: Test
         run: ctest --test-dir build --build-config ${{ matrix.build_type }} --output-on-failure
+
+      - name: Capture hosted random platform review
+        run: >
+          ctest --test-dir build
+          --build-config ${{ matrix.build_type }}
+          -R "^ano_crypto_random_platform_review$"
+          --verbose
+          --output-log hosted-random-platform-review.txt
+
+      - name: Upload hosted random platform review
+        uses: actions/upload-artifact@v4
+        with:
+          name: hosted-random-platform-review-${{ runner.os }}-thread-safety-${{ matrix.thread_safety }}
+          path: hosted-random-platform-review.txt
+          if-no-files-found: error
 
       - name: Public surface check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_public_surface_check
@@ -54,6 +70,9 @@ jobs:
 
       - name: Random-service policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_random_service_policy_check
+
+      - name: Random lifecycle hardening policy check
+        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_random_lifecycle_policy_check
 
       - name: Entropy and health-test policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_entropy_health_policy_check
@@ -76,14 +95,14 @@ jobs:
 
       - name: Run install smoke on Windows
         if: runner.os == 'Windows'
-        run: .\\build-install-smoke\\${{ matrix.build_type }}\\anocrypto_c_install_smoke.exe
+        run: .\build-install-smoke\${{ matrix.build_type }}\anocrypto_c_install_smoke.exe
 
       - name: PoC package smoke on Linux thread-safety ON
         if: runner.os == 'Linux' && matrix.thread_safety == 'ON'
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_poc_package_smoke
 
-  entropy-failure-injection:
-    name: Linux entropy failure injection
+  random-lifecycle-hardening:
+    name: Linux random lifecycle hardening
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -91,32 +110,36 @@ jobs:
 
       - name: Configure dedicated test-hook build
         run: >
-          cmake -S . -B build-entropy-failure
+          cmake -S . -B build-random-hardening
           -DANO_CRYPTO_BUILD_TESTS=ON
           -DANO_CRYPTO_BUILD_EXAMPLES=OFF
           -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
           -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=ON
+          -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=ON
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-19-random-service-test-hook
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-20-random-lifecycle-hardening-test-hook
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build dedicated test-hook lane
-        run: cmake --build build-entropy-failure --parallel
+        run: cmake --build build-random-hardening --parallel
 
-      - name: Run entropy failure-injection tests
-        run: ctest --test-dir build-entropy-failure -L entropy-failure-injection --output-on-failure
+      - name: Run entropy and random hardening tests
+        run: ctest --test-dir build-random-hardening -L entropy-failure-injection --output-on-failure
 
       - name: Entropy and health-test policy check
-        run: cmake --build build-entropy-failure --target ano_crypto_entropy_health_policy_check
+        run: cmake --build build-random-hardening --target ano_crypto_entropy_health_policy_check
 
       - name: Entropy operational policy check
-        run: cmake --build build-entropy-failure --target ano_crypto_entropy_operational_policy_check
+        run: cmake --build build-random-hardening --target ano_crypto_entropy_operational_policy_check
 
       - name: Random-service policy check
-        run: cmake --build build-entropy-failure --target ano_crypto_random_service_policy_check
+        run: cmake --build build-random-hardening --target ano_crypto_random_service_policy_check
+
+      - name: Random lifecycle hardening policy check
+        run: cmake --build build-random-hardening --target ano_crypto_random_lifecycle_policy_check
 
   random-provider-disabled:
     name: Linux random provider disabled
@@ -132,10 +155,11 @@ jobs:
           -DANO_CRYPTO_BUILD_EXAMPLES=OFF
           -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
           -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-19-random-service-provider-disabled
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-20-random-lifecycle-hardening-provider-disabled
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build provider-disabled lane
@@ -147,13 +171,52 @@ jobs:
       - name: Random-service policy check
         run: cmake --build build-provider-disabled --target ano_crypto_random_service_policy_check
 
+      - name: Random lifecycle hardening policy check
+        run: cmake --build build-provider-disabled --target ano_crypto_random_lifecycle_policy_check
+
       - name: Entropy operational policy check
         run: cmake --build build-provider-disabled --target ano_crypto_entropy_operational_policy_check
+
+  clean-release-symbol-baseline:
+    name: ${{ matrix.os }} clean Release exported-symbol baseline
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure clean Release
+        run: >
+          cmake -S . -B build-clean-release
+          -DANO_CRYPTO_BUILD_TESTS=OFF
+          -DANO_CRYPTO_BUILD_EXAMPLES=OFF
+          -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
+          -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
+          -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON
+          -DBUILD_SHARED_LIBS=ON
+          -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-20-random-lifecycle-hardening-clean-release
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Compare clean Release exports with ABI-0 baseline
+        run: cmake --build build-clean-release --config Release --target ano_crypto_exported_symbol_baseline_check
+
+      - name: Upload exported-symbol baseline report
+        uses: actions/upload-artifact@v4
+        with:
+          name: exported-symbol-baseline-${{ runner.os }}
+          path: build-clean-release/policy-check/EXPORTED_SYMBOL_BASELINE_CHECK.txt
+          if-no-files-found: error
 
   evidence-draft:
     name: Linux evidence draft
     runs-on: ubuntu-latest
-    needs: build-test-smoke
+    needs: [build-test-smoke, clean-release-symbol-baseline]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -165,10 +228,11 @@ jobs:
           -DANO_CRYPTO_BUILD_EXAMPLES=ON
           -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
           -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
+          -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-19-random-service
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-20-random-lifecycle-hardening
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
@@ -176,3 +240,10 @@ jobs:
 
       - name: Collect evidence draft
         run: cmake --build build --target ano_crypto_collect_release_evidence
+
+      - name: Upload evidence draft
+        uses: actions/upload-artifact@v4
+        with:
+          name: anocrypto-c-p1-20-evidence-draft
+          path: build/evidence/p1-20
+          if-no-files-found: error

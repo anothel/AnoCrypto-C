@@ -20,24 +20,39 @@ uint64_t ano_crypto_internal_process_marker_current(void)
 #endif
 }
 
-ano_crypto_status_t ano_crypto_internal_process_guard_refresh(
-    ano_crypto_internal_process_guard_t *guard)
+int ano_crypto_internal_process_guard_is_supported(void)
 {
-    uint64_t marker;
+    return ano_crypto_internal_process_marker_current() != 0u;
+}
 
+ano_crypto_status_t ano_crypto_internal_process_guard_init_marker(
+    ano_crypto_internal_process_guard_t *guard,
+    uint64_t marker)
+{
     if (guard == 0) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
     ano_crypto_internal_zeroize(guard, sizeof(*guard));
-    marker = ano_crypto_internal_process_marker_current();
     if (marker == 0u) {
-        return ANO_CRYPTO_OK;
+        return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
     }
 
     guard->process_marker = marker;
     guard->active = 1u;
     return ANO_CRYPTO_OK;
+}
+
+ano_crypto_status_t ano_crypto_internal_process_guard_refresh(
+    ano_crypto_internal_process_guard_t *guard)
+{
+    if (guard == 0) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    return ano_crypto_internal_process_guard_init_marker(
+        guard,
+        ano_crypto_internal_process_marker_current());
 }
 
 ano_crypto_status_t ano_crypto_internal_process_guard_init(
@@ -54,12 +69,8 @@ ano_crypto_status_t ano_crypto_internal_process_guard_check_marker(
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
-    if (guard->active == 0u) {
-        return ANO_CRYPTO_OK;
-    }
-
-    if (current_marker == 0u) {
-        return ANO_CRYPTO_ERR_INTERNAL_ERROR;
+    if (guard->active == 0u || current_marker == 0u) {
+        return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
     }
 
     if (guard->process_marker != current_marker) {
@@ -74,10 +85,6 @@ ano_crypto_status_t ano_crypto_internal_process_guard_check(
 {
     if (guard == 0) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
-    }
-
-    if (guard->active == 0u) {
-        return ANO_CRYPTO_OK;
     }
 
     return ano_crypto_internal_process_guard_check_marker(

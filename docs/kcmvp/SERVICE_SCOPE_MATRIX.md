@@ -1,6 +1,6 @@
 # AnoCrypto-C Service Scope Matrix
 
-Status: P1-19 draft.
+Status: P1-20 draft.
 
 ## Purpose
 
@@ -69,5 +69,9 @@ P1-19 implements the previously reserved symbols without adding an exported publ
 - Caller-owned storage remains opaque and mutable.
 - Explicit-entropy DRBG contexts are rejected by random-service operations, and random-service contexts are rejected by explicit-entropy DRBG generate/reseed operations.
 - A detected process change requires a successful random-service reseed before generation continues.
-- Prediction resistance, VM snapshot/restore detection, and suspend/resume detection remain unsupported.
+- Prediction resistance and automatic VM snapshot/restore/clone/suspend detection remain unsupported. Known duplicated or restored public random contexts must be discarded and reinitialized under the P1-20 operational policy.
 - Direct raw-noise acquisition and finalized source-specific health tests remain out of scope.
+
+## P1-20 operational portability note
+
+The public random service fails closed when either the reviewed platform entropy provider or process marker is unavailable. This is an engineering policy boundary, not a completed validation claim. The ABI-0 exported symbol list remains 53 names and is checked from a clean Release build.

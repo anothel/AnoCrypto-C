@@ -1,6 +1,6 @@
 # C99 Random Service Design
 
-Status: P1-19 implemented engineering design.
+Status: P1-20 implemented and lifecycle-hardened engineering design.
 
 ## Purpose
 
@@ -64,8 +64,8 @@ random_reseed
 
 | API | Success behavior | Important failure behavior |
 |---|---|---|
-| `random_is_available` | Returns nonzero when a reviewed provider branch is available. | Returns zero; it does not initialize the module. |
-| `random_context_size` | Returns current opaque storage size. | Returns `NOT_IMPLEMENTED` and size zero when no provider is available. |
+| `random_is_available` | Returns nonzero when a reviewed provider branch and process marker are available. | Returns zero; it does not initialize the module. |
+| `random_context_size` | Returns current opaque storage size. | Returns `NOT_IMPLEMENTED` and size zero when the provider or process marker is unavailable. |
 | `random_init` | Creates a source-backed HMAC_DRBG context. | Clears supplied context storage on failure. |
 | `random_generate` | Produces up to 65,536 bytes per call. | Clears valid output buffers on all failures. |
 | `random_reseed` | Draws fresh provider entropy and refreshes the process marker. | Returns the provider or DRBG status; no success is implied. |
@@ -90,7 +90,7 @@ On supported process-marker platforms, an inherited source-backed context detect
 - State is not advanced.
 - The child calls `ano_crypto_random_reseed()` and retries.
 
-This is not VM snapshot/restore detection.
+This is not VM snapshot/restore, clone, checkpoint, or suspend/resume detection. Known duplicated state must be discarded and independently reinitialized.
 
 ## Threading
 
@@ -102,8 +102,16 @@ Tests, examples, CI, PoC packages, and evidence may report status and byte count
 
 ## Remaining TODO
 
-- hosted runner confirmation for all provider branches;
-- long-running lifecycle/reseed-limit stress;
-- VM snapshot/restore and suspend/resume policy;
+- actual hosted-run result review for all provider branches;
+- product-specific suspend/resume integration policy;
+- platform-specific VM/checkpoint tests only if a supported host interface is selected;
 - final validation-target mapping;
-- ABI freeze review of opaque context sizing.
+- ABI freeze review of opaque context sizing and build identity.
+
+
+## P1-20 lifecycle and ABI guardrails
+
+- `ano_crypto_random_lifecycle_stress_tests` repeats public lifecycle operations and never persists generated output.
+- The dedicated random test hook can set the private reseed counter only in tests-enabled builds; it is absent from clean Release and PoC SDKs.
+- Unsupported process-marker platforms make the public random service unavailable rather than running without duplication detection.
+- Clean shared Release exports must exactly match the stored 53-symbol ABI-0 name list.

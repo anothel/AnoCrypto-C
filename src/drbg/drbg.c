@@ -9,7 +9,6 @@
 #include "ac_process_guard_internal.h"
 
 #define ANO_CRYPTO_DRBG_CTX_MAGIC 0x41434452u /* ACDR */
-#define ANO_CRYPTO_HMAC_DRBG_RESEED_INTERVAL 281474976710656ULL /* 2^48 */
 
 /*
  * Internal context layout is intentionally private. Public callers obtain the
@@ -363,7 +362,7 @@ static ano_crypto_status_t hmac_drbg_generate_core(
         return ANO_CRYPTO_ERR_NOT_INITIALIZED;
     }
 
-    if (ctx->reseed_counter > ANO_CRYPTO_HMAC_DRBG_RESEED_INTERVAL) {
+    if (ctx->reseed_counter > ANO_CRYPTO_INTERNAL_HMAC_DRBG_RESEED_INTERVAL) {
         return ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED;
     }
 
@@ -728,6 +727,31 @@ ano_crypto_status_t ano_crypto_drbg_generate(
 
     return hmac_drbg_generate_core(internal_ctx, out, out_len, additional_input, additional_input_len);
 }
+
+
+#if defined(ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS)
+ano_crypto_status_t ano_crypto_internal_hmac_drbg_sha256_test_set_reseed_counter(
+    void *ctx,
+    uint64_t reseed_counter)
+{
+    ano_crypto_drbg_ctx_internal_t *internal_ctx;
+
+    if (ctx == 0) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    internal_ctx = (ano_crypto_drbg_ctx_internal_t *)ctx;
+    if (internal_ctx->magic != ANO_CRYPTO_DRBG_CTX_MAGIC ||
+        internal_ctx->algorithm != (uint32_t)ANO_CRYPTO_DRBG_ALG_HMAC_SHA256 ||
+        internal_ctx->state != (uint32_t)ANO_CRYPTO_DRBG_STATE_INSTANTIATED ||
+        internal_ctx->source_backed == 0u) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    internal_ctx->reseed_counter = reseed_counter;
+    return ANO_CRYPTO_OK;
+}
+#endif
 
 ano_crypto_status_t ano_crypto_drbg_uninstantiate(
     void *ctx,

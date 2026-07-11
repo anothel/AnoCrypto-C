@@ -1,14 +1,14 @@
 # C99 Entropy Source and Operational Policy
 
-Status: P1-19 engineering policy draft.
+Status: P1-20 engineering policy draft.
 
 ## Purpose
 
-P1-19 fixes the internal classification, health-test ownership, provider probe, and process-boundary policy that must be reviewed before any public random-generation service is enabled.
+P1-19 established the internal classification, health-test ownership, provider probe, and process-boundary policy that must be reviewed before any public random-generation service is enabled.
 
 This document is an engineering boundary record. It does not establish entropy quality, platform certification, formal validation status, or suitability for every customer environment.
 
-## P1-19 decision summary
+## P1-19 decision summary retained by P1-20
 
 1. Linux `getrandom()`, Windows `BCryptGenRandom()`, and Apple `SecRandomCopyBytes()` are treated as **external conditioned random providers**.
 2. AnoCrypto-C does not treat those API outputs as direct raw-noise samples.
@@ -73,7 +73,7 @@ The process guard is embedded only in the private DRBG context implementation.
 - Before generation, a source-backed context compares the current process ID with the stored marker.
 - A mismatch fails before DRBG state is advanced and clears the requested output.
 - Reseed from the internal source updates the marker after the DRBG update succeeds.
-- On targets without a reviewed process identity primitive, the guard stays inactive and the limitation must remain documented.
+- On targets without a reviewed process identity primitive, source-backed random service initialization fails closed with `ANO_CRYPTO_ERR_NOT_IMPLEMENTED`; the guard is not silently disabled.
 
 P1-19 does not add at-fork callbacks, background reseeding, global random state, or a public process-reset API.
 
@@ -128,8 +128,13 @@ These references are used to establish terminology and boundary questions. P1-19
 
 1. Confirm the final target operating systems and minimum supported versions.
 2. Review process-change behavior on Windows and Apple hosted CI.
-3. Decide whether unsupported process identity must disable a future public random service.
+3. Retain the P1-20 decision that unsupported process identity disables the public random service unless a later reviewed mechanism replaces it.
 4. Select a direct noise source only if a customer/validation scope requires one.
 5. For any direct noise source, define sample representation, startup test, continuous test, thresholds, false-positive handling, and recovery policy.
-6. Retain the P1-19 caller-owned opaque-storage model unless a later ABI review approves a different ownership model.
+6. Retain the caller-owned opaque-storage model unless a later ABI review approves a different ownership model.
 7. Add hosted Windows/macOS evidence and review VM snapshot/restore plus suspend/resume policy before expanding lifecycle claims.
+
+
+## P1-20 operational clarification
+
+P1-20 makes process-marker support a prerequisite for the public source-backed random service. It also records that PID comparison does not detect VM snapshot/restore, clone, checkpoint, or suspend/resume. Known duplicated state must be discarded and each resulting instance independently initialized. A reseed-only recovery is acceptable only when the consuming product can establish that no concurrently usable duplicate remains.

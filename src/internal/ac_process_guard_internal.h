@@ -9,8 +9,8 @@
  *
  * The marker is an operational process identity, not entropy and not a secret.
  * It is used only to force reseeding when inherited DRBG state is observed in a
- * different process (for example after POSIX fork). Unsupported platforms keep
- * the guard inactive and are recorded as a policy TODO.
+ * different process (for example after POSIX fork). P1-20 fails closed for
+ * source-backed random contexts when a process marker cannot be obtained.
  */
 typedef struct ano_crypto_internal_process_guard_s {
     uint64_t process_marker;
@@ -19,6 +19,13 @@ typedef struct ano_crypto_internal_process_guard_s {
 } ano_crypto_internal_process_guard_t;
 
 uint64_t ano_crypto_internal_process_marker_current(void);
+
+int ano_crypto_internal_process_guard_is_supported(void);
+
+/* Pure helper for deterministic unsupported-marker policy tests. */
+ano_crypto_status_t ano_crypto_internal_process_guard_init_marker(
+    ano_crypto_internal_process_guard_t *guard,
+    uint64_t marker);
 
 ano_crypto_status_t ano_crypto_internal_process_guard_init(
     ano_crypto_internal_process_guard_t *guard);

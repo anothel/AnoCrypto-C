@@ -6,6 +6,7 @@
 #include "ac_drbg_internal.h"
 #include "ac_entropy_internal.h"
 #include "ac_internal.h"
+#include "ac_process_guard_internal.h"
 
 static int random_absent_or_valid(const uint8_t *data, size_t data_len)
 {
@@ -28,7 +29,8 @@ static ano_crypto_status_t random_init_os_source(
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
-    if (!ano_crypto_internal_platform_entropy_is_available()) {
+    if (!ano_crypto_internal_platform_entropy_is_available() ||
+        !ano_crypto_internal_process_guard_is_supported()) {
         return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
     }
 
@@ -39,7 +41,8 @@ static ano_crypto_status_t random_init_os_source(
 
 int ano_crypto_random_is_available(void)
 {
-    return ano_crypto_internal_platform_entropy_is_available();
+    return ano_crypto_internal_platform_entropy_is_available() &&
+           ano_crypto_internal_process_guard_is_supported();
 }
 
 const char *ano_crypto_random_service_name(void)
@@ -54,7 +57,8 @@ ano_crypto_status_t ano_crypto_random_context_size(size_t *out_size)
     }
 
     *out_size = 0u;
-    if (!ano_crypto_internal_platform_entropy_is_available()) {
+    if (!ano_crypto_internal_platform_entropy_is_available() ||
+        !ano_crypto_internal_process_guard_is_supported()) {
         return ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
     }
 

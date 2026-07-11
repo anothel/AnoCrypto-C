@@ -12,6 +12,7 @@ option(ANO_CRYPTO_BUILD_TESTS "Build AnoCrypto-C unit and smoke tests" ON)
 option(ANO_CRYPTO_BUILD_EXAMPLES "Build AnoCrypto-C example programs" ON)
 option(ANO_CRYPTO_ENABLE_STRICT_WARNINGS "Enable strict compiler warnings" ON)
 option(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS "Enable internal entropy failure-injection hooks for dedicated test builds" OFF)
+option(ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS "Enable internal random lifecycle/reseed-limit hooks for dedicated test builds" OFF)
 option(ANO_CRYPTO_ENABLE_THREAD_SAFETY "Enable internal locks for module/self-test/CSP global state" ON)
 option(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER "Enable reviewed internal platform entropy provider where supported" ON)
 
@@ -30,6 +31,9 @@ endif()
 if(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS AND NOT ANO_CRYPTO_BUILD_TESTS)
     message(FATAL_ERROR "ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS requires ANO_CRYPTO_BUILD_TESTS=ON and must not be enabled for release/PoC builds")
 endif()
+if(ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS AND NOT ANO_CRYPTO_BUILD_TESTS)
+    message(FATAL_ERROR "ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS requires ANO_CRYPTO_BUILD_TESTS=ON and must not be enabled for release/PoC builds")
+endif()
 
 if(ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS AND ANO_CRYPTO_BUILD_TESTS)
     message(WARNING "ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS is ON while internal tests are enabled; internal-unit tests that link through the shared library may fail on ELF toolchains")
@@ -40,7 +44,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-19-random-service" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-20-random-lifecycle-hardening" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -124,6 +128,9 @@ endif()
 if(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS)
     target_compile_definitions(anocrypto_c PRIVATE ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS)
 endif()
+if(ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS)
+    target_compile_definitions(anocrypto_c PRIVATE ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS)
+endif()
 
 if(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER)
     target_compile_definitions(anocrypto_c PRIVATE ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER)
@@ -152,6 +159,51 @@ if(ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS AND NOT MSVC)
     target_compile_options(anocrypto_c PRIVATE -fvisibility=hidden)
 endif()
 
+set(ANO_CRYPTO_SYMBOL_TOOL "")
+set(ANO_CRYPTO_SYMBOL_STYLE "")
+if(BUILD_SHARED_LIBS)
+    if(MSVC)
+        find_program(ANO_CRYPTO_SYMBOL_TOOL NAMES dumpbin)
+        set(ANO_CRYPTO_SYMBOL_STYLE "MSVC")
+    elseif(APPLE)
+        set(ANO_CRYPTO_SYMBOL_TOOL "${CMAKE_NM}")
+        set(ANO_CRYPTO_SYMBOL_STYLE "APPLE")
+    else()
+        set(ANO_CRYPTO_SYMBOL_TOOL "${CMAKE_NM}")
+        set(ANO_CRYPTO_SYMBOL_STYLE "GNU")
+    endif()
+endif()
+
+if(BUILD_SHARED_LIBS AND ANO_CRYPTO_SYMBOL_TOOL)
+    add_custom_target(ano_crypto_exported_symbol_baseline_check
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_LIBRARY_FILE=$<TARGET_FILE:anocrypto_c>
+            -DANO_CRYPTO_SYMBOL_BASELINE=${CMAKE_CURRENT_SOURCE_DIR}/abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt
+            -DANO_CRYPTO_SYMBOL_TOOL=${ANO_CRYPTO_SYMBOL_TOOL}
+            -DANO_CRYPTO_SYMBOL_STYLE=${ANO_CRYPTO_SYMBOL_STYLE}
+            -DANO_CRYPTO_SYMBOL_REPORT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/EXPORTED_SYMBOL_BASELINE_CHECK.txt
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_exported_symbols.cmake
+        DEPENDS anocrypto_c
+        USES_TERMINAL
+        COMMENT "Comparing clean shared-library exports with the AnoCrypto-C ABI-0 baseline")
+else()
+    add_custom_target(ano_crypto_exported_symbol_baseline_check
+        COMMAND ${CMAKE_COMMAND} -E echo "No supported exported-symbol tool is configured for this shared-library build"
+        COMMAND ${CMAKE_COMMAND} -E false
+        COMMENT "Exported-symbol baseline check unavailable")
+endif()
+
+add_custom_target(ano_crypto_clean_release_symbol_baseline_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_SYMBOL_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/clean-release-symbol-check
+        -DANO_CRYPTO_SYMBOL_REPORT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/CLEAN_RELEASE_EXPORTED_SYMBOL_BASELINE_CHECK.txt
+        -DANO_CRYPTO_CMAKE_GENERATOR=${CMAKE_GENERATOR}
+        -DANO_CRYPTO_CMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
+        -DANO_CRYPTO_CMAKE_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_clean_release_symbols.cmake
+    USES_TERMINAL
+    COMMENT "Building a clean Release library and checking the stored export baseline")
 
 add_custom_target(ano_crypto_public_surface_check
     COMMAND ${CMAKE_COMMAND}
@@ -190,6 +242,15 @@ add_custom_target(ano_crypto_random_service_policy_check
     USES_TERMINAL
     COMMENT "Checking AnoCrypto-C public random-service implementation policy")
 
+
+add_custom_target(ano_crypto_random_lifecycle_policy_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_RANDOM_LIFECYCLE_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/RANDOM_LIFECYCLE_HARDENING_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_random_lifecycle_policy.cmake
+    USES_TERMINAL
+    COMMENT "Checking AnoCrypto-C random lifecycle, portability, and export-baseline policy")
 
 add_custom_target(ano_crypto_entropy_health_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -324,6 +385,23 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
     add_test(NAME ano_crypto_random_service_tests COMMAND ano_crypto_random_service_tests)
 
+    add_executable(ano_crypto_random_lifecycle_stress_tests
+        tests/stress/random_lifecycle_stress_tests.c)
+    target_link_libraries(ano_crypto_random_lifecycle_stress_tests PRIVATE anocrypto_c)
+    add_test(NAME ano_crypto_random_lifecycle_stress_tests COMMAND ano_crypto_random_lifecycle_stress_tests)
+    set_tests_properties(ano_crypto_random_lifecycle_stress_tests PROPERTIES LABELS "random-service;stress")
+
+    add_executable(ano_crypto_random_platform_review
+        tests/operational/random_platform_review.c)
+    target_link_libraries(ano_crypto_random_platform_review PRIVATE anocrypto_c)
+    target_include_directories(ano_crypto_random_platform_review PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
+    if(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER AND
+       (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR WIN32 OR APPLE))
+        target_compile_definitions(ano_crypto_random_platform_review PRIVATE ANO_CRYPTO_EXPECT_RANDOM_AVAILABLE)
+    endif()
+    add_test(NAME ano_crypto_random_platform_review COMMAND ano_crypto_random_platform_review)
+    set_tests_properties(ano_crypto_random_platform_review PROPERTIES LABELS "random-service;hosted-review")
+
     add_executable(ano_crypto_drbg_api_negative_tests
         tests/negative/drbg_api_negative_tests.c)
     target_link_libraries(ano_crypto_drbg_api_negative_tests PRIVATE anocrypto_c)
@@ -410,6 +488,18 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
         add_test(NAME ano_crypto_random_service_failure_injection_tests COMMAND ano_crypto_random_service_failure_injection_tests)
         set_tests_properties(ano_crypto_random_service_failure_injection_tests PROPERTIES LABELS "entropy-failure-injection;random-service")
+
+        if(ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS)
+            add_executable(ano_crypto_random_reseed_limit_tests
+                tests/negative/random_reseed_limit_tests.c)
+            target_link_libraries(ano_crypto_random_reseed_limit_tests PRIVATE anocrypto_c)
+            target_include_directories(ano_crypto_random_reseed_limit_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
+            target_compile_definitions(ano_crypto_random_reseed_limit_tests PRIVATE
+                ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS
+                ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS)
+            add_test(NAME ano_crypto_random_reseed_limit_tests COMMAND ano_crypto_random_reseed_limit_tests)
+            set_tests_properties(ano_crypto_random_reseed_limit_tests PROPERTIES LABELS "random-service;random-hardening;entropy-failure-injection")
+        endif()
     endif()
 
     add_executable(ano_crypto_drbg_entropy_helper_tests
@@ -448,7 +538,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-19
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-20
             -DANO_CRYPTO_RUN_CTEST=ON
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
@@ -456,16 +546,19 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_POC_PACKAGE_SMOKE=ON
             -DANO_CRYPTO_RUN_SHA2_SCOPE_CHECK=ON
             -DANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK=ON
+            -DANO_CRYPTO_RUN_RANDOM_LIFECYCLE_CHECK=ON
+            -DANO_CRYPTO_RUN_EXPORTED_SYMBOL_CHECK=ON
             -DANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK=ON
             -DANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-19 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-20 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_public_surface_check
         ano_crypto_thread_safety_policy_check
         ano_crypto_sha2_scope_policy_check
         ano_crypto_random_service_policy_check
+        ano_crypto_random_lifecycle_policy_check
         ano_crypto_entropy_health_policy_check
         ano_crypto_entropy_operational_policy_check
         anocrypto_c
@@ -479,6 +572,8 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_hash_hmac_api_negative_tests
         ano_crypto_sha2_reserved_api_tests
         ano_crypto_random_service_tests
+        ano_crypto_random_lifecycle_stress_tests
+        ano_crypto_random_platform_review
         ano_crypto_drbg_api_negative_tests
         ano_crypto_csp_key_lifecycle_negative_tests
         ano_crypto_csp_handle_stale_exhaustion_tests
@@ -507,5 +602,9 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
     if(TARGET ano_crypto_random_service_failure_injection_tests)
         add_dependencies(ano_crypto_collect_release_evidence ano_crypto_random_service_failure_injection_tests)
+    endif()
+
+    if(TARGET ano_crypto_random_reseed_limit_tests)
+        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_random_reseed_limit_tests)
     endif()
 endif()

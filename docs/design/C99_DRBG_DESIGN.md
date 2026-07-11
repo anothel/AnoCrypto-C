@@ -1,6 +1,6 @@
 # C99 DRBG Design Skeleton
 
-Status: P1-19 draft.
+Status: P1-20 draft.
 
 ## Implemented through P1-19
 
@@ -125,18 +125,22 @@ For module-fatal health failure:
 
 A final source-specific health-test design, threshold, sample placement, restart policy, and recovery policy remain TODO / confirmation required.
 
-## P1-19 source-backed process boundary
+## P1-20 source-backed process boundary
 
 The private HMAC_DRBG context now distinguishes internally source-backed state from the public explicit-entropy path.
 
 For internally source-backed state:
 
-1. successful instantiation records a non-secret process marker when supported;
+1. successful instantiation requires and records a non-secret process marker;
 2. generation checks the marker before advancing DRBG state;
 3. a changed marker returns `ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED` and clears requested output;
 4. successful source-backed reseed refreshes the marker;
-5. unsupported process-marker platforms leave the guard inactive and remain a documented limitation.
+5. unavailable process-marker support fails closed for the public source-backed random service.
 
-The process marker and guard type are private. No public API or struct layout exposes them. Public explicit-entropy DRBG contexts remain caller-managed; callers must not infer automatic fork/process protection for that path.
+The process marker, fail-closed capability check, and guard type are private. No public API or struct layout exposes them. Public explicit-entropy DRBG contexts remain caller-managed; callers must not infer automatic fork/process protection for that path.
 
 Because the private context size changed, consumers must call `ano_crypto_drbg_context_size()` and must not hard-code pre-release context sizes.
+
+### P1-20 random lifecycle hardening
+
+P1-20 adds lifecycle stress and a dedicated test-only reseed-counter hook. The hook is excluded from release and PoC builds. VM snapshot/restore, clone, and suspend/resume are not detected automatically; known duplicated or restored public random contexts must be discarded and reinitialized according to `C99_RANDOM_OPERATIONAL_PORTABILITY_POLICY.md`.
