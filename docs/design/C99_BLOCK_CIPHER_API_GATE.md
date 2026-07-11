@@ -1,32 +1,31 @@
-# C99 Block Cipher API Gate
+# C99 Block Cipher API Decision
 
-Status: P1-24 design gate; no public API is added in this phase.
+Status: P1-25 reviewed API implemented.
 
-## Candidate service model
+## Public API
 
-The next phase may add opaque caller-owned cipher contexts with separate size,
-init, update/final or one-shot operations. Final signatures remain TODO until ABI
-review. Required semantics are fixed here:
+`include/anocrypto/ac_cipher.h` provides:
 
-- C99 only;
-- status return plus output parameters;
-- exact key/IV/input/output validation;
-- CBC without padding accepts only complete 16-byte blocks;
-- zero-length processing is rejected for the first slice unless the final API
-  review records a different rule;
-- no implicit allocation, IV generation, padding, or key export;
-- output is cleared on failures after output ownership begins;
-- cryptographic service calls require the module operational state;
-- contexts from another service or algorithm must be rejected.
+- algorithm/mode/direction enums with explicit values;
+- caller-owned opaque context sizing;
+- init/update/uninit lifecycle;
+- CSP-key-handle one-shot processing;
+- status returns and output-length reporting;
+- no public context layout.
 
-## Aliasing candidate
+CBC without padding accepts only non-empty complete 16-byte blocks. Output length
+is exactly input length. No allocation, padding, IV generation, key export, or
+persistence is implicit.
 
-Exact in-place operation (`input == output`) is a desired requirement for CBC,
-but partial overlap is prohibited. This remains subject to implementation review
-and must be regression-tested before being documented as supported.
+## Aliasing and failure behavior
+
+Exact in-place operation is supported. Any partial overlap is rejected before
+processing. Parameter and short-buffer failures do not begin output processing.
+An unexpected internal block failure clears the requested output region and the
+cipher context before returning.
 
 ## ABI decision
 
-P1-24 adds no header, enum value, exported function, public struct, or symbol.
-P1-25 must either preserve ABI-0 by using already reserved identifiers or submit a
-reviewed ABI change with baseline update. No silent change is allowed.
+P1-25 deliberately adds `ac_cipher.h` and eight exported functions. The stored
+ABI-0 symbol baseline changes from 53 to 61 entries. Existing symbol names,
+status values, enum values, and public structure layouts are unchanged.

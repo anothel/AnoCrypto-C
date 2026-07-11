@@ -14,10 +14,10 @@ extern "C" {
 #define ANO_CRYPTO_SELFTEST_FLAG_INTEGRITY_PLACEHOLDER 0x00000004u
 
 /*
- * Runs the P0 self-test framework skeleton.
+ * Runs the current startup self-test sequence.
  *
- * P0 does not implement cryptographic KATs yet. This function currently checks
- * framework wiring and build identity availability only.
+ * The P1-25 sequence includes build/manifest checks, SHA-2/HMAC KATs,
+ * AES-128/192/256 and CBC path KATs, and HMAC_DRBG-SHA-256 KATs.
  *
  * A self-test failure must move the module to ERROR_STATE.
  */

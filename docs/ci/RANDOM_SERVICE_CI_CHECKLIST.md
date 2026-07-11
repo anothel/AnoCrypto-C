@@ -47,7 +47,7 @@ Configure tests with OS entropy disabled and both internal hooks enabled. Confir
 - Tests and both test hooks are OFF.
 - Internal symbol hiding is ON.
 - Installed headers contain no internal entropy, process-guard, reseed-counter, or test-hook token.
-- The clean shared library exactly matches `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` (53 public symbols).
+- The clean shared library exactly matches `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` (61 public symbols).
 - The PoC package includes lifecycle and clean-export review records.
 - Examples print statuses and byte counts only.
 

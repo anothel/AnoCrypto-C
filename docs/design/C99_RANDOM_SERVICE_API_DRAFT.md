@@ -114,4 +114,4 @@ Tests, examples, CI, PoC packages, and evidence may report status and byte count
 - `ano_crypto_random_lifecycle_stress_tests` repeats public lifecycle operations and never persists generated output.
 - The dedicated random test hook can set the private reseed counter only in tests-enabled builds; it is absent from clean Release and PoC SDKs.
 - Unsupported process-marker platforms make the public random service unavailable rather than running without duplication detection.
-- Clean shared Release exports must exactly match the stored 53-symbol ABI-0 name list.
+- Clean shared Release exports must exactly match the stored 61-symbol ABI-0 name list.

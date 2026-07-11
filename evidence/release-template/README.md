@@ -208,7 +208,7 @@ Confirm the cross-platform concurrency test uses native Win32 threads or pthread
 
 ## P1-22 SHA-512 Family Review
 
-Review `SHA512_FAMILY_CHECK.txt`, `SHA512_FAMILY_REVIEW_NOTES.txt`, startup/extended KAT results, negative tests, install/PoC smoke, and the clean 53-symbol export baseline. Evidence must not retain digest values, MAC values, HMAC keys, entropy, seed material, DRBG state, or generated random bytes. Review P1-23 differential and portability records separately from KAT provenance.
+Review `SHA512_FAMILY_CHECK.txt`, `SHA512_FAMILY_REVIEW_NOTES.txt`, startup/extended KAT results, negative tests, install/PoC smoke, and the clean 61-symbol export baseline. Evidence must not retain digest values, MAC values, HMAC keys, entropy, seed material, DRBG state, or generated random bytes. Review P1-23 differential and portability records separately from KAT provenance.
 
 
 ## P1-23 Differential and Portability Review

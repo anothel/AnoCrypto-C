@@ -1,33 +1,32 @@
 # Block Cipher KAT and Evidence Plan
 
-Status: P1-24 pre-implementation plan.
-
-## Selected next candidate slice
-
-AES-128/192/256 primitive and AES-CBC without padding. This is an engineering
-scope decision only.
+Status: P1-25 implemented engineering evidence slice.
 
 ## Public sources
 
-- FIPS 197 for AES algorithm examples and known-answer material.
-- NIST SP 800-38A for CBC mode examples.
+- FIPS 197 AES-128/192/256 cipher examples.
+- NIST SP 800-38A CBC-AES128/192/256 examples.
 
-Exact vector identifiers and transcription checks must be entered in
-`cleanroom/SOURCE_MANIFEST.md` when implementation begins. No private submission
-material or third-party proprietary fixture may be used.
+The vector identifiers are recorded in `cleanroom/SOURCE_MANIFEST.md`. No private
+submission material or third-party product implementation was used.
 
-## Required evidence before the slice is called implemented
+## Implemented evidence
 
-- startup KAT result status;
-- extended AES and CBC KAT status;
-- encrypt/decrypt and multi-block status;
-- negative-test status;
-- CSP lifecycle status;
-- test-only differential-provider identity and comparison count;
-- install and PoC smoke status without key/plaintext/ciphertext output;
-- clean Release exported-symbol comparison;
-- compiler/platform and side-channel review TODOs;
-- known limitations and deferred modes.
+- startup AES-128/192/256 encrypt/decrypt KAT;
+- startup AES-128-CBC encrypt/decrypt path KAT;
+- extended four-block CBC-AES128/192/256 KAT;
+- streaming and exact in-place regression;
+- invalid key/IV/input/output/mode/direction/overlap/context tests;
+- stale and wrong-type CSP handle tests;
+- OpenSSL 3.x test-only AES-CBC differential comparison;
+- install and PoC smoke without key/IV/plaintext/ciphertext output;
+- clean Release 61-symbol baseline check.
 
-Logs must never contain AES keys, expanded schedules, IVs, plaintext, ciphertext,
-or intermediate state.
+Evidence logs retain status, provider identity, comparison counts, and policy
+metadata only. Keys, expanded schedules, IVs, plaintext, ciphertext, and
+intermediate states are excluded.
+
+## Remaining review
+
+Compiler-output and supported-target side-channel review, 32-bit/big-endian hosted
+results, hardware provider decisions, and final validation-target scope remain TODO.

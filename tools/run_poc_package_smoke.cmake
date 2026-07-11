@@ -66,6 +66,7 @@ set(_required_package_records
     "CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt"
     "SHA512_FAMILY_PACKAGE_NOTES.txt"
     "DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt"
+    "AES_CBC_PACKAGE_NOTES.txt"
     "RANDOM_SERVICE_PACKAGE_NOTES.txt"
     "RANDOM_LIFECYCLE_PACKAGE_NOTES.txt"
     "ENTROPY_HEALTH_PACKAGE_NOTES.txt"
@@ -84,11 +85,16 @@ file(GLOB_RECURSE _poc_package_files LIST_DIRECTORIES false "${_package_dir}/*")
 foreach(_poc_file IN LISTS _poc_package_files)
     string(TOLOWER "${_poc_file}" _poc_file_lower)
     if(_poc_file_lower MATCHES "(^|[/\\])(libcrypto|libssl|openssl)([./\\]|$)" OR
-       _poc_file_lower MATCHES "sha2_hmac_openssl_differential_tests\.c$" OR
-       _poc_file_lower MATCHES "sha512_portability_review\.c$")
+       _poc_file_lower MATCHES "(sha2_hmac|aes_cbc)_openssl_differential_tests\.c$" OR
+       _poc_file_lower MATCHES "sha512_portability_review\.c$" OR
+       _poc_file_lower MATCHES "ac_(aes|cipher)_internal\.h$")
         message(FATAL_ERROR "PoC package contains test-only differential/provider artifact: ${_poc_file}")
     endif()
 endforeach()
+
+if(NOT EXISTS "${_sdk_prefix}/include/anocrypto/ac_cipher.h")
+    message(FATAL_ERROR "PoC SDK is missing public AES/CBC header: ${_sdk_prefix}/include/anocrypto/ac_cipher.h")
+endif()
 
 file(GLOB_RECURSE _poc_public_headers LIST_DIRECTORIES false "${_sdk_prefix}/include/*.h")
 foreach(_poc_header IN LISTS _poc_public_headers)
@@ -156,6 +162,7 @@ file(WRITE "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_PACKAGE_SMOKE_SUMMARY.txt"
     "Concurrency/sanitizer notes: ${_package_dir}/CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt\n"
     "SHA-512-family notes: ${_package_dir}/SHA512_FAMILY_PACKAGE_NOTES.txt\n"
     "Differential/portability notes: ${_package_dir}/DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt\n"
+    "AES/CBC notes: ${_package_dir}/AES_CBC_PACKAGE_NOTES.txt\n"
     "Random service notes: ${_package_dir}/RANDOM_SERVICE_PACKAGE_NOTES.txt\n"
     "Random lifecycle notes: ${_package_dir}/RANDOM_LIFECYCLE_PACKAGE_NOTES.txt\n"
     "Clean Release symbol baseline: ${_package_dir}/CLEAN_RELEASE_SYMBOL_BASELINE.log\n"

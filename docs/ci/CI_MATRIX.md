@@ -12,7 +12,7 @@ Status: P1-23 engineering draft.
 | Linux GCC `-m32` portability lane | Required workflow | N/A | N/A | Provider and OS entropy disabled; actual result needs review. |
 | Installed-package smoke | Required | Required | Required | All SHA-2/HMAC variants through installed API. |
 | Customer PoC package smoke | Required | Optional | Optional | No OpenSSL runtime dependency or result values. |
-| Public surface and 53-symbol baseline | Required | Required | Required | Tests/examples/hooks OFF; internal symbols hidden. |
+| Public surface and 61-symbol baseline | Required | Required | Required | Tests/examples/hooks OFF; internal symbols hidden. |
 | Thread/concurrency policy | Required | Required | Required | Win32/pthread native regression where supported. |
 | GCC ASan/UBSan | Required | Not selected | Not selected | Full Linux CTest with `address-undefined`. |
 | Random/entropy hardening lanes | Required | Optional | Optional | Dedicated hooks only in test builds. |

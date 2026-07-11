@@ -17,7 +17,7 @@ option(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS "Enable internal entropy failure-inj
 option(ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS "Enable internal random lifecycle/reseed-limit hooks for dedicated test builds" OFF)
 option(ANO_CRYPTO_ENABLE_THREAD_SAFETY "Enable internal locks for module/self-test/CSP global state" ON)
 option(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER "Enable reviewed internal platform entropy provider where supported" ON)
-option(ANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS "Build test-only SHA-2/HMAC differential checks against OpenSSL 3.x when available" ON)
+option(ANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS "Build test-only SHA-2/HMAC and AES-CBC differential checks against OpenSSL 3.x when available" ON)
 option(ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER "Fail configuration when the test-only OpenSSL 3.x differential provider is unavailable" OFF)
 set(ANO_CRYPTO_SANITIZER_MODE "none" CACHE STRING "Sanitizer mode: none or address-undefined")
 set_property(CACHE ANO_CRYPTO_SANITIZER_MODE PROPERTY STRINGS none address-undefined)
@@ -90,7 +90,7 @@ elseif(NOT ANO_CRYPTO_SANITIZER_MODE STREQUAL "none")
 endif()
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-24-block-cipher-entry-gate" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-25-aes-cbc" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -104,7 +104,8 @@ set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/ac_drbg.h
     include/anocrypto/ac_random.h
     include/anocrypto/ac_csp.h
-    include/anocrypto/ac_key.h)
+    include/anocrypto/ac_key.h
+    include/anocrypto/ac_cipher.h)
 
 add_library(anocrypto_c
     src/core/status.c
@@ -117,6 +118,8 @@ add_library(anocrypto_c
     src/hash/sha256.c
     src/hash/sha512.c
     src/mac/hmac.c
+    src/cipher/aes.c
+    src/cipher/cipher.c
     src/drbg/drbg.c
     src/drbg/random.c
     src/drbg/entropy_adapter.c
@@ -293,12 +296,14 @@ add_custom_target(ano_crypto_sha512_family_policy_check
     USES_TERMINAL
     COMMENT "Checking AnoCrypto-C SHA-384/SHA-512 family implementation policy")
 
-add_custom_target(ano_crypto_block_cipher_entry_gate_check
+add_custom_target(ano_crypto_aes_cbc_policy_check
     COMMAND ${CMAKE_COMMAND}
         -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_block_cipher_entry_gate.cmake
-    COMMENT "Checking P1-24 block-cipher entry gate")
+        -DANO_CRYPTO_AES_CBC_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/AES_CBC_IMPLEMENTATION_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_aes_cbc_policy.cmake
+    USES_TERMINAL
+    COMMENT "Checking P1-25 AES/CBC implementation, API, KAT, and package policy")
 
 add_custom_target(ano_crypto_differential_portability_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -449,6 +454,19 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
     add_test(NAME ano_crypto_hash_hmac_api_negative_tests COMMAND ano_crypto_hash_hmac_api_negative_tests)
 
+    add_executable(ano_crypto_aes_cbc_kat_tests
+        tests/kat/aes_cbc_kat_tests.c)
+    target_link_libraries(ano_crypto_aes_cbc_kat_tests PRIVATE anocrypto_c)
+    target_include_directories(ano_crypto_aes_cbc_kat_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
+    add_test(NAME ano_crypto_aes_cbc_kat_tests COMMAND ano_crypto_aes_cbc_kat_tests)
+    set_tests_properties(ano_crypto_aes_cbc_kat_tests PROPERTIES LABELS "kat;aes;cbc")
+
+    add_executable(ano_crypto_cipher_api_negative_tests
+        tests/negative/cipher_api_negative_tests.c)
+    target_link_libraries(ano_crypto_cipher_api_negative_tests PRIVATE anocrypto_c)
+    add_test(NAME ano_crypto_cipher_api_negative_tests COMMAND ano_crypto_cipher_api_negative_tests)
+    set_tests_properties(ano_crypto_cipher_api_negative_tests PROPERTIES LABELS "negative;aes;cbc;csp")
+
     add_executable(ano_crypto_sha512_family_kat_tests
         tests/kat/sha512_family_kat_tests.c)
     target_link_libraries(ano_crypto_sha512_family_kat_tests PRIVATE anocrypto_c)
@@ -483,7 +501,16 @@ if(ANO_CRYPTO_BUILD_TESTS)
                 COMMAND ano_crypto_sha2_hmac_openssl_differential_tests)
             set_tests_properties(ano_crypto_sha2_hmac_openssl_differential_tests PROPERTIES
                 LABELS "differential;sha2;hmac;sha512-family")
-            message(STATUS "OpenSSL ${OPENSSL_VERSION} selected for test-only SHA-2/HMAC differential validation")
+            add_executable(ano_crypto_aes_cbc_openssl_differential_tests
+                tests/differential/aes_cbc_openssl_differential_tests.c)
+            target_link_libraries(ano_crypto_aes_cbc_openssl_differential_tests PRIVATE
+                anocrypto_c
+                OpenSSL::Crypto)
+            add_test(NAME ano_crypto_aes_cbc_openssl_differential_tests
+                COMMAND ano_crypto_aes_cbc_openssl_differential_tests)
+            set_tests_properties(ano_crypto_aes_cbc_openssl_differential_tests PROPERTIES
+                LABELS "differential;aes;cbc")
+            message(STATUS "OpenSSL ${OPENSSL_VERSION} selected for test-only SHA-2/HMAC and AES-CBC differential validation")
         elseif(ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER)
             message(FATAL_ERROR "OpenSSL 3.x Crypto was required for differential validation but was not found")
         else()
@@ -676,13 +703,14 @@ if(ANO_CRYPTO_BUILD_TESTS)
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-24
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-25
             -DANO_CRYPTO_RUN_CTEST=ON
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
             -DANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON
             -DANO_CRYPTO_RUN_POC_PACKAGE_SMOKE=ON
             -DANO_CRYPTO_RUN_SHA512_FAMILY_CHECK=ON
+            -DANO_CRYPTO_RUN_AES_CBC_CHECK=ON
             -DANO_CRYPTO_RUN_DIFFERENTIAL_PORTABILITY_CHECK=ON
             -DANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK=ON
             -DANO_CRYPTO_RUN_RANDOM_LIFECYCLE_CHECK=ON
@@ -692,14 +720,14 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-24 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-25 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_public_surface_check
         ano_crypto_thread_safety_policy_check
         ano_crypto_concurrency_sanitizer_policy_check
         ano_crypto_sha512_family_policy_check
         ano_crypto_differential_portability_policy_check
-        ano_crypto_block_cipher_entry_gate_check
+        ano_crypto_aes_cbc_policy_check
         ano_crypto_random_service_policy_check
         ano_crypto_random_lifecycle_policy_check
         ano_crypto_entropy_health_policy_check
@@ -713,6 +741,8 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_hmac_drbg_boundary_tests
         ano_crypto_hmac_key_handle_kat_tests
         ano_crypto_hash_hmac_api_negative_tests
+        ano_crypto_aes_cbc_kat_tests
+        ano_crypto_cipher_api_negative_tests
         ano_crypto_sha512_family_kat_tests
         ano_crypto_sha512_family_api_negative_tests
         ano_crypto_sha512_portability_review
@@ -737,6 +767,9 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
     if(TARGET ano_crypto_sha2_hmac_openssl_differential_tests)
         add_dependencies(ano_crypto_collect_release_evidence ano_crypto_sha2_hmac_openssl_differential_tests)
+    endif()
+    if(TARGET ano_crypto_aes_cbc_openssl_differential_tests)
+        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_aes_cbc_openssl_differential_tests)
     endif()
 
     if(TARGET anocrypto_c_core_poc)

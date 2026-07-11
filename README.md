@@ -2,13 +2,16 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-24 foundation with SHA-256, SHA-384, SHA-512 and their HMAC variants, HMAC_DRBG-SHA-256, the public random lifecycle, cross-platform CSP/HMAC concurrency coverage, Linux GCC ASan/UBSan, deterministic OpenSSL 3.x test-only SHA-2/HMAC differential validation, C99 representation/alignment portability checks, and the recorded 53-symbol ABI-0 baseline. Actual hosted Linux 32-bit, Windows, macOS, and big-endian artifacts still require review; evidence, install, and PoC outputs remain engineering drafts.
+Current status: P1-25 engineering slice with SHA-256, SHA-384, SHA-512 and their HMAC variants, HMAC_DRBG-SHA-256, the public random lifecycle, AES-128/192/256, AES-CBC without padding, CSP-backed HMAC/AES keys, cross-platform concurrency coverage, Linux GCC ASan/UBSan, deterministic OpenSSL 3.x test-only differential validation, C99 portability checks, and the reviewed 61-symbol ABI-0 baseline. Actual hosted Linux 32-bit, Windows, macOS, big-endian, and target-specific side-channel artifacts still require review; evidence, install, and PoC outputs remain engineering drafts.
 
 Implemented processing scope:
 
 - SHA-256, SHA-384, and SHA-512 one-shot and streaming APIs
 - HMAC-SHA-256, HMAC-SHA-384, and HMAC-SHA-512 one-shot and streaming APIs
 - HMAC computation for all three SHA-2 variants using an in-memory HMAC key handle
+- AES-128, AES-192, and AES-256 table-free portable primitive used through CSP-backed block-cipher keys
+- AES-CBC without padding, caller-provided 16-byte IV, complete blocks only, exact in-place support, and partial-overlap rejection
+- Startup and extended public-source AES/CBC KATs plus negative and OpenSSL test-only differential coverage
 - HMAC_DRBG-SHA-256 deterministic core API
 - Internal HMAC_DRBG-SHA-256 instantiate/reseed helper driven by entropy source
 - Public `ano_crypto_random_*` lifecycle backed by the reviewed platform entropy seam and HMAC_DRBG-SHA-256
@@ -16,7 +19,7 @@ Implemented processing scope:
 - Process-change detection for source-backed random contexts, requiring explicit reseed before generation
 - Startup self-test KATs for SHA-256/SHA-384/SHA-512, their HMAC variants, and HMAC_DRBG-SHA-256
 - Extended KAT executables for all implemented SHA-2/HMAC variants, HMAC key-handle paths, and HMAC_DRBG-SHA-256 public vectors
-- Deterministic OpenSSL 3.x test-only differential comparisons for SHA-256/384/512 and HMAC one-shot/streaming paths
+- Deterministic OpenSSL 3.x test-only differential comparisons for SHA-256/384/512, HMAC, and AES-CBC paths
 - SHA-512-family representation, endian, variable-chunk, and intentionally unaligned-input portability regression
 - CMake C99 representation guard requiring 8-bit bytes, 32-bit `uint32_t`, 64-bit `uint64_t`, and `size_t` no wider than `uint64_t`
 - Negative API tests for hash/HMAC/DRBG/CSP/key argument handling, context lifecycle behavior, handle exhaustion, stale handle rejection, and DRBG helper failure cleanup
@@ -31,10 +34,10 @@ Implemented processing scope:
 - Limited internal locking for module/self-test/CSP global state
 - Thread-safety support matrix, cross-platform Win32/pthread CSP/HMAC test, status-only platform review, CI checklist, and policy-check targets
 - CI matrix skeleton for Linux, macOS, and Windows build/test/install-smoke paths
-- API/ABI review checklist, stored 53-symbol baseline, and build-identity ABI-0 field-order baseline
+- API/ABI review checklist, stored 61-symbol baseline, and build-identity ABI-0 field-order baseline
 - Release-style internal symbol hiding option for supported compilers
 - Customer PoC package v0 staging, package manifest/review records, and standalone public-API example smoke
-- Development workflow, service scope matrix, differential validation strategy, block-cipher selection gate, side-channel checklist, customer PoC intake questionnaire, SBOM/signing plan, and evidence manifest policy drafts
+- Development workflow, service scope matrix, differential validation strategy, AES/CBC implementation policy, side-channel checklist, customer PoC intake questionnaire, SBOM/signing plan, and evidence manifest policy drafts
 
 Skeleton-only / TODO scope:
 
@@ -46,7 +49,7 @@ Skeleton-only / TODO scope:
 - Byte-identical source archive and binary reproducibility rules
 - Complete SBOM generation and detached-signature workflow
 - PoC package legal/evaluation notice and customer-specific support boundary
-- Block cipher/mode implementation, pending a P1-24 requirements/API/KAT/differential/evidence entry gate
+- AES compiler-output and target-specific side-channel review; CTR, AEAD, padding helpers, CMAC/GMAC, and domestic-algorithm decisions
 
 ## Build
 
@@ -59,8 +62,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-24
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-24
+cmake --install build --prefix /tmp/anocrypto-c-p1-25
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-25
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -78,8 +81,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-24
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-24
+cmake --install build --prefix /tmp/anocrypto-c-p1-25
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-25
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -110,7 +113,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, P1-23 concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-24/`. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, P1-23 concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-25/`. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -167,7 +170,7 @@ Generated files include public-surface, thread-safety, P1-23 concurrency/sanitiz
 ## Important limitations
 
 - This is not an official validation result.
-- Hash_DRBG and block cipher processing APIs are not implemented; SHA-384/SHA-512 and their HMAC variants are implemented in the P1-22 engineering slice.
+- Hash_DRBG is not implemented. AES-128/192/256 and CBC without padding are implemented in the P1-25 engineering slice; CTR, AEAD, padding helpers, CMAC/GMAC, and additional block ciphers remain outside the current scope.
 - KAT pass results are correctness checks only and do not replace formal validation.
 - The explicit-entropy HMAC_DRBG-SHA-256 API remains caller-managed and separate from the public random service.
 - The entropy callback seam is test/internal plumbing and is not an operational entropy source.
@@ -206,7 +209,7 @@ Generated files include public-surface, thread-safety, P1-23 concurrency/sanitiz
 - A dedicated tests-only hook verifies the HMAC_DRBG `2^48` reseed-counter boundary, failed-reseed persistence, recovery, and no-wrap behavior.
 - Known VM snapshot/restore or clone events require inherited contexts to be discarded and each instance independently reinitialized; automatic detection is not implemented.
 - Suspend/resume handling remains a consuming-product policy.
-- `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the current 53-name ABI-0 public symbol baseline.
+- `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the current 61-name ABI-0 public symbol baseline.
 - Clean Release, evidence, and PoC flows compare shared-library exports with that baseline and keep both internal test-hook options disabled.
 - Hosted CI collects status-only platform review artifacts; actual hosted results still require review.
 
@@ -242,11 +245,18 @@ Generated files include public-surface, thread-safety, P1-23 concurrency/sanitiz
 - Adds C99 representation compile guards and `ano_crypto_sha512_portability_review` for endian metadata, variable chunking, and unaligned input.
 - Adds a dedicated hosted Linux differential job and a Linux GCC `-m32` portability workflow. Workflow presence does not imply those hosted artifacts have been reviewed.
 - Adds `ano_crypto_differential_portability_policy_check`, evidence logs/template, clean-room provenance, and PoC exclusion checks.
-- Preserves the public header/API and stored 53-symbol ABI-0 export baseline.
+- Preserved the then-current public header/API and 53-symbol ABI-0 export baseline.
 
-The next candidate is P1-24: re-open the block-cipher/mode decision gate and lock customer requirements, algorithm/mode parameters, public API impact, public vector sources, differential strategy, and evidence expectations before implementation.
+P1-24 was the implementation entry gate. It added no block-cipher code or public ABI and conditionally approved a narrow AES/CBC slice.
 
+## P1-25 AES-CBC implementation
 
-## P1-24 block-cipher entry gate
+- Adds the reviewed public `ac_cipher.h` surface with eight exported functions.
+- Implements AES-128/192/256 and CBC without padding using CSP-backed non-exportable in-memory keys.
+- Allows exact in-place processing and rejects partial overlap, incomplete blocks, invalid IV/key sizes, stale handles, and cross-service contexts.
+- Adds startup KATs, extended FIPS 197/SP 800-38A KATs, negative tests, and OpenSSL 3.x test-only differential comparison.
+- Extends install and customer PoC smoke without printing keys, IVs, plaintext, ciphertext, or reference results.
+- Updates the ABI-0 exported-symbol baseline from 53 to 61 entries after explicit review.
+- Leaves compiler-output, microarchitecture-specific side-channel analysis, hosted 32-bit/big-endian evidence, CTR, AEAD, padding helpers, CMAC/GMAC, and domestic algorithms as TODO.
 
-P1-24 adds no block-cipher implementation or public ABI. It records a conditional GO for the next narrow slice: AES-128/192/256 primitive plus CBC without padding, with API, CSP, KAT, side-channel, package, and evidence conditions fixed before code entry.
+The next candidate is P1-26: harden the implemented AES slice without widening the public API.

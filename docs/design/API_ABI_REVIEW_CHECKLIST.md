@@ -85,7 +85,7 @@ Expected exported public names should use the `ano_crypto_` prefix. Internal `an
 1. Keep the ABI-version-1 build-identity field order unchanged; use a separately reviewed ABI version or API for incompatible growth.
 2. Decide whether to add a stricter version script/export map per platform.
 3. Decide whether static libraries are supported and what ABI commitments apply.
-4. Keep the stored 53-symbol ABI-0 baseline under review; any intentional public symbol change requires a separate API/ABI decision before updating it.
+4. Keep the stored 61-symbol ABI-0 baseline under review; any intentional public symbol change requires a separate API/ABI decision before updating it.
 5. Keep unsupported algorithms as explicit placeholder returns until implementation and evidence are reviewed.
 
 ## P1-14 thread-safety ABI note
@@ -145,6 +145,6 @@ P1-19 implements the existing `ac_random.h` symbols without adding a public func
 
 - No public function, enum value, macro, structure field, or exported symbol is added.
 - OpenSSL is linked only to the test executable and is absent from `anocrypto_c`, installed headers, package config files, and the PoC runtime.
-- Clean Release exports must remain equal to the stored 53-symbol ABI-0 baseline.
+- Clean Release exports must remain equal to the stored 61-symbol ABI-0 baseline.
 - C99 representation checks are build prerequisites and are not new public ABI fields.
 - Any future support for a representation outside those prerequisites requires a separate ABI/portability review.

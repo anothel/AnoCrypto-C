@@ -1,6 +1,6 @@
 # AnoCrypto-C Algorithm Scope
 
-Status: P1-24 engineering draft.
+Status: P1-25 engineering draft.
 
 ## Implemented candidate slice
 
@@ -13,7 +13,7 @@ Status: P1-24 engineering draft.
 | MAC | HMAC-SHA-384 | Implemented P1-22 | RFC 4231 startup/extended coverage and CSP handle path. |
 | MAC | HMAC-SHA-512 | Implemented P1-22 | RFC 4231 startup/extended coverage and CSP handle path. |
 | DRBG | HMAC_DRBG-SHA-256 | Implemented engineering slice | Startup/public KAT, boundary, negative, reseed, and random-service integration tests. |
-| CSP/key | In-memory HMAC key lifecycle | Implemented engineering slice | Import/use/destroy, stale-handle, exhaustion, and concurrency tests. |
+| CSP/key | In-memory HMAC and AES key lifecycle | Implemented engineering slice | Import/use/destroy, exact AES key lengths, stale-handle, exhaustion, and concurrency tests. |
 | Entropy/random | Platform-provider-backed public random service | Implemented engineering slice | Lifecycle, failure injection, provider-disabled, fork/process, stress, and package smoke. |
 
 ## Reserved or deferred
@@ -21,7 +21,7 @@ Status: P1-24 engineering draft.
 | Area | Service | State |
 |---|---|---|
 | DRBG | Hash_DRBG-SHA-256 | Algorithm ID placeholder; not implemented. |
-| Block cipher/modes | AES primitive + CBC no-padding | P1-24 entry gate approved; implementation deferred to P1-25 after API/CSP/side-channel review. |
+| Block cipher/modes | AES-128/192/256 + CBC no-padding | Implemented P1-25 engineering slice with startup/extended KAT, negative, differential, install/PoC, and evidence checks. |
 | Additional KDF/MAC | TBD | Deferred. |
 | Public-key primitives | TBD | Deferred to later planning. |
 
@@ -29,6 +29,6 @@ Status: P1-24 engineering draft.
 
 This file records implementation and evidence-preparation scope. It does not assert official validation status. Passing KATs and CTest are engineering correctness signals only.
 
-P1-22 did not add a public function or change the stored 53-symbol ABI-0 export list. P1-23 adds OpenSSL 3.x test-only differential and portability checks without changing that public surface or introducing an SDK runtime dependency. Actual hosted 32-bit, Windows, macOS, and big-endian review remains TODO.
+P1-22 did not add a public function and P1-23 added only test/evidence tooling, preserving the then-current 53-symbol ABI-0 list. P1-25 adds eight reviewed AES/CBC public symbols and updates the stored ABI-0 list to 61 names. Actual hosted 32-bit, Windows, macOS, big-endian, and target-specific side-channel review remains TODO.
 
-P1-24 adds no block-cipher code or public symbol. The selected next candidate is AES-128/192/256 primitive plus CBC without padding; AEAD, CTR, padding helpers, CMAC/GMAC, and domestic algorithms remain deferred.
+P1-25 adds eight reviewed public cipher symbols and updates the stored ABI-0 export baseline from 53 to 61 entries. AEAD, CTR, padding helpers, CMAC/GMAC, hardware dispatch, and domestic algorithms remain deferred. Compiler-output and target-specific side-channel review remain TODO.

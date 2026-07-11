@@ -212,6 +212,83 @@ static int run_drbg_smoke(void)
     return 0;
 }
 
+static int run_aes_cbc_smoke(void)
+{
+    static const uint8_t key[ANO_CRYPTO_CIPHER_AES128_KEY_SIZE] = {
+        0x00u, 0x01u, 0x02u, 0x03u, 0x04u, 0x05u, 0x06u, 0x07u,
+        0x08u, 0x09u, 0x0au, 0x0bu, 0x0cu, 0x0du, 0x0eu, 0x0fu
+    };
+    static const uint8_t iv[ANO_CRYPTO_CIPHER_CBC_IV_SIZE] = {
+        0x0fu, 0x0eu, 0x0du, 0x0cu, 0x0bu, 0x0au, 0x09u, 0x08u,
+        0x07u, 0x06u, 0x05u, 0x04u, 0x03u, 0x02u, 0x01u, 0x00u
+    };
+    static const uint8_t plaintext[ANO_CRYPTO_CIPHER_AES_BLOCK_SIZE] = {
+        0x20u, 0x21u, 0x22u, 0x23u, 0x24u, 0x25u, 0x26u, 0x27u,
+        0x28u, 0x29u, 0x2au, 0x2bu, 0x2cu, 0x2du, 0x2eu, 0x2fu
+    };
+    ano_crypto_csp_handle_t handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+    uint8_t ciphertext[ANO_CRYPTO_CIPHER_AES_BLOCK_SIZE];
+    uint8_t recovered[ANO_CRYPTO_CIPHER_AES_BLOCK_SIZE];
+    size_t written = 0u;
+    size_t i;
+    uint8_t difference = 0u;
+    ano_crypto_status_t status;
+
+    status = ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER,
+                                          key, sizeof(key),
+                                          ANO_CRYPTO_KEY_FLAG_NONE,
+                                          &handle);
+    if (status != ANO_CRYPTO_OK) {
+        return fail_status("AES demo key import", status);
+    }
+
+    status = ano_crypto_cipher_crypt_with_key(ANO_CRYPTO_CIPHER_ALG_AES,
+                                               ANO_CRYPTO_CIPHER_MODE_CBC,
+                                               ANO_CRYPTO_CIPHER_DIRECTION_ENCRYPT,
+                                               handle,
+                                               iv, sizeof(iv),
+                                               plaintext, sizeof(plaintext),
+                                               ciphertext, sizeof(ciphertext),
+                                               &written,
+                                               ANO_CRYPTO_CIPHER_FLAG_NONE);
+    if (status != ANO_CRYPTO_OK || written != sizeof(ciphertext)) {
+        (void)ano_crypto_key_destroy(handle);
+        return fail_status("AES-CBC encrypt", status);
+    }
+
+    status = ano_crypto_cipher_crypt_with_key(ANO_CRYPTO_CIPHER_ALG_AES,
+                                               ANO_CRYPTO_CIPHER_MODE_CBC,
+                                               ANO_CRYPTO_CIPHER_DIRECTION_DECRYPT,
+                                               handle,
+                                               iv, sizeof(iv),
+                                               ciphertext, sizeof(ciphertext),
+                                               recovered, sizeof(recovered),
+                                               &written,
+                                               ANO_CRYPTO_CIPHER_FLAG_NONE);
+    if (status != ANO_CRYPTO_OK || written != sizeof(recovered)) {
+        (void)ano_crypto_csp_zeroize(ciphertext, sizeof(ciphertext));
+        (void)ano_crypto_key_destroy(handle);
+        return fail_status("AES-CBC decrypt", status);
+    }
+
+    for (i = 0u; i < sizeof(plaintext); ++i) {
+        difference |= (uint8_t)(plaintext[i] ^ recovered[i]);
+    }
+    (void)ano_crypto_csp_zeroize(ciphertext, sizeof(ciphertext));
+    (void)ano_crypto_csp_zeroize(recovered, sizeof(recovered));
+    status = ano_crypto_key_destroy(handle);
+    if (status != ANO_CRYPTO_OK) {
+        return fail_status("AES demo key destroy", status);
+    }
+    if (difference != 0u) {
+        return fail_message("AES-CBC round-trip mismatch");
+    }
+
+    printf("- AES-128-CBC no-padding smoke: PASS (%lu bytes processed; values not printed)\n",
+           (unsigned long)sizeof(plaintext));
+    return 0;
+}
+
 static int run_random_service_smoke(void)
 {
     uint8_t output[32];
@@ -320,6 +397,8 @@ int main(void)
     } else if (run_hmac_key_handle_smoke() != 0) {
         result = 1;
     } else if (run_drbg_smoke() != 0) {
+        result = 1;
+    } else if (run_aes_cbc_smoke() != 0) {
         result = 1;
     } else if (run_random_service_smoke() != 0) {
         result = 1;

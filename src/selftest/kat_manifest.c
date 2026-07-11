@@ -1,7 +1,7 @@
 #include "ac_kat_manifest.h"
 
 /*
- * P1-22 KAT manifest, retained in P1-23.
+ * P1-25 KAT manifest.
  * P1-23 differential tests are separate engineering comparisons and do not
  * alter public KAT provenance entries.
  * SHA-256, SHA-384, SHA-512, their HMAC variants, and the
@@ -15,6 +15,36 @@
  * are not operational secrets.
  */
 static const ano_crypto_internal_kat_manifest_entry_t g_kat_manifest[] = {
+    {
+        "cipher.aes128.fips197",
+        "AES-128",
+        "SRC-1401: NIST FIPS 197 AES-128 cipher example",
+        "p1-25-implemented-startup"
+    },
+    {
+        "cipher.aes192.fips197",
+        "AES-192",
+        "SRC-1401: NIST FIPS 197 AES-192 cipher example",
+        "p1-25-implemented-startup"
+    },
+    {
+        "cipher.aes256.fips197",
+        "AES-256",
+        "SRC-1401: NIST FIPS 197 AES-256 cipher example",
+        "p1-25-implemented-startup"
+    },
+    {
+        "cipher.aes128.cbc.sp800-38a",
+        "AES-128-CBC without padding",
+        "SRC-1402: NIST SP 800-38A CBC-AES128 example",
+        "p1-25-implemented-startup-and-extended"
+    },
+    {
+        "cipher.aes192.aes256.cbc.sp800-38a",
+        "AES-192/256-CBC without padding",
+        "SRC-1402: NIST SP 800-38A CBC-AES192 and CBC-AES256 examples",
+        "p1-25-extended-kat-test"
+    },
     {
         "hash.sha384.empty",
         "SHA-384",

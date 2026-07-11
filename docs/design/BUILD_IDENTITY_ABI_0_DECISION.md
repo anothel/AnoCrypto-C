@@ -4,7 +4,7 @@ Status: P1-21 engineering decision.
 
 ## Decision
 
-AnoCrypto-C retains the existing public `ano_crypto_build_identity_t` layout for the 0.x ABI-0 line. P1-21 does not add field getters, add public symbols, or change the stored 53-symbol baseline.
+AnoCrypto-C retains the existing public `ano_crypto_build_identity_t` layout for the 0.x ABI-0 line. P1-21 did not add field getters or change its then-current 53-symbol baseline. P1-25 adds eight reviewed cipher symbols and updates the current stored baseline to 61 names without changing the build-identity layout.
 
 The structure is intentionally narrow and query-only. Its field order is recorded in `abi/ANOCRYPTO_C_0_BUILD_IDENTITY_LAYOUT.md` and checked by `ano_crypto_build_identity_abi_tests`.
 

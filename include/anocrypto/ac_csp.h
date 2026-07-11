@@ -13,7 +13,7 @@ extern "C" {
  * CSP handle skeleton.
  *
  * The handle is intentionally opaque to callers. Value 0 is always invalid.
- * P1-5 provides a small in-process handle table for HMAC keys only and tests fixed-capacity exhaustion/stale-handle rejection. Storage,
+ * P1-25 provides a small in-process handle table for HMAC and AES block-cipher keys and tests fixed-capacity exhaustion/stale-handle rejection. Storage,
  * ownership, export policy, persistence, thread-safety, and multi-process
  * behavior require further review before wider use.
  */

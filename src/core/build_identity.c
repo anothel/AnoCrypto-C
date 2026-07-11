@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-23-differential-portability"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-25-aes-cbc"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P1-23 C99 foundation; SHA-256, SHA-384, SHA-512 and HMAC variants include startup/extended KATs plus a deterministic OpenSSL 3.x test-only differential lane, unaligned-input and representation portability regressions, HMAC_DRBG-SHA-256, HMAC key-handle lifecycle, reviewed platform entropy seams, random lifecycle hardening, concurrency coverage, Linux GCC address-and-undefined sanitizer coverage, build-identity ABI-0 policy, and clean Release exported-symbol checks; prediction resistance, automatic VM snapshot/restore or suspend/resume detection, direct noise-source selection and final health-test thresholds, reviewed hosted Windows/macOS and 32-bit artifacts, big-endian execution evidence, ThreadSanitizer policy, Hash_DRBG, and block cipher scope remain TODO";
+    out_identity->notes = "P1-25 C99 engineering slice; implemented services include SHA-256/384/512, matching HMAC variants, HMAC_DRBG-SHA-256, the source-backed random lifecycle, CSP-backed HMAC and AES keys, AES-128/192/256, and CBC without padding. Startup/extended KATs, negative tests, OpenSSL 3.x test-only differential lanes, portability regressions, concurrency coverage, Linux GCC address-and-undefined sanitizer coverage, build-identity ABI-0 policy, and clean Release exported-symbol checks are included. Prediction resistance, automatic VM snapshot/restore or suspend/resume detection, direct noise-source selection and final health-test thresholds, reviewed hosted Windows/macOS and 32-bit artifacts, big-endian execution evidence, ThreadSanitizer policy, Hash_DRBG, CTR, AEAD, padding helpers, CMAC/GMAC, domestic algorithms, hardware dispatch, and final side-channel/compiler-output review remain TODO";
 
     return ANO_CRYPTO_OK;
 }

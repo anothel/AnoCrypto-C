@@ -470,3 +470,12 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - Used only public standards identifiers and project-owned design requirements.
 - Selected FIPS 197 and NIST SP 800-38A as future public vector sources; no vectors or implementation code were copied in P1-24.
 - No private certification material, customer material, key, plaintext, ciphertext, or proprietary implementation was used.
+
+
+## P1-25 block-cipher public sources
+
+| ID | Source | Use | Boundary |
+|---|---|---|---|
+| SRC-1401 | NIST FIPS 197, Advanced Encryption Standard | AES-128/192/256 algorithm definition and cipher examples used for startup/extended KAT transcription. | Public standard; no external implementation code copied. |
+| SRC-1402 | NIST SP 800-38A, CBC mode examples | CBC-AES128/192/256 four-block encrypt/decrypt fixtures. | Public standard; no private submission data. |
+| SRC-1403 | OpenSSL 3.x public EVP cipher API | Test-only AES-CBC differential provider. | Build/test dependency only; excluded from product library, installed SDK, and PoC runtime. |

@@ -14,5 +14,6 @@
 #include <anocrypto/ac_random.h>
 #include <anocrypto/ac_csp.h>
 #include <anocrypto/ac_key.h>
+#include <anocrypto/ac_cipher.h>
 
 #endif /* ANO_CRYPTO_ANOCRYPTO_H */

@@ -3,6 +3,7 @@
 #include <string.h>
 #include <anocrypto/ac_build.h>
 #include <anocrypto/ac_selftest.h>
+#include "ac_aes_internal.h"
 #include "ac_drbg_internal.h"
 #include "ac_hmac_internal.h"
 #include "ac_internal.h"
@@ -489,6 +490,103 @@ static ano_crypto_status_t ano_crypto_selftest_hmac_sha512_family_kat(void)
     return ANO_CRYPTO_OK;
 }
 
+static ano_crypto_status_t ano_crypto_selftest_aes_cbc_kat(void)
+{
+    static const uint8_t plaintext[16] = {
+        0x00u,0x11u,0x22u,0x33u,0x44u,0x55u,0x66u,0x77u,
+        0x88u,0x99u,0xaau,0xbbu,0xccu,0xddu,0xeeu,0xffu
+    };
+    static const uint8_t keys[3][32] = {
+        {0x00u,0x01u,0x02u,0x03u,0x04u,0x05u,0x06u,0x07u,
+         0x08u,0x09u,0x0au,0x0bu,0x0cu,0x0du,0x0eu,0x0fu},
+        {0x00u,0x01u,0x02u,0x03u,0x04u,0x05u,0x06u,0x07u,
+         0x08u,0x09u,0x0au,0x0bu,0x0cu,0x0du,0x0eu,0x0fu,
+         0x10u,0x11u,0x12u,0x13u,0x14u,0x15u,0x16u,0x17u},
+        {0x00u,0x01u,0x02u,0x03u,0x04u,0x05u,0x06u,0x07u,
+         0x08u,0x09u,0x0au,0x0bu,0x0cu,0x0du,0x0eu,0x0fu,
+         0x10u,0x11u,0x12u,0x13u,0x14u,0x15u,0x16u,0x17u,
+         0x18u,0x19u,0x1au,0x1bu,0x1cu,0x1du,0x1eu,0x1fu}
+    };
+    static const size_t key_lens[3] = {16u, 24u, 32u};
+    static const uint8_t expected[3][16] = {
+        {0x69u,0xc4u,0xe0u,0xd8u,0x6au,0x7bu,0x04u,0x30u,0xd8u,0xcdu,0xb7u,0x80u,0x70u,0xb4u,0xc5u,0x5au},
+        {0xddu,0xa9u,0x7cu,0xa4u,0x86u,0x4cu,0xdfu,0xe0u,0x6eu,0xafu,0x70u,0xa0u,0xecu,0x0du,0x71u,0x91u},
+        {0x8eu,0xa2u,0xb7u,0xcau,0x51u,0x67u,0x45u,0xbfu,0xeau,0xfcu,0x49u,0x90u,0x4bu,0x49u,0x60u,0x89u}
+    };
+    static const uint8_t cbc_key[16] = {
+        0x2bu,0x7eu,0x15u,0x16u,0x28u,0xaeu,0xd2u,0xa6u,
+        0xabu,0xf7u,0x15u,0x88u,0x09u,0xcfu,0x4fu,0x3cu
+    };
+    static const uint8_t cbc_iv[16] = {
+        0x00u,0x01u,0x02u,0x03u,0x04u,0x05u,0x06u,0x07u,
+        0x08u,0x09u,0x0au,0x0bu,0x0cu,0x0du,0x0eu,0x0fu
+    };
+    static const uint8_t cbc_plaintext[16] = {
+        0x6bu,0xc1u,0xbeu,0xe2u,0x2eu,0x40u,0x9fu,0x96u,
+        0xe9u,0x3du,0x7eu,0x11u,0x73u,0x93u,0x17u,0x2au
+    };
+    static const uint8_t cbc_ciphertext[16] = {
+        0x76u,0x49u,0xabu,0xacu,0x81u,0x19u,0xb2u,0x46u,
+        0xceu,0xe9u,0x8eu,0x9bu,0x12u,0xe9u,0x19u,0x7du
+    };
+    ano_crypto_internal_aes_ctx_t ctx;
+    uint8_t out[16];
+    uint8_t block[16];
+    size_t i;
+    ano_crypto_status_t st;
+
+    for (i = 0u; i < 3u; ++i) {
+        st = ano_crypto_internal_aes_init(&ctx, keys[i], key_lens[i]);
+        if (st == ANO_CRYPTO_OK) {
+            st = ano_crypto_internal_aes_encrypt_block(&ctx, plaintext, out);
+        }
+        if (st != ANO_CRYPTO_OK || !bytes_equal(out, expected[i], sizeof(out))) {
+            ano_crypto_internal_aes_uninit(&ctx);
+            ano_crypto_internal_zeroize(out, sizeof(out));
+            return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+        }
+        st = ano_crypto_internal_aes_decrypt_block(&ctx, out, block);
+        if (st != ANO_CRYPTO_OK || !bytes_equal(block, plaintext, sizeof(block))) {
+            ano_crypto_internal_aes_uninit(&ctx);
+            ano_crypto_internal_zeroize(out, sizeof(out));
+            ano_crypto_internal_zeroize(block, sizeof(block));
+            return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+        }
+        ano_crypto_internal_aes_uninit(&ctx);
+    }
+
+    st = ano_crypto_internal_aes_init(&ctx, cbc_key, sizeof(cbc_key));
+    for (i = 0u; i < sizeof(block); ++i) {
+        block[i] = (uint8_t)(cbc_plaintext[i] ^ cbc_iv[i]);
+    }
+    if (st == ANO_CRYPTO_OK) {
+        st = ano_crypto_internal_aes_encrypt_block(&ctx, block, out);
+    }
+    if (st != ANO_CRYPTO_OK || !bytes_equal(out, cbc_ciphertext, sizeof(out))) {
+        ano_crypto_internal_aes_uninit(&ctx);
+        ano_crypto_internal_zeroize(out, sizeof(out));
+        ano_crypto_internal_zeroize(block, sizeof(block));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+    st = ano_crypto_internal_aes_decrypt_block(&ctx, cbc_ciphertext, block);
+    if (st == ANO_CRYPTO_OK) {
+        for (i = 0u; i < sizeof(block); ++i) {
+            block[i] = (uint8_t)(block[i] ^ cbc_iv[i]);
+        }
+    }
+    if (st != ANO_CRYPTO_OK || !bytes_equal(block, cbc_plaintext, sizeof(block))) {
+        ano_crypto_internal_aes_uninit(&ctx);
+        ano_crypto_internal_zeroize(out, sizeof(out));
+        ano_crypto_internal_zeroize(block, sizeof(block));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+
+    ano_crypto_internal_aes_uninit(&ctx);
+    ano_crypto_internal_zeroize(out, sizeof(out));
+    ano_crypto_internal_zeroize(block, sizeof(block));
+    return ANO_CRYPTO_OK;
+}
+
 ano_crypto_status_t ano_crypto_selftest_run(uint32_t flags)
 {
     ano_crypto_status_t st;
@@ -537,6 +635,13 @@ ano_crypto_status_t ano_crypto_selftest_run(uint32_t flags)
     }
 
     st = ano_crypto_selftest_hmac_sha512_family_kat();
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_selftest_set_last_status(st);
+        ano_crypto_internal_module_mark_error(st);
+        return st;
+    }
+
+    st = ano_crypto_selftest_aes_cbc_kat();
     if (st != ANO_CRYPTO_OK) {
         ano_crypto_selftest_set_last_status(st);
         ano_crypto_internal_module_mark_error(st);

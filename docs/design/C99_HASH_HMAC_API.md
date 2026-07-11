@@ -13,7 +13,7 @@ HMAC computation through an in-memory CSP HMAC-key handle.
 Public context layouts are not exposed. Callers obtain storage requirements
 with `ano_crypto_hash_context_size()` and `ano_crypto_hmac_context_size()`.
 P1-22 implemented the previously reserved algorithm IDs without adding public
-symbols. P1-23 adds only test/evidence tooling and leaves the stored 53-symbol
+symbols. P1-23 added only test/evidence tooling and left the then-current 53-symbol
 ABI-0 export list unchanged. Cross-service context use is rejected.
 
 ## State and lifecycle rules

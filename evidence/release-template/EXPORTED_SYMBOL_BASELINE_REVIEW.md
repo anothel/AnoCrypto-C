@@ -3,7 +3,7 @@
 Status: template.
 
 - Baseline file: `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt`
-- Expected public symbol count: 53
+- Expected public symbol count: 61
 - Clean Release configuration reviewed:
 - Linux comparison result:
 - Windows comparison result:

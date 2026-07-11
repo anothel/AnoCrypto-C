@@ -36,7 +36,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -105,6 +105,9 @@ jobs:
       - name: Differential and portability policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_differential_portability_policy_check
 
+      - name: AES-CBC implementation policy check
+        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_aes_cbc_policy_check
+
       - name: Random-service policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_random_service_policy_check
 
@@ -163,7 +166,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
           -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability-openssl
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc-openssl
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build differential lane
@@ -179,10 +182,13 @@ jobs:
       - name: Differential and portability policy check
         run: cmake --build build-differential --target ano_crypto_differential_portability_policy_check
 
+      - name: AES-CBC implementation policy check
+        run: cmake --build build-differential --target ano_crypto_aes_cbc_policy_check
+
       - name: Upload differential status artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sha2-hmac-openssl-differential-Linux
+          name: sha2-hmac-aes-cbc-openssl-differential-Linux
           path: differential-validation.txt
           if-no-files-found: error
 
@@ -212,7 +218,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability-linux32
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc-linux32
           -DCMAKE_C_FLAGS=-m32
           -DCMAKE_EXE_LINKER_FLAGS=-m32
           -DCMAKE_SHARED_LINKER_FLAGS=-m32
@@ -265,7 +271,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_SANITIZER_MODE=address-undefined
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability-GCC-asan-ubsan
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc-GCC-asan-ubsan
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build sanitizer lane
@@ -297,7 +303,7 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability-test-hook
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc-test-hook
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build dedicated test-hook lane
@@ -337,7 +343,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability-provider-disabled
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc-provider-disabled
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build provider-disabled lane
@@ -379,7 +385,7 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON
           -DBUILD_SHARED_LIBS=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability-clean-release
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc-clean-release
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Compare clean Release exports with ABI-0 baseline
@@ -418,7 +424,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
           -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-23-differential-portability
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-25-aes-cbc
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
@@ -430,6 +436,6 @@ jobs:
       - name: Upload evidence draft
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p1-23-evidence-draft
-          path: build/evidence/p1-23
+          name: anocrypto-c-p1-25-evidence-draft
+          path: build/evidence/p1-25
           if-no-files-found: error

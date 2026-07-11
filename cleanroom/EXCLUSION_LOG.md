@@ -286,3 +286,11 @@ If excluded material is discovered:
 - Used only public standards identifiers and project-owned design requirements.
 - Selected FIPS 197 and NIST SP 800-38A as future public vector sources; no vectors or implementation code were copied in P1-24.
 - No private certification material, customer material, key, plaintext, ciphertext, or proprietary implementation was used.
+
+
+## P1-25 AES/CBC exclusions
+
+- No third-party AES implementation, S-box table, key-schedule code, file layout, or test harness was copied into the product source.
+- No private KCMVP submission material or customer vectors were used.
+- OpenSSL remains a test-only differential provider and is excluded from the library, installed SDK, and customer PoC runtime.
+- Keys, expanded schedules, IVs, plaintext, ciphertext, and intermediate AES state are excluded from logs and evidence.
