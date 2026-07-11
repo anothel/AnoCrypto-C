@@ -40,7 +40,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-17-entropy-health" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-18-entropy-operational-policy" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -70,6 +70,7 @@ add_library(anocrypto_c
     src/drbg/random.c
     src/drbg/entropy_adapter.c
     src/drbg/entropy_health.c
+    src/drbg/process_guard.c
     src/csp/csp_handle.c
     src/csp/key.c
     src/csp/zeroize.c)
@@ -197,6 +198,15 @@ add_custom_target(ano_crypto_entropy_health_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_entropy_health_policy.cmake
     USES_TERMINAL
     COMMENT "Checking AnoCrypto-C entropy failure-injection and health-test policy")
+
+add_custom_target(ano_crypto_entropy_operational_policy_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_ENTROPY_OPERATIONAL_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/ENTROPY_OPERATIONAL_POLICY_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_entropy_operational_policy.cmake
+    USES_TERMINAL
+    COMMENT "Checking AnoCrypto-C entropy source classification, provider ownership, and process-boundary policy")
 
 if(ANO_CRYPTO_BUILD_EXAMPLES)
     add_subdirectory(examples/core_poc)
@@ -360,6 +370,20 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
     add_test(NAME ano_crypto_entropy_health_tests COMMAND ano_crypto_entropy_health_tests)
 
+    add_executable(ano_crypto_entropy_operational_policy_tests
+        tests/unit/entropy_operational_policy_tests.c)
+    target_link_libraries(ano_crypto_entropy_operational_policy_tests PRIVATE anocrypto_c)
+    target_include_directories(ano_crypto_entropy_operational_policy_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
+
+    add_test(NAME ano_crypto_entropy_operational_policy_tests COMMAND ano_crypto_entropy_operational_policy_tests)
+
+    add_executable(ano_crypto_process_guard_tests
+        tests/unit/process_guard_tests.c)
+    target_link_libraries(ano_crypto_process_guard_tests PRIVATE anocrypto_c)
+    target_include_directories(ano_crypto_process_guard_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
+
+    add_test(NAME ano_crypto_process_guard_tests COMMAND ano_crypto_process_guard_tests)
+
     add_executable(ano_crypto_entropy_health_error_state_tests
         tests/negative/entropy_health_error_state_tests.c)
     target_link_libraries(ano_crypto_entropy_health_error_state_tests PRIVATE anocrypto_c)
@@ -414,7 +438,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-17
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-18
             -DANO_CRYPTO_RUN_CTEST=ON
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
@@ -423,15 +447,17 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_SHA2_SCOPE_CHECK=ON
             -DANO_CRYPTO_RUN_RANDOM_BOUNDARY_CHECK=ON
             -DANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK=ON
+            -DANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-17 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-18 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_public_surface_check
         ano_crypto_thread_safety_policy_check
         ano_crypto_sha2_scope_policy_check
         ano_crypto_random_boundary_policy_check
         ano_crypto_entropy_health_policy_check
+        ano_crypto_entropy_operational_policy_check
         anocrypto_c
         ano_crypto_module_state_tests
         ano_crypto_service_gate_negative_tests
@@ -450,6 +476,8 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_platform_entropy_provider_tests
         ano_crypto_entropy_source_negative_tests
         ano_crypto_entropy_health_tests
+        ano_crypto_entropy_operational_policy_tests
+        ano_crypto_process_guard_tests
         ano_crypto_entropy_health_error_state_tests
         ano_crypto_drbg_entropy_helper_tests
         ano_crypto_thread_lock_tests

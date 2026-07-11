@@ -1,6 +1,6 @@
 # C99 Entropy Adapter Design Skeleton
 
-Status: P1-17 draft.
+Status: P1-18 draft.
 
 ## Purpose
 
@@ -85,6 +85,17 @@ The callback seam is for tests and adapter plumbing. It must not be treated as a
 - `ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS` defaults to `OFF` and is valid only with tests enabled.
 - The deterministic hook supports sequence, repeated-output, fail-before-write, and partial-write/fail modes in a dedicated test build.
 - Hook declarations remain in `src/internal/ac_entropy_internal.h`; public headers and installed C ABI are unchanged.
-- Internal health state may be attached to callback or platform sources with operation-local or module-fatal policy.
+- Internal health state may be attached only to an explicitly classified raw-noise engineering callback with operation-local or module-fatal policy.
 - Startup/continuous duplicate-block checks are bounded engineering candidates only; final noise-source-specific tests and thresholds remain TODO.
 - PoC SDK staging uses a separate clean build with tests/hooks off and internal symbol hiding on.
+
+## P1-18 source classification and operational policy
+
+- OS provider branches are classified internally as external conditioned random providers.
+- Unclassified callbacks remain caller-owned integration seams and cannot receive the module health-test skeleton.
+- The P1-17 duplicate-block candidates may attach only to an explicit internal raw-noise engineering callback.
+- `ano_crypto_internal_entropy_source_get_policy()` exposes class, health owner, and restart policy only to internal tests/code.
+- `ano_crypto_internal_entropy_source_probe_operational()` is restricted to the OS-provider class, uses a fixed temporary request, returns status only, and clears temporary storage.
+- Runtime provider failure remains operation-local unless an explicit module-fatal raw-noise health policy has latched `ERROR_STATE`.
+- Source-backed DRBG helpers use the private process-change guard described in `C99_ENTROPY_SOURCE_OPERATIONAL_POLICY.md`.
+- Public headers, installed package types, and exported public symbols remain unchanged.

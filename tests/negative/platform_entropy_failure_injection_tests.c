@@ -42,9 +42,14 @@ static int buffer_is_zero(const uint8_t *buffer, size_t buffer_len)
 
 int main(void)
 {
+    ano_crypto_internal_entropy_source_t os_source;
     uint8_t first[32];
     uint8_t second[32];
     size_t i;
+
+    expect_status("operational probe source init",
+                  ano_crypto_internal_entropy_source_init_os(&os_source, 16u),
+                  ANO_CRYPTO_OK);
 
     expect_status("deterministic hook configure",
                   ano_crypto_internal_entropy_test_hook_configure(
@@ -58,6 +63,9 @@ int main(void)
                   ANO_CRYPTO_OK);
     expect_status("deterministic second read",
                   ano_crypto_internal_platform_entropy_get(second, sizeof(second)),
+                  ANO_CRYPTO_OK);
+    expect_status("deterministic operational probe",
+                  ano_crypto_internal_entropy_source_probe_operational(&os_source),
                   ANO_CRYPTO_OK);
     for (i = 0u; i < sizeof(first); ++i) {
         expect_true("deterministic first sequence",
@@ -75,6 +83,9 @@ int main(void)
     expect_status("forced provider failure",
                   ano_crypto_internal_platform_entropy_get(first, sizeof(first)),
                   ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED);
+    expect_status("forced operational probe failure",
+                  ano_crypto_internal_entropy_source_probe_operational(&os_source),
+                  ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED);
     expect_true("forced failure zeroizes output",
                 buffer_is_zero(first, sizeof(first)));
 
@@ -86,6 +97,9 @@ int main(void)
                   ANO_CRYPTO_OK);
     expect_status("partial provider failure",
                   ano_crypto_internal_platform_entropy_get(first, sizeof(first)),
+                  ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED);
+    expect_status("partial operational probe failure",
+                  ano_crypto_internal_entropy_source_probe_operational(&os_source),
                   ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED);
     expect_true("partial provider failure zeroizes full output",
                 buffer_is_zero(first, sizeof(first)));

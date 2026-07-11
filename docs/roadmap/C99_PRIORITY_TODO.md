@@ -1,6 +1,6 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-17 draft.
+Status: P1-18 draft.
 
 ## Completed P0/P1 foundation items
 
@@ -63,21 +63,25 @@ Status: P1-17 draft.
 - P1-17 entropy provider failure-injection seam and dedicated CI lane
 - P1-17 internal startup/continuous health-test candidate skeleton and fatal state-transition tests
 - P1-17 entropy/health policy, evidence, and clean PoC package boundary checks
+- P1-18 OS-provider classification and health-test ownership boundary
+- P1-18 status-only provider operational probe and source-backed process-change reseed guard
+- P1-18 entropy operational tests, policy check, evidence outputs, and PoC package boundary records
 
 ## Immediate P1 next items
 
 1. Review and harden CI matrix after first hosted runs on Linux, Windows, and Apple runners.
 2. Add Windows-specific concurrent CSP/HMAC coverage and sanitizer lanes where supported.
 3. Decide when to implement SHA-384/SHA-512 after P1-15 reserved-scope entry criteria are reviewed.
-4. Select the actual entropy/noise-source boundary and review source-specific startup/continuous health tests, thresholds, restart behavior, and fatality policy.
-5. Decide whether and when to expose public `ano_crypto_random_*` APIs after the P1-17 entropy/health review.
-6. Add reproducible source archive timestamp normalization if byte-for-byte archives become a release requirement.
-7. Decide whether to replace the public build identity struct with field getters before ABI freeze.
-8. Add exported-symbol baseline comparison after symbol visibility policy is chosen.
-9. Add package license/evaluation notice after legal review.
-10. Select first block cipher/mode only after customer and validation-target candidate inputs are reviewed.
-11. Add differential tests only after a reviewed public/reference source or tool is selected.
-12. Replace SBOM/signing placeholders with reviewed generator/signing outputs after tool and key-management policy are selected.
+4. Select a direct noise source only if required, then define source-specific startup/continuous health tests, thresholds, false-positive handling, and recovery policy.
+5. Review hosted Linux/Windows/Apple process-boundary results and decide unsupported-process-marker policy.
+6. Decide whether and when to implement public `ano_crypto_random_*` APIs after the P1-18 operational gate.
+7. Add reproducible source archive timestamp normalization if byte-for-byte archives become a release requirement.
+8. Decide whether to replace the public build identity struct with field getters before ABI freeze.
+9. Add exported-symbol baseline comparison after symbol visibility policy is chosen.
+10. Add package license/evaluation notice after legal review.
+11. Select first block cipher/mode only after customer and validation-target candidate inputs are reviewed.
+12. Add differential tests only after a reviewed public/reference source or tool is selected.
+13. Replace SBOM/signing placeholders with reviewed generator/signing outputs after tool and key-management policy are selected.
 
 ## P2 candidates
 
@@ -102,3 +106,14 @@ Status: P1-17 draft.
 - Module-fatal health failure transition, DRBG context invalidation, and sticky service-gate coverage.
 - Entropy/health policy check, dedicated CI lane, evidence review records, and clean PoC SDK rebuild/scan.
 - No public random implementation, public hook API, or finalized health-test claim.
+
+## P1-18 added scope
+
+- Internal source classification: none, unclassified callback, external conditioned provider, and raw-noise engineering candidate.
+- Explicit health-test ownership and restart-policy metadata without public ABI exposure.
+- Status-only operational probe restricted to the OS-provider class.
+- P1-17 duplicate-block health skeleton restricted to an explicit internal raw-noise engineering callback.
+- Private source-backed DRBG process marker; generation after a detected process change returns `ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED` and clears output.
+- Successful source-backed reseed refreshes the process marker.
+- Entropy operational unit/fork tests, policy target, CI checklist, evidence outputs, and clean PoC package notes.
+- Public random generation remains reserved.

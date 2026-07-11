@@ -1,6 +1,6 @@
 # Public Random API Decision
 
-Status: P1-16 reserved boundary decision.
+Status: P1-18 retained reserved boundary decision.
 
 ## Decision
 
@@ -85,3 +85,7 @@ Evidence may record only status names, provider branch names, test names, file h
 6. Add platform CI coverage for Linux, Windows, and Apple provider branches.
 7. Review whether random service belongs inside the validation-target candidate boundary or a higher layer.
 8. Update customer PoC package notes after public generation is implemented.
+
+## P1-18 operational gate result
+
+P1-18 resolves the internal source classification and adds a private source-backed process-change reseed guard, but it does not satisfy all public-random exit criteria. Public generation remains reserved because context ownership, unsupported process-marker behavior, prediction resistance, hosted cross-platform results, direct noise-source requirements, and validation-boundary impact still require review.

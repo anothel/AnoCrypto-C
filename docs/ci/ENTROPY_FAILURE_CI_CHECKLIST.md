@@ -1,6 +1,6 @@
 # Entropy Failure-Injection CI Checklist
 
-Status: P1-17 engineering checklist.
+Status: P1-18 retained engineering checklist.
 
 ## Default Build Lanes
 

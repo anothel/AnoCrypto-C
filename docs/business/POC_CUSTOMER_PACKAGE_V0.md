@@ -145,3 +145,7 @@ For P1-14, review `THREAD_SAFETY_PACKAGE_NOTES.txt`, `docs/design/THREAD_SAFETY_
 The customer package must not contain internal entropy provider headers or deterministic failure-injection APIs. The generated SDK is therefore not copied from the test build; it is rebuilt with `ANO_CRYPTO_BUILD_TESTS=OFF`, `ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF`, and `ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON`.
 
 `ENTROPY_HEALTH_PACKAGE_NOTES.txt` records this boundary. Health-test candidates remain internal and disabled by default, and the package must not contain raw entropy, deterministic hook output, seed material, DRBG state, or generated random bytes.
+
+## P1-18 entropy operational package boundary
+
+The package includes `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt` and the public policy documents, but it must not contain internal source-policy headers, process-guard headers/sources, operational unit tests, or internal symbols. The note records that OS APIs are treated as external conditioned providers, the process guard is private, and public random generation remains reserved.

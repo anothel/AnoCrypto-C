@@ -1,6 +1,6 @@
 # Customer PoC Package Review Manifest
 
-Status: P1-17 draft.
+Status: P1-18 draft.
 
 ## Purpose
 
@@ -61,3 +61,7 @@ The generated package includes `THREAD_SAFETY_PACKAGE_NOTES.txt`. Review it with
 ## P1-17 entropy/test-hook package note
 
 Review `ENTROPY_HEALTH_PACKAGE_NOTES.txt`, `CLEAN_BUILD_CONFIGURE.log`, and `CLEAN_BUILD.log` together. The packaged SDK must come from the separate clean build, not the internal failure-injection build. No internal entropy header, deterministic hook API, entropy capture, seed material, generated random bytes, or DRBG state may be included.
+
+## P1-18 entropy operational package note
+
+Review `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt` together with the clean build logs and installed symbol/header scans. Confirm that no process-guard, source-class, raw-noise candidate, or internal entropy symbol is installed and that the package still describes public random generation as reserved.

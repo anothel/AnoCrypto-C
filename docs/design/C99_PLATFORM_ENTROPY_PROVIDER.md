@@ -1,6 +1,6 @@
 # C99 Platform Entropy Provider Policy Skeleton
 
-Status: P1-15 draft.
+Status: P1-18 draft.
 
 ## Goal
 
@@ -72,3 +72,11 @@ Not allowed in evidence logs:
 5. Decide whether provider availability should be exposed through a public diagnostic API.
 6. Add customer/environment-specific provider review checklist before PoC delivery.
 7. Review whether internal helper behavior should be part of validation-target documentation or remain implementation detail.
+
+## P1-18 classification and probe
+
+- The configured OS branch is classified internally as an external conditioned random provider.
+- It is not treated as direct raw-noise access, so the P1-17 raw-noise health skeleton is not attached to its output.
+- The internal operational probe requests a fixed temporary buffer, returns status only, and clears the temporary buffer.
+- A provider runtime failure remains operation-local in P1-18 unless a separate explicit module-fatal raw-noise health policy has latched error state.
+- Source-backed DRBG process-change handling is documented in `C99_ENTROPY_SOURCE_OPERATIONAL_POLICY.md`.

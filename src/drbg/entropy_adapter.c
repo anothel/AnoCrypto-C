@@ -113,6 +113,33 @@ ano_crypto_status_t ano_crypto_internal_entropy_source_init_none(
 
     ano_crypto_internal_zeroize(source, sizeof(*source));
     source->kind = ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_NONE;
+    source->source_class = ANO_CRYPTO_INTERNAL_ENTROPY_CLASS_NONE;
+    source->health_test_owner = ANO_CRYPTO_INTERNAL_ENTROPY_HEALTH_OWNER_NONE;
+    source->restart_policy = ANO_CRYPTO_INTERNAL_ENTROPY_RESTART_POLICY_NONE;
+    return ANO_CRYPTO_OK;
+}
+
+static ano_crypto_status_t ano_crypto_internal_entropy_source_init_callback_common(
+    ano_crypto_internal_entropy_source_t *source,
+    ano_crypto_internal_entropy_read_fn read_fn,
+    void *user_context,
+    size_t min_request_len,
+    uint32_t source_class,
+    uint32_t health_test_owner)
+{
+    if (source == 0 || read_fn == 0 || min_request_len == 0u ||
+        min_request_len > ANO_CRYPTO_INTERNAL_ENTROPY_MAX_REQUEST_LEN) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    ano_crypto_internal_zeroize(source, sizeof(*source));
+    source->kind = ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_CALLBACK;
+    source->source_class = source_class;
+    source->min_request_len = min_request_len;
+    source->read_fn = read_fn;
+    source->user_context = user_context;
+    source->health_test_owner = health_test_owner;
+    source->restart_policy = ANO_CRYPTO_INTERNAL_ENTROPY_RESTART_POLICY_CALLER_DEFINED;
     return ANO_CRYPTO_OK;
 }
 
@@ -122,17 +149,28 @@ ano_crypto_status_t ano_crypto_internal_entropy_source_init_callback(
     void *user_context,
     size_t min_request_len)
 {
-    if (source == 0 || read_fn == 0 || min_request_len == 0u ||
-        min_request_len > ANO_CRYPTO_INTERNAL_ENTROPY_MAX_REQUEST_LEN) {
-        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
-    }
+    return ano_crypto_internal_entropy_source_init_callback_common(
+        source,
+        read_fn,
+        user_context,
+        min_request_len,
+        ANO_CRYPTO_INTERNAL_ENTROPY_CLASS_CALLBACK_UNSPECIFIED,
+        ANO_CRYPTO_INTERNAL_ENTROPY_HEALTH_OWNER_CALLER);
+}
 
-    ano_crypto_internal_zeroize(source, sizeof(*source));
-    source->kind = ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_CALLBACK;
-    source->min_request_len = min_request_len;
-    source->read_fn = read_fn;
-    source->user_context = user_context;
-    return ANO_CRYPTO_OK;
+ano_crypto_status_t ano_crypto_internal_entropy_source_init_callback_noise_candidate(
+    ano_crypto_internal_entropy_source_t *source,
+    ano_crypto_internal_entropy_read_fn read_fn,
+    void *user_context,
+    size_t min_request_len)
+{
+    return ano_crypto_internal_entropy_source_init_callback_common(
+        source,
+        read_fn,
+        user_context,
+        min_request_len,
+        ANO_CRYPTO_INTERNAL_ENTROPY_CLASS_RAW_NOISE_TEST_CANDIDATE,
+        ANO_CRYPTO_INTERNAL_ENTROPY_HEALTH_OWNER_MODULE_ENGINEERING_CANDIDATE);
 }
 
 ano_crypto_status_t ano_crypto_internal_entropy_source_init_os(
@@ -146,7 +184,10 @@ ano_crypto_status_t ano_crypto_internal_entropy_source_init_os(
 
     ano_crypto_internal_zeroize(source, sizeof(*source));
     source->kind = ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_OS;
+    source->source_class = ANO_CRYPTO_INTERNAL_ENTROPY_CLASS_EXTERNAL_CONDITIONED_RBG;
     source->min_request_len = min_request_len;
+    source->health_test_owner = ANO_CRYPTO_INTERNAL_ENTROPY_HEALTH_OWNER_EXTERNAL_PROVIDER;
+    source->restart_policy = ANO_CRYPTO_INTERNAL_ENTROPY_RESTART_POLICY_PROVIDER_PER_CALL;
     return ANO_CRYPTO_OK;
 }
 
@@ -155,6 +196,47 @@ ano_crypto_status_t ano_crypto_internal_entropy_source_init_os_reserved(
     size_t min_request_len)
 {
     return ano_crypto_internal_entropy_source_init_os(source, min_request_len);
+}
+
+ano_crypto_status_t ano_crypto_internal_entropy_source_get_policy(
+    const ano_crypto_internal_entropy_source_t *source,
+    uint32_t *out_source_class,
+    uint32_t *out_health_test_owner,
+    uint32_t *out_restart_policy)
+{
+    if (source == 0 || out_source_class == 0 || out_health_test_owner == 0 ||
+        out_restart_policy == 0) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    *out_source_class = source->source_class;
+    *out_health_test_owner = source->health_test_owner;
+    *out_restart_policy = source->restart_policy;
+    return ANO_CRYPTO_OK;
+}
+
+ano_crypto_status_t ano_crypto_internal_entropy_source_probe_operational(
+    const ano_crypto_internal_entropy_source_t *source)
+{
+    uint8_t probe[ANO_CRYPTO_INTERNAL_ENTROPY_OPERATIONAL_PROBE_LEN];
+    ano_crypto_status_t st;
+
+    if (source == 0) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    if (source->kind != ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_OS ||
+        source->source_class != ANO_CRYPTO_INTERNAL_ENTROPY_CLASS_EXTERNAL_CONDITIONED_RBG) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+    }
+
+    if (source->min_request_len > sizeof(probe)) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+    }
+
+    st = ano_crypto_internal_platform_entropy_get(probe, sizeof(probe));
+    ano_crypto_internal_zeroize(probe, sizeof(probe));
+    return st;
 }
 
 ano_crypto_status_t ano_crypto_internal_entropy_source_attach_health_test(
@@ -166,9 +248,13 @@ ano_crypto_status_t ano_crypto_internal_entropy_source_attach_health_test(
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
-    if (source->kind != ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_CALLBACK &&
-        source->kind != ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_OS) {
-        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    if (source->kind != ANO_CRYPTO_INTERNAL_ENTROPY_SOURCE_KIND_CALLBACK) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+    }
+
+    if (source->source_class != ANO_CRYPTO_INTERNAL_ENTROPY_CLASS_RAW_NOISE_TEST_CANDIDATE ||
+        source->health_test_owner != ANO_CRYPTO_INTERNAL_ENTROPY_HEALTH_OWNER_MODULE_ENGINEERING_CANDIDATE) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
     }
 
     if (failure_policy != ANO_CRYPTO_INTERNAL_ENTROPY_HEALTH_FAILURE_OPERATION_ONLY &&

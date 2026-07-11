@@ -1,6 +1,6 @@
 # AnoCrypto-C Service Scope Matrix
 
-Status: P1-17 draft.
+Status: P1-18 draft.
 
 ## Purpose
 
@@ -64,3 +64,12 @@ P1-16 adds a reserved `ac_random.h` public boundary and fail-closed `ano_crypto_
 ## P1-17 entropy/health boundary conclusion
 
 P1-17 adds internal deterministic failure injection, bounded health-test candidates, and fail-closed state transitions only. These are not customer-facing services and do not widen the installed public ABI. Ordinary and PoC builds keep the hook disabled. Public random generation remains reserved until source selection, reseed/fork/restart behavior, health testing, and evidence requirements are reviewed.
+
+## P1-18 entropy operational conclusion
+
+P1-18 adds internal policy metadata, provider operational probing, and process-change protection only. These are not customer-facing cryptographic services and do not widen the installed ABI.
+
+- OS entropy APIs are external conditioned provider inputs to an internal source-backed DRBG path.
+- Direct raw-noise acquisition is not implemented.
+- Public random generation remains reserved.
+- Final direct-noise-source tests and validation mapping remain TODO / confirmation required.

@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-17 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-18 \
 #         -DANO_CRYPTO_RUN_CTEST=ON \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-17")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-18")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -60,6 +60,10 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK)
     set(ANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK)
+    set(ANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK ON)
 endif()
 
 get_filename_component(ANO_CRYPTO_SOURCE_DIR "${ANO_CRYPTO_SOURCE_DIR}" ABSOLUTE)
@@ -144,7 +148,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
 "Git status: ${_git_status}\n"
 "CMake command: ${CMAKE_COMMAND}\n"
 "CMake version: ${CMAKE_VERSION}\n"
-"Reproducible build status: P1-17 draft procedure; binary byte identity not claimed\n"
+"Reproducible build status: P1-18 draft procedure; binary byte identity not claimed\n"
 "Evidence status: engineering draft only\n"
 "Claims boundary: not official validation evidence\n")
 
@@ -344,10 +348,31 @@ else()
         "Entropy/health policy check was not requested. Set ANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK=ON.\n")
 endif()
 
+if(ANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK)
+    set(_entropy_operational_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_OPERATIONAL_POLICY_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+            -DANO_CRYPTO_ENTROPY_OPERATIONAL_CHECK_OUTPUT=${_entropy_operational_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_entropy_operational_policy.cmake"
+        RESULT_VARIABLE _entropy_operational_check_result
+        OUTPUT_VARIABLE _entropy_operational_check_stdout
+        ERROR_VARIABLE _entropy_operational_check_stderr)
+    file(APPEND "${_entropy_operational_check_output}" "\nCommand output:\n${_entropy_operational_check_stdout}${_entropy_operational_check_stderr}\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Entropy operational policy check result: ${_entropy_operational_check_result}\n")
+    if(NOT _entropy_operational_check_result EQUAL 0)
+        message(FATAL_ERROR "entropy operational policy check failed; see ${_entropy_operational_check_output}")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_OPERATIONAL_POLICY_CHECK.txt"
+        "Entropy operational policy check was not requested. Set ANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK=ON.\n")
+endif()
+
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "AnoCrypto-C reproducible build evidence notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-17 draft procedure; binary byte identity is not claimed.\n"
+    "Status: P1-18 draft procedure; binary byte identity is not claimed.\n"
     "Source directory: ${ANO_CRYPTO_SOURCE_DIR}\n"
     "Build directory: ${ANO_CRYPTO_BUILD_DIR}\n"
     "Source archive content list: SOURCE_ARCHIVE_CONTENTS.txt\n"
@@ -358,13 +383,14 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "SHA-2 reserved scope check: SHA2_SCOPE_CHECK.txt\n"
     "Random-service boundary check: RANDOM_BOUNDARY_CHECK.txt\n"
     "Entropy/health policy check: ENTROPY_HEALTH_CHECK.txt\n"
+    "Entropy operational policy check: ENTROPY_OPERATIONAL_POLICY_CHECK.txt\n"
     "TODO: normalize archive timestamps if byte-for-byte source archives become a release requirement.\n"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-17 evidence and scope-review notes\n"
+    "AnoCrypto-C P1-18 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: engineering planning artifact; no new cryptographic algorithm implementation is added by P1-17.\n"
+    "Status: engineering planning artifact; no new cryptographic algorithm implementation is added by P1-18.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Differential validation strategy: docs/kcmvp/DIFFERENTIAL_VALIDATION_STRATEGY.md\n"
@@ -388,26 +414,26 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
     "DRBG/entropy boundary evidence notes: docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md\n"
     "Entropy failure/health design: docs/design/C99_ENTROPY_FAILURE_INJECTION_AND_HEALTH_TEST.md\n"
     "Entropy/health policy check: ENTROPY_HEALTH_CHECK.txt\n"
-    "P1-17 keeps SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 as reserved processing APIs that return ANO_CRYPTO_ERR_NOT_IMPLEMENTED.\n"
+    "P1-18 keeps SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 as reserved processing APIs that return ANO_CRYPTO_ERR_NOT_IMPLEMENTED.\n"
     "Do not include secrets, entropy bytes, generated secret bytes, private keys, tokens, customer data, or internal deployment details in scope evidence.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Scope review notes: SCOPE_REVIEW_NOTES.txt\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA2_SCOPE_REVIEW_NOTES.txt"
     "AnoCrypto-C SHA-384/SHA-512 scope review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-17 planning and reserved-API regression evidence only.\n"
+    "Status: P1-18 planning and reserved-API regression evidence only.\n"
     "Scope decision: docs/design/SHA2_384_512_SCOPE_DECISION.md\n"
     "KAT plan: docs/kcmvp/SHA2_384_512_KAT_PLAN.md\n"
     "Reserved API test: tests/negative/sha2_reserved_api_tests.c\n"
     "Policy check: SHA2_SCOPE_CHECK.txt\n"
     "Current behavior: size/name queries are available; SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 processing return ANO_CRYPTO_ERR_NOT_IMPLEMENTED.\n"
-    "No SHA-384/SHA-512 compression implementation, HMAC implementation, startup KAT, or differential validation code is added by P1-17.\n")
+    "No SHA-384/SHA-512 compression implementation, HMAC implementation, startup KAT, or differential validation code is added by P1-18.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SHA-2 scope review notes: SHA2_SCOPE_REVIEW_NOTES.txt\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RANDOM_BOUNDARY_REVIEW_NOTES.txt"
     "AnoCrypto-C random-service boundary review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-17 reserved boundary evidence only.\n"
+    "Status: P1-18 reserved boundary evidence only.\n"
     "Decision document: docs/design/PUBLIC_RANDOM_API_DECISION.md\n"
     "DRBG/entropy evidence notes: docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md\n"
     "Reserved header: include/anocrypto/ac_random.h\n"
@@ -421,7 +447,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Random boundary rev
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_HEALTH_REVIEW_NOTES.txt"
     "AnoCrypto-C entropy failure-injection and health-test review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-17 engineering testability and state-transition evidence only.\n"
+    "Status: P1-18 engineering testability and state-transition evidence only.\n"
     "Design: docs/design/C99_ENTROPY_FAILURE_INJECTION_AND_HEALTH_TEST.md\n"
     "CI checklist: docs/ci/ENTROPY_FAILURE_CI_CHECKLIST.md\n"
     "Policy check: ENTROPY_HEALTH_CHECK.txt\n"
@@ -431,10 +457,25 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_HEALTH_REVIEW_NOTES.txt"
     "Evidence must record status and policy only; raw entropy, deterministic hook bytes, seed material, DRBG state, and generated secret bytes are prohibited.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Entropy health review notes: ENTROPY_HEALTH_REVIEW_NOTES.txt\n")
 
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_OPERATIONAL_REVIEW_NOTES.txt"
+    "AnoCrypto-C entropy source and operational process-boundary review notes\n"
+    "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
+    "Status: P1-18 engineering policy and regression evidence only.\n"
+    "Design: docs/design/C99_ENTROPY_SOURCE_OPERATIONAL_POLICY.md\n"
+    "CI checklist: docs/ci/ENTROPY_OPERATIONAL_CI_CHECKLIST.md\n"
+    "Policy check: ENTROPY_OPERATIONAL_POLICY_CHECK.txt\n"
+    "Tests: entropy_operational_policy_tests, process_guard_tests, and the dedicated platform failure-injection lane.\n"
+    "OS APIs are classified as external conditioned random providers; the internal raw-noise health skeleton is not attached to OS-provider output.\n"
+    "The operational probe is status-only; its success, forced-failure, and partial-failure paths are exercised only in the dedicated hook lane.\n"
+    "A detected process identity change causes source-backed DRBG generation to return ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED and clear output until reseed succeeds.\n"
+    "Explicit-entropy DRBG state remains caller-managed across process inheritance; this is a boundary record, not a fork-safety claim.\n"
+    "The public random service remains reserved. Evidence records status and policy only, not provider output, seed material, nonce material, DRBG state, or generated output.\n")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Entropy operational review notes: ENTROPY_OPERATIONAL_REVIEW_NOTES.txt\n")
+
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SBOM_STATUS.txt"
     "AnoCrypto-C SBOM status\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: placeholder only; no complete SBOM is generated by P1-17.\n"
+    "Status: placeholder only; no complete SBOM is generated by P1-18.\n"
     "Hash manifests available: SOURCE_FILES.sha256, SOURCE_ARCHIVE.sha256, BINARY_FILES.sha256, EVIDENCE_MANIFEST.sha256.\n"
     "Candidate SBOM formats: SPDX JSON or CycloneDX JSON after tool and schema review.\n"
     "SBOM plan: docs/kcmvp/SBOM_SIGNING_PLAN.md\n"
@@ -444,7 +485,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SBOM status: SBOM_S
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SIGNING_STATUS.txt"
     "AnoCrypto-C signing status\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: signing not performed by P1-17 evidence collection.\n"
+    "Status: signing not performed by P1-18 evidence collection.\n"
     "Private signing keys and signing tokens must not be stored in this repository, evidence directory, or PoC package.\n"
     "Candidate signed artifacts: source archive, source hash file, binary hash file, PoC package archive, SBOM, and evidence manifest after policy review.\n"
     "Preferred future approach: detached signatures with separately reviewed verification instructions.\n"
@@ -586,6 +627,8 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `RANDOM_BOUNDARY_REVIEW_NOTES.txt`: random-service boundary review notes.\n"
 "- `ENTROPY_HEALTH_CHECK.txt`: entropy failure-injection and health-test boundary policy check.\n"
 "- `ENTROPY_HEALTH_REVIEW_NOTES.txt`: health-test state-transition and logging review notes.\n"
+"- `ENTROPY_OPERATIONAL_POLICY_CHECK.txt`: source classification, health ownership, operational probe, and process-boundary policy check.\n"
+"- `ENTROPY_OPERATIONAL_REVIEW_NOTES.txt`: entropy source and process-change review notes.\n"
 "- `REPRODUCIBLE_BUILD_NOTES.txt`: current reproducibility procedure notes and unresolved gaps.\n"
 "- `ctest.log`: captured CTest output when requested.\n"
 "- `INSTALL_SMOKE_*.log`: installed-package configure/build/run logs when requested.\n"
@@ -609,6 +652,8 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- Confirm platform entropy evidence records provider/status only and does not contain entropy bytes.\n"
 "- Confirm random-service evidence records only reserved status and does not contain generated bytes.\n"
 "- Confirm entropy/health evidence contains no raw entropy, deterministic hook bytes, seed material, or DRBG state.\n"
+"- Confirm operational evidence classifies OS providers as external conditioned services and contains no provider output.\n"
+"- Confirm source-backed DRBG process-change evidence records only status and output-clearing results.\n"
 "- Confirm PoC clean-build logs show entropy test hooks OFF and internal symbol hiding ON.\n"
 "- Confirm thread-safety evidence records only status, platform branch, and support-matrix notes.\n")
 

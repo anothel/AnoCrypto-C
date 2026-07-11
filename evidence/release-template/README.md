@@ -76,8 +76,8 @@ ctest --test-dir build --output-on-failure
 Install smoke:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-17
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-17
+cmake --install build --prefix /tmp/anocrypto-c-p1-18
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-18
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -156,3 +156,15 @@ If present, review entropy failure-injection and health-test records for:
 - no installed internal entropy headers or exported test-hook symbols;
 - no entropy samples, deterministic hook byte sequences, seed material, DRBG state, or generated random bytes in logs/evidence;
 - explicit wording that duplicate-block candidates are engineering skeletons, not finalized source-specific tests.
+
+## P1-18 Entropy Operational Review
+
+If present, review:
+
+- `ENTROPY_OPERATIONAL_POLICY_CHECK.txt`;
+- `ENTROPY_OPERATIONAL_REVIEW_NOTES.txt`;
+- OS-provider classification as external conditioned provider output;
+- rejection of raw-noise health attachment for OS-provider and unclassified callback sources;
+- source-backed process-change result `ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED` and output clearing;
+- clean Release/PoC absence of internal process-guard and source-policy symbols;
+- status-only evidence with no provider output, seed material, nonce material, DRBG state, or generated random output.

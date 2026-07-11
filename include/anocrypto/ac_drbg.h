@@ -42,6 +42,7 @@ typedef enum ano_crypto_drbg_state_e {
 #define ANO_CRYPTO_DRBG_HMAC_SHA256_MAX_REQUEST_SIZE 65536u
 #define ANO_CRYPTO_DRBG_HMAC_SHA256_OUTPUT_SIZE 32u
 
+/* Query this value for each build; the private pre-release layout may change. */
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_drbg_context_size(
     ano_crypto_drbg_algorithm_t algorithm,
     size_t *out_size);

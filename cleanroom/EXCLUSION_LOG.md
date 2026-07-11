@@ -1,6 +1,6 @@
 # AnoCrypto-C Exclusion Log
 
-Status: P1-17 draft
+Status: P1-18 draft
 Date: 2026-07-11
 
 ## Purpose
@@ -206,3 +206,15 @@ If excluded material is discovered:
 | EX-2604 | Logs/evidence containing entropy material, seed material, DRBG state, generated random bytes, private keys, tokens, or customer data | Sensitive information risk | Excluded | P1-17 policy, tests, package notes, and evidence review require status-only output. |
 | EX-2605 | Treating duplicate-block candidates or CI failure lanes as a finalized health-test design or official validation result | Claims risk | Excluded | Final source-specific health testing and thresholds remain TODO / confirmation required. |
 | EX-2606 | Recovery/reset API from sticky module `ERROR_STATE` without lifecycle and validation-boundary review | State-machine/API risk | Deferred | P1-17 keeps fatal health failure sticky and requires restart or future reviewed recovery design. |
+
+## P1-18 Additional Exclusions
+
+| ID | Material / behavior | Risk | Decision | Notes |
+|---|---|---|---|---|
+| EX-2701 | Applying the P1-17 duplicate-block candidate to OS-provider output and describing it as a raw-noise health test | Misplaced test and misleading evidence risk | Excluded | OS APIs are classified as external conditioned providers. |
+| EX-2702 | Third-party process/fork guard code, at-fork handlers, or random-state recovery code with unclear ownership | Code provenance and lifecycle risk | Excluded | P1-18 uses a fresh small internal process-marker check only. |
+| EX-2703 | Public ABI exposure of source classes, health owners, restart policies, raw-noise candidate types, or process guards | ABI/support risk | Excluded | These remain internal implementation metadata. |
+| EX-2704 | Provider output, seed material, nonce material, DRBG state, generated random output, private keys, tokens, or customer data in tests/evidence/packages | Sensitive information risk | Excluded | P1-18 tests and records remain status-only. |
+| EX-2705 | Claiming automatic fork/process protection for public explicit-entropy DRBG contexts | Support boundary risk | Excluded | The guard applies only to internally source-backed contexts. |
+| EX-2706 | Enabling public random generation before context ownership, unsupported process-marker behavior, reseed/prediction-resistance policy, hosted CI, and validation-boundary review | API and operational risk | Deferred | Public random processing stays reserved. |
+| EX-2707 | Treating a provider operational probe as entropy-quality evidence | Evidence risk | Excluded | The probe checks call-path/status only and clears temporary storage. |

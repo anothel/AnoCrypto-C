@@ -34,7 +34,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=${{ matrix.thread_safety }}
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-17-entropy-health
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-18-entropy-operational-policy
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -57,6 +57,9 @@ jobs:
 
       - name: Entropy and health-test policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_entropy_health_policy_check
+
+      - name: Entropy operational policy check
+        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_entropy_operational_policy_check
 
       - name: Install
         run: cmake --install build --config ${{ matrix.build_type }} --prefix install-prefix
@@ -97,7 +100,7 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-17-entropy-health-test-hook
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-18-entropy-operational-policy-test-hook
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build dedicated test-hook lane
@@ -108,6 +111,9 @@ jobs:
 
       - name: Entropy and health-test policy check
         run: cmake --build build-entropy-failure --target ano_crypto_entropy_health_policy_check
+
+      - name: Entropy operational policy check
+        run: cmake --build build-entropy-failure --target ano_crypto_entropy_operational_policy_check
 
   evidence-draft:
     name: Linux evidence draft
@@ -126,7 +132,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-17-entropy-health
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-18-entropy-operational-policy
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build

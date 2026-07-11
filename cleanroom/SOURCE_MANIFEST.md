@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P1-17 draft
+Status: P1-18 draft
 Date: 2026-07-11
 
 ## Purpose
@@ -347,3 +347,24 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - The duplicate-block checks are explicitly limited to wiring/state-transition candidates pending selection and review of the actual noise-source boundary.
 - Logs and evidence remain status-only and exclude entropy material, seed material, DRBG state, generated secret bytes, private keys, tokens, customer data, and internal deployment details.
 - The test hook is internal, compile-time gated, disabled by default, and excluded from clean Release/PoC builds.
+
+## P1-18 Entropy Source and Operational Policy Inputs
+
+| ID | Source | Classification | Usage | Notes |
+|---|---|---|---|---|
+| DER-18001 | NIST SP 800-90B, public final publication | Public standard | Terminology and review basis for noise-source health tests, startup/continuous testing, and pre-conditioning placement | No implementation code, threshold, or test vector copied. |
+| DER-18002 | NIST SP 800-90C, public final publication | Public standard | Review basis for entropy-source failure reporting and RBG construction boundaries | Used as a design reference only. |
+| DER-18003 | Linux `getrandom(2)` public manual page | Public platform documentation | Confirm provider call/partial-return/error considerations for the Linux branch | Existing fresh C99 wrapper retained; no third-party source code copied. |
+| DER-18004 | Microsoft `BCryptGenRandom` public documentation | Public platform documentation | Confirm system-preferred provider selection and status mapping questions for the Windows branch | Existing fresh C99 wrapper retained. |
+| DER-18005 | Apple `SecRandomCopyBytes` public documentation | Public platform documentation | Confirm default provider call and status mapping questions for the Apple branch | Existing fresh C99 wrapper retained. |
+| DER-18006 | Fresh internal source-class/health-owner/restart-policy metadata | User-owned C99 implementation | Keep OS-provider output separate from direct raw-noise engineering callbacks | Internal only; no installed ABI. |
+| DER-18007 | Fresh process identity guard and unit/fork tests | User-owned C99 implementation/test code | Require reseed after inherited source-backed DRBG state crosses a detected process boundary | Process marker is non-secret metadata; tests log status only. |
+| DER-18008 | Fresh P1-18 design, CI, evidence, policy-check, and PoC package updates | User-owned documentation/tooling | Record and enforce the operational boundary | Engineering guardrails only. |
+
+## P1-18 Clean-room Notes
+
+- Public standards and official platform documentation were used to establish terminology and boundary questions only.
+- No third-party entropy-source implementation, RCT/APT implementation, cutoff, sample data, process-guard code, or CI workflow was copied.
+- No operating-system provider output is stored as a fixture or written to evidence.
+- P1-18 process-marker tests use process identifiers as non-secret control metadata and do not treat them as entropy.
+- Direct noise-source selection and final source-specific health-test parameters remain TODO / confirmation required.

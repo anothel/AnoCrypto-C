@@ -6,6 +6,7 @@
 #include "ac_drbg_internal.h"
 #include "ac_hmac_internal.h"
 #include "ac_internal.h"
+#include "ac_process_guard_internal.h"
 
 #define ANO_CRYPTO_DRBG_CTX_MAGIC 0x41434452u /* ACDR */
 #define ANO_CRYPTO_HMAC_DRBG_RESEED_INTERVAL 281474976710656ULL /* 2^48 */
@@ -19,8 +20,9 @@ typedef struct ano_crypto_drbg_ctx_internal_s {
     uint32_t magic;
     uint32_t algorithm;
     uint32_t state;
-    uint32_t reserved;
+    uint32_t source_backed;
     uint64_t reseed_counter;
+    ano_crypto_internal_process_guard_t process_guard;
     uint8_t key[ANO_CRYPTO_DRBG_HMAC_SHA256_OUTPUT_SIZE];
     uint8_t value[ANO_CRYPTO_DRBG_HMAC_SHA256_OUTPUT_SIZE];
 } ano_crypto_drbg_ctx_internal_t;
@@ -323,6 +325,13 @@ static ano_crypto_status_t hmac_drbg_reseed_core(
     }
 
     ctx->reseed_counter = 1u;
+    if (ctx->source_backed != 0u) {
+        st = ano_crypto_internal_process_guard_refresh(&ctx->process_guard);
+        if (st != ANO_CRYPTO_OK) {
+            ctx->state = (uint32_t)ANO_CRYPTO_DRBG_STATE_ERROR;
+            return st;
+        }
+    }
     return ANO_CRYPTO_OK;
 }
 
@@ -356,6 +365,14 @@ static ano_crypto_status_t hmac_drbg_generate_core(
 
     if (ctx->reseed_counter > ANO_CRYPTO_HMAC_DRBG_RESEED_INTERVAL) {
         return ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED;
+    }
+
+    if (ctx->source_backed != 0u) {
+        st = ano_crypto_internal_process_guard_check(&ctx->process_guard);
+        if (st != ANO_CRYPTO_OK) {
+            ano_crypto_internal_zeroize(out, out_len);
+            return st;
+        }
     }
 
     if (additional_input_len != 0u) {
@@ -525,9 +542,18 @@ ano_crypto_status_t ano_crypto_internal_hmac_drbg_sha256_instantiate_from_entrop
 
     if (st != ANO_CRYPTO_OK) {
         ano_crypto_internal_zeroize(ctx, ctx_len);
+        return st;
     }
 
-    return st;
+    ((ano_crypto_drbg_ctx_internal_t *)ctx)->source_backed = 1u;
+    st = ano_crypto_internal_process_guard_init(
+        &((ano_crypto_drbg_ctx_internal_t *)ctx)->process_guard);
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_internal_zeroize(ctx, ctx_len);
+        return st;
+    }
+
+    return ANO_CRYPTO_OK;
 }
 
 ano_crypto_status_t ano_crypto_internal_hmac_drbg_sha256_reseed_from_entropy_source(

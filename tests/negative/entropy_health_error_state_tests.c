@@ -101,7 +101,7 @@ int main(void)
                   ANO_CRYPTO_OK);
 
     expect_status("source init",
-                  ano_crypto_internal_entropy_source_init_callback(
+                  ano_crypto_internal_entropy_source_init_callback_noise_candidate(
                       &source, repeat_entropy, &provider,
                       ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_ENTROPY_INPUT_SIZE),
                   ANO_CRYPTO_OK);

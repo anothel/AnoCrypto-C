@@ -87,7 +87,7 @@ endif()
 file(GLOB_RECURSE _installed_headers LIST_DIRECTORIES false "${_sdk_dir}/include/*.h")
 foreach(_header IN LISTS _installed_headers)
     file(READ "${_header}" _header_content)
-    if(_header_content MATCHES "ano_crypto_internal_|ENTROPY_TEST_HOOK|ENABLE_TEST_HOOK")
+    if(_header_content MATCHES "ano_crypto_internal_|ENTROPY_TEST_HOOK|ENABLE_TEST_HOOK|RAW_NOISE_TEST_CANDIDATE|PROCESS_GUARD")
         message(FATAL_ERROR "PoC public header exposes internal/test-hook token: ${_header}")
     endif()
 endforeach()
@@ -103,7 +103,7 @@ if(_nm_exe)
             RESULT_VARIABLE _nm_result
             OUTPUT_VARIABLE _nm_stdout
             ERROR_VARIABLE _nm_stderr)
-        if(_nm_result EQUAL 0 AND _nm_stdout MATCHES "ano_crypto_internal_|entropy_test_hook")
+        if(_nm_result EQUAL 0 AND _nm_stdout MATCHES "ano_crypto_internal_|entropy_test_hook|process_guard")
             message(FATAL_ERROR "PoC shared library exports internal entropy/test-hook symbols: ${_library}")
         endif()
     endforeach()
@@ -132,6 +132,7 @@ set(_doc_files
     docs/design/C99_DRBG_DESIGN.md
     docs/design/C99_ENTROPY_ADAPTER_DESIGN.md
     docs/design/C99_ENTROPY_FAILURE_INJECTION_AND_HEALTH_TEST.md
+    docs/design/C99_ENTROPY_SOURCE_OPERATIONAL_POLICY.md
     docs/design/BLOCK_CIPHER_MODE_SELECTION.md
     docs/design/C99_THREAD_SAFETY_POLICY.md
     docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md
@@ -139,6 +140,7 @@ set(_doc_files
     docs/ci/CI_MATRIX.md
     docs/ci/THREAD_SAFETY_CI_CHECKLIST.md
     docs/ci/ENTROPY_FAILURE_CI_CHECKLIST.md
+    docs/ci/ENTROPY_OPERATIONAL_CI_CHECKLIST.md
     docs/roadmap/DEVELOPMENT_WORKFLOW.md
     docs/roadmap/C99_PRIORITY_TODO.md)
 
@@ -172,6 +174,10 @@ set(_forbidden_internal_package_paths
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/ac_entropy_health_internal.h"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/entropy_adapter.c"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/entropy_health.c"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/process_guard.c"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/ac_process_guard_internal.h"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/entropy_operational_policy_tests.c"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/process_guard_tests.c"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/platform_entropy_failure_injection_tests.c")
 foreach(_forbidden_path IN LISTS _forbidden_internal_package_paths)
     if(EXISTS "${_forbidden_path}")
@@ -184,7 +190,7 @@ string(TIMESTAMP _created_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SBOM_STATUS.txt"
     "AnoCrypto-C PoC package SBOM status\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: placeholder only; no complete SBOM is generated for this P1-17 PoC package.\n"
+    "Status: placeholder only; no complete SBOM is generated for this P1-18 PoC package.\n"
     "Package hash manifest: PACKAGE_MANIFEST.md\n"
     "SBOM plan document: docs/kcmvp/SBOM_SIGNING_PLAN.md\n"
     "Do not add secrets, private keys, tokens, entropy captures, generated secret bytes, customer data, or internal deployment details to SBOM inputs.\n")
@@ -192,14 +198,14 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SBOM_STATUS.txt"
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SIGNING_STATUS.txt"
     "AnoCrypto-C PoC package signing status\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: signing not performed for this P1-17 PoC package.\n"
+    "Status: signing not performed for this P1-18 PoC package.\n"
     "No private signing key, signing token, or detached signature file is included.\n"
     "Future detached-signature workflow remains TODO until signing tool, signer identity, and verification policy are selected.\n")
 
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/THREAD_SAFETY_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package thread-safety notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P1-17 support-matrix draft for customer PoC review.\n"
+    "Status: P1-18 support-matrix draft for customer PoC review.\n"
     "Support matrix: docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md\n"
     "CI checklist: docs/ci/THREAD_SAFETY_CI_CHECKLIST.md\n"
     "Build option: ANO_CRYPTO_ENABLE_THREAD_SAFETY controls internal global-state locking where supported.\n"
@@ -209,7 +215,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/THREAD_SAFETY_PACKAGE_NOTES.txt"
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SHA2_SCOPE_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package SHA-384/SHA-512 scope notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P1-17 reserved-scope draft for customer PoC review.\n"
+    "Status: P1-18 reserved-scope draft for customer PoC review.\n"
     "Scope decision: docs/design/SHA2_384_512_SCOPE_DECISION.md\n"
     "KAT plan: docs/kcmvp/SHA2_384_512_KAT_PLAN.md\n"
     "Current behavior: SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 size/name metadata is queryable, but processing APIs return ANO_CRYPTO_ERR_NOT_IMPLEMENTED.\n"
@@ -218,7 +224,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SHA2_SCOPE_PACKAGE_NOTES.txt"
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RANDOM_BOUNDARY_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package random-service boundary notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P1-17 reserved random-service boundary draft for customer PoC review.\n"
+    "Status: P1-18 reserved random-service boundary draft for customer PoC review.\n"
     "Public random API decision: docs/design/PUBLIC_RANDOM_API_DECISION.md\n"
     "Random service draft: docs/design/C99_RANDOM_SERVICE_API_DRAFT.md\n"
     "DRBG/entropy evidence notes: docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md\n"
@@ -229,11 +235,21 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RANDOM_BOUNDARY_PACKAGE_NOTES.txt"
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/ENTROPY_HEALTH_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package entropy/health-test boundary notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P1-17 engineering boundary summary.\n"
+    "Status: P1-18 engineering boundary summary.\n"
     "The SDK in this package is rebuilt with ANO_CRYPTO_BUILD_TESTS=OFF, ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF, and ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON.\n"
     "No internal entropy provider header or deterministic failure-injection API is installed.\n"
     "Health-test candidates remain internal, disabled by default, and require noise-source-specific review before operational policy selection.\n"
     "Package logs and evidence must not contain entropy bytes, seed material, DRBG state, generated secret bytes, private keys, tokens, or customer data.\n")
+
+file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt"
+    "AnoCrypto-C PoC package entropy operational policy notes\n"
+    "Generated UTC: ${_created_utc}\n"
+    "Status: P1-18 engineering boundary summary.\n"
+    "OS APIs are classified internally as external conditioned random providers; the module raw-noise health skeleton is not attached to their output.\n"
+    "The source-backed DRBG process-change guard is private implementation state and no process-guard type or function is installed.\n"
+    "Explicit-entropy DRBG contexts remain caller-managed across process inheritance; this package does not claim automatic fork safety for that API.\n"
+    "The public random-generation service remains reserved and returns ANO_CRYPTO_ERR_NOT_IMPLEMENTED for processing operations.\n"
+    "Package evidence records status and policy only; provider output, seed material, nonce material, DRBG state, and generated random output are excluded.\n")
 
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/PACKAGE_REVIEW_MANIFEST.md"
     "# AnoCrypto-C PoC Package Review Manifest\n\n"
@@ -247,7 +263,8 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/PACKAGE_REVIEW_MANIFEST.md"
     "- Confirm `SHA2_SCOPE_PACKAGE_NOTES.txt` matches the current SHA-384/SHA-512 reserved scope decision.\n"
     "- Confirm `RANDOM_BOUNDARY_PACKAGE_NOTES.txt` matches the current public random-service reserved boundary decision.\n"
     "- Confirm `ENTROPY_HEALTH_PACKAGE_NOTES.txt` records test hooks OFF and internal symbol hiding ON.\n"
-    "- Confirm installed headers and shared-library exports do not expose internal entropy or failure-injection test-hook symbols.\n"
+    "- Confirm `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt` records external OS-provider classification, private process guard, and reserved public random service.\n"
+    "- Confirm installed headers and shared-library exports do not expose internal entropy, process-guard, or failure-injection test-hook symbols.\n"
     "- Confirm examples do not print key bytes, entropy bytes, seed material, nonce material, DRBG state, generated DRBG output, private keys, or tokens.\n"
     "- Confirm install logs do not disclose internal deployment details before sharing.\n"
     "- Confirm package contents match the intended customer PoC scope.\n"
@@ -265,10 +282,11 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/README.md"
 "- `PACKAGE_MANIFEST.md`: package-relative SHA-256 file manifest.\n"
 "- `PACKAGE_REVIEW_MANIFEST.md`: review notes before sharing.\n"
 "- `SBOM_STATUS.txt` and `SIGNING_STATUS.txt`: placeholder status records.\n"
-"- `THREAD_SAFETY_PACKAGE_NOTES.txt`: P1-17 thread-safety support-matrix summary.\n"
-"- `SHA2_SCOPE_PACKAGE_NOTES.txt`: P1-17 SHA-384/SHA-512 reserved-scope summary.\n"
-"- `RANDOM_BOUNDARY_PACKAGE_NOTES.txt`: P1-17 public random-service reserved-boundary summary.\n"
-"- `ENTROPY_HEALTH_PACKAGE_NOTES.txt`: clean-build and internal entropy/test-hook exclusion summary.\n\n"
+"- `THREAD_SAFETY_PACKAGE_NOTES.txt`: P1-18 thread-safety support-matrix summary.\n"
+"- `SHA2_SCOPE_PACKAGE_NOTES.txt`: P1-18 SHA-384/SHA-512 reserved-scope summary.\n"
+"- `RANDOM_BOUNDARY_PACKAGE_NOTES.txt`: P1-18 public random-service reserved-boundary summary.\n"
+"- `ENTROPY_HEALTH_PACKAGE_NOTES.txt`: clean-build and internal entropy/test-hook exclusion summary.\n"
+"- `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt`: OS-provider classification, private process-boundary guard, and reserved random-service summary.\n\n"
 "## Build the PoC example\n\n"
 "```sh\n"
 "cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=$PWD/sdk\n"

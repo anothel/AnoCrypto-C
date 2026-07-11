@@ -1,6 +1,6 @@
 # AnoCrypto-C Algorithm Scope
 
-Status: P1-17 draft.
+Status: P1-18 draft.
 
 ## Implemented candidate slice
 
@@ -79,3 +79,7 @@ KAT and CTest pass logs are engineering correctness evidence only. They do not r
 - Entropy failure injection and health-test state remain internal engineering seams.
 - Health failure maps to the existing `ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED`; no public status enum expansion is made.
 - Final entropy source, health-test requirements, sample boundary, thresholds, restart handling, and validation mapping remain TODO / confirmation required.
+
+## P1-18 entropy operational scope note
+
+P1-18 does not add an algorithm or widen the current SHA-256/HMAC-SHA-256/HMAC_DRBG-SHA-256 processing slice. It adds internal source classification, status-only provider probing, and process-change reseed behavior for source-backed DRBG state. Direct noise-source selection, finalized startup/continuous tests, public random generation, and validation mapping remain outside the completed scope.

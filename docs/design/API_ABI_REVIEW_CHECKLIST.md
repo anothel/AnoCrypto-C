@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-17 draft.
+Status: P1-18 draft.
 
 ## Review scope
 
@@ -62,8 +62,8 @@ cmake --build build --target ano_crypto_thread_safety_policy_check
 cmake --build build --target ano_crypto_sha2_scope_policy_check
 cmake --build build --target ano_crypto_random_boundary_policy_check
 cmake --build build --target ano_crypto_entropy_health_policy_check
-cmake --install build --prefix /tmp/anocrypto-c-p1-17
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-17
+cmake --install build --prefix /tmp/anocrypto-c-p1-18
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-18
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 cmake --build build --target ano_crypto_poc_package_smoke
@@ -100,3 +100,11 @@ The P1-14 support matrix does not add public symbols or public struct layouts. I
 - No public status-enum value or public struct layout was added for the health-test skeleton; internal health failure maps to `ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED`.
 - PoC staging rebuilds with tests/hooks off and internal symbol hiding on, then scans public headers and shared-library exports for internal/test-hook leakage.
 - Windows shared-library auto-export is allowed only in internal test builds so existing internal-unit tests can link; it is not enabled in the tests-off Release/PoC configuration.
+
+## P1-18 entropy operational ABI note
+
+- Source class, health owner, restart policy, operational probe, and process guard remain private under `src/internal/` or internal source files.
+- No public function, enum value, installed struct, or public macro was added for P1-18.
+- The private DRBG context size increased; callers are required to query `ano_crypto_drbg_context_size()` for each build and must not persist or hard-code the size.
+- Clean Release/PoC builds keep internal symbol hiding enabled and must not export `ano_crypto_internal_*`, entropy hook, or process-guard names.
+- Compare the P1-17 and P1-18 exported public symbol-name lists; any difference requires review before handoff.

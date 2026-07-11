@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-17 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs and negative tests, internal platform entropy provider seam, dedicated-build entropy failure injection, internal startup/continuous health-test candidates, sticky module error-state wiring for fatal health failure, internal DRBG instantiate/reseed helpers, HMAC_DRBG boundary vectors, CMake package naming normalization, HMAC key handle lifecycle, limited internal global-state locking, reproducible-build and CI skeletons, API/ABI and public-surface checks, release-evidence draft tooling, customer PoC package v0 clean-build boundary, SHA-384/SHA-512 reserved scope, and reserved public random-service boundary.
+Current status: P1-18 foundation with SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, expanded KATs and negative tests, internal platform entropy provider seam, dedicated-build entropy failure injection, internal health-test candidates, explicit OS-provider classification as an external conditioned random provider, status-only operational probe, source-backed DRBG process-change reseed guard, sticky module error-state wiring for fatal raw-noise candidate health failure, reproducible-build and CI skeletons, API/ABI and public-surface checks, release-evidence draft tooling, customer PoC package v0 clean-build boundary, SHA-384/SHA-512 reserved scope, and reserved public random-service boundary.
 
 Implemented processing scope:
 
@@ -19,6 +19,9 @@ Implemented processing scope:
 - Dedicated-build deterministic entropy provider hook for success, failure, and partial-write negative paths; disabled by default and absent from public headers
 - Internal startup/continuous duplicate-block health-test candidates with operation-local or module-fatal policy wiring
 - Fatal health-test failure coverage for DRBG context zeroization and sticky module `ERROR_STATE` transition
+- Internal source classification and health-test ownership metadata that keeps OS-provider output outside the raw-noise health skeleton
+- Status-only OS-provider operational probe with temporary-buffer zeroization
+- Private process identity guard for source-backed DRBG state; generation after process change requires reseed and clears output
 - Release evidence draft collection with source archive hash, public-surface check, reproducible-build notes, install smoke logs, PoC package smoke logs, scope-review notes, SBOM/signing placeholder status, and evidence manifest hashes
 - Limited internal locking for module/self-test/CSP global state
 - Thread-safety support matrix, CI checklist, and policy-check target
@@ -33,8 +36,9 @@ Skeleton-only / TODO scope:
 - SHA-384/SHA-512 ABI placeholders with P1-15 reserved-scope regression tests
 - HMAC-SHA-384/HMAC-SHA-512 ABI placeholders
 - Hash_DRBG-SHA-256 ABI placeholder
-- Implemented public random byte generation service and reviewed customer/platform entropy policy
-- Reviewed noise-source-specific startup/continuous health tests, thresholds, restart behavior, and source placement
+- Implemented public random byte generation service and final customer/platform entropy support policy
+- Direct noise-source selection, source-specific startup/continuous health tests, thresholds, and recovery policy
+- Cross-platform hosted-CI review of process-change behavior and unsupported-process-marker policy
 - Persistent keystore, key export, key wrapping, and multi-process CSP model
 - Windows-specific concurrent CSP/HMAC coverage and sanitizer lanes
 - Byte-identical source archive and binary reproducibility rules
@@ -53,8 +57,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-17
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-17
+cmake --install build --prefix /tmp/anocrypto-c-p1-18
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-18
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -72,8 +76,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-17
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-17
+cmake --install build --prefix /tmp/anocrypto-c-p1-18
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-18
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -104,7 +108,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_SURFACE_CHECK.txt`, `THREAD_SAFETY_CHECK.txt`, `SHA2_SCOPE_CHECK.txt`, `RANDOM_BOUNDARY_CHECK.txt`, `RANDOM_BOUNDARY_REVIEW_NOTES.txt`, `REPRODUCIBLE_BUILD_NOTES.txt`, `SCOPE_REVIEW_NOTES.txt`, `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST.sha256`, `ctest.log`, installed-package smoke logs, and PoC package smoke logs when the default P1-17 target is used. The P1-17 target also writes `ENTROPY_HEALTH_CHECK.txt` and `ENTROPY_HEALTH_REVIEW_NOTES.txt`.
+Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_SURFACE_CHECK.txt`, `THREAD_SAFETY_CHECK.txt`, `SHA2_SCOPE_CHECK.txt`, `RANDOM_BOUNDARY_CHECK.txt`, `RANDOM_BOUNDARY_REVIEW_NOTES.txt`, `ENTROPY_HEALTH_CHECK.txt`, `ENTROPY_HEALTH_REVIEW_NOTES.txt`, `ENTROPY_OPERATIONAL_POLICY_CHECK.txt`, `ENTROPY_OPERATIONAL_REVIEW_NOTES.txt`, `REPRODUCIBLE_BUILD_NOTES.txt`, `SCOPE_REVIEW_NOTES.txt`, `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST.sha256`, `ctest.log`, installed-package smoke logs, and PoC package smoke logs when the default P1-18 target is used.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -134,6 +138,19 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_
 - Evidence workflow now writes `RANDOM_BOUNDARY_CHECK.txt` and `RANDOM_BOUNDARY_REVIEW_NOTES.txt`
 - PoC package now writes `RANDOM_BOUNDARY_PACKAGE_NOTES.txt`
 
+## P1-18 entropy source and operational policy
+
+- `docs/design/C99_ENTROPY_SOURCE_OPERATIONAL_POLICY.md` records source classification, health-test ownership, operational probe, failure fatality, and process-change decisions.
+- `docs/ci/ENTROPY_OPERATIONAL_CI_CHECKLIST.md` defines normal, failure-injection, clean Release, PoC, and evidence checks.
+- OS APIs selected by CMake are classified internally as external conditioned random providers rather than direct raw-noise interfaces.
+- P1-17 duplicate-block candidates can attach only to an explicitly classified internal raw-noise engineering callback.
+- `ano_crypto_internal_entropy_source_probe_operational()` checks the configured OS provider with a fixed temporary request and clears the temporary buffer before return.
+- Source-backed internal HMAC_DRBG state records process identity; a detected process change returns `ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED` and clears generation output until reseed succeeds.
+- `ano_crypto_entropy_operational_policy_check` verifies source, health-owner, process-boundary, evidence, public-header, and reserved-random-service rules.
+- Evidence collection writes `ENTROPY_OPERATIONAL_POLICY_CHECK.txt` and `ENTROPY_OPERATIONAL_REVIEW_NOTES.txt`.
+- PoC packaging writes `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt` and rejects internal process-guard/source-policy artifacts.
+- No new public function or installed internal type is added; public random generation remains reserved.
+
 ## Important limitations
 
 - This is not an official validation result.
@@ -141,9 +158,9 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_
 - KAT pass results are correctness checks only and do not replace formal validation.
 - HMAC_DRBG-SHA-256 accepts explicit entropy input in public APIs; automatic public random-service instantiation from OS entropy remains TODO.
 - The entropy callback seam is test/internal plumbing and is not an operational entropy source.
-- The platform entropy provider seam and DRBG helper are internal; provider/helper smoke tests are engineering checks only and do not store entropy bytes.
+- The platform entropy provider seam, operational probe, process guard, and DRBG source helpers are internal; their tests are engineering checks only and do not store provider output.
 - HMAC key handles are in-memory only; export, persistence, keystore integration, and full thread-safety support are not finalized.
-- Prediction-resistance requests are rejected until the entropy adapter, reseed policy, and review evidence are defined.
+- Prediction-resistance requests are rejected until per-request entropy, reseed, process-change, and review evidence rules are defined.
 - Error recovery policy after fatal state remains TODO.
 - Public build identity still exposes one versioned struct layout; field getters should be considered before ABI freeze.
 - Binary reproducibility across hosts/toolchains is not established yet.
@@ -154,6 +171,8 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_
 - P1-16 random-service boundary additions do not add implemented public random byte generation.
 - This repository does not claim official validation or external review completion.
 - P1-17 health-test candidates are engineering skeletons, not finalized noise-source tests or validation evidence.
+- P1-18 process-change protection applies only to internally source-backed DRBG contexts; the public explicit-entropy DRBG API remains caller-managed.
+- P1-18 OS-provider classification does not prove provider quality or suitability for every target environment.
 
 ### P1-17 entropy boundary additions
 
@@ -164,4 +183,4 @@ Generated files include `SOURCE_ARCHIVE.sha256`, `BINARY_FILES.sha256`, `PUBLIC_
 - Fatal reseed health failure invalidates the affected HMAC_DRBG context by zeroization.
 - PoC staging performs a separate clean shared-library build with tests/hooks off and internal symbol hiding on.
 - Evidence collection adds `ENTROPY_HEALTH_CHECK.txt` and `ENTROPY_HEALTH_REVIEW_NOTES.txt`.
-- Final noise-source-specific health tests and operational policy remain TODO / confirmation required.
+- Final direct-noise-source tests, thresholds, and recovery policy remain TODO / confirmation required.

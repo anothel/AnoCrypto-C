@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P1-17 draft.
+Status: P1-18 draft.
 
 ## Purpose
 
@@ -42,6 +42,7 @@ Each task should follow this loop:
    - Public-surface check when naming, public headers, or symbols change.
    - Thread-safety policy check when synchronization code, CSP/key handle behavior, or concurrency wording changes.
    - Entropy/health policy check when provider, failure handling, DRBG seed acquisition, health-test, or hook boundaries change.
+   - Entropy operational policy check when source classification, provider probe, restart/fork behavior, or process-boundary handling changes.
 
 4. Update clean-room and claims records.
    - Record public standards and user-owned documents used as inputs.
@@ -135,6 +136,21 @@ P1-17 deliverables:
 - Evidence outputs and PoC clean-build checks proving hooks/internal symbols are not part of the customer SDK.
 - Clean-room records and explicit TODOs for source-specific health testing.
 
+## P1-18 placement
+
+P1-18 is the entropy source and operational policy step after the P1-17 failure-injection/health skeleton. It classifies OS APIs as external conditioned random providers, separates raw-noise health ownership from provider output, adds a status-only operational probe, and adds a private process-change reseed guard for source-backed DRBG state. It does not implement public random generation or finalize a direct noise-source test design.
+
+P1-18 deliverables:
+
+- Entropy source class, health-owner, and restart-policy metadata in internal headers only.
+- OS-provider operational probe that clears temporary storage and records status only.
+- Explicit rejection of health-test attachment to OS-provider and unclassified callback sources.
+- Private process identity guard for internally source-backed HMAC_DRBG contexts.
+- POSIX fork regression plus deterministic process-marker tests.
+- Entropy operational policy check target, CI checklist, evidence records, and PoC package boundary note.
+- Public symbol/header scan showing no new internal policy surface.
+- Clean-room records for public standards and platform documentation used as design inputs.
+
 ## Planned next sequence
 
 | Step | Candidate name | Scope |
@@ -142,7 +158,8 @@ P1-17 deliverables:
 | P1-15 | SHA-384/SHA-512 reserved scope decision | Completed as reserved-scope/KAT-plan guardrail without implementation. |
 | P1-16 | Public random API decision | Completed as a reserved fail-closed boundary; public generation remains unimplemented. |
 | P1-17 | Entropy failure injection and health-test skeleton | Completed as internal testability/state-transition plumbing; final source-specific policy remains TODO. |
-| P1-18 candidate | Entropy source and operational health policy review | Select the actual source boundary and decide startup/continuous tests, restart/fork behavior, and fatality policy before public random generation. |
+| P1-18 | Entropy source and operational policy review | Completed as source classification, external-provider health ownership, status-only probe, and source-backed process-change reseed guard; direct noise-source thresholds remain TODO. |
+| P1-19 candidate | Public random-service implementation gate | Re-review context ownership, reseed/prediction-resistance policy, unsupported process-marker behavior, hosted CI results, and validation-boundary impact before implementing generation. |
 | P2-01 | Block cipher implementation start | Start only after P1-12 selection criteria and customer/KCMVP scope are reviewed. |
 
 ## Stop conditions
