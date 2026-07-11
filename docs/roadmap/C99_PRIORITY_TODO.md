@@ -1,8 +1,8 @@
 # AnoCrypto-C Priority TODO
 
-Status: P1-23 draft.
+Status: P1-24 draft.
 
-## Completed foundation through P1-23
+## Completed foundation through P1-24
 
 - C99 repository, clean-room records, public C ABI skeleton, lifecycle,
   self-test, build identity, install/export package, evidence, and PoC flows.
@@ -20,28 +20,18 @@ Status: P1-23 draft.
 
 ## Immediate P1 next items
 
-1. **P1-24 candidate: block-cipher/mode implementation entry gate.**
-   - Reconfirm customer and validation-target candidate requirements.
-   - Choose algorithm, mode, key sizes, IV/nonce policy, padding behavior, and
-     allowed API surface before writing implementation code.
-   - Select only public standards/vectors and record clean-room provenance.
-   - Define startup KAT, extended KAT, negative, differential, CSP, install,
-     PoC, and evidence expectations as one gate.
-   - Decide whether the existing 53-symbol ABI can be used or a reviewed ABI
-     change is required.
-2. Review actual hosted P1-23 Linux 32-bit, Windows, and macOS artifacts and
-   record platform-specific limitations; obtain big-endian evidence if that
-   target is intended to be supported.
+1. **P1-25 candidate: implement the approved narrow AES/CBC slice.**
+   - Finalize and review `ac_cipher.h` signatures before adding public surface.
+   - Implement AES-128/192/256 primitive and CBC without padding only.
+   - Add FIPS 197 and NIST SP 800-38A startup/extended KATs.
+   - Bind AES keys to the CSP lifecycle and add stale/destroy/concurrency tests.
+   - Select and document a constant-time-oriented portable implementation strategy.
+   - Add test-only differential validation, install/PoC smoke, evidence, and symbol review.
+2. Review actual hosted P1-23/P1-24 Linux 32-bit, Windows, and macOS artifacts.
 3. Evaluate Clang sanitizer runtime and ThreadSanitizer separately.
-4. Add SHA-512-family length-counter overflow simulation only through a
-   separately reviewed internal test hook.
-5. Select a direct noise source only if required, then define source-specific
-   health tests and recovery policy.
-6. Normalize archive timestamps only if byte-for-byte reproducibility becomes
-   a release requirement.
-7. Add package legal/evaluation notice after legal review.
-8. Replace SBOM/signing placeholders after tool and key-management policy
-   selection.
+4. Select a direct noise source only if required, then define source-specific health tests.
+5. Add package legal/evaluation notice after legal review.
+6. Replace SBOM/signing placeholders after tool and key-management policy selection.
 
 ## Deferred P2 candidates
 

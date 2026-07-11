@@ -1,69 +1,86 @@
 # Block Cipher and Mode Selection Decision Record
 
-Status: P1-15 draft.
+Status: P1-24 entry gate approved for the next implementation slice.
 
-## Decision summary
+## Decision
 
-No block cipher or mode implementation is added in P1-12. The next implementation should start only after customer requirements, target platforms, candidate validation boundary, test-vector sources, self-test requirements, CSP handling, and side-channel review expectations are recorded.
+P1-24 does not add block-cipher processing code or public symbols. It approves a
+narrow P1-25 implementation entry slice:
 
-## Why this is a separate gate
+- algorithm: AES only;
+- key sizes: 128, 192, and 256 bits;
+- first primitive: internal single-block encrypt/decrypt for KAT and mode reuse;
+- first public mode candidate: CBC without padding;
+- block size: 16 bytes;
+- IV size: exactly 16 bytes for CBC;
+- caller supplies complete blocks; padding belongs outside AnoCrypto-C;
+- ECB is not proposed as a general customer-facing data mode;
+- AEAD, CTR, CMAC, GMAC, domestic algorithms, and automatic padding remain deferred.
 
-Block cipher support changes more than a source file. It can affect:
+The choice is an engineering entry decision, not a validation or customer-scope
+claim. A customer or validation-target requirement may reopen the decision.
 
-- Public API and ABI.
-- Service registry and module-state gating.
-- Self-test/KAT requirements.
-- Key/CSP lifecycle and zeroization paths.
-- Error behavior for invalid key sizes, IV/nonce lengths, padding, and authentication tags.
-- Output-buffer aliasing rules.
-- Side-channel review scope.
-- Customer PoC package contents.
-- Evidence workflow and release notes.
+## Public API gate
 
-## Candidate decision inputs
+Before P1-25 merges, an API review must approve:
 
-| Input | Required before implementation? | Notes |
-|---|---:|---|
-| Customer algorithm requirement | Yes | Record algorithm, mode, key sizes, platform, and integration use case. |
-| KCMVP candidate scope | Yes | Confirm whether the algorithm/mode belongs in the candidate core boundary. |
-| Public test-vector source | Yes | Source must be public or user-owned and recorded in clean-room records. |
-| API/ABI draft | Yes | Include context sizing, output sizing, aliasing rules, and status mapping. |
-| CSP lifecycle mapping | Yes | Define import/use/destroy/export restrictions before code. |
-| Self-test/KAT design | Yes | Add known-answer and negative paths before or with implementation. |
-| Side-channel checklist | Yes | Review key-dependent branches, table lookups, memory access patterns, and cleanup paths. |
-| CI runner support | Recommended | Make sure target toolchains build the new code. |
-| Evidence workflow update | Yes | Add logs and scope notes without stronger claims than the evidence supports. |
+- a new `ac_cipher.h` public header;
+- opaque caller-owned context sizing rather than a public struct layout;
+- `ano_crypto_status_t` return values and output parameters;
+- explicit algorithm, direction, mode, key-size, and IV-size validation;
+- exact output-length rules and `written` behavior;
+- documented in-place aliasing policy;
+- no automatic padding and no hidden IV generation;
+- module-state/self-test gating identical to existing cryptographic services.
 
-## Candidate implementation options
+P1-24 intentionally does not add the header because names and signatures are not
+ABI-approved yet. The recorded 53-symbol ABI-0 baseline must remain unchanged.
 
-| Option | Description | P1-12 position |
-|---|---|---|
-| AES-ECB internal primitive only | Minimal primitive for later modes and KATs | Possible starting point, but not externally useful by itself. |
-| AES-CBC | Common legacy integration mode | Requires padding/no-padding policy and IV handling rules. |
-| AES-CTR | Stream-like mode | Requires counter construction and reuse policy. |
-| AES-GCM | AEAD mode | Requires nonce/tag/AAD policy and misuse-resistant higher-level guidance outside core. |
-| Domestic algorithm candidate | Customer/KCMVP-driven choice | Requires explicit requirement and public/reference vector source review. |
+## CSP gate
 
-## API design constraints
+Raw AES keys must not be retained by a public context after initialization unless
+the reviewed API explicitly requires it. The preferred path is an internal key
+schedule bound to a CSP key handle with:
 
-- Keep C99 only.
-- Do not require C++ runtime features.
-- Return `ano_crypto_status_t` and use output parameters.
-- Avoid public struct layout exposure where possible.
-- Provide context-size query before caller-allocated contexts.
-- Define whether input/output aliasing is allowed per function.
-- Define exact behavior for short output buffers.
-- Keep nonce/padding/policy helpers that belong to AnoSecureKit out of the core.
+- exact key-type and key-size checks;
+- non-exportable-by-default lifecycle;
+- destroy/stale-handle rejection;
+- key schedule and temporary block zeroization;
+- no key, schedule, IV, plaintext, or ciphertext logging.
 
-## P1-12 decision
+## KAT and negative-test gate
 
-Block cipher implementation is deferred. The next code step should begin with an API sketch and tests after a customer or validation-target candidate scope is selected.
+Public-source vectors must be recorded before implementation. The planned minimum
+is:
 
-## Open TODOs
+- FIPS 197 AES-128/192/256 encrypt and decrypt known-answer tests;
+- NIST SP 800-38A CBC encrypt/decrypt examples;
+- startup KAT for each supported AES key size and the selected CBC direction path;
+- extended multi-block and in-place tests;
+- invalid key, IV, input length, output length, state, direction, mode, and stale
+  handle tests;
+- differential comparison through a test-only provider that does not enter the
+  product dependency graph.
 
-- Decide first algorithm and mode.
-- Decide whether the first block cipher API should be one-shot only, streaming, or both.
-- Decide context allocation style.
-- Decide whether AEAD belongs in the first block cipher wave or a separate wave.
-- Decide KAT and negative vector sources.
-- Decide if a separate service registry file is needed before code.
+## Side-channel and implementation gate
+
+The implementation review must cover key-dependent table lookups, branches,
+memory access, compiler output, zeroization, and supported CPU/toolchain scope.
+A portable constant-time-oriented implementation strategy must be selected before
+coding. Hardware acceleration, if later introduced, requires a separate provider
+and dispatch decision.
+
+## Deferred items
+
+- AES-GCM and all nonce/tag/AAD policy;
+- AES-CTR counter construction and exhaustion policy;
+- PKCS#7 or other padding;
+- CMAC/GMAC;
+- ARIA or another domestic algorithm pending an explicit requirement and public
+  vector/reference review;
+- higher-level nonce, envelope, and storage policy, which belongs to AnoSecureKit.
+
+## Gate outcome
+
+**GO for P1-25 design and implementation of the narrow AES primitive plus CBC
+no-padding slice, subject to the API, CSP, KAT, and side-channel conditions above.**

@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-23 foundation with SHA-256, SHA-384, SHA-512 and their HMAC variants, HMAC_DRBG-SHA-256, the public random lifecycle, cross-platform CSP/HMAC concurrency coverage, Linux GCC ASan/UBSan, deterministic OpenSSL 3.x test-only SHA-2/HMAC differential validation, C99 representation/alignment portability checks, and the recorded 53-symbol ABI-0 baseline. Actual hosted Linux 32-bit, Windows, macOS, and big-endian artifacts still require review; evidence, install, and PoC outputs remain engineering drafts.
+Current status: P1-24 foundation with SHA-256, SHA-384, SHA-512 and their HMAC variants, HMAC_DRBG-SHA-256, the public random lifecycle, cross-platform CSP/HMAC concurrency coverage, Linux GCC ASan/UBSan, deterministic OpenSSL 3.x test-only SHA-2/HMAC differential validation, C99 representation/alignment portability checks, and the recorded 53-symbol ABI-0 baseline. Actual hosted Linux 32-bit, Windows, macOS, and big-endian artifacts still require review; evidence, install, and PoC outputs remain engineering drafts.
 
 Implemented processing scope:
 
@@ -59,8 +59,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-23
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-23
+cmake --install build --prefix /tmp/anocrypto-c-p1-24
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-24
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -78,8 +78,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-23
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-23
+cmake --install build --prefix /tmp/anocrypto-c-p1-24
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-24
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -110,7 +110,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, P1-23 concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-23/`. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, P1-23 concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-24/`. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -245,3 +245,8 @@ Generated files include public-surface, thread-safety, P1-23 concurrency/sanitiz
 - Preserves the public header/API and stored 53-symbol ABI-0 export baseline.
 
 The next candidate is P1-24: re-open the block-cipher/mode decision gate and lock customer requirements, algorithm/mode parameters, public API impact, public vector sources, differential strategy, and evidence expectations before implementation.
+
+
+## P1-24 block-cipher entry gate
+
+P1-24 adds no block-cipher implementation or public ABI. It records a conditional GO for the next narrow slice: AES-128/192/256 primitive plus CBC without padding, with API, CSP, KAT, side-channel, package, and evidence conditions fixed before code entry.

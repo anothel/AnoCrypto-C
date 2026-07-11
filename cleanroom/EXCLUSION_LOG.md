@@ -279,3 +279,10 @@ If excluded material is discovered:
 | EX-3205 | Treating provider agreement as official validation or proof of implementation independence | Claims risk | Excluded | Differential validation is one engineering correctness layer only. |
 | EX-3206 | Claiming 32-bit, big-endian, Windows, or macOS support from workflow definitions without reviewing actual runs | Evidence/portability overstatement | Excluded | Hosted and non-native artifacts require explicit review. |
 | EX-3207 | Using unreviewed 32-bit OpenSSL packages merely to make the multilib lane pass | Supply-chain ambiguity | Excluded | The initial 32-bit lane disables external differential testing unless a provider package is separately reviewed. |
+
+
+## P1-24 block-cipher entry gate
+
+- Used only public standards identifiers and project-owned design requirements.
+- Selected FIPS 197 and NIST SP 800-38A as future public vector sources; no vectors or implementation code were copied in P1-24.
+- No private certification material, customer material, key, plaintext, ciphertext, or proprietary implementation was used.

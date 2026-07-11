@@ -463,3 +463,10 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - Differential logs contain provider identity, version, comparison count, algorithm/path/length metadata on failure, and status only.
 - The Linux 32-bit workflow is a portability lane definition until an actual hosted result is reviewed.
 - Differential agreement, sanitizer results, and portability status do not establish official validation, side-channel resistance, or completed KCMVP status.
+
+
+## P1-24 block-cipher entry gate
+
+- Used only public standards identifiers and project-owned design requirements.
+- Selected FIPS 197 and NIST SP 800-38A as future public vector sources; no vectors or implementation code were copied in P1-24.
+- No private certification material, customer material, key, plaintext, ciphertext, or proprietary implementation was used.

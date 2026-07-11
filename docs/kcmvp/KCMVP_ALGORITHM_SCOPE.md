@@ -1,6 +1,6 @@
 # AnoCrypto-C Algorithm Scope
 
-Status: P1-23 engineering draft.
+Status: P1-24 engineering draft.
 
 ## Implemented candidate slice
 
@@ -21,7 +21,7 @@ Status: P1-23 engineering draft.
 | Area | Service | State |
 |---|---|---|
 | DRBG | Hash_DRBG-SHA-256 | Algorithm ID placeholder; not implemented. |
-| Block cipher/modes | TBD | Deferred pending customer and validation-target review. |
+| Block cipher/modes | AES primitive + CBC no-padding | P1-24 entry gate approved; implementation deferred to P1-25 after API/CSP/side-channel review. |
 | Additional KDF/MAC | TBD | Deferred. |
 | Public-key primitives | TBD | Deferred to later planning. |
 
@@ -30,3 +30,5 @@ Status: P1-23 engineering draft.
 This file records implementation and evidence-preparation scope. It does not assert official validation status. Passing KATs and CTest are engineering correctness signals only.
 
 P1-22 did not add a public function or change the stored 53-symbol ABI-0 export list. P1-23 adds OpenSSL 3.x test-only differential and portability checks without changing that public surface or introducing an SDK runtime dependency. Actual hosted 32-bit, Windows, macOS, and big-endian review remains TODO.
+
+P1-24 adds no block-cipher code or public symbol. The selected next candidate is AES-128/192/256 primitive plus CBC without padding; AEAD, CTR, padding helpers, CMAC/GMAC, and domestic algorithms remain deferred.
