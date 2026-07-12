@@ -14,28 +14,30 @@ endif()
 get_filename_component(ANO_CRYPTO_BUILD_DIR "${ANO_CRYPTO_BUILD_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_CTEST_EVIDENCE_DIR "${ANO_CRYPTO_CTEST_EVIDENCE_DIR}" ABSOLUTE)
 
-find_program(_ctest_exe ctest)
-if(NOT _ctest_exe)
-    message(FATAL_ERROR "ctest executable not found")
-endif()
+find_program(_ctest_exe NAMES ctest REQUIRED)
 if(NOT EXISTS "${ANO_CRYPTO_BUILD_DIR}/CTestTestfile.cmake")
     message(FATAL_ERROR "configured CTest tree is unavailable: ${ANO_CRYPTO_BUILD_DIR}")
 endif()
 
 file(REMOVE_RECURSE "${ANO_CRYPTO_CTEST_EVIDENCE_DIR}")
 file(MAKE_DIRECTORY "${ANO_CRYPTO_CTEST_EVIDENCE_DIR}")
+set(_ctest_log "${ANO_CRYPTO_CTEST_EVIDENCE_DIR}/ctest.log")
+
+# Stream stdout/stderr directly to the evidence file instead of capturing them
+# in CMake pipe variables.  Some nested build/test programs may leave inherited
+# pipe descriptors open briefly; file redirection prevents that from stalling
+# the evidence wrapper after CTest itself has completed.
 execute_process(
-    COMMAND "${_ctest_exe}" --output-on-failure
+    COMMAND "${_ctest_exe}" --output-on-failure --timeout 180
     WORKING_DIRECTORY "${ANO_CRYPTO_BUILD_DIR}"
     RESULT_VARIABLE _ctest_result
-    OUTPUT_VARIABLE _ctest_stdout
-    ERROR_VARIABLE _ctest_stderr)
-file(WRITE "${ANO_CRYPTO_CTEST_EVIDENCE_DIR}/ctest.log"
-    "${_ctest_stdout}${_ctest_stderr}")
+    OUTPUT_FILE "${_ctest_log}"
+    ERROR_FILE "${_ctest_log}"
+    TIMEOUT 900)
 file(WRITE "${ANO_CRYPTO_CTEST_EVIDENCE_DIR}/CTEST_EVIDENCE_SUMMARY.txt"
     "CTest result: ${_ctest_result}\n"
     "Sensitive cryptographic values logged: no\n")
-if(NOT _ctest_result EQUAL 0)
-    message(FATAL_ERROR "CTest evidence run failed; see ${ANO_CRYPTO_CTEST_EVIDENCE_DIR}/ctest.log")
+if(NOT "${_ctest_result}" STREQUAL "0")
+    message(FATAL_ERROR "CTest evidence run failed (${_ctest_result}); see ${_ctest_log}")
 endif()
 message(STATUS "AnoCrypto-C CTest evidence capture passed: ${ANO_CRYPTO_CTEST_EVIDENCE_DIR}")

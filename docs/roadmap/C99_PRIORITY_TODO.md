@@ -41,3 +41,25 @@ Status: P1-29 AES-CMAC hardening completed as an engineering slice.
 - public-key algorithms and AnoPKI integration;
 - complete SBOM/signing and customer evaluation/legal notices;
 - any official-validation or completed-review claim.
+
+
+## P1-30 Release Compatibility Baseline
+
+Completed engineering scope:
+
+- central release identity and expected-tag metadata;
+- exact P1-29 public-header and 69-symbol baseline;
+- normalized public source-surface comparison;
+- current-header and P1-29-header consumers against P1-30;
+- installed CMake package exact/incompatible version probes;
+- hosted artifact manifest create/verify/tamper tests;
+- status-only hosted bundle index/review workflow;
+- evidence and PoC compatibility boundaries with no public ABI growth.
+
+Remaining TODO:
+
+- review actual Linux/macOS/Windows hosted compatibility artifacts;
+- review actual Linux 32-bit and s390x big-endian artifacts;
+- verify the expected tag and commit in a tagged Git workflow;
+- select signing/provenance policy before external release use;
+- decide P1-31 scope after hosted artifact disposition, without implying completed validation.

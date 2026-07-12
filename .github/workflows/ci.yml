@@ -36,7 +36,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-29-cmac-hardening
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-30-release-compatibility
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -119,6 +119,38 @@ jobs:
           name: hosted-aes-cmac-hardening-review-${{ runner.os }}-thread-safety-${{ matrix.thread_safety }}
           path: hosted-aes-cmac-hardening-review.txt
           if-no-files-found: error
+
+      - name: Create hosted platform artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-artifact-bundle
+          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=hosted-random-platform-review.txt;hosted-thread-platform-review.txt;hosted-sha512-portability-review.txt;hosted-aes-cbc-hardening-review.txt;hosted-aes-cmac-hardening-review.txt"
+          -DANO_CRYPTO_HOSTED_LANE=platform-thread-safety-${{ matrix.thread_safety }}
+          -DANO_CRYPTO_HOSTED_PLATFORM=${{ runner.os }}
+          -DANO_CRYPTO_HOSTED_ARCH=runner-default
+          -DANO_CRYPTO_HOSTED_COMPILER=cmake-configured
+          -DANO_CRYPTO_HOSTED_COMMIT=${{ github.sha }}
+          -P tools/create_hosted_artifact_manifest.cmake
+
+      - name: Verify hosted platform artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-artifact-bundle
+          -DANO_CRYPTO_EXPECTED_HOSTED_LANE=platform-thread-safety-${{ matrix.thread_safety }}
+          -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=${{ runner.os }}
+          -P tools/check_hosted_artifact_manifest.cmake
+
+      - name: Upload hosted platform review bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: anocrypto-c-p1-30-hosted-platform-${{ runner.os }}-thread-safety-${{ matrix.thread_safety }}
+          path: hosted-artifact-bundle
+          if-no-files-found: error
+
+      - name: Release compatibility policy check
+        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_release_compatibility_policy_check
 
       - name: Public surface check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_public_surface_check
@@ -205,7 +237,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
           -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-29-cmac-hardening-openssl
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-30-release-compatibility-openssl
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build differential lane
@@ -229,6 +261,35 @@ jobs:
 
       - name: AES-CMAC hardening policy check
         run: cmake --build build-differential --target ano_crypto_cmac_hardening_policy_check
+
+      - name: Create differential hosted artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-differential-bundle
+          -DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=differential-validation.txt
+          -DANO_CRYPTO_HOSTED_LANE=openssl-differential
+          -DANO_CRYPTO_HOSTED_PLATFORM=Linux
+          -DANO_CRYPTO_HOSTED_ARCH=x86_64
+          -DANO_CRYPTO_HOSTED_COMPILER=system-default
+          -DANO_CRYPTO_HOSTED_COMMIT=${{ github.sha }}
+          -P tools/create_hosted_artifact_manifest.cmake
+
+      - name: Verify differential hosted artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-differential-bundle
+          -DANO_CRYPTO_EXPECTED_HOSTED_LANE=openssl-differential
+          -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=Linux
+          -P tools/check_hosted_artifact_manifest.cmake
+
+      - name: Upload differential hosted bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: anocrypto-c-p1-30-openssl-differential-Linux
+          path: hosted-differential-bundle
+          if-no-files-found: error
 
       - name: Upload differential status artifact
         uses: actions/upload-artifact@v4
@@ -263,7 +324,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-29-cmac-hardening-linux32
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-30-release-compatibility-linux32
           -DCMAKE_C_FLAGS=-m32
           -DCMAKE_EXE_LINKER_FLAGS=-m32
           -DCMAKE_SHARED_LINKER_FLAGS=-m32
@@ -305,6 +366,35 @@ jobs:
       - name: AES-CMAC hardening policy check
         run: cmake --build build-32bit --target ano_crypto_cmac_hardening_policy_check
 
+      - name: Create 32-bit hosted artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-32bit-bundle
+          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=sha512-portability-32bit.txt;aes-cbc-hardening-32bit.txt;aes-cmac-hardening-32bit.txt"
+          -DANO_CRYPTO_HOSTED_LANE=linux-32bit-portability
+          -DANO_CRYPTO_HOSTED_PLATFORM=Linux
+          -DANO_CRYPTO_HOSTED_ARCH=x86
+          -DANO_CRYPTO_HOSTED_COMPILER=gcc-m32
+          -DANO_CRYPTO_HOSTED_COMMIT=${{ github.sha }}
+          -P tools/create_hosted_artifact_manifest.cmake
+
+      - name: Verify 32-bit hosted artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-32bit-bundle
+          -DANO_CRYPTO_EXPECTED_HOSTED_LANE=linux-32bit-portability
+          -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=Linux
+          -P tools/check_hosted_artifact_manifest.cmake
+
+      - name: Upload 32-bit hosted bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: anocrypto-c-p1-30-portability-Linux-32bit
+          path: hosted-32bit-bundle
+          if-no-files-found: error
+
       - name: Upload 32-bit portability artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -339,7 +429,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-29-cmac-hardening-${{ matrix.cc }}-compiler-review
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-30-release-compatibility-${{ matrix.cc }}-compiler-review
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Capture AES compiler output
@@ -353,6 +443,35 @@ jobs:
 
       - name: AES-CMAC hardening policy check
         run: cmake --build build-compiler-review --target ano_crypto_cmac_hardening_policy_check
+
+      - name: Create compiler-output hosted artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-compiler-bundle
+          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=build-compiler-review/policy-check/aes-compiler-review/AES_COMPILER_OUTPUT_REVIEW.txt;build-compiler-review/policy-check/aes-compiler-review/AES_COMPILER_OUTPUT_DISASSEMBLY.txt;build-compiler-review/policy-check/cmac-compiler-review/CMAC_COMPILER_OUTPUT_REVIEW.txt;build-compiler-review/policy-check/cmac-compiler-review/CMAC_COMPILER_OUTPUT_DISASSEMBLY.txt"
+          -DANO_CRYPTO_HOSTED_LANE=aes-cmac-compiler-output-${{ matrix.cc }}
+          -DANO_CRYPTO_HOSTED_PLATFORM=Linux
+          -DANO_CRYPTO_HOSTED_ARCH=x86_64
+          -DANO_CRYPTO_HOSTED_COMPILER=${{ matrix.cc }}
+          -DANO_CRYPTO_HOSTED_COMMIT=${{ github.sha }}
+          -P tools/create_hosted_artifact_manifest.cmake
+
+      - name: Verify compiler-output hosted artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-compiler-bundle
+          -DANO_CRYPTO_EXPECTED_HOSTED_LANE=aes-cmac-compiler-output-${{ matrix.cc }}
+          -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=Linux
+          -P tools/check_hosted_artifact_manifest.cmake
+
+      - name: Upload compiler-output hosted bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: anocrypto-c-p1-30-compiler-output-${{ matrix.cc }}-Linux
+          path: hosted-compiler-bundle
+          if-no-files-found: error
 
       - name: Upload compiler-output artifact
         uses: actions/upload-artifact@v4
@@ -389,7 +508,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DBUILD_SHARED_LIBS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-29-cmac-hardening-s390x
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-30-release-compatibility-s390x
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build s390x lane
@@ -420,6 +539,35 @@ jobs:
 
       - name: AES-CMAC hardening policy check
         run: cmake --build build-s390x --target ano_crypto_cmac_hardening_policy_check
+
+      - name: Create s390x hosted artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-s390x-bundle
+          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=aes-cbc-hardening-s390x.txt;aes-cmac-hardening-s390x.txt"
+          -DANO_CRYPTO_HOSTED_LANE=linux-s390x-big-endian
+          -DANO_CRYPTO_HOSTED_PLATFORM=Linux
+          -DANO_CRYPTO_HOSTED_ARCH=s390x
+          -DANO_CRYPTO_HOSTED_COMPILER=gcc-s390x-linux-gnu
+          -DANO_CRYPTO_HOSTED_COMMIT=${{ github.sha }}
+          -P tools/create_hosted_artifact_manifest.cmake
+
+      - name: Verify s390x hosted artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-s390x-bundle
+          -DANO_CRYPTO_EXPECTED_HOSTED_LANE=linux-s390x-big-endian
+          -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=Linux
+          -P tools/check_hosted_artifact_manifest.cmake
+
+      - name: Upload s390x hosted bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: anocrypto-c-p1-30-portability-Linux-s390x
+          path: hosted-s390x-bundle
+          if-no-files-found: error
 
       - name: Upload s390x status artifact
         uses: actions/upload-artifact@v4
@@ -454,7 +602,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_SANITIZER_MODE=address-undefined
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-29-cmac-hardening-GCC-asan-ubsan
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-30-release-compatibility-GCC-asan-ubsan
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build sanitizer lane
@@ -492,7 +640,7 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-29-cmac-hardening-test-hook
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-30-release-compatibility-test-hook
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build dedicated test-hook lane
@@ -532,7 +680,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-29-cmac-hardening-provider-disabled
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-30-release-compatibility-provider-disabled
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build provider-disabled lane
@@ -567,6 +715,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Configure clean Release
         run: >
@@ -580,11 +730,55 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON
           -DBUILD_SHARED_LIBS=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-29-cmac-hardening-clean-release
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-30-release-compatibility-clean-release
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Compare clean Release exports with ABI-0 baseline
         run: cmake --build build-clean-release --config Release --target ano_crypto_exported_symbol_baseline_check
+
+      - name: Release compatibility policy check
+        run: cmake --build build-clean-release --config Release --target ano_crypto_release_compatibility_policy_check
+
+      - name: Validate expected tag identity
+        if: startsWith(github.ref, 'refs/tags/')
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_BUILD_DIR=${{ github.workspace }}/build-clean-release
+          -DANO_CRYPTO_ACTUAL_RELEASE_TAG=${{ github.ref_name }}
+          -DANO_CRYPTO_ACTUAL_RELEASE_COMMIT=${{ github.sha }}
+          -DANO_CRYPTO_REQUIRE_ACTUAL_RELEASE_TAG=ON
+          -DANO_CRYPTO_RELEASE_COMPATIBILITY_CHECK_OUTPUT=${{ github.workspace }}/build-clean-release/policy-check/TAGGED_RELEASE_COMPATIBILITY_CHECK.txt
+          -P tools/check_release_compatibility.cmake
+
+      - name: Create exported-symbol hosted artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-symbol-bundle
+          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=build-clean-release/policy-check/EXPORTED_SYMBOL_BASELINE_CHECK.txt;build-clean-release/policy-check/RELEASE_COMPATIBILITY_CHECK.txt"
+          -DANO_CRYPTO_HOSTED_LANE=clean-release-symbol-compatibility
+          -DANO_CRYPTO_HOSTED_PLATFORM=${{ runner.os }}
+          -DANO_CRYPTO_HOSTED_ARCH=runner-default
+          -DANO_CRYPTO_HOSTED_COMPILER=cmake-configured
+          -DANO_CRYPTO_HOSTED_COMMIT=${{ github.sha }}
+          -P tools/create_hosted_artifact_manifest.cmake
+
+      - name: Verify exported-symbol hosted artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-symbol-bundle
+          -DANO_CRYPTO_EXPECTED_HOSTED_LANE=clean-release-symbol-compatibility
+          -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=${{ runner.os }}
+          -P tools/check_hosted_artifact_manifest.cmake
+
+      - name: Upload exported-symbol hosted bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: anocrypto-c-p1-30-symbol-compatibility-${{ runner.os }}
+          path: hosted-symbol-bundle
+          if-no-files-found: error
 
       - name: Upload exported-symbol baseline report
         uses: actions/upload-artifact@v4
@@ -593,10 +787,73 @@ jobs:
           path: build-clean-release/policy-check/EXPORTED_SYMBOL_BASELINE_CHECK.txt
           if-no-files-found: error
 
+  tagged-release-compatibility:
+    name: ${{ matrix.os }} tagged release compatibility smoke
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run clean installed-package compatibility smoke
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_BUILD_DIR=${{ github.workspace }}/tagged-compatibility-driver
+          -DANO_CRYPTO_TAGGED_COMPAT_SMOKE_DIR=${{ github.workspace }}/tagged-release-compatibility
+          -P tools/run_tagged_release_compatibility_smoke.cmake
+
+      - name: Verify actual tag and commit identity
+        if: startsWith(github.ref, 'refs/tags/')
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_BUILD_DIR=${{ github.workspace }}/tagged-release-compatibility/release-build
+          -DANO_CRYPTO_ACTUAL_RELEASE_TAG=${{ github.ref_name }}
+          -DANO_CRYPTO_ACTUAL_RELEASE_COMMIT=${{ github.sha }}
+          -DANO_CRYPTO_REQUIRE_ACTUAL_RELEASE_TAG=ON
+          -DANO_CRYPTO_RELEASE_COMPATIBILITY_CHECK_OUTPUT=${{ github.workspace }}/tagged-release-compatibility/TAG_COMMIT_IDENTITY_CHECK.txt
+          -P tools/check_release_compatibility.cmake
+
+      - name: Create tagged compatibility hosted artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-tagged-compatibility-bundle
+          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=${{ github.workspace }}/tagged-release-compatibility/TAGGED_COMPAT_SUMMARY.txt;${{ github.workspace }}/tagged-release-compatibility/release-build/policy-check/RELEASE_COMPATIBILITY_CHECK.txt"
+          -DANO_CRYPTO_HOSTED_LANE=tagged-release-compatibility
+          -DANO_CRYPTO_HOSTED_PLATFORM=${{ runner.os }}
+          -DANO_CRYPTO_HOSTED_ARCH=runner-default
+          -DANO_CRYPTO_HOSTED_COMPILER=cmake-configured
+          -DANO_CRYPTO_HOSTED_COMMIT=${{ github.sha }}
+          -P tools/create_hosted_artifact_manifest.cmake
+
+      - name: Verify tagged compatibility hosted artifact manifest
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-tagged-compatibility-bundle
+          -DANO_CRYPTO_EXPECTED_HOSTED_LANE=tagged-release-compatibility
+          -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=${{ runner.os }}
+          -P tools/check_hosted_artifact_manifest.cmake
+
+      - name: Upload tagged compatibility hosted bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: anocrypto-c-p1-30-tagged-compatibility-${{ runner.os }}
+          path: hosted-tagged-compatibility-bundle
+          if-no-files-found: error
+
   evidence-draft:
     name: Linux evidence draft
     runs-on: ubuntu-latest
-    needs: [build-test-smoke, differential-validation, core-portability-32bit, aes-cmac-compiler-output-review, aes-big-endian-s390x, sanitizer, clean-release-symbol-baseline]
+    needs: [build-test-smoke, differential-validation, core-portability-32bit, aes-cmac-compiler-output-review, aes-big-endian-s390x, sanitizer, clean-release-symbol-baseline, tagged-release-compatibility]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -619,7 +876,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
           -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-29-cmac-hardening
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-30-release-compatibility
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
@@ -631,6 +888,74 @@ jobs:
       - name: Upload evidence draft
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p1-29-evidence-draft
-          path: build/evidence/p1-29
+          name: anocrypto-c-p1-30-evidence-draft
+          path: build/evidence/p1-30
+          if-no-files-found: error
+
+  hosted-artifact-index:
+    name: Verify and index hosted artifact bundles
+    runs-on: ubuntu-latest
+    needs: [build-test-smoke, differential-validation, core-portability-32bit, aes-cmac-compiler-output-review, aes-big-endian-s390x, clean-release-symbol-baseline, tagged-release-compatibility]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download platform bundles
+        uses: actions/download-artifact@v4
+        with:
+          pattern: anocrypto-c-p1-30-hosted-platform-*
+          path: downloaded-hosted-artifacts
+          merge-multiple: false
+
+      - name: Download differential bundles
+        uses: actions/download-artifact@v4
+        with:
+          pattern: anocrypto-c-p1-30-openssl-differential-*
+          path: downloaded-hosted-artifacts
+          merge-multiple: false
+
+      - name: Download portability bundles
+        uses: actions/download-artifact@v4
+        with:
+          pattern: anocrypto-c-p1-30-portability-*
+          path: downloaded-hosted-artifacts
+          merge-multiple: false
+
+      - name: Download compiler-output bundles
+        uses: actions/download-artifact@v4
+        with:
+          pattern: anocrypto-c-p1-30-compiler-output-*
+          path: downloaded-hosted-artifacts
+          merge-multiple: false
+
+      - name: Download symbol compatibility bundles
+        uses: actions/download-artifact@v4
+        with:
+          pattern: anocrypto-c-p1-30-symbol-compatibility-*
+          path: downloaded-hosted-artifacts
+          merge-multiple: false
+
+      - name: Download tagged compatibility bundles
+        uses: actions/download-artifact@v4
+        with:
+          pattern: anocrypto-c-p1-30-tagged-compatibility-*
+          path: downloaded-hosted-artifacts
+          merge-multiple: false
+
+      - name: Verify manifests and create hosted artifact index
+        run: >
+          cmake
+          -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
+          -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=${{ github.workspace }}/downloaded-hosted-artifacts
+          -DANO_CRYPTO_HOSTED_ARTIFACT_OUTPUT_DIR=${{ github.workspace }}/hosted-artifact-index
+          -DANO_CRYPTO_WORKFLOW_RUN_ID=${{ github.run_id }}
+          -DANO_CRYPTO_WORKFLOW_COMMIT=${{ github.sha }}
+          -DANO_CRYPTO_WORKFLOW_REF=${{ github.ref }}
+          -P tools/create_hosted_artifact_index.cmake
+
+      - name: Upload hosted artifact index
+        uses: actions/upload-artifact@v4
+        with:
+          name: anocrypto-c-p1-30-hosted-artifact-index
+          path: hosted-artifact-index
           if-no-files-found: error

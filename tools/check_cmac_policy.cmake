@@ -1,4 +1,4 @@
-# AnoCrypto-C P1-29 retained AES-CMAC implementation policy check.
+# AnoCrypto-C P1-30 retained AES-CMAC implementation policy check.
 # This is an engineering guardrail, not formal validation evidence.
 
 cmake_minimum_required(VERSION 3.16)
@@ -54,7 +54,7 @@ foreach(_file IN ITEMS
   require_file("${_file}")
 endforeach()
 
-require_text("include/anocrypto/ac_version.h" "0.1.0-p1-29-cmac-hardening")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p1-30-release-compatibility")
 require_text("include/anocrypto/ac_key.h" "ANO_CRYPTO_KEY_TYPE_CMAC = 7")
 require_text("include/anocrypto/anocrypto.h" "#include <anocrypto/ac_cmac.h>")
 require_text("include/anocrypto/ac_cmac.h" "ANO_CRYPTO_CMAC_TAG_SIZE 16u")
@@ -103,7 +103,7 @@ if(_cmac_source MATCHES "openssl/|EVP_MAC|OpenSSL::Crypto" OR
 endif()
 
 file(WRITE "${ANO_CRYPTO_CMAC_CHECK_OUTPUT}"
-  "AnoCrypto-C P1-29 retained AES-CMAC implementation policy check\n")
+  "AnoCrypto-C P1-30 retained AES-CMAC implementation policy check\n")
 if(_violations)
   file(APPEND "${ANO_CRYPTO_CMAC_CHECK_OUTPUT}" "Result: FAIL\n")
   foreach(_violation IN LISTS _violations)

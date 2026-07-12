@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-29 engineering slice retaining SHA-256, SHA-384, SHA-512 and their HMAC variants, HMAC_DRBG-SHA-256, the public random lifecycle, AES-128/192/256, AES-CBC without padding, and AES-CMAC with full 16-byte tags through dedicated CSP key purposes. The repository includes startup and extended public-source KATs, negative and OpenSSL 3.x test-only differential validation, C99 portability checks, AES lifecycle hardening, compiler-output capture for manual review, and a reviewed 69-symbol ABI-0 baseline. P1-29 adds private CMAC state/lifecycle/alias cleanup hardening, 128-iteration stress, expanded differential and shared-handle concurrency coverage, and compiler-output capture without widening the public API. Actual hosted Linux 32-bit, Windows, macOS, big-endian, and target-specific compiler/side-channel artifacts still require review; evidence, install, and PoC outputs remain engineering drafts.
+Current status: `0.1.0-p1-30-release-compatibility`, an engineering slice that retains the P1-29 cryptographic processing scope and the reviewed 69-symbol ABI-0 surface. P1-30 adds a central release-identity record, a preserved P1-29 public-header and symbol baseline, normalized declaration/type/constant comparison, a P1-29-header/P1-30-library runtime consumer, installed-package compatibility smoke, and hashed status-only hosted-artifact manifests. Expected Git tag metadata is recorded but tag existence and commit identity still require an explicit release review. Actual hosted Linux 32-bit, Windows, macOS, big-endian, and target-specific compiler/side-channel artifacts also remain review items; evidence, install, and PoC outputs remain engineering drafts.
 
 Implemented processing scope:
 
@@ -15,6 +15,7 @@ Implemented processing scope:
 - P1-26 AES private-context integrity guards, fail-closed reinitialization, 128-iteration lifecycle stress, unaligned byte-buffer/streaming/in-place portability regression, and shared/per-thread CSP AES concurrency coverage
 - P1-28 AES-CMAC with AES-128/192/256 dedicated key-purpose handles, full 16-byte tags, one-shot compute/verify, streaming compute, startup/extended KATs, negative tests, and OpenSSL test-only differential coverage
 - P1-29 AES-CMAC private state guards, fail-closed reinitialization, bounded uninit and non-overlap rules, lifecycle stress, shared-handle concurrency, 1,728 comparison differential corpus, and manual compiler-output review capture
+- P1-30 release identity, P1-29 public-header snapshot, normalized source-surface comparison, old-header/current-library runtime compatibility, installed-package compatibility smoke, and hashed hosted-artifact bundle manifests
 - AES Release compiler-output capture with compiler/target/library metadata and a manual-review-only interpretation boundary
 - HMAC_DRBG-SHA-256 deterministic core API
 - Internal HMAC_DRBG-SHA-256 instantiate/reseed helper driven by entropy source
@@ -66,8 +67,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-29
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-29
+cmake --install build --prefix /tmp/anocrypto-c-p1-30
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-30
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -85,8 +86,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-29
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-29
+cmake --install build --prefix /tmp/anocrypto-c-p1-30
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-30
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -117,7 +118,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-29/`. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-30/`. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -306,3 +307,15 @@ P1-27 selected the narrow AES-CMAC scope and reviewed the API, dedicated key-pur
   1,728 test-only OpenSSL CMAC comparisons.
 - Captures compiler/target/library metadata and CMAC disassembly for manual
   target-specific review; no completed side-channel conclusion is made.
+
+
+## P1-30 release compatibility and hosted artifact manifests
+
+- Adds `release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake` as the single reviewed metadata record for the current version, expected tag, fingerprint, evidence slice, ABI line, symbol count, and compatibility baseline.
+- Preserves the project-owned P1-29 public headers and 69-symbol list under `abi/baselines/0.1.0-p1-29-cmac-hardening/` with SHA-256 checksums.
+- Adds `ano_crypto_release_compatibility_policy_check`, which compares normalized public function declarations, types, non-version constants, and stored exports against the P1-29 baseline.
+- Builds and runs a consumer with the preserved P1-29 headers against the current P1-30 library, including through the installed CMake package.
+- Adds deterministic hosted-artifact bundle creation and verification with release identity, lane/platform/compiler metadata, file sizes, SHA-256 hashes, text-only restrictions, and explicit sensitive-value marker checks.
+- Adds create/verify/tamper regression coverage for the artifact manifest.
+- Keeps the public API and ABI-0 export set unchanged at 69 symbols.
+- Records the expected tag as metadata by default; strict mode requires actual tag/commit inputs and a Git-backed check that the tag, supplied commit, and `HEAD` resolve to one commit.

@@ -18,7 +18,7 @@ Or run the script directly:
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-29 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-30 \
   -DANO_CRYPTO_RUN_CTEST=ON \
   -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
   -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -27,7 +27,7 @@ cmake \
   -P tools/collect_release_evidence.cmake
 ```
 
-P1-29 output includes source-file hashes, a source archive SHA-256, binary hashes, CTest output, public-surface check output, thread-safety policy check output, reproducible-build notes, scope-review notes, SBOM/signing placeholder status, an evidence manifest, install-prefix smoke logs, and optional customer PoC package smoke logs, random-service implementation checks, entropy/health policy checks, and entropy/health review notes, entropy operational policy checks, and entropy operational review notes.
+P1-30 output includes source-file hashes, a source archive SHA-256, binary hashes, CTest output, public-surface check output, thread-safety policy check output, reproducible-build notes, scope-review notes, SBOM/signing placeholder status, an evidence manifest, install-prefix smoke logs, and optional customer PoC package smoke logs, random-service implementation checks, entropy/health policy checks, and entropy/health review notes, entropy operational policy checks, and entropy operational review notes.
 
 ## `check_public_surface.cmake`
 
@@ -151,3 +151,19 @@ cmake --build build --target ano_crypto_cmac_compiler_review
 CMAC compiler disassembly is internal engineering evidence and is excluded from
 the customer PoC package. Status logs must not print key, message, tag, subkey,
 AES schedule, or chaining-state values.
+
+
+## P1-30 release compatibility and hosted artifact tools
+
+- `check_release_compatibility.cmake` validates central release identity, 14 baseline/current public-header hashes, normalized public declarations/types/constants, and the unchanged 69-symbol ABI line.
+- `run_tagged_release_compatibility_smoke.cmake` builds a clean installed package and runs current-header, P1-29-header, exact-version, and incompatible-version consumers.
+- `create_hosted_artifact_manifest.cmake` creates a text-only status bundle with release/lane/platform/compiler metadata, sizes, and SHA-256.
+- `check_hosted_artifact_manifest.cmake` rejects tampering, unlisted files, unsafe paths, binary/NUL content, and sensitive-value markers.
+- `create_hosted_artifact_index.cmake` re-verifies downloaded manifests, checks required lane/platform coverage, and writes an index plus a human-review template.
+
+```sh
+cmake --build build --target ano_crypto_release_compatibility_policy_check
+cmake --build build --target ano_crypto_tagged_release_compatibility_smoke
+```
+
+Expected tag metadata is not release provenance until a Git-backed check proves that the tag, supplied commit, and checked-out `HEAD` identify one commit.

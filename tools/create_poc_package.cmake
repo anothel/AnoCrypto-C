@@ -16,6 +16,7 @@ endif()
 get_filename_component(ANO_CRYPTO_SOURCE_DIR "${ANO_CRYPTO_SOURCE_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_BUILD_DIR "${ANO_CRYPTO_BUILD_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_POC_PACKAGE_DIR "${ANO_CRYPTO_POC_PACKAGE_DIR}" ABSOLUTE)
+include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
 
 if(NOT EXISTS "${ANO_CRYPTO_BUILD_DIR}")
     message(FATAL_ERROR "Build directory does not exist: ${ANO_CRYPTO_BUILD_DIR}")
@@ -95,6 +96,23 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/CLEAN_RELEASE_SYMBOL_BASELINE.log"
     "${_symbol_stdout}${_symbol_stderr}")
 if(NOT _symbol_result EQUAL 0)
     message(FATAL_ERROR "Clean PoC SDK exported-symbol baseline check failed; see ${ANO_CRYPTO_POC_PACKAGE_DIR}/CLEAN_RELEASE_SYMBOL_BASELINE.log")
+endif()
+
+execute_process(
+    COMMAND "${CMAKE_COMMAND}" -E env
+        --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
+        "${CMAKE_COMMAND}" --build "${_clean_build_dir}" --config "${ANO_CRYPTO_POC_BUILD_CONFIG}" --target ano_crypto_release_compatibility_policy_check
+    RESULT_VARIABLE _release_compat_result
+    OUTPUT_VARIABLE _release_compat_stdout
+    ERROR_VARIABLE _release_compat_stderr)
+file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_COMPATIBILITY_CHECK.log"
+    "# Check P1-30 release identity and P1-29 public compatibility baseline\n"
+    "# Expected version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
+    "# Expected public symbols: ${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}\n"
+    "# Result: ${_release_compat_result}\n\n"
+    "${_release_compat_stdout}${_release_compat_stderr}")
+if(NOT _release_compat_result EQUAL 0)
+    message(FATAL_ERROR "PoC release compatibility policy check failed; see ${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_COMPATIBILITY_CHECK.log")
 endif()
 
 execute_process(
@@ -197,6 +215,9 @@ set(_doc_files
     docs/ci/AES_HARDENING_CI_CHECKLIST.md
     docs/ci/AES_CMAC_CI_CHECKLIST.md
     docs/ci/CMAC_HARDENING_CI_CHECKLIST.md
+    docs/ci/RELEASE_COMPATIBILITY_CI_CHECKLIST.md
+    docs/release/TAGGED_RELEASE_COMPATIBILITY_POLICY.md
+    docs/kcmvp/TAGGED_RELEASE_COMPATIBILITY_EVIDENCE.md
     docs/roadmap/DEVELOPMENT_WORKFLOW.md
     docs/roadmap/C99_PRIORITY_TODO.md)
 
@@ -220,6 +241,7 @@ endforeach()
 file(COPY "${ANO_CRYPTO_SOURCE_DIR}/examples/core_poc" DESTINATION "${_examples_dir}")
 file(COPY
     "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/README.md"
+    "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/RELEASE_COMPATIBILITY_REVIEW.md"
     "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/RANDOM_LIFECYCLE_REVIEW.md"
     "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/EXPORTED_SYMBOL_BASELINE_REVIEW.md"
     "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/CONCURRENCY_SANITIZER_REVIEW.md"
@@ -261,6 +283,9 @@ set(_forbidden_internal_package_paths
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/ac_aes_internal.h"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/ac_cipher_internal.h"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/ac_cmac_internal.h"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/abi/baselines"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/tests/compat"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/release"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/cmac.c"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/cmac_kat_tests.c"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/cmac_api_negative_tests.c"
@@ -294,7 +319,10 @@ foreach(_package_file IN LISTS _package_boundary_files)
        _package_file_lower MATCHES "(aes|cmac)_compiler_output_(review|disassembly)\.txt$" OR
        _package_file_lower MATCHES "(capture_cmac_compiler_review|check_cmac_hardening_policy)\.cmake$" OR
        _package_file_lower MATCHES "ac_(aes|cipher|cmac)_internal\.h$" OR
-       _package_file_lower MATCHES "cmac(_kat_tests|_api_negative_tests|_openssl_differential_tests)?\.c$")
+       _package_file_lower MATCHES "cmac(_kat_tests|_api_negative_tests|_openssl_differential_tests)?\.c$" OR
+       _package_file_lower MATCHES "p1_29_compatibility_probe\.c$" OR
+       _package_file_lower MATCHES "hosted_artifact_manifest" OR
+       _package_file_lower MATCHES "(^|[/\\])abi[/\\]baselines([/\\]|$)")
         message(FATAL_ERROR "PoC package contains a test-only differential/provider artifact: ${_package_file}")
     endif()
 endforeach()
@@ -304,7 +332,7 @@ string(TIMESTAMP _created_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SBOM_STATUS.txt"
     "AnoCrypto-C PoC package SBOM status\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: placeholder only; no complete SBOM is generated for this P1-29 PoC package.\n"
+    "Status: placeholder only; no complete SBOM is generated for this P1-30 PoC package.\n"
     "Package hash manifest: PACKAGE_MANIFEST.md\n"
     "SBOM plan document: docs/kcmvp/SBOM_SIGNING_PLAN.md\n"
     "Do not add secrets, private keys, tokens, entropy captures, generated secret bytes, customer data, or internal deployment details to SBOM inputs.\n")
@@ -312,7 +340,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SBOM_STATUS.txt"
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SIGNING_STATUS.txt"
     "AnoCrypto-C PoC package signing status\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: signing not performed for this P1-29 PoC package.\n"
+    "Status: signing not performed for this P1-30 PoC package.\n"
     "No private signing key, signing token, or detached signature file is included.\n"
     "Future detached-signature workflow remains TODO until signing tool, signer identity, and verification policy are selected.\n")
 
@@ -439,6 +467,20 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt"
     "The public random-generation service is implemented on reviewed provider branches using source-backed HMAC_DRBG-SHA-256 contexts.\n"
     "Package evidence records status and policy only; provider output, seed material, nonce material, DRBG state, and generated random output are excluded.\n")
 
+file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt"
+    "AnoCrypto-C PoC package release compatibility notes\n"
+    "Generated UTC: ${_created_utc}\n"
+    "Current version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
+    "Expected release tag metadata: ${ANO_CRYPTO_RELEASE_TAG}\n"
+    "Compatibility baseline: ${ANO_CRYPTO_COMPAT_BASELINE_VERSION}\n"
+    "Public headers: ${ANO_CRYPTO_RELEASE_PUBLIC_HEADER_COUNT}\n"
+    "Public ABI-0 exports: ${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}\n"
+    "Clean package policy result: RELEASE_COMPATIBILITY_CHECK.log\n"
+    "The retained P1-29 header snapshot, compatibility probe source, release tooling, and hosted CI manifests are not included in the customer package.\n"
+    "Expected tag metadata does not establish that a tag exists or identifies this binary; release provenance requires separate review.\n"
+    "Compatibility results are toolchain-specific engineering guardrails and do not establish universal ABI or semantic compatibility.\n"
+    "Package records contain no keys, entropy, seed material, DRBG state, generated random bytes, CMAC tags, or customer data.\n")
+
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/PACKAGE_REVIEW_MANIFEST.md"
     "# AnoCrypto-C PoC Package Review Manifest\n\n"
     "Generated UTC: ${_created_utc}\n\n"
@@ -457,6 +499,8 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/PACKAGE_REVIEW_MANIFEST.md"
     "- Confirm `RANDOM_SERVICE_PACKAGE_NOTES.txt` matches the current public random-service implementation and stated limitations.\n"
     "- Confirm `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt` records fail-closed process-marker, VM clone/snapshot, suspend/resume, and hook boundaries.\n"
     "- Confirm `CLEAN_RELEASE_SYMBOL_BASELINE.log` reports the stored 69-symbol ABI-0 baseline match.\n"
+    "- Confirm `RELEASE_COMPATIBILITY_CHECK.log` and `RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt` match the P1-30/P1-29 compatibility policy.\n"
+    "- Confirm no retained baseline header tree, compatibility test source, hosted artifact manifest, or release-internal metadata directory is packaged.\n"
     "- Confirm `ENTROPY_HEALTH_PACKAGE_NOTES.txt` records test hooks OFF and internal symbol hiding ON.\n"
     "- Confirm `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt` records external OS-provider classification, private process guard, and implemented public random service.\n"
     "- Confirm installed headers and shared-library exports do not expose internal entropy, process-guard, reseed-limit, failure-injection test-hook, or internal AES context symbols.\n"
@@ -489,6 +533,8 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/README.md"
 "- `RANDOM_SERVICE_PACKAGE_NOTES.txt`: P1-29 retained public random-service implementation summary.\n"
 "- `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt`: P1-29 retained lifecycle, process-marker, VM duplication, and clean export-baseline summary.\n"
 "- `CLEAN_RELEASE_SYMBOL_BASELINE.log`: clean shared-library comparison with the stored 69-symbol ABI-0 baseline.\n"
+"- `RELEASE_COMPATIBILITY_CHECK.log`: P1-30 release identity and P1-29 public source/symbol compatibility policy result.\n"
+"- `RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt`: customer-facing compatibility scope, exclusions, and provenance limitations.\n"
 "- `ENTROPY_HEALTH_PACKAGE_NOTES.txt`: clean-build and internal entropy/test-hook exclusion summary.\n"
 "- `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt`: OS-provider classification, private process-boundary guard, and implemented random-service summary.\n\n"
 "## Build the PoC example\n\n"

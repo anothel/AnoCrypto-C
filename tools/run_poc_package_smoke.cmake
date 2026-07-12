@@ -76,6 +76,8 @@ set(_required_package_records
     "CLEAN_BUILD_CONFIGURE.log"
     "CLEAN_BUILD.log"
     "CLEAN_RELEASE_SYMBOL_BASELINE.log"
+    "RELEASE_COMPATIBILITY_CHECK.log"
+    "RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt"
     "INSTALL_PACKAGE.log")
 foreach(_record IN LISTS _required_package_records)
     if(NOT EXISTS "${_package_dir}/${_record}")
@@ -93,7 +95,10 @@ foreach(_poc_file IN LISTS _poc_package_files)
        _poc_file_lower MATCHES "(aes|cmac)_compiler_output_(review|disassembly)\.txt$" OR
        _poc_file_lower MATCHES "(capture_cmac_compiler_review|check_cmac_hardening_policy)\.cmake$" OR
        _poc_file_lower MATCHES "ac_(aes|cipher|cmac)_internal\.h$" OR
-       _poc_file_lower MATCHES "cmac(_kat_tests|_api_negative_tests|_openssl_differential_tests)?\.c$")
+       _poc_file_lower MATCHES "cmac(_kat_tests|_api_negative_tests|_openssl_differential_tests)?\.c$" OR
+       _poc_file_lower MATCHES "p1_29_compatibility_probe\.c$" OR
+       _poc_file_lower MATCHES "hosted_artifact_manifest" OR
+       _poc_file_lower MATCHES "(^|[/\\])abi[/\\]baselines([/\\]|$)")
         message(FATAL_ERROR "PoC package contains test-only differential/provider artifact: ${_poc_file}")
     endif()
 endforeach()
@@ -178,6 +183,8 @@ file(WRITE "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_PACKAGE_SMOKE_SUMMARY.txt"
     "Random service notes: ${_package_dir}/RANDOM_SERVICE_PACKAGE_NOTES.txt\n"
     "Random lifecycle notes: ${_package_dir}/RANDOM_LIFECYCLE_PACKAGE_NOTES.txt\n"
     "Clean Release symbol baseline: ${_package_dir}/CLEAN_RELEASE_SYMBOL_BASELINE.log\n"
+    "Release compatibility check: ${_package_dir}/RELEASE_COMPATIBILITY_CHECK.log\n"
+    "Release compatibility notes: ${_package_dir}/RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt\n"
     "Entropy health boundary notes: ${_package_dir}/ENTROPY_HEALTH_PACKAGE_NOTES.txt\n"
     "Entropy operational policy notes: ${_package_dir}/ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt\n"
     "PoC package smoke result: ${_run_result}\n")

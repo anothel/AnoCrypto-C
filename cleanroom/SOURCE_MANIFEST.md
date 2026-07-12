@@ -551,3 +551,15 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - New operational and lifecycle inputs are generated deterministically at runtime and are not retained as secret fixtures or evidence values.
 - Compiler-output capture records binary/compiler/target metadata and disassembly only; it does not execute with or retain CMAC key, message, or tag values.
 - No key, tag, subkey, chain, AES schedule, entropy, seed, DRBG state, random output, private key, token, customer data, or internal deployment information is added to logs or packages.
+
+
+## P1-30 release compatibility inputs
+
+| Input | Classification | Use | Notes |
+|---|---|---|---|
+| Project-owned `0.1.0-p1-29-cmac-hardening` public headers and exported-symbol list | User/project owned | Frozen compatibility baseline | Exact copies are stored under `abi/baselines/`; no third-party implementation is introduced. |
+| Current AnoCrypto-C C99 public headers and CMake package configuration | User/project owned | Normalized source/API and package-version comparison | Version macros are reviewed separately from stable declarations. |
+| CMake public documentation and project-authored test harnesses | Public documentation / project owned | Package compatibility, manifest, and negative-test design | No external source code or proprietary fixture is copied. |
+| Git tag and commit metadata supplied by CI | Build metadata | Optional tagged-release identity check | Metadata is status-only; tag authorization/signature review remains TODO. |
+
+P1-30 hosted artifacts retain only status, counts, versions, target/compiler metadata, file sizes, and hashes. Cryptographic values and customer/internal deployment data remain excluded.

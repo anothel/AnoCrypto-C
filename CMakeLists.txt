@@ -9,6 +9,11 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 include(CheckCSourceCompiles)
 include(TestBigEndian)
+include("${CMAKE_CURRENT_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+
+if(NOT PROJECT_VERSION STREQUAL ANO_CRYPTO_RELEASE_PACKAGE_VERSION)
+    message(FATAL_ERROR "project() version and release package version must match")
+endif()
 
 option(ANO_CRYPTO_BUILD_TESTS "Build AnoCrypto-C unit and smoke tests" ON)
 option(ANO_CRYPTO_BUILD_EXAMPLES "Build AnoCrypto-C example programs" ON)
@@ -20,7 +25,22 @@ option(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER "Enable reviewed internal platform 
 option(ANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS "Build test-only SHA-2/HMAC, AES-CBC, and AES-CMAC differential checks against OpenSSL 3.x when available" ON)
 option(ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER "Fail configuration when the test-only OpenSSL 3.x differential provider is unavailable" OFF)
 set(ANO_CRYPTO_SANITIZER_MODE "none" CACHE STRING "Sanitizer mode: none or address-undefined")
+set(ANO_CRYPTO_ACTUAL_RELEASE_TAG "" CACHE STRING "Actual Git tag supplied by a tagged CI/release build")
+set(ANO_CRYPTO_ACTUAL_RELEASE_COMMIT "" CACHE STRING "Actual commit supplied by a tagged CI/release build")
+option(ANO_CRYPTO_REQUIRE_ACTUAL_RELEASE_TAG "Require the expected tag, supplied commit, and checked-out HEAD to resolve to one commit" OFF)
 set_property(CACHE ANO_CRYPTO_SANITIZER_MODE PROPERTY STRINGS none address-undefined)
+
+if(NOT ANO_CRYPTO_ACTUAL_RELEASE_TAG STREQUAL "" AND
+   NOT ANO_CRYPTO_ACTUAL_RELEASE_TAG STREQUAL ANO_CRYPTO_RELEASE_TAG)
+    message(FATAL_ERROR
+        "ANO_CRYPTO_ACTUAL_RELEASE_TAG='${ANO_CRYPTO_ACTUAL_RELEASE_TAG}' does not match expected tag '${ANO_CRYPTO_RELEASE_TAG}'")
+endif()
+if(ANO_CRYPTO_REQUIRE_ACTUAL_RELEASE_TAG AND
+   (ANO_CRYPTO_ACTUAL_RELEASE_TAG STREQUAL "" OR
+    ANO_CRYPTO_ACTUAL_RELEASE_COMMIT STREQUAL ""))
+    message(FATAL_ERROR
+        "ANO_CRYPTO_REQUIRE_ACTUAL_RELEASE_TAG=ON requires ANO_CRYPTO_ACTUAL_RELEASE_TAG and ANO_CRYPTO_ACTUAL_RELEASE_COMMIT")
+endif()
 
 if(NOT DEFINED ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS)
     if(ANO_CRYPTO_BUILD_TESTS)
@@ -109,7 +129,7 @@ elseif(NOT ANO_CRYPTO_SANITIZER_MODE STREQUAL "none")
 endif()
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-29-cmac-hardening" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "${ANO_CRYPTO_RELEASE_FINGERPRINT}" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -331,6 +351,36 @@ add_custom_target(ano_crypto_clean_release_symbol_baseline_check
     USES_TERMINAL
     COMMENT "Building a clean Release library and checking the stored export baseline")
 
+add_custom_target(ano_crypto_release_compatibility_policy_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_ACTUAL_RELEASE_TAG=${ANO_CRYPTO_ACTUAL_RELEASE_TAG}
+        -DANO_CRYPTO_ACTUAL_RELEASE_COMMIT=${ANO_CRYPTO_ACTUAL_RELEASE_COMMIT}
+        -DANO_CRYPTO_REQUIRE_ACTUAL_RELEASE_TAG=${ANO_CRYPTO_REQUIRE_ACTUAL_RELEASE_TAG}
+        -DANO_CRYPTO_RELEASE_COMPATIBILITY_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/RELEASE_COMPATIBILITY_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_compatibility.cmake
+    USES_TERMINAL
+    VERBATIM
+    COMMENT "Checking P1-30 release identity and P1-29 public source/ABI compatibility")
+
+add_custom_target(ano_crypto_tagged_release_compatibility_smoke
+    COMMAND ${CMAKE_COMMAND} -E env
+        --unset=MAKEFLAGS
+        --unset=MFLAGS
+        --unset=MAKELEVEL
+        ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_TAGGED_COMPAT_SMOKE_DIR=${CMAKE_CURRENT_BINARY_DIR}/tagged-release-compatibility
+        -DANO_CRYPTO_CMAKE_GENERATOR=${CMAKE_GENERATOR}
+        -DANO_CRYPTO_CMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
+        -DANO_CRYPTO_CMAKE_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_tagged_release_compatibility_smoke.cmake
+    USES_TERMINAL
+    VERBATIM
+    COMMENT "Building installed P1-30 package and running current/P1-29 header compatibility consumers")
+
 add_custom_target(ano_crypto_public_surface_check
     COMMAND ${CMAKE_COMMAND}
         -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
@@ -393,7 +443,7 @@ add_custom_target(ano_crypto_cmac_policy_check
         -DANO_CRYPTO_CMAC_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/AES_CMAC_IMPLEMENTATION_CHECK.txt
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_cmac_policy.cmake
     USES_TERMINAL
-    COMMENT "Checking P1-29 retained AES-CMAC implementation, API, KAT, CSP, differential, and package policy")
+    COMMENT "Checking P1-30 retained AES-CMAC implementation, API, KAT, CSP, differential, and package policy")
 
 add_custom_target(ano_crypto_cmac_hardening_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -402,7 +452,7 @@ add_custom_target(ano_crypto_cmac_hardening_policy_check
         -DANO_CRYPTO_CMAC_HARDENING_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/AES_CMAC_HARDENING_CHECK.txt
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_cmac_hardening_policy.cmake
     USES_TERMINAL
-    COMMENT "Checking P1-29 CMAC cleanup, lifecycle, concurrency, differential, compiler-review, and ABI policy")
+    COMMENT "Checking P1-30 retained CMAC cleanup, lifecycle, concurrency, differential, compiler-review, and ABI policy")
 
 add_custom_target(ano_crypto_differential_portability_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -506,8 +556,8 @@ configure_package_config_file(
 
 write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/AnoCryptoCConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion)
+    VERSION ${ANO_CRYPTO_RELEASE_PACKAGE_VERSION}
+    COMPATIBILITY ${ANO_CRYPTO_RELEASE_PACKAGE_COMPATIBILITY})
 
 install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/AnoCryptoCConfig.cmake
@@ -844,6 +894,40 @@ if(ANO_CRYPTO_BUILD_TESTS)
     add_test(NAME ano_crypto_thread_platform_review COMMAND ano_crypto_thread_platform_review)
     set_tests_properties(ano_crypto_thread_platform_review PROPERTIES LABELS "thread-safety;operational-review")
 
+    add_executable(ano_crypto_current_header_compatibility_tests
+        tests/compat/p1_29_compatibility_probe.c)
+    target_compile_definitions(ano_crypto_current_header_compatibility_tests PRIVATE
+        ANO_CRYPTO_COMPAT_HEADER_MODE="current-p1-30"
+        ANO_CRYPTO_EXPECT_CURRENT_HEADER=1
+        ANO_CRYPTO_EXPECT_RUNTIME_VERSION="${ANO_CRYPTO_RELEASE_VERSION}")
+    target_link_libraries(ano_crypto_current_header_compatibility_tests PRIVATE anocrypto_c)
+    add_test(NAME ano_crypto_current_header_compatibility_tests
+        COMMAND ano_crypto_current_header_compatibility_tests)
+    set_tests_properties(ano_crypto_current_header_compatibility_tests PROPERTIES
+        LABELS "compatibility;source-compatibility;abi")
+
+    add_executable(ano_crypto_p129_header_compatibility_tests
+        tests/compat/p1_29_compatibility_probe.c)
+    target_include_directories(ano_crypto_p129_header_compatibility_tests BEFORE PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/abi/baselines/${ANO_CRYPTO_COMPAT_BASELINE_VERSION}/include)
+    target_compile_definitions(ano_crypto_p129_header_compatibility_tests PRIVATE
+        ANO_CRYPTO_COMPAT_HEADER_MODE="baseline-p1-29"
+        ANO_CRYPTO_EXPECT_P1_29_HEADER_SNAPSHOT=1
+        ANO_CRYPTO_EXPECT_RUNTIME_VERSION="${ANO_CRYPTO_RELEASE_VERSION}")
+    target_link_libraries(ano_crypto_p129_header_compatibility_tests PRIVATE anocrypto_c)
+    add_test(NAME ano_crypto_p129_header_compatibility_tests
+        COMMAND ano_crypto_p129_header_compatibility_tests)
+    set_tests_properties(ano_crypto_p129_header_compatibility_tests PROPERTIES
+        LABELS "compatibility;binary-compatibility;abi")
+
+    add_test(NAME ano_crypto_hosted_artifact_manifest_tests
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DANO_CRYPTO_TEST_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/hosted-artifact-manifest-test
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/hosted_artifact_manifest_tests.cmake)
+    set_tests_properties(ano_crypto_hosted_artifact_manifest_tests PROPERTIES
+        LABELS "ci-artifact;release-compatibility")
+
     add_executable(ano_crypto_build_identity_abi_tests
         tests/unit/build_identity_abi_tests.c)
     target_link_libraries(ano_crypto_build_identity_abi_tests PRIVATE anocrypto_c)
@@ -897,6 +981,8 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_drbg_entropy_helper_tests
         ano_crypto_thread_lock_tests
         ano_crypto_thread_platform_review
+        ano_crypto_current_header_compatibility_tests
+        ano_crypto_p129_header_compatibility_tests
         ano_crypto_build_identity_abi_tests
         ano_crypto_install_smoke_buildtree)
 
@@ -926,8 +1012,24 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
             -DANO_CRYPTO_CTEST_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/ctest-evidence
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_ctest_evidence.cmake
-        COMMENT "Capturing AnoCrypto-C P1-29 CTest evidence")
+        USES_TERMINAL
+        COMMENT "Capturing AnoCrypto-C P1-30 CTest evidence")
     add_dependencies(ano_crypto_ctest_evidence ${_ano_crypto_evidence_test_targets})
+
+    # Package and tagged-release smoke targets create independent nested build
+    # trees.  Complete them before launching the full CTest evidence process so
+    # the outer build never runs several nested CMake/CTest trees concurrently.
+    # This keeps the evidence target deterministic on constrained CI runners.
+    add_dependencies(ano_crypto_ctest_evidence
+        ano_crypto_aes_compiler_review
+        ano_crypto_cmac_compiler_review
+        ano_crypto_tagged_release_compatibility_smoke)
+    if(TARGET ano_crypto_install_package_smoke)
+        add_dependencies(ano_crypto_ctest_evidence ano_crypto_install_package_smoke)
+    endif()
+    if(TARGET ano_crypto_poc_package_smoke)
+        add_dependencies(ano_crypto_ctest_evidence ano_crypto_poc_package_smoke)
+    endif()
 
     add_custom_target(ano_crypto_collect_release_evidence
         # The evidence assembler consumes prepared install/PoC/CTest artifacts.
@@ -939,7 +1041,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-29
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-30
             -DANO_CRYPTO_RUN_CTEST=OFF
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
@@ -956,20 +1058,13 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK=ON
             -DANO_CRYPTO_RUN_RANDOM_LIFECYCLE_CHECK=ON
             -DANO_CRYPTO_RUN_EXPORTED_SYMBOL_CHECK=ON
+            -DANO_CRYPTO_RUN_RELEASE_COMPATIBILITY_CHECK=ON
+            -DANO_CRYPTO_RUN_TAGGED_COMPATIBILITY_CHECK=ON
             -DANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK=ON
             -DANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK=ON
             -DANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
-        COMMENT "Collecting AnoCrypto-C P1-29 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-30 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
-        ano_crypto_ctest_evidence
-        ano_crypto_aes_compiler_review
-        ano_crypto_cmac_compiler_review)
-
-    if(TARGET ano_crypto_install_package_smoke)
-        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_install_package_smoke)
-    endif()
-    if(TARGET ano_crypto_poc_package_smoke)
-        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_poc_package_smoke)
-    endif()
+        ano_crypto_ctest_evidence)
 endif()

@@ -246,7 +246,7 @@ P1-23 deliverables:
 | P1-27 | AES-CMAC implementation entry gate | Completed as a no-code scope/API/KAT/CSP/evidence gate. |
 | P1-28 | AES-CMAC implementation | Completed with AES-128/192/256, full tags, dedicated CMAC-purpose handles, KAT/negative/differential/package evidence, and an intentional 69-symbol baseline. |
 | P1-29 | AES-CMAC hardening | Completed with private-state/failure/cleanup/alias hardening, lifecycle/concurrency regression, 1,728 differential paths, and compiler-output capture. |
-| P1-30 candidate | Hosted evidence and ABI compatibility review | Prefer retaining and reviewing actual cross-platform artifacts and tagged-release ABI/source compatibility before another algorithm implementation. |
+| P1-30 | Release compatibility baseline and hosted artifact manifests | Freeze the P1-29 public contract, test old/current headers against the P1-30 package, and require manifest-backed hosted review without adding public services. |
 
 ## Stop conditions
 
@@ -273,3 +273,5 @@ P1-29 deliverables:
 - 1,728 test-only OpenSSL comparison paths;
 - CMAC compiler-output capture and human-review plan;
 - policy, evidence, PoC, CI, roadmap, and clean-room alignment.
+
+| P1-31 candidate | Hosted artifact disposition and release provenance | Review actual cross-platform artifacts, tag/commit identity, and signing/SBOM provenance policy before another public algorithm or API expansion. |

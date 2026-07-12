@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-29 engineering draft.
+Status: P1-30 engineering draft.
 
 ## Purpose
 
@@ -15,14 +15,14 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-29/
+build/evidence/p1-30/
 ```
 
-The build target captures the complete CTest run, installed-package consumer
-smoke, and customer PoC smoke as separate prerequisite steps. The evidence
-assembler then copies those status-only artifacts and runs the differential and
-platform review executables directly. This avoids recursive CTest/build-runner
-jobserver interactions while keeping the standalone script fallback available.
+The build target first completes installed-package, customer PoC, tagged-release
+compatibility, and compiler-output prerequisite steps. It then captures the
+complete CTest run to files and finally assembles the status-only evidence.
+Ordering the nested build trees before CTest avoids concurrent CMake/CTest
+runner interactions while keeping the standalone script fallback available.
 
 ## Expected generated files
 
@@ -35,6 +35,9 @@ SOURCE_ARCHIVE.log
 anocrypto-c-source.tar.gz
 BINARY_FILES.sha256
 PUBLIC_SURFACE_CHECK.txt
+RELEASE_COMPATIBILITY_CHECK.txt
+TAGGED_COMPATIBILITY_SMOKE.txt
+RELEASE_COMPATIBILITY_REVIEW_NOTES.txt
 THREAD_SAFETY_CHECK.txt
 SHA512_FAMILY_CHECK.txt
 RANDOM_SERVICE_CHECK.txt
@@ -249,3 +252,17 @@ Review these additional records:
 Confirm the eight-function CMAC API and 69-symbol baseline are unchanged,
 OpenSSL remains test-only, PoC/install packages exclude private hardening and
 compiler artifacts, and all logs remain status-only.
+
+
+## P1-30 additions
+
+- Central release identity: `release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake`.
+- Retained P1-29 public-header/hash/symbol baseline under `abi/baselines/0.1.0-p1-29-cmac-hardening/`.
+- Normalized public declaration/type/constant and stored-symbol policy check.
+- Current-header and retained-P1-29-header installed-package consumers.
+- Exact/incompatible CMake package-version probes.
+- Text-only hosted artifact manifests with size/hash/sensitive-marker verification.
+- Final hosted artifact index and explicit human-review template.
+- Expected tag/commit/`HEAD` identity check for an actual tagged Git checkout.
+
+Local evidence records expected tag metadata but does not claim that a tag exists or is authorized. Hosted-platform review and release-signature policy remain TODO.

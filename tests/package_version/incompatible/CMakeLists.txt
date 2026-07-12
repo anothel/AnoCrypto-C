@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.16)
+project(AnoCryptoCIncompatiblePackageVersionProbe LANGUAGES C)
+find_package(AnoCryptoC 0.2.0 QUIET CONFIG)
+if(AnoCryptoC_FOUND)
+    message(FATAL_ERROR "The 0.1.x package must not satisfy a 0.2.0 request")
+endif()
