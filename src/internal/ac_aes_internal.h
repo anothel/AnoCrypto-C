@@ -20,6 +20,9 @@ typedef struct ano_crypto_internal_aes_ctx_s {
     uint32_t initialized;
 } ano_crypto_internal_aes_ctx_t;
 
+int ano_crypto_internal_aes_context_is_valid(
+    const ano_crypto_internal_aes_ctx_t *ctx);
+
 ano_crypto_status_t ano_crypto_internal_aes_init(
     ano_crypto_internal_aes_ctx_t *ctx,
     const uint8_t *key,

@@ -18,7 +18,7 @@ Or run the script directly:
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-23 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-29 \
   -DANO_CRYPTO_RUN_CTEST=ON \
   -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
   -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -27,7 +27,7 @@ cmake \
   -P tools/collect_release_evidence.cmake
 ```
 
-P1-23 output includes source-file hashes, a source archive SHA-256, binary hashes, CTest output, public-surface check output, thread-safety policy check output, reproducible-build notes, scope-review notes, SBOM/signing placeholder status, an evidence manifest, install-prefix smoke logs, and optional customer PoC package smoke logs, random-service implementation checks, entropy/health policy checks, and entropy/health review notes, entropy operational policy checks, and entropy operational review notes.
+P1-29 output includes source-file hashes, a source archive SHA-256, binary hashes, CTest output, public-surface check output, thread-safety policy check output, reproducible-build notes, scope-review notes, SBOM/signing placeholder status, an evidence manifest, install-prefix smoke logs, and optional customer PoC package smoke logs, random-service implementation checks, entropy/health policy checks, and entropy/health review notes, entropy operational policy checks, and entropy operational review notes.
 
 ## `check_public_surface.cmake`
 
@@ -126,3 +126,28 @@ The script writes `policy-check/ENTROPY_OPERATIONAL_POLICY_CHECK.txt`. It is an 
 Checks P1-23 OpenSSL 3.x test-only provider selection, deterministic SHA-2/HMAC differential coverage, C99 representation/endian/alignment portability tests, hosted differential/32-bit workflow wiring, evidence records, and PoC product-boundary exclusions.
 
 The evidence collector writes `DIFFERENTIAL_PORTABILITY_CHECK.txt`, `DIFFERENTIAL_VALIDATION.log`, `SHA512_PORTABILITY_REVIEW.log`, and `DIFFERENTIAL_PORTABILITY_REVIEW_NOTES.txt`. Logs must not contain digest, MAC, key, message, entropy, seed, DRBG state, or random values.
+
+
+## P1-29 AES-CMAC hardening tools
+
+- `check_cmac_policy.cmake` retains the P1-28 AES-CMAC implementation, API,
+  KAT, dedicated CSP-purpose, differential-provider, package, and 69-symbol
+  baseline checks under the P1-29 version identity.
+- `check_cmac_hardening_policy.cmake` verifies private state guards, overlap
+  rules, bounded cleanup, lifecycle stress, concurrency, the 1,728-comparison
+  differential corpus, compiler-review wiring, evidence records, and unchanged
+  public ABI.
+- `capture_cmac_compiler_review.cmake` records compiler, target, library hash,
+  symbol markers, aggregate branch/call counts, and disassembly for manual
+  target-specific review. It does not make an automated timing or side-channel
+  conclusion.
+
+```sh
+cmake --build build --target ano_crypto_cmac_policy_check
+cmake --build build --target ano_crypto_cmac_hardening_policy_check
+cmake --build build --target ano_crypto_cmac_compiler_review
+```
+
+CMAC compiler disassembly is internal engineering evidence and is excluded from
+the customer PoC package. Status logs must not print key, message, tag, subkey,
+AES schedule, or chaining-state values.

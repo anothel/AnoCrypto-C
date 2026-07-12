@@ -1,6 +1,6 @@
 # AES-CMAC KAT and Evidence Plan
 
-Status: P1-28 engineering implementation and evidence plan.
+Status: P1-29 engineering implementation and hardening evidence plan.
 
 ## Public vector source
 
@@ -27,7 +27,11 @@ tag are not logged.
 - context lifecycle and repeated-finalization rejection;
 - install consumer and customer PoC status-only smoke;
 - clean Release exported-symbol review;
-- OpenSSL 3.x test-only differential comparison.
+- OpenSSL 3.x test-only differential comparison, expanded in P1-29 to 96
+  deterministic cases per key size and six checked paths per case;
+- 128-iteration lifecycle stress and shared-handle concurrency regression;
+- private context-integrity, alias, and bounded-cleanup operational review;
+- target/compiler-specific CMAC compiler-output capture for manual review.
 
 ## Evidence boundary
 
@@ -42,3 +46,10 @@ Target-specific compiler output, timing/cache behavior, fault behavior, final
 validation-target scope, and protocol/KDF use remain separate review items.
 Passing KAT and differential tests is engineering evidence, not an official
 validation result.
+
+## P1-29 evidence additions
+
+The hardening evidence records 1,728 CMAC differential comparisons, lifecycle
+iteration counts, concurrency status, alias/cleanup policy status, compiler and
+target identity, and the unchanged 69-symbol baseline. Values used or produced
+by CMAC are not retained.

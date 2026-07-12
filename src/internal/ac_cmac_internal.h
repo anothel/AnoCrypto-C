@@ -7,10 +7,13 @@
 #include "ac_aes_internal.h"
 
 #define ANO_CRYPTO_INTERNAL_CMAC_CTX_MAGIC 0x434d4331u
+#define ANO_CRYPTO_INTERNAL_CMAC_STATE_VERSION 1u
 
 typedef struct ano_crypto_internal_cmac_ctx_s {
     uint32_t magic;
     uint32_t initialized;
+    uint32_t state_version;
+    uint32_t key_size;
     size_t pending_len;
     uint8_t chain[ANO_CRYPTO_INTERNAL_AES_BLOCK_SIZE];
     uint8_t pending[ANO_CRYPTO_INTERNAL_AES_BLOCK_SIZE];
@@ -39,6 +42,11 @@ ano_crypto_status_t ano_crypto_internal_cmac_compute(
     const uint8_t *input,
     size_t input_len,
     uint8_t out[ANO_CRYPTO_INTERNAL_AES_BLOCK_SIZE]);
+
+int ano_crypto_internal_cmac_tags_equal(
+    const uint8_t *a,
+    const uint8_t *b,
+    size_t len);
 
 void ano_crypto_internal_cmac_uninit(ano_crypto_internal_cmac_ctx_t *ctx);
 

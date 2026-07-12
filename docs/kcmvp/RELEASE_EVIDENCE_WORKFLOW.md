@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-28 engineering draft.
+Status: P1-29 engineering draft.
 
 ## Purpose
 
@@ -15,7 +15,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-28/
+build/evidence/p1-29/
 ```
 
 The build target captures the complete CTest run, installed-package consumer
@@ -234,3 +234,18 @@ Release comparison. Evidence retains status, source/provider identity, key-size
 class, message-length class, and comparison count only. Key, message, tag,
 subkey, intermediate, entropy, seed, DRBG, random, customer, and private-key
 values are prohibited.
+
+## P1-29 AES-CMAC hardening evidence
+
+Review these additional records:
+
+- `AES_CMAC_HARDENING_CHECK.txt`;
+- `AES_CMAC_HARDENING_REVIEW.log`;
+- `AES_CMAC_LIFECYCLE_STRESS.log`;
+- `CMAC_COMPILER_OUTPUT_REVIEW.txt`;
+- `CMAC_COMPILER_OUTPUT_DISASSEMBLY.txt` when captured;
+- `AES_CMAC_HARDENING_REVIEW_NOTES.txt`.
+
+Confirm the eight-function CMAC API and 69-symbol baseline are unchanged,
+OpenSSL remains test-only, PoC/install packages exclude private hardening and
+compiler artifacts, and all logs remain status-only.

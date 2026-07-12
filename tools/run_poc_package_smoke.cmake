@@ -89,8 +89,9 @@ foreach(_poc_file IN LISTS _poc_package_files)
     if(_poc_file_lower MATCHES "(^|[/\\])(libcrypto|libssl|openssl)([./\\]|$)" OR
        _poc_file_lower MATCHES "(sha2_hmac|aes_cbc|aes_cmac)_openssl_differential_tests\.c$" OR
        _poc_file_lower MATCHES "sha512_portability_review\.c$" OR
-       _poc_file_lower MATCHES "aes_cbc_(hardening_review|lifecycle_stress_tests)\.c$" OR
-       _poc_file_lower MATCHES "aes_compiler_output_(review|disassembly)\.txt$" OR
+       _poc_file_lower MATCHES "aes_(cbc|cmac)_(hardening_review|lifecycle_stress_tests)\.c$" OR
+       _poc_file_lower MATCHES "(aes|cmac)_compiler_output_(review|disassembly)\.txt$" OR
+       _poc_file_lower MATCHES "(capture_cmac_compiler_review|check_cmac_hardening_policy)\.cmake$" OR
        _poc_file_lower MATCHES "ac_(aes|cipher|cmac)_internal\.h$" OR
        _poc_file_lower MATCHES "cmac(_kat_tests|_api_negative_tests|_openssl_differential_tests)?\.c$")
         message(FATAL_ERROR "PoC package contains test-only differential/provider artifact: ${_poc_file}")

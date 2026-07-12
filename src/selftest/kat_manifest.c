@@ -1,8 +1,8 @@
 #include "ac_kat_manifest.h"
 
 /*
- * P1-28 retained KAT manifest with AES-CMAC startup and extended public-source coverage.
- * P1-23/P1-28 differential tests are separate engineering comparisons and do not
+ * P1-29 retained KAT manifest with AES-CMAC startup and extended public-source coverage.
+ * P1-23/P1-29 differential tests are separate engineering comparisons and do not
  * alter public KAT provenance entries.
  * SHA-256, SHA-384, SHA-512, their HMAC variants, and the
  * HMAC_DRBG-SHA-256 core are covered by startup or extended public-source
@@ -19,13 +19,13 @@ static const ano_crypto_internal_kat_manifest_entry_t g_kat_manifest[] = {
         "mac.aes-cmac.aes128.nist-example2",
         "AES-128-CMAC",
         "SRC-1501: NIST AES-CMAC Example 2 associated with SP 800-38B",
-        "p1-28-implemented-startup"
+        "p1-29-retained-startup"
     },
     {
         "mac.aes-cmac.aes128-192-256.nist-examples",
         "AES-CMAC",
         "SRC-1501: NIST AES-CMAC examples for AES-128, AES-192, and AES-256",
-        "p1-28-extended-kat-test"
+        "p1-29-retained-extended-kat-test"
     },
     {
         "cipher.aes128.fips197",

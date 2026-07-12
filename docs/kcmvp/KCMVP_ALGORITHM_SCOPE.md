@@ -1,6 +1,6 @@
 # KCMVP Candidate Algorithm Scope
 
-Status: P1-28 engineering draft; not an official validation scope.
+Status: P1-29 engineering draft; not an official validation scope.
 
 | Family | Service | Status and boundary |
 |---|---|---|
@@ -18,3 +18,11 @@ P1-28 adds one public header, one dedicated key-purpose enum value, and eight
 CMAC functions. The reviewed clean Release ABI-0 baseline is 69 names. This
 engineering scope does not claim official approval, completed assessment, or
 universal side-channel properties.
+
+## P1-29 CMAC hardening boundary
+
+P1-29 retains the P1-28 AES-CMAC algorithm and service scope. It adds only
+implementation-hardening and evidence coverage. The public CMAC API remains
+eight functions, the key-purpose enum remains unchanged, and the clean Release
+baseline remains 69 symbols. This does not establish a final validation scope
+or target-specific side-channel conclusion.

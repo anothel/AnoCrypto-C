@@ -536,3 +536,18 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - OpenSSL is called only through public APIs in a separately linked test executable; no OpenSSL implementation or test harness source is copied.
 - CMAC keys, messages, tags, subkeys, chaining state, AES round keys, entropy, seed material, DRBG state, generated random output, private keys, tokens, customer data, and internal deployment information are excluded from logs, evidence summaries, and customer packages.
 - P1-28 does not add tag truncation, CTR, GCM/GMAC, persistence, export, protocol formatting, or a completed side-channel claim.
+
+
+## P1-29 AES-CMAC Hardening Inputs
+
+| ID | Source | Classification | Use | Boundary |
+|---|---|---|---|---|
+| DER-3701 | Fresh project-owned CMAC context/lifecycle/alias hardening and C99 tests | User-owned project material | Strengthen private state integrity, cleanup, stress, and concurrency behavior | No third-party CMAC implementation or private validation material copied. |
+| DER-3702 | Existing project-owned AES/CMAC API, CSP, CI, evidence, and PoC structure | User-owned project material | Preserve the eight-function CMAC API and 69-symbol baseline while adding hardening evidence | Internal layouts and compiler artifacts remain outside the public/PoC surface. |
+| SRC-1502-R1 | OpenSSL 3.x public EVP_MAC CMAC interface used by the existing test-only provider | Public documentation and separately linked test dependency | Expand deterministic differential coverage to 1,728 comparisons | Product library, installed SDK, and customer PoC remain independent of OpenSSL. |
+
+### P1-29 notes
+
+- New operational and lifecycle inputs are generated deterministically at runtime and are not retained as secret fixtures or evidence values.
+- Compiler-output capture records binary/compiler/target metadata and disassembly only; it does not execute with or retain CMAC key, message, or tag values.
+- No key, tag, subkey, chain, AES schedule, entropy, seed, DRBG state, random output, private key, token, customer data, or internal deployment information is added to logs or packages.

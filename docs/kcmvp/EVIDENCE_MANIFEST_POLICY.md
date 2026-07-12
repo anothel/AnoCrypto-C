@@ -1,10 +1,10 @@
 # Evidence Manifest Policy
 
-Status: P1-15 draft.
+Status: P1-29 engineering draft.
 
 ## Purpose
 
-AnoCrypto-C release evidence is currently a local engineering draft. P1-14 retains the manifest policy so each generated evidence directory and customer PoC package can be reviewed with consistent hash and placeholder records.
+AnoCrypto-C release evidence is currently a local engineering draft. P1-29 retains the manifest policy so each generated evidence directory and customer PoC package can be reviewed with consistent hash and placeholder records.
 
 ## Manifest files
 
@@ -22,7 +22,7 @@ AnoCrypto-C release evidence is currently a local engineering draft. P1-14 retai
 
 ## Hash algorithm
 
-Use SHA-256 for P1-14 manifests. If later release policy requires additional digest algorithms, add them as separate files instead of changing existing file semantics silently.
+Use SHA-256 for the retained engineering manifests. If later release policy requires additional digest algorithms, add them as separate files instead of changing existing file semantics silently.
 
 ## Manifest generation rules
 
@@ -62,3 +62,20 @@ Include `AES_CMAC_IMPLEMENTATION_CHECK.txt` and `AES_CMAC_REVIEW_NOTES.txt` in
 the generated manifest. The files may contain scope, status, symbol count,
 provider identity, comparison count, and review metadata only. CMAC keys,
 messages, subkeys, intermediate state, and tags are prohibited.
+
+
+## P1-29 AES-CMAC hardening records
+
+Include the following status-only records when generated:
+
+- `AES_CMAC_HARDENING_CHECK.txt`;
+- `AES_CMAC_HARDENING_REVIEW.log`;
+- `AES_CMAC_LIFECYCLE_STRESS.log`;
+- `CMAC_COMPILER_OUTPUT_REVIEW.txt`;
+- `CMAC_COMPILER_OUTPUT_DISASSEMBLY.txt` for internal manual review;
+- `AES_CMAC_HARDENING_REVIEW_NOTES.txt`.
+
+The compiler-output disassembly remains an internal engineering artifact and is
+excluded from the customer PoC package. None of these records may contain CMAC
+keys, message bytes, computed or supplied tags, AES schedules, chaining state,
+or other secret-dependent values.

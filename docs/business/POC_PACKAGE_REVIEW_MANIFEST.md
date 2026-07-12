@@ -1,6 +1,6 @@
 # Customer PoC Package Review Manifest
 
-Status: P1-28 draft.
+Status: P1-29 draft.
 
 ## Purpose
 
@@ -110,3 +110,11 @@ Review `SHA512_FAMILY_PACKAGE_NOTES.txt`, the packaged example, and clean export
 - [ ] Key, message, subkey, intermediate, and tag values are absent from package records.
 - [ ] The clean Release symbol report shows 69 expected and actual names.
 - [ ] Tag truncation, CTR, GCM/GMAC, persistence, export, and protocol formatting remain deferred.
+
+## P1-29 CMAC hardening package boundary
+
+The PoC retains public `ac_cmac.h` and the compiled CMAC service. It may include
+`AES_CMAC_PACKAGE_NOTES.txt`, but must exclude private AES/CMAC
+headers, CMAC implementation source, hardening/lifecycle/differential tests,
+compiler disassembly, OpenSSL provider artifacts, and all key/message/tag
+values.

@@ -1,6 +1,6 @@
 # Thread-Safety Support Matrix
 
-Status: P1-15 draft.
+Status: P1-29 retained and extended draft.
 
 ## Purpose
 
@@ -31,6 +31,7 @@ This matrix turns the earlier internal locking note into a public support-bounda
 | Streaming HMAC context | Separate contexts supported | A single caller-provided HMAC context must not be mutated concurrently. | KAT and negative API tests. | Caller owns context serialization. |
 | HMAC key import/destroy/state | Serialized by the global CSP lock | Handles are process-local opaque values. Destroying a handle invalidates later use of that handle. | CSP lifecycle, stale-handle, exhaustion, and cross-platform concurrent smoke tests. | Supported for process-local HMAC key handles under the current capacity limit. |
 | HMAC compute with key handle | Supported with snapshot rule | The implementation copies key material under the lock, releases the lock, computes locally, and clears the local copy. | HMAC key handle KAT and cross-platform concurrent smoke test. | A concurrent destroy does not affect an operation that already captured a valid snapshot; later stale-handle calls must fail. |
+| AES-CBC and AES-CMAC key handles | Supported for independent operation contexts with snapshot rule | Key material is copied under the CSP lock into operation-local state. A single caller-owned cipher or CMAC context must not be mutated concurrently. | Cross-platform per-thread and shared-handle CSP/HMAC/AES/CMAC concurrency regression. | A captured operation may finish after concurrent destroy; later stale-handle use fails. |
 | HMAC_DRBG context | Separate contexts supported | A single DRBG context is caller-owned mutable state and must not be generated/reseeded/uninstantiated concurrently. | KAT, boundary tests, negative tests. | Caller owns context serialization. |
 | Internal entropy adapter/provider seam | Internal only | Provider tests record status only and must not log entropy bytes. | Provider status tests. | Not a public random-service support commitment. |
 | Zeroize helper | Caller-owned buffer only | The same mutable buffer must not be cleared concurrently with other reads/writes. | CSP lifecycle paths and tests. | Caller owns buffer serialization. |
@@ -39,9 +40,9 @@ This matrix turns the earlier internal locking note into a public support-bounda
 
 | Platform branch | Current implementation | Current CI intent | Notes |
 |---|---|---|---|
-| Linux / POSIX-like | `pthread_mutex_t` branch | Required build/test lane plus cross-platform CSP/HMAC concurrency test | Local GCC normal and ASan/UBSan engineering lanes pass; hosted artifact review remains required. |
+| Linux / POSIX-like | `pthread_mutex_t` branch | Required build/test lane plus cross-platform CSP/HMAC/AES/CMAC concurrency test | Local GCC normal and ASan/UBSan engineering lanes pass; hosted artifact review remains required. |
 | Apple | `pthread_mutex_t` branch | Required build/test/install-smoke and concurrency test when pthread is available | Actual hosted artifact review remains TODO. |
-| Windows | `INIT_ONCE` and `CRITICAL_SECTION` branch | Required build/test/install-smoke and native `CreateThread` CSP/HMAC concurrency test | Test source and workflow are present; actual hosted artifact review remains TODO before widening support wording. |
+| Windows | `INIT_ONCE` and `CRITICAL_SECTION` branch | Required build/test/install-smoke and native `CreateThread` CSP/HMAC/AES/CMAC concurrency test | Test source and workflow are present; actual hosted artifact review remains TODO before widening support wording. |
 | Other platforms | No-op fallback | Build-only until reviewed | Must be listed as unsupported for thread-safety unless a real lock branch is added and tested. |
 
 ## Review rules

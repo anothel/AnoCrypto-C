@@ -4,7 +4,7 @@
 #include "ac_internal.h"
 
 
-static int ano_crypto_aes_context_valid(
+int ano_crypto_internal_aes_context_is_valid(
     const ano_crypto_internal_aes_ctx_t *ctx)
 {
     uint32_t expected_round_key_size;
@@ -339,7 +339,7 @@ ano_crypto_status_t ano_crypto_internal_aes_encrypt_block(
     uint32_t round;
     size_t i;
 
-    if (!ano_crypto_aes_context_valid(ctx) || input == 0 || output == 0) {
+    if (!ano_crypto_internal_aes_context_is_valid(ctx) || input == 0 || output == 0) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
@@ -376,7 +376,7 @@ ano_crypto_status_t ano_crypto_internal_aes_decrypt_block(
     uint32_t round;
     size_t i;
 
-    if (!ano_crypto_aes_context_valid(ctx) || input == 0 || output == 0) {
+    if (!ano_crypto_internal_aes_context_is_valid(ctx) || input == 0 || output == 0) {
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 

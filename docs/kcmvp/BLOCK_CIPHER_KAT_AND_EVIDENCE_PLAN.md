@@ -1,6 +1,6 @@
 # Block Cipher KAT and Evidence Plan
 
-Status: P1-26 implemented and hardened engineering evidence slice.
+Status: P1-29 AES-CBC retained and AES-CMAC hardened engineering evidence slice.
 
 ## Public sources
 
@@ -35,7 +35,11 @@ results, hardware provider decisions, and final validation-target scope remain T
 
 ## P1-28 AES-CMAC evidence
 
-AES-CMAC now has separate startup and extended public-source KATs, negative
+AES-CMAC has separate startup and extended public-source KATs, negative
 API/CSP tests, OpenSSL 3.x test-only differential comparison, install and PoC
-smoke, value-free evidence notes, and a 69-symbol clean Release baseline. CMAC
-keys, messages, tags, subkeys, and intermediate states are excluded from logs.
+smoke, value-free evidence notes, and a 69-symbol clean Release baseline. P1-29
+adds private-state validation, fail-closed reinitialization, bounded cleanup,
+alias rejection, 128-cycle lifecycle stress, shared-handle concurrency,
+1,728 checked differential paths, and compiler-output capture for manual review.
+CMAC keys, messages, tags, subkeys, schedules, and intermediate states are
+excluded from logs.

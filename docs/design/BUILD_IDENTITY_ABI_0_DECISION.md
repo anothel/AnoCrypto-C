@@ -1,6 +1,6 @@
 # Build Identity ABI-0 Decision
 
-Status: P1-28 engineering decision retained.
+Status: P1-29 engineering decision retained.
 
 AnoCrypto-C retains the existing public `ano_crypto_build_identity_t` layout
 for the 0.x ABI-0 line. ABI version 1 field order, meaning, and pointer ownership
@@ -19,3 +19,6 @@ P1-25 added eight reviewed cipher functions, growing the stored public-symbol
 baseline from 53 to 61 without changing this layout. P1-28 adds eight reviewed
 CMAC functions and grows the baseline from 61 to 69, again without changing the
 build-identity layout or ABI version.
+
+P1-29 retains the 69-symbol baseline and the ABI version 1 layout while
+hardening private CMAC state and review artifacts only.

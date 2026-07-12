@@ -210,3 +210,12 @@ status/length information, and clears the tag buffer. Internal CMAC context
 headers, implementation source, KAT/negative/differential source, OpenSSL
 provider artifacts, keys, messages, subkeys, intermediate state, and tags are
 excluded from the customer package.
+
+## P1-29 AES-CMAC hardening package boundary
+
+The customer smoke flow continues to exercise full-tag AES-CMAC without
+printing tag or key material. P1-29 adds only a status note describing
+fail-closed reinitialization, alias rejection, bounded cleanup, lifecycle and
+concurrency regression, test-only differential coverage, and the internal-only
+compiler-review artifact boundary. No internal test hook or private context
+layout is exposed.

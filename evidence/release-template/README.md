@@ -67,7 +67,7 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - `docs/ci/THREAD_SAFETY_CI_CHECKLIST.md` records the P1-14 thread-safety CI lanes and log-review rules.
 - `tools/check_thread_safety_policy.cmake` checks thread-safety policy/evidence wiring.
 - `tools/check_sha512_family_policy.cmake` checks SHA-384/SHA-512 implemented-scope wiring.
-- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, `THREAD_SAFETY_CHECK.txt`, `SHA512_FAMILY_CHECK.txt`, AES/CBC hardening/compiler-review records, and related review notes plus AES-CMAC implementation records for P1-28 evidence drafts.
+- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, `THREAD_SAFETY_CHECK.txt`, `SHA512_FAMILY_CHECK.txt`, AES/CBC hardening/compiler-review records, and related review notes plus AES-CMAC implementation and P1-29 hardening records.
 
 ## Commands
 
@@ -257,3 +257,12 @@ Confirm that:
   seed, DRBG, random, private-key, token, or customer values.
 - Confirm tag truncation, CTR, GCM/GMAC, persistence, export, protocol formatting,
   and target-specific side-channel conclusions remain deferred.
+
+## P1-29 AES-CMAC Hardening Review
+
+Include `AES_CMAC_HARDENING_CHECK.txt`, hardening/lifecycle status logs, CMAC
+compiler-output summary and optional disassembly, and
+`AES_CMAC_HARDENING_REVIEW_NOTES.txt`. Confirm no public symbol increase beyond
+69, no private/provider artifact in the PoC or installed SDK, and no sensitive
+values in logs. Compiler-output capture requires human target-specific review
+and is not an automated side-channel conclusion.

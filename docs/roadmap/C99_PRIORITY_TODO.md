@@ -1,8 +1,8 @@
 # C99 Priority TODO
 
-Status: P1-28 AES-CMAC implementation completed as an engineering slice.
+Status: P1-29 AES-CMAC hardening completed as an engineering slice.
 
-## Completed foundation through P1-28
+## Completed foundation through P1-29
 
 - C99 repository, clean-room records, stable-status API style, module lifecycle,
   self-test/error-state, build identity, and install/export package structure.
@@ -13,19 +13,24 @@ Status: P1-28 AES-CMAC implementation completed as an engineering slice.
 - AES-128/192/256 and CBC without padding with KAT, negative, differential,
   lifecycle, concurrency, portability, and compiler-output review artifacts.
 - AES-CMAC with AES-128/192/256, full tags, dedicated CMAC-purpose handles,
-  startup/extended KATs, negative tests, differential, install, PoC, evidence,
-  and the reviewed 69-symbol ABI-0 baseline.
+  startup/extended KATs, install/PoC/evidence integration, and a 69-symbol ABI-0
+  baseline.
+- P1-29 CMAC private-state integrity guards, fail-closed reinitialization,
+  bounded cleanup and alias rules, 128-iteration lifecycle stress, expanded
+  1,728-comparison differential coverage, shared-handle concurrency regression,
+  and target-specific compiler-output capture.
 
 ## Immediate P1 candidates
 
-1. Review actual hosted Windows/macOS, Linux 32-bit, and big-endian artifacts.
-2. Perform target-specific human review of captured AES/CMAC compiler output and
-   define a documented side-channel hardening backlog without overclaiming.
-3. Decide whether the next algorithm step is a no-implementation gate for
-   AES-CTR, a KDF/CMAC-derived service, or a pause for packaging/legal/evidence
-   maturity.
-4. Strengthen automated ABI/source compatibility comparison across tagged
-   releases.
+1. Review and retain actual hosted Windows/macOS, Linux 32-bit, and big-endian
+   artifacts instead of treating workflow presence as execution evidence.
+2. Perform target-specific human review of captured AES and CMAC compiler output
+   and record the remaining timing/cache/fault backlog without overclaiming.
+3. Strengthen automated ABI/source compatibility comparison across tagged
+   releases, including public type size/alignment and semantic compatibility.
+4. Decide whether the next algorithm step is a no-implementation gate for a
+   narrowly scoped KDF, AES-CTR, or a pause for packaging/legal/evidence
+   maturity. CTR must not proceed without a counter-ownership policy.
 5. Finalize direct-noise-source health-test ownership only after a concrete
    source and operating environment are selected.
 

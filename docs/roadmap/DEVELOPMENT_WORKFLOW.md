@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P1-23 draft.
+Status: P1-29 engineering draft.
 
 ## Purpose
 
@@ -240,8 +240,13 @@ P1-23 deliverables:
 | P1-21 | Concurrency and sanitizer hardening | Completed with Win32/pthread CSP/HMAC coverage, status-only thread artifacts, a required GCC ASan/UBSan lane, and build-identity ABI-0 layout decision. |
 | P1-22 | SHA-384/SHA-512 family implementation | Completed with existing public identifiers, startup/extended KATs, negative tests, install/PoC smoke, and unchanged 53-symbol export baseline. |
 | P1-23 | SHA-512-family differential validation and portability | Completed with OpenSSL 3.x test-only deterministic comparisons, C99 representation/alignment checks, hosted artifact wiring, and unchanged public ABI. |
-| P1-24 candidate | Block-cipher/mode implementation entry gate | Reconfirm requirements, algorithm/mode/API/KAT/differential/evidence scope, and ABI impact before implementation. |
-| P2-01 | Block cipher implementation start | Start only after P1-12 selection criteria and customer/KCMVP scope are reviewed. |
+| P1-24 | AES-CBC implementation entry gate | Completed as a no-code selection/API/KAT/CSP/evidence gate. |
+| P1-25 | AES-CBC implementation | Completed with AES-128/192/256, CBC without padding, dedicated CSP purpose, KAT/negative/differential/package evidence, and an intentional 61-symbol baseline. |
+| P1-26 | AES-CBC hardening | Completed with private-state guards, lifecycle/concurrency/portability regression, expanded differential coverage, and compiler-output capture. |
+| P1-27 | AES-CMAC implementation entry gate | Completed as a no-code scope/API/KAT/CSP/evidence gate. |
+| P1-28 | AES-CMAC implementation | Completed with AES-128/192/256, full tags, dedicated CMAC-purpose handles, KAT/negative/differential/package evidence, and an intentional 69-symbol baseline. |
+| P1-29 | AES-CMAC hardening | Completed with private-state/failure/cleanup/alias hardening, lifecycle/concurrency regression, 1,728 differential paths, and compiler-output capture. |
+| P1-30 candidate | Hosted evidence and ABI compatibility review | Prefer retaining and reviewing actual cross-platform artifacts and tagged-release ABI/source compatibility before another algorithm implementation. |
 
 ## Stop conditions
 
@@ -253,3 +258,18 @@ Stop adding code and update docs first when any of the following happen:
 - A customer request mixes AnoCrypto-C, AnoSecureKit, or AnoPKI responsibilities.
 - A log or sample risks printing secret material, entropy bytes, generated secret bytes, private keys, tokens, or customer data.
 - A marketing or security statement is stronger than the current evidence.
+
+## P1-29 placement
+
+P1-29 is the AES-CMAC lifecycle and compiler-review hardening step after the
+P1-28 implementation. It retains the public API and exported-symbol baseline.
+
+P1-29 deliverables:
+
+- CMAC private-context integrity validation and fail-closed reinitialization;
+- overlap and failure-output policy regression;
+- bounded cleanup behavior for short and oversized caller lengths;
+- 128-cycle lifecycle stress and shared CMAC-purpose handle concurrency;
+- 1,728 test-only OpenSSL comparison paths;
+- CMAC compiler-output capture and human-review plan;
+- policy, evidence, PoC, CI, roadmap, and clean-room alignment.

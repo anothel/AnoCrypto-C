@@ -11,7 +11,7 @@ extern "C" {
 #endif
 
 /*
- * P1-28 AES-CMAC public slice.
+ * P1-29 AES-CMAC hardened public slice.
  *
  * Implemented scope:
  * - AES-128, AES-192, and AES-256 through a dedicated CMAC-purpose CSP key.
@@ -19,6 +19,15 @@ extern "C" {
  * - Empty messages and arbitrary streaming chunk lengths are supported.
  * - Context storage is caller-owned and opaque.
  * - Successful finalization clears the secret-dependent context state.
+ * - Message input, output tag, output-length storage, and context storage must
+ *   not overlap. For verification, message input and the supplied tag must also
+ *   be disjoint. Rejected preflight calls do not consume a valid context.
+ * - A nonzero short uninit length clears the caller-authorized prefix and
+ *   returns BUFFER_TOO_SMALL. A zero length cannot safely modify storage. In
+ *   either case callers must retry with the queried size to clear the complete
+ *   opaque extent; no short-length cleanup is considered complete.
+ * - With a sufficient length, uninit clears only the reviewed opaque extent,
+ *   even when a larger caller buffer is supplied.
  * - No key export, persistence, protocol formatting, or implicit allocation.
  */
 

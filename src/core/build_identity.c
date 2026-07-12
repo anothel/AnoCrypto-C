@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-28-aes-cmac"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-29-cmac-hardening"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P1-28 C99 engineering slice; implemented services include SHA-256/384/512, matching HMAC variants, HMAC_DRBG-SHA-256, the source-backed random lifecycle, CSP-backed HMAC, AES encryption, and dedicated CMAC keys, AES-128/192/256 CBC without padding, and full-tag AES-CMAC one-shot/streaming compute and one-shot verify. P1-28 adds startup and extended public-source CMAC KATs, negative tests, OpenSSL 3.x test-only differential comparison, install/PoC smoke coverage, and a reviewed 69-symbol baseline. Prediction resistance, automatic VM snapshot/restore or suspend/resume detection, direct noise-source selection and final health-test thresholds, reviewed hosted Windows/macOS, 32-bit, big-endian, and compiler-output artifacts, ThreadSanitizer policy, Hash_DRBG, AES-CTR, AEAD, padding helpers, tag truncation, GMAC, domestic algorithms, hardware dispatch, and completed side-channel review remain TODO";
+    out_identity->notes = "P1-29 C99 engineering slice; implemented services include SHA-256/384/512, matching HMAC variants, HMAC_DRBG-SHA-256, the source-backed random lifecycle, CSP-backed HMAC, AES encryption, and dedicated CMAC keys, AES-128/192/256 CBC without padding, and full-tag AES-CMAC one-shot/streaming compute and one-shot verify. P1-29 hardens CMAC fail-closed reinitialization, opaque-context integrity checks, bounded cleanup, alias rejection, failure output clearing, lifecycle/concurrency regression, expanded OpenSSL 3.x test-only differential comparison, and compiler-output capture while retaining the reviewed 69-symbol baseline. Prediction resistance, automatic VM snapshot/restore or suspend/resume detection, direct noise-source selection and final health-test thresholds, reviewed hosted Windows/macOS, 32-bit, big-endian, and compiler-output artifacts, ThreadSanitizer policy, Hash_DRBG, AES-CTR, AEAD, padding helpers, tag truncation, GMAC, domestic algorithms, hardware dispatch, and completed side-channel review remain TODO";
 
     return ANO_CRYPTO_OK;
 }

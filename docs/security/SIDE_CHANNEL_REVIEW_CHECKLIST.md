@@ -1,6 +1,6 @@
 # Side-Channel Review Checklist
 
-Status: P1-26 draft; AES compiler-output capture is available but manual disposition remains required.
+Status: P1-29 draft; AES-CBC and AES-CMAC compiler-output capture is available but manual disposition remains required.
 
 ## Purpose
 
@@ -32,12 +32,12 @@ Run this checklist before merging changes that touch:
 | Platform differences | Are platform-specific entropy, threading, and visibility branches reviewed? | TODO |
 | Public claims | Do docs avoid stronger leakage-resistance wording than the evidence supports? | TODO |
 
-## Current P1-26 observations
+## Current observations through P1-29
 
 - SHA-256, HMAC-SHA-256, HMAC_DRBG-SHA-256, and HMAC key handle paths exist as an engineering P1 slice.
 - HMAC key material is in-memory only and is not exported by public API.
 - Entropy provider tests are status-only and must not log entropy bytes.
-- AES uses a table-free arithmetic implementation and P1-26 can capture compiler output for review. This does not automatically establish constant-time behavior.
+- AES uses a table-free arithmetic implementation, and AES-CBC plus AES-CMAC compiler output can be captured for review. This does not automatically establish constant-time behavior.
 - Compiler/optimization/architecture-specific disassembly, timing/cache behavior, fault behavior, and supported-target review remain TODO before broader claims are made.
 
 ## Evidence record template
@@ -68,3 +68,11 @@ comparison candidate. Review compiler output and target-specific timing/cache
 behavior for subkey doubling, final-block selection, AES calls, and tag compare.
 Passing KAT/differential tests does not establish a universal side-channel
 property. No such completed-review claim is made.
+
+## P1-29 AES-CMAC compiler review note
+
+P1-29 captures CMAC-related compiler output for manual target-specific review.
+Review subkey doubling, final-block selection, AES calls, cleanup paths, and tag
+comparison. Whole-library branch/call counts and source-level constant-work
+structure are navigation aids only. Actual compiler/CPU conclusions remain
+TODO until reviewed artifacts and dispositions are retained.

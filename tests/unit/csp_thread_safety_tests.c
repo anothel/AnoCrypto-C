@@ -24,6 +24,7 @@ typedef struct worker_result_s {
     unsigned int failures;
     ano_crypto_csp_handle_t shared_hmac_handle;
     ano_crypto_csp_handle_t shared_aes_handle;
+    ano_crypto_csp_handle_t shared_cmac_handle;
     int shared_mode;
 } worker_result_t;
 
@@ -87,7 +88,9 @@ static TEST_THREAD_RETURN worker_main(TEST_THREAD_ARG arg)
     for (i = 0u; i < iterations; ++i) {
         ano_crypto_csp_handle_t hmac_handle = result->shared_hmac_handle;
         ano_crypto_csp_handle_t aes_handle = result->shared_aes_handle;
+        ano_crypto_csp_handle_t cmac_handle = result->shared_cmac_handle;
         uint8_t mac[ANO_CRYPTO_HASH_SHA256_DIGEST_SIZE];
+        uint8_t cmac_tag[ANO_CRYPTO_CMAC_TAG_SIZE];
         uint8_t ciphertext[16];
         uint8_t recovered[16];
         size_t written = 0u;
@@ -115,6 +118,18 @@ static TEST_THREAD_RETURN worker_main(TEST_THREAD_ARG arg)
                 (void)ano_crypto_key_destroy(hmac_handle);
                 continue;
             }
+            st = ano_crypto_key_import_secret(
+                ANO_CRYPTO_KEY_TYPE_CMAC,
+                aes_key,
+                sizeof(aes_key),
+                ANO_CRYPTO_KEY_FLAG_NONE,
+                &cmac_handle);
+            if (st != ANO_CRYPTO_OK) {
+                result->failures += 1u;
+                (void)ano_crypto_key_destroy(aes_handle);
+                (void)ano_crypto_key_destroy(hmac_handle);
+                continue;
+            }
         }
 
         st = ano_crypto_hmac_compute_with_key(
@@ -127,6 +142,27 @@ static TEST_THREAD_RETURN worker_main(TEST_THREAD_ARG arg)
             &written);
         if (st != ANO_CRYPTO_OK || written != sizeof(mac)) {
             result->failures += 1u;
+        }
+
+        written = 0u;
+        st = ano_crypto_cmac_compute_with_key(
+            cmac_handle,
+            msg,
+            sizeof(msg),
+            cmac_tag,
+            sizeof(cmac_tag),
+            &written,
+            ANO_CRYPTO_CMAC_FLAG_NONE);
+        if (st != ANO_CRYPTO_OK || written != sizeof(cmac_tag)) {
+            result->failures += 1u;
+        } else {
+            st = ano_crypto_cmac_verify_with_key(
+                cmac_handle, msg, sizeof(msg),
+                cmac_tag, sizeof(cmac_tag),
+                ANO_CRYPTO_CMAC_FLAG_NONE);
+            if (st != ANO_CRYPTO_OK) {
+                result->failures += 1u;
+            }
         }
 
         written = 0u;
@@ -167,10 +203,14 @@ static TEST_THREAD_RETURN worker_main(TEST_THREAD_ARG arg)
         }
 
         (void)ano_crypto_csp_zeroize(mac, sizeof(mac));
+        (void)ano_crypto_csp_zeroize(cmac_tag, sizeof(cmac_tag));
         (void)ano_crypto_csp_zeroize(ciphertext, sizeof(ciphertext));
         (void)ano_crypto_csp_zeroize(recovered, sizeof(recovered));
 
         if (result->shared_mode == 0) {
+            if (ano_crypto_key_destroy(cmac_handle) != ANO_CRYPTO_OK) {
+                result->failures += 1u;
+            }
             if (ano_crypto_key_destroy(aes_handle) != ANO_CRYPTO_OK) {
                 result->failures += 1u;
             }
@@ -190,7 +230,8 @@ static TEST_THREAD_RETURN worker_main(TEST_THREAD_ARG arg)
 static int run_worker_group(
     int shared_mode,
     ano_crypto_csp_handle_t shared_hmac_handle,
-    ano_crypto_csp_handle_t shared_aes_handle)
+    ano_crypto_csp_handle_t shared_aes_handle,
+    ano_crypto_csp_handle_t shared_cmac_handle)
 {
     test_thread_t threads[THREAD_COUNT];
     worker_result_t results[THREAD_COUNT];
@@ -202,6 +243,7 @@ static int run_worker_group(
         results[i].failures = 0u;
         results[i].shared_hmac_handle = shared_hmac_handle;
         results[i].shared_aes_handle = shared_aes_handle;
+        results[i].shared_cmac_handle = shared_cmac_handle;
         results[i].shared_mode = shared_mode;
         if (create_thread(&threads[i], worker_main, &results[i]) != 0) {
             fprintf(stderr, "thread creation failed\n");
@@ -220,7 +262,7 @@ static int run_worker_group(
 
     if (created != THREAD_COUNT) failures += 1u;
     if (failures != 0u) {
-        fprintf(stderr, "threaded CSP/HMAC/AES worker failures: %u\n", failures);
+        fprintf(stderr, "threaded CSP/HMAC/AES/CMAC worker failures: %u\n", failures);
         return 1;
     }
     return 0;
@@ -235,6 +277,7 @@ int main(void)
     };
     ano_crypto_csp_handle_t shared_hmac_handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
     ano_crypto_csp_handle_t shared_aes_handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+    ano_crypto_csp_handle_t shared_cmac_handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
     ano_crypto_status_t st;
 
     st = ano_crypto_module_init(0);
@@ -245,6 +288,7 @@ int main(void)
 
     if (run_worker_group(
             0,
+            ANO_CRYPTO_CSP_INVALID_HANDLE,
             ANO_CRYPTO_CSP_INVALID_HANDLE,
             ANO_CRYPTO_CSP_INVALID_HANDLE) != 0) {
         return 1;
@@ -267,19 +311,33 @@ int main(void)
         (void)ano_crypto_key_destroy(shared_hmac_handle);
         return 1;
     }
-
-    if (run_worker_group(1, shared_hmac_handle, shared_aes_handle) != 0) {
+    st = ano_crypto_key_import_secret(
+        ANO_CRYPTO_KEY_TYPE_CMAC,
+        shared_aes_key,
+        sizeof(shared_aes_key),
+        ANO_CRYPTO_KEY_FLAG_NONE,
+        &shared_cmac_handle);
+    if (st != ANO_CRYPTO_OK) {
         (void)ano_crypto_key_destroy(shared_aes_handle);
         (void)ano_crypto_key_destroy(shared_hmac_handle);
         return 1;
     }
 
-    if (ano_crypto_key_destroy(shared_aes_handle) != ANO_CRYPTO_OK ||
+    if (run_worker_group(
+            1, shared_hmac_handle, shared_aes_handle, shared_cmac_handle) != 0) {
+        (void)ano_crypto_key_destroy(shared_cmac_handle);
+        (void)ano_crypto_key_destroy(shared_aes_handle);
+        (void)ano_crypto_key_destroy(shared_hmac_handle);
+        return 1;
+    }
+
+    if (ano_crypto_key_destroy(shared_cmac_handle) != ANO_CRYPTO_OK ||
+        ano_crypto_key_destroy(shared_aes_handle) != ANO_CRYPTO_OK ||
         ano_crypto_key_destroy(shared_hmac_handle) != ANO_CRYPTO_OK) {
         return 1;
     }
     if (ano_crypto_module_shutdown() != ANO_CRYPTO_OK) return 1;
 
-    puts("anocrypto-c csp_thread_safety_tests: PASS (HMAC/AES values not printed)");
+    puts("anocrypto-c csp_thread_safety_tests: PASS (HMAC/AES/CMAC values not printed)");
     return 0;
 }

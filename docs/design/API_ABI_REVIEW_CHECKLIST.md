@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-28 engineering draft.
+Status: P1-29 engineering draft.
 
 ## Identity
 
@@ -35,12 +35,13 @@ Status: P1-28 engineering draft.
 | `ac_cmac.h` | AES-CMAC full-tag compute/verify/streaming; eight functions. |
 | `ac_key.h` | In-memory HMAC, block-cipher, and CMAC key purposes; export/persistence deferred. |
 
-## P1-28 symbol decision
+## P1-28/P1-29 symbol decision
 
 P1-28 adds `ac_cmac.h`, `ANO_CRYPTO_KEY_TYPE_CMAC = 7`, and exactly eight
 `ano_crypto_cmac_*` functions. The clean Release ABI-0 baseline grows from 61
 to 69 names. No existing symbol is removed or renamed. Internal CMAC structures,
-OpenSSL provider details, and test hooks are not public ABI.
+OpenSSL provider details, and test hooks are not public ABI. P1-29 retains all
+69 names and adds no public type, enum, macro, header, or function.
 
 ## Required local checks
 
@@ -50,10 +51,26 @@ cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 cmake --build build --target ano_crypto_public_surface_check
 cmake --build build --target ano_crypto_cmac_policy_check
-cmake --build build --target ano_crypto_exported_symbol_baseline_check
+cmake --build build --target ano_crypto_cmac_hardening_policy_check
+cmake --build build --target ano_crypto_cmac_compiler_review
+cmake --build build --target ano_crypto_clean_release_symbol_baseline_check
 cmake --build build --target ano_crypto_poc_package_smoke
 ```
+
+The direct `ano_crypto_exported_symbol_baseline_check` target is intended for a
+clean Release-style build with internal-symbol hiding enabled. Test builds expose
+internal entry points for internal-unit coverage and therefore use the dedicated
+`ano_crypto_clean_release_symbol_baseline_check` wrapper instead.
 
 Symbol-name equality is only one ABI guardrail. Calling convention, public type
 size/alignment, loader metadata, semantic behavior, and target-specific support
 remain separate review items.
+
+
+## P1-29 AES-CMAC hardening ABI review
+
+- Exported public-symbol baseline remains 69 symbols.
+- The eight public CMAC function signatures and `ANO_CRYPTO_KEY_TYPE_CMAC = 7` remain unchanged.
+- The private caller-owned CMAC context extent changes as an opaque implementation detail.
+- Consumers must call `ano_crypto_cmac_context_size()` against the loaded library and must not hardcode, serialize, or persist an earlier size.
+- Installed headers continue to expose no CMAC context layout or internal state marker.

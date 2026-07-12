@@ -1,12 +1,12 @@
 # Concurrency and Sanitizer CI Checklist
 
-Status: P1-21 engineering checklist.
+Status: P1-29 retained engineering checklist.
 
 ## Selected lanes
 
 - Linux GCC Debug with `ANO_CRYPTO_SANITIZER_MODE=address-undefined` is the required P1-21 sanitizer lane.
 - Clang supports the same CMake mode, but its hosted runtime is a follow-up review item rather than a required P1-21 lane.
-- Linux, macOS, and Windows normal thread-safety-ON lanes run the cross-platform CSP/HMAC concurrency test when the reviewed backend is available.
+- Linux, macOS, and Windows normal thread-safety-ON lanes run the cross-platform CSP/HMAC/AES/CMAC concurrency test when the reviewed backend is available.
 - A Linux thread-safety-OFF lane confirms that the build and status artifact remain explicit about caller serialization.
 
 AddressSanitizer and UndefinedBehaviorSanitizer are selected because they can run against the complete current CTest set without requiring production secrets or special fixtures. ThreadSanitizer is not enabled in P1-21; toolchain/runtime compatibility and false-positive handling remain TODO.

@@ -1,6 +1,6 @@
 # C99 AES-CMAC API Policy
 
-Status: P1-28 implemented public API policy.
+Status: P1-29 hardened public API policy.
 
 ## Public surface
 
@@ -23,7 +23,12 @@ Status: P1-28 implemented public API policy.
 - Empty messages are valid.
 - `update` accepts arbitrary byte lengths; `NULL` is accepted only with length zero.
 - Successful `final` clears secret-dependent context state.
-- `uninit` is allowed outside OPERATIONAL for cleanup.
+- Context, input, output, and output-length storage must obey the documented
+  non-overlap rules; rejected preflight does not consume a valid context.
+- Failed reinitialization after valid size preflight clears the prior context.
+- `uninit` is allowed outside OPERATIONAL for cleanup. A short length clears only
+  the supplied extent and returns `BUFFER_TOO_SMALL`; a sufficient oversized
+  length clears only the reviewed context extent.
 - Short output returns `ANO_CRYPTO_ERR_BUFFER_TOO_SMALL` and no partial tag.
 
 ## Verification rules
@@ -44,6 +49,12 @@ This is not a universal side-channel claim.
 
 ## ABI decision
 
-P1-28 adds one public header, one key-purpose enum value, and eight exported
+P1-28 added one public header, one key-purpose enum value, and eight exported
 functions. The clean Release ABI-0 baseline therefore grows from 61 to 69
 names with no removal or rename of an existing symbol.
+
+## P1-29 hardening decision
+
+P1-29 does not add a public declaration or symbol. It strengthens private
+context validation, cleanup, overlap, lifecycle, concurrency, differential, and
+compiler-review evidence while retaining the 69-name ABI-0 baseline.

@@ -62,6 +62,9 @@ ano_crypto_require_text("CMakeLists.txt"
 ano_crypto_require_text("CMakeLists.txt"
     "ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS AND NOT ANO_CRYPTO_BUILD_TESTS"
     "test-hook release-build guard")
+ano_crypto_require_text("CMakeLists.txt"
+    "Internal test hooks are forbidden in Release-like configurations"
+    "test-hook Release-like configuration guard")
 ano_crypto_require_text("tools/create_poc_package.cmake"
     "-DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF"
     "PoC clean build disables entropy hooks")

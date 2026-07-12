@@ -1,6 +1,6 @@
 # CI Matrix
 
-Status: P1-28 engineering draft.
+Status: P1-29 engineering draft.
 
 | Lane | Linux | macOS | Windows | Notes |
 |---|---:|---:|---:|---|
@@ -26,3 +26,12 @@ extended NIST example KATs, negative/cross-purpose handling, OpenSSL test-only
 differential comparison, install/PoC smoke, 69-symbol baseline, internal-source
 exclusion, and value-free logs. Workflow presence does not mean hosted or
 side-channel review is complete.
+
+## P1-29 CMAC hardening addition
+
+Add the CMAC hardening review and 128-cycle lifecycle stress to ordinary,
+Clang, and selected diagnostic lanes. The required OpenSSL lane checks 1,728
+CMAC comparison paths. Release-style compiler lanes capture CMAC disassembly
+metadata where supported. All lanes run the CMAC hardening policy and retain
+the 69-symbol clean Release baseline. Hosted workflow definitions do not count
+as reviewed run evidence.

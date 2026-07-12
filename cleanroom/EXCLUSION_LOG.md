@@ -332,3 +332,16 @@ If excluded material is discovered:
 | EX-3607 | Claiming universal constant-time behavior, completed side-channel review, or official validation from KAT/differential results | Claims and technical risk | Excluded | Target-specific compiler, timing/cache, and formal review remain TODO. |
 | EX-3608 | Adding CTR, GCM/GMAC, protocol formatting, persistence, export, or hardware dispatch in the CMAC implementation step | Scope-creep risk | Deferred | Each requires a separate reviewed decision gate. |
 | EX-3609 | Running nested install/PoC builds and a second filtered CTest inside one evidence-assembly process under an outer build jobserver | Build reliability and deadlock risk | Excluded | CTest, installed-package smoke, and PoC smoke are separate prepared artifacts consumed by the evidence assembler. |
+
+
+## P1-29 AES-CMAC Hardening Exclusions
+
+| ID | Excluded material or behavior | Risk | Disposition | Note |
+|---|---|---|---|---|
+| EX-3701 | Third-party CMAC lifecycle, context-integrity, constant-work comparison, concurrency, or compiler-analysis source with unclear rights | Provenance risk | Excluded | P1-29 changes and tests are fresh project-owned C99 and CMake material. |
+| EX-3702 | Treating source-level full-tag comparison or disassembly capture as a completed timing/side-channel conclusion | Claims risk | Excluded | Target/compiler-specific human review remains required. |
+| EX-3703 | Allowing context, message, output tag, or output-length storage to overlap where mutable state can be corrupted | Memory/state integrity risk | Excluded | Public preflight rejects the reviewed overlap classes. |
+| EX-3704 | Trusting oversized `uninit` length to clear beyond the opaque CMAC context | Memory-corruption risk | Excluded | Cleanup is bounded to the queried context extent. |
+| EX-3705 | Retaining a prior key schedule after failed CMAC reinitialization | Secret-state lifecycle risk | Excluded | Valid-size reinitialization failure clears the caller context. |
+| EX-3706 | Logging or packaging CMAC keys, messages, tags, subkeys, chains, AES schedules, differential outputs, entropy, seed, DRBG state, random bytes, private keys, tokens, or customer data | Sensitive-material disclosure | Excluded | P1-29 logs contain status/count/compiler/target metadata only. |
+| EX-3707 | Adding public CMAC functions, tag truncation, CTR, GCM/GMAC, persistence, export, or protocol formatting during hardening | API/scope creep | Excluded or deferred | Public API remains eight functions and ABI-0 remains 69 symbols. |

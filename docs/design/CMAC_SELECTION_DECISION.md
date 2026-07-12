@@ -1,6 +1,6 @@
 # CMAC Selection Decision
 
-Status: P1-28 engineering implementation decision.
+Status: P1-29 implemented and hardened engineering decision.
 
 ## Decision
 
@@ -42,3 +42,10 @@ key-separation policy.
 
 The clean Release ABI-0 baseline is 69 exported names after the reviewed eight
 CMAC functions are added.
+
+## P1-29 hardening note
+
+The selected algorithm and public scope are unchanged. P1-29 adds private state
+integrity checks, fail-closed lifecycle behavior, bounded cleanup, expanded
+differential and concurrency coverage, and compiler-output capture. It does not
+change the 69-symbol ABI baseline or make a completed side-channel claim.

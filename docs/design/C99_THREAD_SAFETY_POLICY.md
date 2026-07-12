@@ -1,6 +1,6 @@
 # C99 Thread-Safety Policy
 
-Status: P1-21 draft.
+Status: P1-29 retained and extended draft.
 
 ## Goal
 
@@ -30,9 +30,11 @@ The following API groups are intended to tolerate concurrent calls when `ANO_CRY
 - self-test last-status/flag queries
 - HMAC key import/destroy/state/is-valid operations
 - HMAC-SHA-256 compute using an imported HMAC key handle
-- one-shot hash/HMAC operations with independent caller-owned buffers
+- AES-CBC and AES-CMAC operations using imported purpose-specific handles and
+  independent caller-owned contexts/buffers
+- one-shot hash/HMAC/CMAC operations with independent caller-owned buffers
 
-Caller-provided operation contexts remain caller-owned. The module does not promise that a single hash, HMAC, or DRBG context can be mutated concurrently by multiple threads.
+Caller-provided operation contexts remain caller-owned. The module does not promise that a single hash, HMAC, cipher, CMAC, or DRBG context can be mutated concurrently by multiple threads.
 
 ## Key handle snapshot rule
 
@@ -61,7 +63,7 @@ The option is ON by default. If thread support is disabled or unavailable, calle
 Existing tests:
 
 - `ano_crypto_thread_lock_tests`: basic internal lock seam smoke test.
-- `ano_crypto_csp_thread_safety_tests`: Win32 native-thread or POSIX pthread concurrent HMAC import/use/destroy and shared-handle compute loops when the reviewed backend is available.
+- `ano_crypto_csp_thread_safety_tests`: Win32 native-thread or POSIX pthread concurrent HMAC/AES/CMAC import/use/destroy and shared-handle compute loops when the reviewed backend is available.
 
 P1-21 evidence wiring includes:
 
@@ -69,7 +71,7 @@ P1-21 evidence wiring includes:
 - `THREAD_SAFETY_CHECK.txt`: generated in release evidence drafts.
 - `THREAD_SAFETY_PACKAGE_NOTES.txt`: generated in customer PoC package drafts.
 
-The concurrent test uses public synthetic HMAC fixture bytes only and must not print key material, MAC output, entropy bytes, nonce bytes, DRBG state, generated DRBG bytes, private keys, tokens, or customer data.
+The concurrent test uses public synthetic HMAC/AES/CMAC fixture bytes only and must not print key material, MAC output, entropy bytes, nonce bytes, DRBG state, generated DRBG bytes, private keys, tokens, or customer data.
 
 ## TODO
 

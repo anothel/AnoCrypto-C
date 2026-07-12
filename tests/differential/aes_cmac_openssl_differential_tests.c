@@ -8,6 +8,10 @@
 #include <openssl/params.h>
 #include <anocrypto/anocrypto.h>
 
+#define CMAC_DIFFERENTIAL_CASES_PER_KEY 96u
+#define CMAC_DIFFERENTIAL_PATHS_PER_CASE 6u
+#define CMAC_DIFFERENTIAL_MAX_MESSAGE 2048u
+
 static int equal_bytes(const uint8_t *a, const uint8_t *b, size_t len)
 {
     uint8_t difference = 0u;
@@ -89,19 +93,84 @@ static void fill_case(uint8_t *buffer, size_t length, uint32_t seed)
     }
 }
 
+static size_t message_length_for_case(size_t case_index)
+{
+    static const size_t boundaries[] = {
+        0u,1u,2u,3u,7u,8u,14u,15u,16u,17u,18u,30u,31u,32u,33u,
+        46u,47u,48u,49u,62u,63u,64u,65u,66u,126u,127u,128u,129u,
+        254u,255u,256u,257u,510u,511u,512u,513u,1023u,1024u,
+        1025u,2047u,2048u
+    };
+    if (case_index < sizeof(boundaries) / sizeof(boundaries[0])) {
+        return boundaries[case_index];
+    }
+    return (size_t)(((uint32_t)case_index * 97u +
+                     (uint32_t)case_index * (uint32_t)case_index * 13u + 19u) %
+                    (CMAC_DIFFERENTIAL_MAX_MESSAGE + 1u));
+}
+
+static ano_crypto_status_t stream_cmac(
+    ano_crypto_csp_handle_t handle,
+    const uint8_t *message,
+    size_t message_len,
+    size_t initial_chunk,
+    uint8_t out[ANO_CRYPTO_CMAC_TAG_SIZE])
+{
+    uint8_t *ctx = 0;
+    size_t ctx_size = 0u;
+    size_t offset = 0u;
+    size_t chunk = initial_chunk;
+    size_t written = 0u;
+    ano_crypto_status_t st;
+
+    st = ano_crypto_cmac_context_size(&ctx_size);
+    if (st != ANO_CRYPTO_OK || ctx_size == 0u) {
+        return st == ANO_CRYPTO_OK ? ANO_CRYPTO_ERR_INTERNAL_ERROR : st;
+    }
+    ctx = (uint8_t *)calloc(1u, ctx_size);
+    if (ctx == 0) {
+        return ANO_CRYPTO_ERR_INTERNAL_ERROR;
+    }
+
+    st = ano_crypto_cmac_init(
+        ctx, ctx_size, handle, ANO_CRYPTO_CMAC_FLAG_NONE);
+    while (st == ANO_CRYPTO_OK && offset < message_len) {
+        size_t take = chunk;
+        if (take > message_len - offset) {
+            take = message_len - offset;
+        }
+        st = ano_crypto_cmac_update(ctx, message + offset, take);
+        offset += take;
+        chunk = (chunk % 47u) + 1u;
+    }
+    if (message_len == 0u && st == ANO_CRYPTO_OK) {
+        st = ano_crypto_cmac_update(ctx, 0, 0u);
+    }
+    if (st == ANO_CRYPTO_OK) {
+        st = ano_crypto_cmac_final(
+            ctx, out, ANO_CRYPTO_CMAC_TAG_SIZE, &written);
+        if (st == ANO_CRYPTO_OK && written != ANO_CRYPTO_CMAC_TAG_SIZE) {
+            st = ANO_CRYPTO_ERR_INTERNAL_ERROR;
+        }
+    }
+    (void)ano_crypto_cmac_uninit(ctx, ctx_size);
+    free(ctx);
+    return st;
+}
+
 int main(void)
 {
     static const size_t key_lengths[3] = {16u, 24u, 32u};
-    static const size_t message_lengths[] = {
-        0u,1u,2u,7u,15u,16u,17u,31u,32u,33u,47u,48u,49u,63u,64u,65u,
-        127u,128u,129u,255u,256u,257u,511u,512u
-    };
-    uint8_t key[32];
-    uint8_t message[512];
-    uint8_t ano_tag[ANO_CRYPTO_CMAC_TAG_SIZE];
-    uint8_t stream_tag[ANO_CRYPTO_CMAC_TAG_SIZE];
+    uint8_t key_storage[33];
+    uint8_t message_storage[CMAC_DIFFERENTIAL_MAX_MESSAGE + 1u];
+    uint8_t ano_tag_storage[ANO_CRYPTO_CMAC_TAG_SIZE + 1u];
+    uint8_t stream_tag_storage[ANO_CRYPTO_CMAC_TAG_SIZE + 1u];
     uint8_t reference_tag[ANO_CRYPTO_CMAC_TAG_SIZE];
     uint8_t altered[ANO_CRYPTO_CMAC_TAG_SIZE];
+    uint8_t *key = key_storage + 1u;
+    uint8_t *message = message_storage + 1u;
+    uint8_t *ano_tag = ano_tag_storage + 1u;
+    uint8_t *stream_tag = stream_tag_storage + 1u;
     size_t comparisons = 0u;
     size_t key_index;
     size_t case_index;
@@ -129,80 +198,67 @@ int main(void)
         }
 
         for (case_index = 0u;
-             case_index < sizeof(message_lengths) / sizeof(message_lengths[0]);
+             case_index < CMAC_DIFFERENTIAL_CASES_PER_KEY;
              ++case_index) {
-            size_t message_len = message_lengths[case_index];
+            size_t message_len = message_length_for_case(case_index);
             const uint8_t *message_ptr = message_len == 0u ? 0 : message;
             size_t written = 0u;
-            size_t ctx_size = 0u;
-            uint8_t *ctx;
-            size_t offset = 0u;
-            size_t chunk = 1u;
 
             fill_case(message, message_len,
-                      (uint32_t)(0x730000u + key_index * 257u + case_index));
-            if (!openssl_cmac(key, key_len, message_ptr, message_len, reference_tag)) {
-                fprintf(stderr, "OpenSSL CMAC reference failed for key class %lu message length %lu\n",
-                        (unsigned long)key_len, (unsigned long)message_len);
+                      (uint32_t)(0x730000u + key_index * 4099u + case_index));
+            if (!openssl_cmac(
+                    key, key_len, message_ptr, message_len, reference_tag)) {
+                fprintf(stderr, "OpenSSL CMAC reference failed for key class %lu case %lu length %lu\n",
+                        (unsigned long)key_len, (unsigned long)case_index,
+                        (unsigned long)message_len);
                 return 1;
             }
 
             st = ano_crypto_cmac_compute_with_key(
                 handle, message_ptr, message_len,
-                ano_tag, sizeof(ano_tag), &written, ANO_CRYPTO_CMAC_FLAG_NONE);
-            if (st != ANO_CRYPTO_OK || written != sizeof(ano_tag) ||
-                !equal_bytes(ano_tag, reference_tag, sizeof(ano_tag))) {
-                fprintf(stderr, "CMAC differential one-shot mismatch for key class %lu message length %lu status %s\n",
-                        (unsigned long)key_len, (unsigned long)message_len,
-                        ano_crypto_status_name(st));
+                ano_tag, ANO_CRYPTO_CMAC_TAG_SIZE, &written,
+                ANO_CRYPTO_CMAC_FLAG_NONE);
+            if (st != ANO_CRYPTO_OK || written != ANO_CRYPTO_CMAC_TAG_SIZE ||
+                !equal_bytes(ano_tag, reference_tag, ANO_CRYPTO_CMAC_TAG_SIZE)) {
+                fprintf(stderr, "CMAC differential one-shot mismatch for key class %lu case %lu length %lu status %s\n",
+                        (unsigned long)key_len, (unsigned long)case_index,
+                        (unsigned long)message_len, ano_crypto_status_name(st));
                 return 1;
             }
             ++comparisons;
 
-            st = ano_crypto_cmac_context_size(&ctx_size);
-            if (st != ANO_CRYPTO_OK || ctx_size == 0u) {
+            st = stream_cmac(
+                handle, message_ptr, message_len,
+                (case_index % 17u) + 1u, stream_tag);
+            if (st != ANO_CRYPTO_OK ||
+                !equal_bytes(stream_tag, reference_tag, ANO_CRYPTO_CMAC_TAG_SIZE)) {
+                fprintf(stderr, "CMAC differential streaming-A mismatch for key class %lu case %lu length %lu status %s\n",
+                        (unsigned long)key_len, (unsigned long)case_index,
+                        (unsigned long)message_len, ano_crypto_status_name(st));
                 return 1;
             }
-            ctx = (uint8_t *)calloc(1u, ctx_size);
-            if (ctx == 0) {
-                return 1;
-            }
-            st = ano_crypto_cmac_init(ctx, ctx_size, handle, ANO_CRYPTO_CMAC_FLAG_NONE);
-            while (st == ANO_CRYPTO_OK && offset < message_len) {
-                size_t take = chunk;
-                if (take > message_len - offset) {
-                    take = message_len - offset;
-                }
-                st = ano_crypto_cmac_update(ctx, message + offset, take);
-                offset += take;
-                chunk = (chunk % 19u) + 1u;
-            }
-            if (message_len == 0u && st == ANO_CRYPTO_OK) {
-                st = ano_crypto_cmac_update(ctx, 0, 0u);
-            }
-            if (st == ANO_CRYPTO_OK) {
-                written = 0u;
-                st = ano_crypto_cmac_final(
-                    ctx, stream_tag, sizeof(stream_tag), &written);
-            }
-            (void)ano_crypto_cmac_uninit(ctx, ctx_size);
-            free(ctx);
-            if (st != ANO_CRYPTO_OK || written != sizeof(stream_tag) ||
-                !equal_bytes(stream_tag, reference_tag, sizeof(stream_tag))) {
-                fprintf(stderr, "CMAC differential streaming mismatch for key class %lu message length %lu status %s\n",
-                        (unsigned long)key_len, (unsigned long)message_len,
-                        ano_crypto_status_name(st));
+            ++comparisons;
+
+            st = stream_cmac(
+                handle, message_ptr, message_len,
+                (case_index % 43u) + 1u, stream_tag);
+            if (st != ANO_CRYPTO_OK ||
+                !equal_bytes(stream_tag, reference_tag, ANO_CRYPTO_CMAC_TAG_SIZE)) {
+                fprintf(stderr, "CMAC differential streaming-B mismatch for key class %lu case %lu length %lu status %s\n",
+                        (unsigned long)key_len, (unsigned long)case_index,
+                        (unsigned long)message_len, ano_crypto_status_name(st));
                 return 1;
             }
             ++comparisons;
 
             st = ano_crypto_cmac_verify_with_key(
                 handle, message_ptr, message_len,
-                reference_tag, sizeof(reference_tag), ANO_CRYPTO_CMAC_FLAG_NONE);
+                reference_tag, sizeof(reference_tag),
+                ANO_CRYPTO_CMAC_FLAG_NONE);
             if (st != ANO_CRYPTO_OK) {
-                fprintf(stderr, "CMAC differential verify failure for key class %lu message length %lu status %s\n",
-                        (unsigned long)key_len, (unsigned long)message_len,
-                        ano_crypto_status_name(st));
+                fprintf(stderr, "CMAC differential verify failure for key class %lu case %lu length %lu status %s\n",
+                        (unsigned long)key_len, (unsigned long)case_index,
+                        (unsigned long)message_len, ano_crypto_status_name(st));
                 return 1;
             }
             ++comparisons;
@@ -213,9 +269,22 @@ int main(void)
                 handle, message_ptr, message_len,
                 altered, sizeof(altered), ANO_CRYPTO_CMAC_FLAG_NONE);
             if (st != ANO_CRYPTO_ERR_AUTHENTICATION_FAILED) {
-                fprintf(stderr, "CMAC differential mismatch-status failure for key class %lu message length %lu status %s\n",
-                        (unsigned long)key_len, (unsigned long)message_len,
-                        ano_crypto_status_name(st));
+                fprintf(stderr, "CMAC differential mismatch-A status failure for key class %lu case %lu length %lu status %s\n",
+                        (unsigned long)key_len, (unsigned long)case_index,
+                        (unsigned long)message_len, ano_crypto_status_name(st));
+                return 1;
+            }
+            ++comparisons;
+
+            memcpy(altered, reference_tag, sizeof(altered));
+            altered[(case_index * 7u + 15u) % sizeof(altered)] ^= 0x80u;
+            st = ano_crypto_cmac_verify_with_key(
+                handle, message_ptr, message_len,
+                altered, sizeof(altered), ANO_CRYPTO_CMAC_FLAG_NONE);
+            if (st != ANO_CRYPTO_ERR_AUTHENTICATION_FAILED) {
+                fprintf(stderr, "CMAC differential mismatch-B status failure for key class %lu case %lu length %lu status %s\n",
+                        (unsigned long)key_len, (unsigned long)case_index,
+                        (unsigned long)message_len, ano_crypto_status_name(st));
                 return 1;
             }
             ++comparisons;
@@ -226,14 +295,21 @@ int main(void)
         }
     }
 
-    (void)ano_crypto_csp_zeroize(key, sizeof(key));
-    (void)ano_crypto_csp_zeroize(message, sizeof(message));
-    (void)ano_crypto_csp_zeroize(ano_tag, sizeof(ano_tag));
-    (void)ano_crypto_csp_zeroize(stream_tag, sizeof(stream_tag));
+    (void)ano_crypto_csp_zeroize(key_storage, sizeof(key_storage));
+    (void)ano_crypto_csp_zeroize(message_storage, sizeof(message_storage));
+    (void)ano_crypto_csp_zeroize(ano_tag_storage, sizeof(ano_tag_storage));
+    (void)ano_crypto_csp_zeroize(stream_tag_storage, sizeof(stream_tag_storage));
     (void)ano_crypto_csp_zeroize(reference_tag, sizeof(reference_tag));
     (void)ano_crypto_csp_zeroize(altered, sizeof(altered));
 
     if (ano_crypto_module_shutdown() != ANO_CRYPTO_OK) {
+        return 1;
+    }
+
+    if (comparisons !=
+        (size_t)(3u * CMAC_DIFFERENTIAL_CASES_PER_KEY *
+                 CMAC_DIFFERENTIAL_PATHS_PER_CASE)) {
+        fprintf(stderr, "CMAC differential comparison count mismatch\n");
         return 1;
     }
 

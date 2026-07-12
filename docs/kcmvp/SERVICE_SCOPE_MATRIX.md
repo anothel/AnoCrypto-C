@@ -1,6 +1,6 @@
 # Service Scope Matrix
 
-Status: P1-28 engineering draft.
+Status: P1-29 engineering draft.
 
 | Service | Public surface | Status | Key boundary |
 |---|---|---|---|
@@ -20,3 +20,10 @@ P1-28 CMAC coverage includes startup KAT, all 12 public AES-CMAC examples,
 negative lifecycle/authentication tests, install/PoC smoke, and OpenSSL 3.x
 test-only differential comparison. Target-specific compiler/timing/cache review
 and official validation scope remain TODO.
+
+## P1-29 service-state note
+
+AES-CMAC service availability is unchanged. P1-29 adds fail-closed context
+validation, cleanup and aliasing rules, lifecycle/concurrency regression, and
+manual compiler-review inputs. No service identifier or public operation was
+added.
