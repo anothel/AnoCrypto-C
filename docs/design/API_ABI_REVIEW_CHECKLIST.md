@@ -1,163 +1,59 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-27 draft.
+Status: P1-28 engineering draft.
 
-## Review scope
+## Identity
 
-This checklist covers the public C headers under `include/anocrypto/`, the CMake installed package, the exported public symbol surface, and the installed-package PoC consumer for the current engineering slice.
-
-## Naming and package identity
-
-| Item | Expected | P1-27 status |
+| Item | Expected | Status |
 |---|---|---|
-| Product spelling | `AnoCrypto-C` | OK |
-| Repository/archive slug | `anocrypto-c` | OK |
+| Product | `AnoCrypto-C` | OK |
 | CMake package | `AnoCryptoC` | OK |
 | Imported target | `AnoCryptoC::AnoCryptoC` | OK |
-| Library target/file | `anocrypto_c` | OK |
+| Library | `anocrypto_c` | OK |
 | Include root | `include/anocrypto/` | OK |
-| C API prefix | `ano_crypto_` | OK |
-| Macro prefix | `ANO_CRYPTO_` | OK |
+| C API/macro prefix | `ano_crypto_` / `ANO_CRYPTO_` | OK |
 
-## Header ABI checklist
+## ABI rules
 
-| Rule | P1-27 status | Notes |
-|---|---|---|
-| Public cryptographic contexts do not expose internal struct layout. | OK | Hash/HMAC/DRBG contexts use caller-provided opaque buffers and size APIs. |
-| Public enum values are explicit. | OK | Current public enums use fixed numeric values. |
-| Processing APIs return `ano_crypto_status_t`. | OK | Name/status query helpers are documented exceptions. |
-| Outputs are returned through output parameters. | OK | Digest/MAC/DRBG APIs use output buffers and written lengths. |
-| Context size APIs exist where caller-provided storage is required. | OK | Hash, HMAC, DRBG, random, and cipher services expose implemented context-size queries; random returns `ANO_CRYPTO_ERR_NOT_IMPLEMENTED` when the reviewed provider or process marker is unavailable. |
-| Buffer length errors are explicit. | OK | Negative tests cover representative short-buffer and invalid-argument cases. |
-| Public context mutation is not claimed thread-safe. | OK | Current support is limited to selected global state. |
-| Public build identity struct layout is recorded. | OK for ABI-0 engineering baseline | P1-21 retains ABI version 1 and records the exact field order in `abi/ANOCRYPTO_C_0_BUILD_IDENTITY_LAYOUT.md`; no broad binary-compatibility claim is made. |
-| Symbol visibility policy is finalized. | Partial | `ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS` hides internal symbols for no-test release-style builds on supported ELF/Mach-O compilers; internal test-hook builds may still expose internal symbols for internal-unit tests. |
-| Static library support policy is finalized. | TODO | Shared-library boundary remains the first candidate boundary. |
+- Public processing functions return `ano_crypto_status_t` and use output parameters.
+- Caller-owned contexts are opaque and sized through query functions.
+- Public enum values are explicit and append-only within the current ABI line.
+- Short buffers, NULL/zero-length conventions, overlap, and lifecycle errors are tested.
+- The build-identity ABI version 1 layout is recorded separately and unchanged.
+- Release-style builds hide internal symbols where supported.
+- Shared library remains the first candidate module boundary.
 
-## Per-header review notes
+## Current public processing headers
 
-| Header | P1-27 review note |
+| Header | Current scope |
 |---|---|
-| `anocrypto.h` | Umbrella header only; no extra ABI. |
-| `ac_status.h` | Status enum values are explicit and append-only before internal error sentinel. |
-| `ac_version.h` | Version queries are state-independent. |
-| `ac_build.h` | ABI version 1 field order is retained for the 0.x ABI-0 line; fields are not extended under the same version. |
-| `ac_module.h` | Module config remains opaque; module state enum values are explicit. |
-| `ac_selftest.h` | Test-only force flag is gated behind test-hook macro. |
-| `ac_hash.h` | Opaque buffer context; SHA-256/SHA-384/SHA-512 are implemented behind existing identifiers. |
-| `ac_hmac.h` | Opaque buffer context and in-memory HMAC key handle compute path. |
-| `ac_drbg.h` | Opaque buffer context; explicit entropy input; implemented public random generation remains separate. |
-| `ac_random.h` | P1-20 source-backed HMAC_DRBG-SHA-256 service; caller-owned opaque context, bounded request, fail-closed process-marker prerequisite, failure output clearing, and explicit VM/suspend limitations. |
-| `ac_csp.h` | Handle is integer-opaque to callers; state enum values are explicit. |
-| `ac_key.h` | Import/destroy/state query only; export and persistence are deferred. P1-27 does not yet add a CMAC key-purpose enum. |
-| `ac_cipher.h` | AES-128/192/256 and CBC no-padding; opaque context, CSP key handle, exact in-place only, and 8 reviewed functions. |
-| `ac_cmac.h` | Absent in P1-27; future API proposal only. |
+| `ac_hash.h` | SHA-256/384/512 one-shot and streaming. |
+| `ac_hmac.h` | HMAC-SHA-2 one-shot/streaming and HMAC-purpose handle path. |
+| `ac_drbg.h` | Explicit-entropy HMAC_DRBG-SHA-256 core. |
+| `ac_random.h` | Source-backed public random lifecycle on supported provider/process-marker branches. |
+| `ac_cipher.h` | AES-128/192/256 CBC without padding; eight functions. |
+| `ac_cmac.h` | AES-CMAC full-tag compute/verify/streaming; eight functions. |
+| `ac_key.h` | In-memory HMAC, block-cipher, and CMAC key purposes; export/persistence deferred. |
+
+## P1-28 symbol decision
+
+P1-28 adds `ac_cmac.h`, `ANO_CRYPTO_KEY_TYPE_CMAC = 7`, and exactly eight
+`ano_crypto_cmac_*` functions. The clean Release ABI-0 baseline grows from 61
+to 69 names. No existing symbol is removed or renamed. Internal CMAC structures,
+OpenSSL provider details, and test hooks are not public ABI.
 
 ## Required local checks
 
 ```sh
-cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DANO_CRYPTO_BUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Debug
+cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DANO_CRYPTO_BUILD_EXAMPLES=ON
 cmake --build build --parallel
 ctest --test-dir build --output-on-failure
 cmake --build build --target ano_crypto_public_surface_check
-cmake --build build --target ano_crypto_thread_safety_policy_check
-cmake --build build --target ano_crypto_concurrency_sanitizer_policy_check
-cmake --build build --target ano_crypto_sha512_family_policy_check
-cmake --build build --target ano_crypto_aes_cbc_policy_check
-cmake --build build --target ano_crypto_aes_hardening_policy_check
-cmake --build build --target ano_crypto_cmac_entry_gate_check
-cmake --build build --target ano_crypto_random_service_policy_check
-cmake --build build --target ano_crypto_random_lifecycle_policy_check
+cmake --build build --target ano_crypto_cmac_policy_check
 cmake --build build --target ano_crypto_exported_symbol_baseline_check
-cmake --build build --target ano_crypto_entropy_health_policy_check
-cmake --install build --prefix /tmp/anocrypto-c-p1-27
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-27
-cmake --build build-install-smoke --parallel
-./build-install-smoke/anocrypto_c_install_smoke
 cmake --build build --target ano_crypto_poc_package_smoke
 ```
 
-On Linux, inspect exported symbols with:
-
-```sh
-nm -D --defined-only build/libanocrypto_c.so | awk '{print $3}' | sort
-```
-
-Expected exported public names should use the `ano_crypto_` prefix. Internal `ano_crypto_internal_*` symbols should be hidden in release-style builds with `ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON`; test-hook builds may report them as tracked warnings.
-
-## Before public ABI freeze
-
-1. Keep the ABI-version-1 build-identity field order unchanged; use a separately reviewed ABI version or API for incompatible growth.
-2. Decide whether to add a stricter version script/export map per platform.
-3. Decide whether static libraries are supported and what ABI commitments apply.
-4. Keep the stored 61-symbol ABI-0 baseline under review; any intentional public symbol change requires a separate API/ABI decision before updating it.
-5. Keep unsupported algorithms as explicit placeholder returns until implementation and evidence are reviewed.
-
-## P1-14 thread-safety ABI note
-
-The P1-14 support matrix does not add public symbols or public struct layouts. It documents current behavior for existing APIs and keeps caller-owned context serialization outside the library ABI.
-
-## P1-16 random-service ABI note
-
-P1-19 implements the existing `ac_random.h` symbols without adding a public function. Context ownership remains caller-provided opaque storage; source-backed context marking prevents explicit DRBG contexts from being accepted by the random service. Prediction resistance and automatic VM snapshot/restore detection remain unsupported. P1-20 stores and checks the unchanged 53-symbol ABI-0 baseline.
-
-## P1-17 entropy testability ABI note
-
-- Entropy provider hooks and health-test state remain under `src/internal/` and are not installed.
-- `ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS` is `OFF` by default and cannot be enabled with `ANO_CRYPTO_BUILD_TESTS=OFF`.
-- No public status-enum value or public struct layout was added for the health-test skeleton; internal health failure maps to `ANO_CRYPTO_ERR_ENTROPY_SOURCE_FAILED`.
-- PoC staging rebuilds with tests/hooks off and internal symbol hiding on, then scans public headers and shared-library exports for internal/test-hook leakage.
-- Windows shared-library auto-export is allowed only in internal test builds so existing internal-unit tests can link; it is not enabled in the tests-off Release/PoC configuration.
-
-## P1-19 entropy operational ABI note
-
-- Source class, health owner, restart policy, operational probe, and process guard remain private under `src/internal/` or internal source files.
-- No public function, enum value, installed struct, or public macro was added for P1-19.
-- The private DRBG context size increased; callers are required to query `ano_crypto_drbg_context_size()` for each build and must not persist or hard-code the size.
-- Clean Release/PoC builds keep internal symbol hiding enabled and must not export `ano_crypto_internal_*`, entropy hook, or process-guard names.
-- Run the clean Release baseline target; any difference from `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` requires review before handoff.
-
-## P1-19 random-service ABI note
-
-- No new exported public function is added.
-- `ANO_CRYPTO_RANDOM_MAX_REQUEST_SIZE` documents the per-call ceiling.
-- Private context layout may change before ABI freeze; callers must query size for each build.
-- Installed headers expose no provider callback, entropy source class, health-test state, or process-guard type.
-- Random-service contexts are mutable caller-owned storage and require external synchronization.
-
-
-## P1-20 random lifecycle and exported-symbol ABI note
-
-- No public function, enum value, installed struct, or public macro was added for P1-20.
-- `ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS` is private, defaults to `OFF`, and cannot be enabled with tests disabled.
-- The reseed-counter setter, process-marker helpers, lifecycle stress implementation, and platform review program are not installed.
-- Random-service availability now fails closed when process-marker support is unavailable. This is a behavior clarification behind existing symbols, not a new ABI entry.
-- Clean shared Release builds are compared against `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt`; the current baseline contains 53 `ano_crypto_*` symbols.
-- Symbol-name equality is only one ABI guardrail. Calling conventions, public type sizes, the existing build-identity struct, semantic behavior, and platform loader metadata remain separate review items.
-- VM snapshot/clone and suspend/resume handling is documented as an integration policy and adds no public reset callback or platform-specific ABI.
-
-
-## P1-21 concurrency and build-identity ABI note
-
-- P1-21 adds no public function, enum value, macro, or exported symbol.
-- The Win32/pthread concurrency tests and backend metadata remain internal test/evidence surfaces.
-- `ano_crypto_build_identity_t` ABI version 1 keeps the field order recorded in `abi/ANOCRYPTO_C_0_BUILD_IDENTITY_LAYOUT.md`.
-- `ano_crypto_build_identity_abi_tests` checks field ordering and query results without assuming one cross-platform byte size.
-- String pointers returned in the structure are module-owned and read-only for the loaded module lifetime.
-- Calling convention, alignment, pointer size, loader metadata, and semantic compatibility remain platform-specific review items.
-
-## P1-23 differential/provider boundary
-
-- No public function, enum value, macro, structure field, or exported symbol is added.
-- OpenSSL is linked only to the test executable and is absent from `anocrypto_c`, installed headers, package config files, and the PoC runtime.
-- Clean Release exports must remain equal to the stored 61-symbol ABI-0 baseline.
-- C99 representation checks are build prerequisites and are not new public ABI fields.
-- Any future support for a representation outside those prerequisites requires a separate ABI/portability review.
-
-## P1-27 CMAC entry-gate ABI note
-
-- P1-27 adds no public header, function, enum value, macro, structure field, or exported symbol.
-- `ac_cmac.h`, `ANO_CRYPTO_KEY_TYPE_CMAC`, CMAC source, and CMAC tests remain absent.
-- The proposed future surface has eight reviewed function candidates and a dedicated CMAC key purpose, but these are not declarations available to callers.
-- The stored clean Release ABI-0 baseline remains 61 names.
-- Any P1-28 implementation must record the exact enum and symbol delta before the baseline is updated.
+Symbol-name equality is only one ABI guardrail. Calling convention, public type
+size/alignment, loader metadata, semantic behavior, and target-specific support
+remain separate review items.

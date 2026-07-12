@@ -1,35 +1,30 @@
-# Block Cipher and Mode Selection Decision Record
+# Block Cipher and MAC Selection
 
-Status: P1-27 AES/CBC remains implemented and hardened; AES-CMAC is selected as the next narrow candidate through a no-implementation gate.
+Status: P1-28 AES/CBC and AES-CMAC engineering implementation scope.
 
-## Implemented decision
+## Implemented confidentiality scope
 
-- AES-128/192/256 primitive;
+- AES-128, AES-192, and AES-256 primitive;
 - CBC without padding;
-- 16-byte blocks and IVs;
-- complete non-empty blocks only;
-- CSP key handles and opaque caller-owned contexts;
-- exact in-place allowed, partial overlap prohibited.
+- caller-provided 16-byte IV;
+- complete-block input only;
+- exact in-place support and partial-overlap rejection;
+- CSP-backed block-cipher key purpose.
 
-The implemented selection is an engineering slice. It is not an official
-validation scope or a claim that later customer requirements cannot reopen the
-algorithm/mode decision.
+## Implemented authentication scope
 
-## P1-27 next-candidate decision
+- AES-CMAC with AES-128/192/256;
+- dedicated CMAC-purpose CSP handles;
+- full 16-byte tags only;
+- empty and arbitrary-length messages;
+- one-shot compute/verify and streaming compute.
 
-AES-CMAC is selected before AES-CTR for the next entry gate. The proposed
-future CMAC slice uses AES-128/192/256, full 16-byte tags, streaming compute,
-one-shot compute, one-shot verification, and a dedicated CMAC-purpose CSP
-handle.
+## Deferred scope
 
-P1-27 adds planning, policy, evidence, package, and clean-room records only. It
-does not add a CMAC header, implementation, key-type enum value, function, or
-exported symbol.
+AES-CTR remains deferred because counter construction, uniqueness, exhaustion,
+persistence, process/VM duplication, and recovery policy need a separate gate.
+GCM, GMAC, padding helpers, tag truncation, protocol formatting, hardware
+dispatch, and domestic algorithms also remain outside P1-28.
 
-## Deferred decisions
-
-AES-GCM, AES-CTR, GMAC, padding helpers, tag truncation, hardware acceleration,
-and domestic algorithms remain outside P1-27. AES-CTR requires a separate
-counter construction, uniqueness, exhaustion, clone/snapshot, and recovery
-policy gate. Higher-level envelope/nonce/storage policy remains an AnoSecureKit
-responsibility.
+The current implementation and tests are engineering evidence and do not imply
+that target-specific side-channel or official validation review is complete.

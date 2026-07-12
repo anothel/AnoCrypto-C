@@ -14,7 +14,7 @@ extern "C" {
  * Key/CSP lifecycle skeleton.
  *
  * Raw key material is accepted only as caller-provided input to future import
- * operations. P1-26 implements in-memory HMAC and AES block-cipher key-handle paths.
+ * operations. P1-28 implements in-memory HMAC, AES block-cipher, and dedicated AES-CMAC key-handle paths.
  * It does not export, print, persist, or test with operational secret material.
  */
 typedef enum ano_crypto_key_type_e {
@@ -23,7 +23,8 @@ typedef enum ano_crypto_key_type_e {
     ANO_CRYPTO_KEY_TYPE_DRBG_SEED_MATERIAL = 3,
     ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER = 4,
     ANO_CRYPTO_KEY_TYPE_PUBLIC_KEY = 5,
-    ANO_CRYPTO_KEY_TYPE_PRIVATE_KEY = 6
+    ANO_CRYPTO_KEY_TYPE_PRIVATE_KEY = 6,
+    ANO_CRYPTO_KEY_TYPE_CMAC = 7
 } ano_crypto_key_type_t;
 
 #define ANO_CRYPTO_KEY_FLAG_NONE 0x00000000u

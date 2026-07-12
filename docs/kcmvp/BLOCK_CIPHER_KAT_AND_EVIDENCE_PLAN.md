@@ -22,7 +22,7 @@ submission material or third-party product implementation was used.
 - 128-iteration lifecycle stress, unaligned/variable-chunk portability, failed-reinitialization, internal-context guard, and cross-platform CSP HMAC/AES concurrency regression;
 - compiler-output capture artifacts for manual review without automated leakage-resistance conclusions;
 - install and PoC smoke without key/IV/plaintext/ciphertext output;
-- clean Release 61-symbol baseline check.
+- clean Release 69-symbol baseline check.
 
 Evidence logs retain status, provider identity, comparison counts, and policy
 metadata only. Keys, expanded schedules, IVs, plaintext, ciphertext, and
@@ -33,9 +33,9 @@ intermediate states are excluded.
 Manual disposition of compiler-output artifacts and supported-target side-channel review, actual 32-bit/big-endian hosted
 results, hardware provider decisions, and final validation-target scope remain TODO.
 
-## P1-27 CMAC planning boundary
+## P1-28 AES-CMAC evidence
 
-AES/CBC evidence remains unchanged. P1-27 selects a separate AES-CMAC entry
-gate and records its public-vector and evidence plan in
-`CMAC_KAT_AND_EVIDENCE_PLAN.md`. No CMAC KAT result is claimed by P1-27 and the
-61-symbol baseline is unchanged.
+AES-CMAC now has separate startup and extended public-source KATs, negative
+API/CSP tests, OpenSSL 3.x test-only differential comparison, install and PoC
+smoke, value-free evidence notes, and a 69-symbol clean Release baseline. CMAC
+keys, messages, tags, subkeys, and intermediate states are excluded from logs.

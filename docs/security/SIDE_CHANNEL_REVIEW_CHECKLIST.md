@@ -60,10 +60,11 @@ Reviewer:
 Date:
 ```
 
-## P1-27 CMAC planning note
+## P1-28 AES-CMAC review note
 
-No CMAC implementation exists in P1-27. A later implementation must separately
-review AES subkey generation, final-block selection, full-tag verification,
-compiler output, target timing/cache behavior, and fault behavior. The proposed
-constant-work comparison requirement is an implementation target, not a
-completed side-channel conclusion.
+AES-CMAC uses the existing portable AES primitive, derives subkeys internally,
+retains the final block for K1/K2 processing, and uses a constant-work tag
+comparison candidate. Review compiler output and target-specific timing/cache
+behavior for subkey doubling, final-block selection, AES calls, and tag compare.
+Passing KAT/differential tests does not establish a universal side-channel
+property. No such completed-review claim is made.

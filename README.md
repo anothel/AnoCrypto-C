@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: P1-27 engineering slice retaining SHA-256, SHA-384, SHA-512 and their HMAC variants, HMAC_DRBG-SHA-256, the public random lifecycle, AES-128/192/256, AES-CBC without padding, CSP-backed HMAC/AES keys, cross-platform concurrency coverage, Linux GCC ASan/UBSan, deterministic OpenSSL 3.x test-only differential validation, C99 portability checks, AES context/lifecycle hardening, compiler-output capture for manual review, and the reviewed 61-symbol ABI-0 baseline. P1-27 selects a future narrow AES-CMAC slice through a no-implementation entry gate with dedicated key-purpose, full-tag-only API, public KAT/evidence, package, and unchanged-ABI policy. Actual hosted Linux 32-bit, Windows, macOS, big-endian, and target-specific compiler/side-channel artifacts still require review; evidence, install, and PoC outputs remain engineering drafts.
+Current status: P1-28 engineering slice retaining SHA-256, SHA-384, SHA-512 and their HMAC variants, HMAC_DRBG-SHA-256, the public random lifecycle, AES-128/192/256, AES-CBC without padding, and AES-CMAC with full 16-byte tags through dedicated CSP key purposes. The repository includes startup and extended public-source KATs, negative and OpenSSL 3.x test-only differential validation, C99 portability checks, AES lifecycle hardening, compiler-output capture for manual review, and a reviewed 69-symbol ABI-0 baseline. Actual hosted Linux 32-bit, Windows, macOS, big-endian, and target-specific compiler/side-channel artifacts still require review; evidence, install, and PoC outputs remain engineering drafts.
 
 Implemented processing scope:
 
@@ -13,7 +13,7 @@ Implemented processing scope:
 - AES-CBC without padding, caller-provided 16-byte IV, complete blocks only, exact in-place support, and partial-overlap rejection
 - Startup and extended public-source AES/CBC KATs plus negative and OpenSSL test-only differential coverage
 - P1-26 AES private-context integrity guards, fail-closed reinitialization, 128-iteration lifecycle stress, unaligned byte-buffer/streaming/in-place portability regression, and shared/per-thread CSP AES concurrency coverage
-- P1-27 CMAC selection/API/KAT/evidence gate; no CMAC code, public header, enum, function, or symbol is added
+- P1-28 AES-CMAC with AES-128/192/256 dedicated key-purpose handles, full 16-byte tags, one-shot compute/verify, streaming compute, startup/extended KATs, negative tests, and OpenSSL test-only differential coverage
 - AES Release compiler-output capture with compiler/target/library metadata and a manual-review-only interpretation boundary
 - HMAC_DRBG-SHA-256 deterministic core API
 - Internal HMAC_DRBG-SHA-256 instantiate/reseed helper driven by entropy source
@@ -22,7 +22,7 @@ Implemented processing scope:
 - Process-change detection for source-backed random contexts, requiring explicit reseed before generation
 - Startup self-test KATs for SHA-256/SHA-384/SHA-512, their HMAC variants, and HMAC_DRBG-SHA-256
 - Extended KAT executables for all implemented SHA-2/HMAC variants, HMAC key-handle paths, and HMAC_DRBG-SHA-256 public vectors
-- Deterministic OpenSSL 3.x test-only differential comparisons for SHA-256/384/512, HMAC, and AES-CBC paths
+- Deterministic OpenSSL 3.x test-only differential comparisons for SHA-256/384/512, HMAC, AES-CBC, and AES-CMAC paths
 - SHA-512-family representation, endian, variable-chunk, and intentionally unaligned-input portability regression
 - CMake C99 representation guard requiring 8-bit bytes, 32-bit `uint32_t`, 64-bit `uint64_t`, and `size_t` no wider than `uint64_t`
 - Negative API tests for hash/HMAC/DRBG/CSP/key argument handling, context lifecycle behavior, handle exhaustion, stale handle rejection, and DRBG helper failure cleanup
@@ -37,7 +37,7 @@ Implemented processing scope:
 - Limited internal locking for module/self-test/CSP global state
 - Thread-safety support matrix, cross-platform Win32/pthread CSP/HMAC test, status-only platform review, CI checklist, and policy-check targets
 - CI matrix skeleton for Linux, macOS, and Windows build/test/install-smoke paths
-- API/ABI review checklist, stored 61-symbol baseline, and build-identity ABI-0 field-order baseline
+- API/ABI review checklist, stored 69-symbol baseline, and build-identity ABI-0 field-order baseline
 - Release-style internal symbol hiding option for supported compilers
 - Customer PoC package v0 staging, package manifest/review records, and standalone public-API example smoke
 - Development workflow, service scope matrix, differential validation strategy, AES/CBC implementation policy, side-channel checklist, customer PoC intake questionnaire, SBOM/signing plan, and evidence manifest policy drafts
@@ -65,8 +65,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-27
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-27
+cmake --install build --prefix /tmp/anocrypto-c-p1-28
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-28
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -84,8 +84,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-27
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-27
+cmake --install build --prefix /tmp/anocrypto-c-p1-28
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-28
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -116,7 +116,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, CMAC entry-gate, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-27/`. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-28/`. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -173,7 +173,7 @@ Generated files include public-surface, thread-safety, concurrency/sanitizer, th
 ## Important limitations
 
 - This is not an official validation result.
-- Hash_DRBG is not implemented. AES-128/192/256 and CBC without padding are implemented and hardened through the P1-26 engineering slice; CTR, AEAD, padding helpers, CMAC/GMAC, and additional block ciphers remain outside the current scope.
+- Hash_DRBG is not implemented. AES-128/192/256, CBC without padding, and full-tag AES-CMAC are implemented; CTR, AEAD, padding helpers, GMAC, tag truncation, and additional block ciphers remain outside the current scope.
 - KAT pass results are correctness checks only and do not replace formal validation.
 - The explicit-entropy HMAC_DRBG-SHA-256 API remains caller-managed and separate from the public random service.
 - The entropy callback seam is test/internal plumbing and is not an operational entropy source.
@@ -212,7 +212,7 @@ Generated files include public-surface, thread-safety, concurrency/sanitizer, th
 - A dedicated tests-only hook verifies the HMAC_DRBG `2^48` reseed-counter boundary, failed-reseed persistence, recovery, and no-wrap behavior.
 - Known VM snapshot/restore or clone events require inherited contexts to be discarded and each instance independently reinitialized; automatic detection is not implemented.
 - Suspend/resume handling remains a consuming-product policy.
-- `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the current 61-name ABI-0 public symbol baseline.
+- `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the current 69-name ABI-0 public symbol baseline.
 - Clean Release, evidence, and PoC flows compare shared-library exports with that baseline and keep both internal test-hook options disabled.
 - Hosted CI collects status-only platform review artifacts; actual hosted results still require review.
 
@@ -276,11 +276,16 @@ P1-24 was the implementation entry gate. It added no block-cipher code or public
 
 ## P1-27 CMAC entry gate
 
-- Selects AES-CMAC before AES-CTR as the next narrow algorithm candidate.
-- Proposes AES-128/192/256, full 16-byte tags, streaming compute, one-shot compute, and one-shot verification.
-- Requires a dedicated CMAC-purpose CSP handle before implementation; generic AES encryption handles must not be silently reused.
-- Adds public-vector KAT/evidence, CI-policy, release-review, PoC-package, and clean-room planning records.
-- Adds no `ac_cmac.h`, CMAC implementation, key-type enum value, public function, or exported symbol.
-- Retains the 61-symbol ABI-0 baseline and leaves AES-CTR, truncation, AEAD, GMAC, and protocol construction deferred.
+P1-27 selected the narrow AES-CMAC scope and reviewed the API, dedicated key-purpose, KAT, evidence, and package boundaries without adding code or public ABI.
 
-The next candidate is P1-28: implement the reviewed narrow AES-CMAC slice if the P1-27 API and key-purpose gate is accepted.
+## P1-28 AES-CMAC implementation
+
+- Adds public `ac_cmac.h` with eight reviewed functions.
+- Adds `ANO_CRYPTO_KEY_TYPE_CMAC` as a dedicated CSP key purpose distinct from AES encryption keys.
+- Implements AES-CMAC with AES-128/192/256, full 16-byte tags, empty-message support, streaming compute, one-shot compute, and one-shot verify.
+- Adds startup KAT and all 12 public NIST AES-CMAC examples for AES-128/192/256.
+- Adds negative lifecycle, short-buffer, wrong-purpose, stale-handle, and authentication-failure coverage.
+- Adds OpenSSL 3.x test-only differential comparison without adding a product or PoC runtime dependency.
+- Extends install and PoC smoke while suppressing key, message, tag, subkey, and intermediate values.
+- Updates the reviewed clean Release ABI-0 baseline from 61 to 69 symbols, adding only the eight CMAC functions.
+- Leaves tag truncation, AES-CTR, GCM/GMAC, protocol formatting, key persistence/export, and target-specific side-channel conclusions deferred.

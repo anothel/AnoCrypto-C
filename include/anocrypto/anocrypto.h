@@ -15,5 +15,6 @@
 #include <anocrypto/ac_csp.h>
 #include <anocrypto/ac_key.h>
 #include <anocrypto/ac_cipher.h>
+#include <anocrypto/ac_cmac.h>
 
 #endif /* ANO_CRYPTO_ANOCRYPTO_H */

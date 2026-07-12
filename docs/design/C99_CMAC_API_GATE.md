@@ -1,11 +1,10 @@
-# C99 CMAC API Gate
+# C99 AES-CMAC API Policy
 
-Status: P1-27 reviewed draft for a future implementation step. No public ABI is added here.
+Status: P1-28 implemented public API policy.
 
-## Proposed public header
+## Public surface
 
-A future implementation may add `include/anocrypto/ac_cmac.h` only after the
-API and symbol delta are reviewed. The proposed narrow surface is:
+`include/anocrypto/ac_cmac.h` exposes exactly eight functions:
 
 - `ano_crypto_cmac_context_size`;
 - `ano_crypto_cmac_mac_size`;
@@ -16,47 +15,35 @@ API and symbol delta are reviewed. The proposed narrow surface is:
 - `ano_crypto_cmac_compute_with_key`;
 - `ano_crypto_cmac_verify_with_key`.
 
-This list is a gate proposal, not a declaration available to callers.
-
 ## Context and output rules
 
 - Context storage is caller-owned and opaque.
 - Functions return `ano_crypto_status_t` and use output parameters.
-- The only output size is 16 bytes.
-- Tag truncation is not accepted in the initial slice.
+- The only accepted tag size is 16 bytes.
 - Empty messages are valid.
-- `update` accepts arbitrary byte lengths, including zero-length input where a
-  non-NULL pointer is not required.
-- Successful `final` clears secret-dependent context state and makes the
-  context unusable until reinitialized.
-- `uninit` is allowed outside the module operational state for cleanup.
-- Short output buffers return `ANO_CRYPTO_ERR_BUFFER_TOO_SMALL` without
-  emitting a partial tag.
+- `update` accepts arbitrary byte lengths; `NULL` is accepted only with length zero.
+- Successful `final` clears secret-dependent context state.
+- `uninit` is allowed outside OPERATIONAL for cleanup.
+- Short output returns `ANO_CRYPTO_ERR_BUFFER_TOO_SMALL` and no partial tag.
 
 ## Verification rules
 
-The proposed one-shot verification API accepts exactly 16 tag bytes and returns
-`ANO_CRYPTO_ERR_AUTHENTICATION_FAILED` for a mismatch. It must use an internal
-constant-work comparison candidate and must not reveal a mismatch position.
-This is an implementation requirement, not a completed side-channel claim.
+One-shot verification accepts exactly 16 tag bytes. A mismatch returns
+`ANO_CRYPTO_ERR_AUTHENTICATION_FAILED`. The implementation uses an internal
+constant-work comparison candidate and does not report a mismatch position.
+This is not a universal side-channel claim.
 
 ## CSP rules
 
-- Only a dedicated CMAC-purpose handle is accepted.
+- Only `ANO_CRYPTO_KEY_TYPE_CMAC` handles are accepted.
 - AES encryption handles are rejected by CMAC services.
 - CMAC handles are rejected by CBC services.
-- Accepted key lengths are exactly 16, 24, or 32 bytes.
-- Exportable-candidate flags remain rejected in the initial slice.
+- Key lengths are exactly 16, 24, or 32 bytes.
+- Exportable-candidate flags remain rejected.
 - Destroyed, stale, wrong-purpose, and malformed handles are rejected.
 
-## ABI gate
+## ABI decision
 
-P1-27 preserves the current `ac_key.h`, public headers, enum values, and
-61-symbol ABI-0 baseline. The implementation step must explicitly review:
-
-1. the new key-purpose enum value or equivalent usage mechanism;
-2. the exact public function list;
-3. umbrella-header and install-package exposure;
-4. exported-symbol baseline growth;
-5. cross-service key-purpose negative tests;
-6. source and binary compatibility notes.
+P1-28 adds one public header, one key-purpose enum value, and eight exported
+functions. The clean Release ABI-0 baseline therefore grows from 61 to 69
+names with no removal or rename of an existing symbol.

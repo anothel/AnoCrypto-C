@@ -90,7 +90,7 @@ elseif(NOT ANO_CRYPTO_SANITIZER_MODE STREQUAL "none")
 endif()
 
 set(ANO_CRYPTO_BUILD_GIT_COMMIT "unknown" CACHE STRING "Git commit or source revision for build identity")
-set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-27-cmac-entry-gate" CACHE STRING "Build fingerprint string")
+set(ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p1-28-aes-cmac" CACHE STRING "Build fingerprint string")
 
 set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/anocrypto.h
@@ -105,7 +105,8 @@ set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/ac_random.h
     include/anocrypto/ac_csp.h
     include/anocrypto/ac_key.h
-    include/anocrypto/ac_cipher.h)
+    include/anocrypto/ac_cipher.h
+    include/anocrypto/ac_cmac.h)
 
 add_library(anocrypto_c
     src/core/status.c
@@ -118,6 +119,7 @@ add_library(anocrypto_c
     src/hash/sha256.c
     src/hash/sha512.c
     src/mac/hmac.c
+    src/mac/cmac.c
     src/cipher/aes.c
     src/cipher/cipher.c
     src/drbg/drbg.c
@@ -347,14 +349,14 @@ add_custom_target(ano_crypto_aes_hardening_policy_check
     USES_TERMINAL
     COMMENT "Checking P1-26 AES/CBC lifecycle, differential, compiler-review, and ABI policy")
 
-add_custom_target(ano_crypto_cmac_entry_gate_check
+add_custom_target(ano_crypto_cmac_policy_check
     COMMAND ${CMAKE_COMMAND}
         -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-        -DANO_CRYPTO_CMAC_ENTRY_GATE_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/CMAC_ENTRY_GATE_CHECK.txt
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_cmac_entry_gate.cmake
+        -DANO_CRYPTO_CMAC_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/AES_CMAC_IMPLEMENTATION_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_cmac_policy.cmake
     USES_TERMINAL
-    COMMENT "Checking P1-27 CMAC selection, no-implementation boundary, and unchanged ABI policy")
+    COMMENT "Checking P1-28 AES-CMAC implementation, API, KAT, CSP, differential, and package policy")
 
 add_custom_target(ano_crypto_differential_portability_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -425,6 +427,19 @@ add_custom_target(ano_crypto_poc_package_smoke
     DEPENDS anocrypto_c
     USES_TERMINAL
     COMMENT "Running AnoCrypto-C customer PoC package smoke")
+
+add_custom_target(ano_crypto_install_package_smoke
+    COMMAND ${CMAKE_COMMAND} -E env
+        --unset=MAKEFLAGS
+        --unset=MFLAGS
+        --unset=MAKELEVEL
+        ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR=${CMAKE_CURRENT_BINARY_DIR}/install-package-smoke
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_install_package_smoke.cmake
+    DEPENDS anocrypto_c
+    COMMENT "Running AnoCrypto-C installed-package consumer smoke")
 
 install(TARGETS anocrypto_c
     EXPORT AnoCryptoCTargets
@@ -518,6 +533,18 @@ if(ANO_CRYPTO_BUILD_TESTS)
     add_test(NAME ano_crypto_cipher_api_negative_tests COMMAND ano_crypto_cipher_api_negative_tests)
     set_tests_properties(ano_crypto_cipher_api_negative_tests PROPERTIES LABELS "negative;aes;cbc;csp")
 
+    add_executable(ano_crypto_aes_cmac_kat_tests
+        tests/kat/aes_cmac_kat_tests.c)
+    target_link_libraries(ano_crypto_aes_cmac_kat_tests PRIVATE anocrypto_c)
+    add_test(NAME ano_crypto_aes_cmac_kat_tests COMMAND ano_crypto_aes_cmac_kat_tests)
+    set_tests_properties(ano_crypto_aes_cmac_kat_tests PROPERTIES LABELS "kat;aes;cmac;csp")
+
+    add_executable(ano_crypto_cmac_api_negative_tests
+        tests/negative/cmac_api_negative_tests.c)
+    target_link_libraries(ano_crypto_cmac_api_negative_tests PRIVATE anocrypto_c)
+    add_test(NAME ano_crypto_cmac_api_negative_tests COMMAND ano_crypto_cmac_api_negative_tests)
+    set_tests_properties(ano_crypto_cmac_api_negative_tests PROPERTIES LABELS "negative;aes;cmac;csp")
+
     add_executable(ano_crypto_aes_cbc_hardening_review
         tests/operational/aes_cbc_hardening_review.c)
     target_link_libraries(ano_crypto_aes_cbc_hardening_review PRIVATE anocrypto_c)
@@ -576,7 +603,16 @@ if(ANO_CRYPTO_BUILD_TESTS)
                 COMMAND ano_crypto_aes_cbc_openssl_differential_tests)
             set_tests_properties(ano_crypto_aes_cbc_openssl_differential_tests PROPERTIES
                 LABELS "differential;aes;cbc")
-            message(STATUS "OpenSSL ${OPENSSL_VERSION} selected for test-only SHA-2/HMAC and AES-CBC differential validation")
+            add_executable(ano_crypto_aes_cmac_openssl_differential_tests
+                tests/differential/aes_cmac_openssl_differential_tests.c)
+            target_link_libraries(ano_crypto_aes_cmac_openssl_differential_tests PRIVATE
+                anocrypto_c
+                OpenSSL::Crypto)
+            add_test(NAME ano_crypto_aes_cmac_openssl_differential_tests
+                COMMAND ano_crypto_aes_cmac_openssl_differential_tests)
+            set_tests_properties(ano_crypto_aes_cmac_openssl_differential_tests PROPERTIES
+                LABELS "differential;aes;cmac")
+            message(STATUS "OpenSSL ${OPENSSL_VERSION} selected for test-only SHA-2/HMAC, AES-CBC, and AES-CMAC differential validation")
         elseif(ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER)
             message(FATAL_ERROR "OpenSSL 3.x Crypto was required for differential validation but was not found")
         else()
@@ -765,52 +801,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
         add_test(NAME ano_crypto_poc_example_buildtree COMMAND anocrypto_c_core_poc)
     endif()
 
-    add_custom_target(ano_crypto_collect_release_evidence
-        # The evidence script launches isolated install/PoC build trees.  Remove
-        # the outer Make/Ninja jobserver variables so nested build tools do not
-        # wait on tokens owned by this custom target.
-        COMMAND ${CMAKE_COMMAND} -E env
-            --unset=MAKEFLAGS
-            --unset=MFLAGS
-            --unset=MAKELEVEL
-            ${CMAKE_COMMAND}
-            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
-            -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-27
-            -DANO_CRYPTO_RUN_CTEST=ON
-            -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
-            -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
-            -DANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON
-            -DANO_CRYPTO_RUN_POC_PACKAGE_SMOKE=ON
-            -DANO_CRYPTO_RUN_SHA512_FAMILY_CHECK=ON
-            -DANO_CRYPTO_RUN_AES_CBC_CHECK=ON
-            -DANO_CRYPTO_RUN_AES_HARDENING_CHECK=ON
-            -DANO_CRYPTO_RUN_CMAC_ENTRY_GATE_CHECK=ON
-            -DANO_CRYPTO_RUN_AES_COMPILER_REVIEW=ON
-            -DANO_CRYPTO_RUN_DIFFERENTIAL_PORTABILITY_CHECK=ON
-            -DANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK=ON
-            -DANO_CRYPTO_RUN_RANDOM_LIFECYCLE_CHECK=ON
-            -DANO_CRYPTO_RUN_EXPORTED_SYMBOL_CHECK=ON
-            -DANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK=ON
-            -DANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK=ON
-            -DANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK=ON
-            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
-        USES_TERMINAL
-        COMMENT "Collecting AnoCrypto-C P1-27 release evidence draft")
-    add_dependencies(ano_crypto_collect_release_evidence
-        ano_crypto_public_surface_check
-        ano_crypto_thread_safety_policy_check
-        ano_crypto_concurrency_sanitizer_policy_check
-        ano_crypto_sha512_family_policy_check
-        ano_crypto_differential_portability_policy_check
-        ano_crypto_aes_cbc_policy_check
-        ano_crypto_aes_hardening_policy_check
-        ano_crypto_cmac_entry_gate_check
-        ano_crypto_aes_compiler_review
-        ano_crypto_random_service_policy_check
-        ano_crypto_random_lifecycle_policy_check
-        ano_crypto_entropy_health_policy_check
-        ano_crypto_entropy_operational_policy_check
+    set(_ano_crypto_evidence_test_targets
         anocrypto_c
         ano_crypto_module_state_tests
         ano_crypto_service_gate_negative_tests
@@ -822,6 +813,8 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_hash_hmac_api_negative_tests
         ano_crypto_aes_cbc_kat_tests
         ano_crypto_cipher_api_negative_tests
+        ano_crypto_aes_cmac_kat_tests
+        ano_crypto_cmac_api_negative_tests
         ano_crypto_aes_cbc_hardening_review
         ano_crypto_aes_cbc_lifecycle_stress_tests
         ano_crypto_sha512_family_kat_tests
@@ -846,30 +839,71 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_build_identity_abi_tests
         ano_crypto_install_smoke_buildtree)
 
-    if(TARGET ano_crypto_sha2_hmac_openssl_differential_tests)
-        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_sha2_hmac_openssl_differential_tests)
-    endif()
-    if(TARGET ano_crypto_aes_cbc_openssl_differential_tests)
-        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_aes_cbc_openssl_differential_tests)
-    endif()
+    foreach(_optional_evidence_test_target IN ITEMS
+        ano_crypto_sha2_hmac_openssl_differential_tests
+        ano_crypto_aes_cbc_openssl_differential_tests
+        ano_crypto_aes_cmac_openssl_differential_tests
+        anocrypto_c_core_poc
+        ano_crypto_csp_thread_safety_tests
+        ano_crypto_platform_entropy_failure_injection_tests
+        ano_crypto_random_service_failure_injection_tests
+        ano_crypto_random_reseed_limit_tests)
+        if(TARGET ${_optional_evidence_test_target})
+            list(APPEND _ano_crypto_evidence_test_targets ${_optional_evidence_test_target})
+        endif()
+    endforeach()
 
-    if(TARGET anocrypto_c_core_poc)
-        add_dependencies(ano_crypto_collect_release_evidence anocrypto_c_core_poc)
-    endif()
+    # Run the complete configured CTest set in an independent custom target.
+    # Separating this process from evidence assembly avoids recursive Make/Ninja
+    # runner state leaking into later status-only review programs.
+    add_custom_target(ano_crypto_ctest_evidence
+        COMMAND ${CMAKE_COMMAND} -E env
+            --unset=MAKEFLAGS
+            --unset=MFLAGS
+            --unset=MAKELEVEL
+            ${CMAKE_COMMAND}
+            -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+            -DANO_CRYPTO_CTEST_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/ctest-evidence
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_ctest_evidence.cmake
+        COMMENT "Capturing AnoCrypto-C P1-28 CTest evidence")
+    add_dependencies(ano_crypto_ctest_evidence ${_ano_crypto_evidence_test_targets})
 
-    if(TARGET ano_crypto_csp_thread_safety_tests)
-        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_csp_thread_safety_tests)
-    endif()
+    add_custom_target(ano_crypto_collect_release_evidence
+        # The evidence assembler consumes prepared install/PoC/CTest artifacts.
+        # Remove outer build-runner variables for any standalone fallback path.
+        COMMAND ${CMAKE_COMMAND} -E env
+            --unset=MAKEFLAGS
+            --unset=MFLAGS
+            --unset=MAKELEVEL
+            ${CMAKE_COMMAND}
+            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-28
+            -DANO_CRYPTO_RUN_CTEST=OFF
+            -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
+            -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
+            -DANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON
+            -DANO_CRYPTO_RUN_POC_PACKAGE_SMOKE=ON
+            -DANO_CRYPTO_RUN_SHA512_FAMILY_CHECK=ON
+            -DANO_CRYPTO_RUN_AES_CBC_CHECK=ON
+            -DANO_CRYPTO_RUN_AES_HARDENING_CHECK=ON
+            -DANO_CRYPTO_RUN_CMAC_CHECK=ON
+            -DANO_CRYPTO_RUN_AES_COMPILER_REVIEW=ON
+            -DANO_CRYPTO_RUN_DIFFERENTIAL_PORTABILITY_CHECK=ON
+            -DANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK=ON
+            -DANO_CRYPTO_RUN_RANDOM_LIFECYCLE_CHECK=ON
+            -DANO_CRYPTO_RUN_EXPORTED_SYMBOL_CHECK=ON
+            -DANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK=ON
+            -DANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK=ON
+            -DANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK=ON
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
+        COMMENT "Collecting AnoCrypto-C P1-28 release evidence draft")
+    add_dependencies(ano_crypto_collect_release_evidence ano_crypto_ctest_evidence)
 
-    if(TARGET ano_crypto_platform_entropy_failure_injection_tests)
-        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_platform_entropy_failure_injection_tests)
+    if(TARGET ano_crypto_install_package_smoke)
+        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_install_package_smoke)
     endif()
-
-    if(TARGET ano_crypto_random_service_failure_injection_tests)
-        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_random_service_failure_injection_tests)
-    endif()
-
-    if(TARGET ano_crypto_random_reseed_limit_tests)
-        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_random_reseed_limit_tests)
+    if(TARGET ano_crypto_poc_package_smoke)
+        add_dependencies(ano_crypto_collect_release_evidence ano_crypto_poc_package_smoke)
     endif()
 endif()

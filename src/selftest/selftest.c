@@ -4,6 +4,7 @@
 #include <anocrypto/ac_build.h>
 #include <anocrypto/ac_selftest.h>
 #include "ac_aes_internal.h"
+#include "ac_cmac_internal.h"
 #include "ac_drbg_internal.h"
 #include "ac_hmac_internal.h"
 #include "ac_internal.h"
@@ -587,6 +588,34 @@ static ano_crypto_status_t ano_crypto_selftest_aes_cbc_kat(void)
     return ANO_CRYPTO_OK;
 }
 
+static ano_crypto_status_t ano_crypto_selftest_aes_cmac_kat(void)
+{
+    static const uint8_t key[16] = {
+        0x2bu,0x7eu,0x15u,0x16u,0x28u,0xaeu,0xd2u,0xa6u,
+        0xabu,0xf7u,0x15u,0x88u,0x09u,0xcfu,0x4fu,0x3cu
+    };
+    static const uint8_t message[16] = {
+        0x6bu,0xc1u,0xbeu,0xe2u,0x2eu,0x40u,0x9fu,0x96u,
+        0xe9u,0x3du,0x7eu,0x11u,0x73u,0x93u,0x17u,0x2au
+    };
+    static const uint8_t expected[16] = {
+        0x07u,0x0au,0x16u,0xb4u,0x6bu,0x4du,0x41u,0x44u,
+        0xf7u,0x9bu,0xddu,0x9du,0xd0u,0x4au,0x28u,0x7cu
+    };
+    uint8_t out[16];
+    ano_crypto_status_t st;
+
+    st = ano_crypto_internal_cmac_compute(
+        key, sizeof(key), message, sizeof(message), out);
+    if (st != ANO_CRYPTO_OK || !bytes_equal(out, expected, sizeof(out))) {
+        ano_crypto_internal_zeroize(out, sizeof(out));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+
+    ano_crypto_internal_zeroize(out, sizeof(out));
+    return ANO_CRYPTO_OK;
+}
+
 ano_crypto_status_t ano_crypto_selftest_run(uint32_t flags)
 {
     ano_crypto_status_t st;
@@ -642,6 +671,13 @@ ano_crypto_status_t ano_crypto_selftest_run(uint32_t flags)
     }
 
     st = ano_crypto_selftest_aes_cbc_kat();
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_selftest_set_last_status(st);
+        ano_crypto_internal_module_mark_error(st);
+        return st;
+    }
+
+    st = ano_crypto_selftest_aes_cmac_kat();
     if (st != ANO_CRYPTO_OK) {
         ano_crypto_selftest_set_last_status(st);
         ano_crypto_internal_module_mark_error(st);

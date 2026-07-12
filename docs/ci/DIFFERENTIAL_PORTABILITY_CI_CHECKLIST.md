@@ -27,7 +27,7 @@ Required checks:
 - CMake representation guards pass;
 - Linux GCC and Clang normal tests pass;
 - Linux GCC ASan/UBSan passes;
-- clean Release public exports match the 61-symbol ABI-0 baseline;
+- clean Release public exports match the 69-symbol ABI-0 baseline;
 - customer PoC and install consumers remain independent of OpenSSL.
 
 ## Linux 32-bit lane

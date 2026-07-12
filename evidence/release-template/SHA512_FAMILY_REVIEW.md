@@ -12,7 +12,7 @@ Record:
 - HMAC key-handle KAT result;
 - install and PoC smoke result;
 - `SHA512_FAMILY_CHECK.txt` result;
-- clean Release 61-symbol baseline result;
+- clean Release 69-symbol baseline result;
 - hosted platform limitations and outstanding differential-provider review.
 
 Do not include digest values, MAC values, HMAC key bytes, entropy, seed material, DRBG state, private keys, tokens, or customer data.

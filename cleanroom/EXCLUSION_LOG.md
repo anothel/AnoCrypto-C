@@ -318,3 +318,17 @@ If excluded material is discovered:
 | EX-3504 | Adding `ac_cmac.h`, CMAC source, enum value, function, or symbol during the decision gate | API/ABI governance risk | Excluded | The 61-symbol baseline remains unchanged in P1-27. |
 | EX-3505 | Adding AES-CTR without counter construction, uniqueness, exhaustion, clone, and recovery policy | Misuse and state-management risk | Excluded | CTR remains a separate future gate. |
 | EX-3506 | Logging CMAC key, message, subkey, intermediate, or tag values | Sensitive-material exposure risk | Excluded | Gate, CI, evidence, and PoC records are status/policy only. |
+
+## P1-28 AES-CMAC Implementation Exclusions
+
+| ID | Excluded material or action | Risk | Action | Note |
+|---|---|---|---|---|
+| EX-3601 | Third-party CMAC implementation, subkey-generation source, context layout, tests, or build fragments with unclear rights | Provenance risk | Excluded | P1-28 uses fresh project-owned C99 and recorded public standards/examples. |
+| EX-3602 | Private submission vectors, customer CMAC material, or unexplained expected tags | Confidentiality and evidence-integrity risk | Excluded | Only the recorded public NIST examples are used for KATs. |
+| EX-3603 | Reusing AES encryption-purpose handles for CMAC or CMAC-purpose handles for CBC | Service authorization and key-purpose ambiguity | Excluded | Cross-purpose use is rejected and covered by negative tests. |
+| EX-3604 | Accepting truncated tags, partial output, or mismatch-position reporting | API and authentication ambiguity | Excluded | The initial API accepts exactly 16 bytes and returns `ANO_CRYPTO_ERR_AUTHENTICATION_FAILED` on mismatch. |
+| EX-3605 | Linking OpenSSL into the product library, installing provider headers, or shipping differential source/results in the PoC | Product-boundary and licensing risk | Excluded | OpenSSL remains test-only and clean SDK/PoC builds disable provider discovery. |
+| EX-3606 | Logging or packaging CMAC key, message, tag, subkey, chaining state, round key, entropy, seed, DRBG state, random output, private key, token, or customer data | Sensitive-material disclosure | Excluded | Tests and evidence emit status/count/provenance metadata only. |
+| EX-3607 | Claiming universal constant-time behavior, completed side-channel review, or official validation from KAT/differential results | Claims and technical risk | Excluded | Target-specific compiler, timing/cache, and formal review remain TODO. |
+| EX-3608 | Adding CTR, GCM/GMAC, protocol formatting, persistence, export, or hardware dispatch in the CMAC implementation step | Scope-creep risk | Deferred | Each requires a separate reviewed decision gate. |
+| EX-3609 | Running nested install/PoC builds and a second filtered CTest inside one evidence-assembly process under an outer build jobserver | Build reliability and deadlock risk | Excluded | CTest, installed-package smoke, and PoC smoke are separate prepared artifacts consumed by the evidence assembler. |

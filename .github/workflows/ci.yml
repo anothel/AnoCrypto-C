@@ -36,7 +36,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-27-cmac-entry-gate
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-28-aes-cmac
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -126,8 +126,8 @@ jobs:
       - name: AES/CBC hardening policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_aes_hardening_policy_check
 
-      - name: CMAC entry gate policy check
-        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_cmac_entry_gate_check
+      - name: AES-CMAC implementation policy check
+        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_cmac_policy_check
 
       - name: Random-service policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_random_service_policy_check
@@ -187,7 +187,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
           -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-27-cmac-entry-gate-openssl
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-28-aes-cmac-openssl
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build differential lane
@@ -242,7 +242,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-27-cmac-entry-gate-linux32
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-28-aes-cmac-linux32
           -DCMAKE_C_FLAGS=-m32
           -DCMAKE_EXE_LINKER_FLAGS=-m32
           -DCMAKE_SHARED_LINKER_FLAGS=-m32
@@ -307,7 +307,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-27-cmac-entry-gate-${{ matrix.cc }}-compiler-review
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-28-aes-cmac-${{ matrix.cc }}-compiler-review
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Capture compiler output
@@ -349,7 +349,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DBUILD_SHARED_LIBS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-27-cmac-entry-gate-s390x
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-28-aes-cmac-s390x
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build s390x lane
@@ -402,7 +402,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_SANITIZER_MODE=address-undefined
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-27-cmac-entry-gate-GCC-asan-ubsan
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-28-aes-cmac-GCC-asan-ubsan
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build sanitizer lane
@@ -437,7 +437,7 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-27-cmac-entry-gate-test-hook
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-28-aes-cmac-test-hook
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build dedicated test-hook lane
@@ -477,7 +477,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-27-cmac-entry-gate-provider-disabled
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-28-aes-cmac-provider-disabled
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build provider-disabled lane
@@ -522,7 +522,7 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON
           -DBUILD_SHARED_LIBS=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-27-cmac-entry-gate-clean-release
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-28-aes-cmac-clean-release
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Compare clean Release exports with ABI-0 baseline
@@ -561,7 +561,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
           -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-27-cmac-entry-gate
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p1-28-aes-cmac
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
@@ -573,6 +573,6 @@ jobs:
       - name: Upload evidence draft
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p1-27-evidence-draft
-          path: build/evidence/p1-27
+          name: anocrypto-c-p1-28-evidence-draft
+          path: build/evidence/p1-28
           if-no-files-found: error

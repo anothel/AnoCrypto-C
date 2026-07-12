@@ -516,3 +516,23 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 - P1-27 records planned public vector provenance but stores no CMAC key,
   message, subkey, intermediate, or tag fixture.
 - AES-CTR, truncation, GCM/GMAC, and protocol constructions remain deferred.
+
+## P1-28 AES-CMAC Implementation Inputs
+
+| ID | Input | Classification | Use | Boundary |
+|---|---|---|---|---|
+| SRC-1501 | NIST SP 800-38B and the public AES-CMAC example set for AES-128/192/256 | Public standard and public examples | Algorithm definition, startup KAT, and 12 extended KAT cases | No third-party implementation source or private submission data copied. |
+| SRC-1502 | OpenSSL 3.x public EVP_MAC CMAC API documentation and separately linked `libcrypto` | Public documentation and test-only dependency | Independent differential comparison | Product library, installed SDK, and PoC runtime remain independent of OpenSSL. |
+| DER-3601 | Fresh `src/mac/cmac.c` and private CMAC context design | User-owned C99 implementation | Full-tag AES-CMAC compute/verify/streaming with dedicated CSP key purpose | No external CMAC implementation, subkey routine, layout, or naming structure copied. |
+| DER-3602 | Fresh KAT, negative, differential, install, and PoC tests | User-owned C99 test material | Verify public vectors, lifecycle, wrong-purpose handles, authentication failure, and provider agreement | Keys/messages/tags are public or deterministic test material and are not logged or retained in evidence. |
+| DER-3603 | Fresh P1-28 API/ABI, policy, evidence, package, CI, roadmap, and clean-room updates | User-owned project material | Keep the eight-function CMAC API, dedicated key purpose, and 69-symbol baseline mechanically aligned | Evidence contains status, source/provider identity, comparison count, and metadata only. |
+
+| DER-3604 | Fresh standalone CTest and installed-package smoke evidence runners plus evidence-artifact reuse wiring | User-owned CMake tooling | Prevent nested build/test runner coupling while preserving status-only evidence collection | No cryptographic value is added to logs; direct script fallback remains available. |
+
+## P1-28 Clean-room Notes
+
+- CMAC source, internal context, tests, and build wiring were written fresh from public algorithm requirements and existing project-owned C99 conventions.
+- The 12 expected tags are transcribed from the recorded public NIST example source; no private or unexplained vector file is used.
+- OpenSSL is called only through public APIs in a separately linked test executable; no OpenSSL implementation or test harness source is copied.
+- CMAC keys, messages, tags, subkeys, chaining state, AES round keys, entropy, seed material, DRBG state, generated random output, private keys, tokens, customer data, and internal deployment information are excluded from logs, evidence summaries, and customer packages.
+- P1-28 does not add tag truncation, CTR, GCM/GMAC, persistence, export, protocol formatting, or a completed side-channel claim.

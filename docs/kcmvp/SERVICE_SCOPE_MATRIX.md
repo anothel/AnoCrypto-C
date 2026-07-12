@@ -1,36 +1,22 @@
-# AnoCrypto-C Service Scope Matrix
+# Service Scope Matrix
 
-Status: P1-27 engineering draft.
+Status: P1-28 engineering draft.
 
-This matrix separates implemented core services, internal seams, and deferred product-layer functions. It is a planning and customer-PoC scoping artifact, not official validation evidence.
-
-| Service area | Public surface | Implementation state | Current evidence / boundary |
+| Service | Public surface | Status | Key boundary |
 |---|---|---|---|
-| Module lifecycle and self-test | `ano_crypto_module_*`, `ano_crypto_selftest_*` | Implemented skeleton | State/negative tests and startup KAT flow; integrity strategy remains TODO. |
-| Build/version identity | `ano_crypto_version_*`, `ano_crypto_build_*` | Implemented | ABI version 1 layout and 61-symbol baseline guarded. |
-| SHA-256/384/512 | `ano_crypto_hash_*` | Implemented | Public FIPS vectors, streaming/negative tests, install and PoC smoke. |
-| HMAC-SHA-256/384/512 | `ano_crypto_hmac_*` | Implemented | RFC 4231 vectors, streaming tests, and in-memory key-handle path. |
-| HMAC_DRBG-SHA-256 | `ano_crypto_drbg_*` | Implemented deterministic caller-entropy core | KAT/boundary/negative tests; explicit-entropy contexts remain caller-managed across process changes. |
-| CSP HMAC/AES key lifecycle | `ano_crypto_key_*`, `ano_crypto_csp_*` | Implemented in-memory slice | HMAC and exact-length AES key import/use/destroy, stale handle, exhaustion, concurrency; no persistence/export/wrapping. |
-| Entropy adapter and OS provider | Internal only | Implemented seam | Status-only provider tests and dedicated failure injection; provider bytes never logged. |
-| Public random service | `ano_crypto_random_*` | Implemented over platform entropy and HMAC_DRBG-SHA-256 | Lifecycle/failure/fork/stress tests; snapshot/clone/suspend automatic detection remains unsupported. |
-| AES block cipher/CBC | `ano_crypto_cipher_*` | Implemented in P1-25; hardened in P1-26 | AES-128/192/256 primitive, CBC without padding, startup/extended KAT, negative, expanded differential, lifecycle/portability/concurrency, install/PoC, and compiler-capture evidence. |
-| AES-CMAC | None | P1-27 selected entry gate; not implemented | Dedicated key-purpose and full-tag-only API/KAT/evidence plan; 61-symbol baseline unchanged. |
-| KDF expansion, additional modes, public key | None | Deferred | Selection gates and planning only. |
-| AnoSecureKit / AnoPKI workflows | Outside core | Separate product layers | Must not be mixed into the core module boundary. |
+| Module lifecycle/self-test | `ac_module.h`, `ac_selftest.h` | Implemented skeleton and startup KAT path | Fatal self-test enters sticky error state. |
+| Build/version identity | `ano_crypto_version_*`, `ano_crypto_build_*` | Implemented | ABI version 1 layout; overall 69-symbol baseline. |
+| SHA-2 | `ac_hash.h` | Implemented | SHA-256/384/512. |
+| HMAC | `ac_hmac.h` | Implemented | Raw key and HMAC-purpose CSP handle. |
+| HMAC_DRBG | `ac_drbg.h` | Implemented deterministic core | Explicit-entropy API remains caller-managed. |
+| Public random | `ac_random.h` | Implemented on reviewed provider/process-marker branches | Source-backed HMAC_DRBG context. |
+| AES-CBC | `ac_cipher.h` | Implemented without padding | Block-cipher-purpose CSP handle; caller IV. |
+| AES-CMAC | `ac_cmac.h` | Implemented, full tag only | Dedicated CMAC-purpose CSP handle; CBC/CMAC cross-use rejected. |
+| Key/CSP lifecycle | `ac_key.h`, `ac_csp.h` | In-memory handles implemented | Export, persistence, wrapping deferred. |
+| CTR/GCM/GMAC/padding | None | Deferred | Requires separate policy/API/KAT gate. |
+| PKI/SecureKit workflow | None | Outside core | Remains in AnoPKI/AnoSecureKit layers. |
 
-## Service entry rule
-
-A service entering the implemented slice requires a documented parameter/lifecycle boundary, self-test or KAT rationale, negative tests, CSP mapping where secret state exists, install/PoC coverage when customer-facing, and evidence that does not retain secrets or generated cryptographic values.
-
-## P1-22 SHA-512-family transition
-
-P1-15 reserved the SHA-384/SHA-512 identifiers. P1-22 implements the existing identifiers together with startup/extended KATs, negative tests, CSP handle coverage, PoC/install smoke, policy checks, and evidence notes. The public export list remains unchanged. P1-23 adds OpenSSL 3.x test-only differential automation and portability checks while preserving the public export list. Actual hosted 32-bit, Windows, macOS, and big-endian artifact review remains TODO.
-
-## P1-26 AES/CBC transition
-
-P1-24 approved the entry gate. P1-25 added the reviewed `ac_cipher.h` surface, CSP-backed AES keys, table-free arithmetic portable core, CBC no-padding lifecycle, KAT/negative/differential coverage, and a reviewed 61-symbol ABI-0 baseline. P1-26 preserves that public surface and adds internal context validation, fail-closed reinitialization, lifecycle/unaligned/concurrency regression, an expanded differential corpus, and compiler-output capture. Manual compiler-output and target-specific side-channel review remain TODO.
-
-## P1-27 CMAC selection transition
-
-P1-27 selects a future AES-CMAC slice before AES-CTR. The gate proposes AES-128/192/256, full 16-byte tags, streaming compute, one-shot compute, and one-shot verification using a dedicated CMAC-purpose CSP handle. It adds no CMAC code, public header, enum value, function, or exported symbol. CTR counter construction and exhaustion policy remain deferred to a separate decision.
+P1-28 CMAC coverage includes startup KAT, all 12 public AES-CMAC examples,
+negative lifecycle/authentication tests, install/PoC smoke, and OpenSSL 3.x
+test-only differential comparison. Target-specific compiler/timing/cache review
+and official validation scope remain TODO.

@@ -289,6 +289,57 @@ static int run_aes_cbc_smoke(void)
     return 0;
 }
 
+static int run_cmac_smoke(void)
+{
+    /* Public demo bytes only. This is not operational secret material. */
+    static const uint8_t demo_key[16] = {
+        0x2bu, 0x7eu, 0x15u, 0x16u, 0x28u, 0xaeu, 0xd2u, 0xa6u,
+        0xabu, 0xf7u, 0x15u, 0x88u, 0x09u, 0xcfu, 0x4fu, 0x3cu
+    };
+    static const uint8_t message[] = { 'c', 'o', 'r', 'e', '-', 'p', 'o', 'c', '-', 'c', 'm', 'a', 'c' };
+    ano_crypto_csp_handle_t handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+    uint8_t tag[ANO_CRYPTO_CMAC_TAG_SIZE];
+    size_t written = 0u;
+    ano_crypto_status_t status;
+
+    status = ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_CMAC,
+                                          demo_key, sizeof(demo_key),
+                                          ANO_CRYPTO_KEY_FLAG_NONE,
+                                          &handle);
+    if (status != ANO_CRYPTO_OK || handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
+        return fail_status("CMAC demo key import", status);
+    }
+
+    status = ano_crypto_cmac_compute_with_key(handle,
+                                               message, sizeof(message),
+                                               tag, sizeof(tag),
+                                               &written,
+                                               ANO_CRYPTO_CMAC_FLAG_NONE);
+    if (status != ANO_CRYPTO_OK || written != ANO_CRYPTO_CMAC_TAG_SIZE) {
+        (void)ano_crypto_key_destroy(handle);
+        return fail_status("AES-CMAC compute", status);
+    }
+
+    status = ano_crypto_cmac_verify_with_key(handle,
+                                              message, sizeof(message),
+                                              tag, sizeof(tag),
+                                              ANO_CRYPTO_CMAC_FLAG_NONE);
+    (void)ano_crypto_csp_zeroize(tag, sizeof(tag));
+    if (status != ANO_CRYPTO_OK) {
+        (void)ano_crypto_key_destroy(handle);
+        return fail_status("AES-CMAC verify", status);
+    }
+
+    status = ano_crypto_key_destroy(handle);
+    if (status != ANO_CRYPTO_OK) {
+        return fail_status("CMAC demo key destroy", status);
+    }
+
+    printf("- AES-CMAC smoke: PASS (%u-byte tag; value not printed)\n",
+           (unsigned int)ANO_CRYPTO_CMAC_TAG_SIZE);
+    return 0;
+}
+
 static int run_random_service_smoke(void)
 {
     uint8_t output[32];
@@ -399,6 +450,8 @@ int main(void)
     } else if (run_drbg_smoke() != 0) {
         result = 1;
     } else if (run_aes_cbc_smoke() != 0) {
+        result = 1;
+    } else if (run_cmac_smoke() != 0) {
         result = 1;
     } else if (run_random_service_smoke() != 0) {
         result = 1;

@@ -1,57 +1,28 @@
-# AnoCrypto-C CI Matrix Skeleton
+# CI Matrix
 
-Status: P1-27 engineering draft.
+Status: P1-28 engineering draft.
 
-| Check | Linux | macOS | Windows | Notes |
+| Lane | Linux | macOS | Windows | Notes |
 |---|---:|---:|---:|---|
-| C99 shared-library build | Required | Required | Required | Extensions off and strict warnings. |
-| Unit/KAT/negative tests | Required | Required | Required | SHA-2/HMAC and AES/CBC output is status-only. |
-| SHA-512-family implementation policy | Required | Required | Required | Source, KAT, negative, evidence, and PoC wiring. |
-| SHA-512 portability review | Required | Required | Required | Endian metadata, variable chunks, and unaligned input; no values. |
-| OpenSSL 3.x differential lane | Required dedicated job | Not selected | Not selected | Test-only provider; exact version/status artifact. |
-| Linux GCC `-m32` portability lane | Required workflow | N/A | N/A | SHA-512 and AES hardening reviews; actual result needs review. |
-| Linux s390x big-endian cross-run lane | Required workflow | N/A | N/A | Selected AES/SHA-512 tests; actual emulator/toolchain result needs review. |
-| AES compiler-output capture | GCC and Clang artifacts | Not selected | Not selected | Capture only; human review required and no automatic side-channel conclusion. |
-| Installed-package smoke | Required | Required | Required | All SHA-2/HMAC variants through installed API. |
-| Customer PoC package smoke | Required | Optional | Optional | No OpenSSL runtime dependency or result values. |
-| Public surface and 61-symbol baseline | Required | Required | Required | Tests/examples/hooks OFF; internal symbols hidden. |
-| Thread/concurrency policy | Required | Required | Required | Win32/pthread native regression where supported. |
-| GCC ASan/UBSan | Required | Not selected | Not selected | Full Linux CTest with `address-undefined`. |
-| Random/entropy hardening lanes | Required | Optional | Optional | Dedicated hooks only in test builds. |
-| Evidence draft | Required | Optional | Optional | Engineering artifact; not release approval. |
+| C99 configure/build/test | Required | Required | Required | Actual hosted artifacts require review. |
+| Install/package consumer smoke | Required | Required | Required | Uses installed `AnoCryptoC::AnoCryptoC`. |
+| Public surface and 69-symbol baseline | Required | Required | Required | Tests/examples/hooks OFF; internal symbols hidden. |
+| SHA-2/HMAC KAT and negative tests | Required | Required | Required | Status-only logs. |
+| AES-CBC KAT and negative tests | Required | Required | Required | Complete blocks, no padding. |
+| AES-CMAC KAT and negative tests | Required | Required | Required | Full 16-byte tag, dedicated key purpose. |
+| OpenSSL differential | Required hosted Linux lane | Optional | Optional | Test-only provider; product and PoC remain independent. |
+| GCC ASan + UBSan | Required hosted Linux lane | Not selected | Not selected | Diagnostic evidence only. |
+| Thread-safety OFF | Required | Required | Required | Confirms explicit unsupported branch. |
+| Platform entropy provider OFF | Required | Required | Required | Public random service must fail closed. |
+| Entropy/random test hooks | Dedicated internal lane | Dedicated internal lane | Dedicated internal lane | Hooks disabled in Release/PoC. |
+| 32-bit representation | Hosted Linux candidate | — | — | Result not yet reviewed. |
+| Big-endian candidate | s390x/QEMU workflow | — | — | Result not yet reviewed. |
+| Compiler-output capture | GCC/Clang candidate | Apple Clang candidate | MSVC/clang-cl candidate | Human review required. |
 
-## P1-26 additions
+## P1-28 AES-CMAC addition
 
-- Retain the P1-23 OpenSSL and SHA-512 portability boundaries.
-- Expand AES-CBC differential validation to 96 deterministic cases per key size and multiple processing paths.
-- Run AES hardening and 128-iteration lifecycle stress tests.
-- Capture GCC and Clang Release compiler output for manual review.
-- Add Linux 32-bit and s390x big-endian workflow structures for AES/SHA-512 portability.
-- Run `ano_crypto_aes_hardening_policy_check` in applicable jobs.
-- Discover OpenSSL 3.x only when test-only differential tests are enabled.
-- Require the provider in a dedicated Linux job and fail configure if absent.
-- Compare SHA-256/384/512 and HMAC variants over deterministic one-shot,
-  streaming, boundary, long-key, larger-message, and unaligned cases.
-- Run `ano_crypto_sha512_portability_review` on standard hosted runners.
-- Add a Linux GCC `-m32` workflow with a reviewed multilib package; disable the
-  external provider in that lane unless a reviewed 32-bit package is added.
-- Run `ano_crypto_differential_portability_policy_check` in applicable jobs.
-- Keep the product target, installed SDK, PoC runtime, and public headers free
-  of OpenSSL dependencies introduced by the differential lane.
-- Upload status/provider/version/architecture metadata only. Never upload
-  digest, MAC, key, message, entropy, seed, DRBG-state, or random values.
-
-## Hosted-result boundary
-
-Workflow definitions and artifact upload steps do not prove successful hosted
-execution. Actual Linux 32-bit, Windows, macOS, and any future big-endian
-results must be retained and reviewed before portability support wording is
-changed. Clang sanitizer runtime and ThreadSanitizer remain follow-up items.
-
-## P1-27 CMAC entry-gate addition
-
-The normal Linux/macOS/Windows matrix runs
-`ano_crypto_cmac_entry_gate_check`. The target verifies that the selection,
-API, KAT/evidence, package, and release-review records exist while CMAC public
-headers, implementation sources, key-type enum values, and exported symbols
-remain absent. Workflow configuration is not CMAC implementation evidence.
+CI checks the public eight-function API, dedicated CMAC key type, startup and
+extended NIST example KATs, negative/cross-purpose handling, OpenSSL test-only
+differential comparison, install/PoC smoke, 69-symbol baseline, internal-source
+exclusion, and value-free logs. Workflow presence does not mean hosted or
+side-channel review is complete.

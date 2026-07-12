@@ -149,7 +149,8 @@ ano_crypto_status_t ano_crypto_internal_csp_import_secret(
 
     if (key_type == ANO_CRYPTO_KEY_TYPE_HMAC) {
         /* HMAC accepts non-empty secret byte strings up to the CSP slot limit. */
-    } else if (key_type == ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER) {
+    } else if (key_type == ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER ||
+               key_type == ANO_CRYPTO_KEY_TYPE_CMAC) {
         if (key_material_len != 16u && key_material_len != 24u &&
             key_material_len != 32u) {
             return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;

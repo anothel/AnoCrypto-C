@@ -6,7 +6,7 @@
 ## Public surface
 
 - [ ] `ac_cipher.h` still contains the reviewed eight public functions.
-- [ ] Clean Release exports match the stored 61-symbol ABI-0 baseline.
+- [ ] Clean Release exports match the stored 69-symbol ABI-0 baseline.
 - [ ] No new mode, padding, AEAD, hardware-dispatch, or domestic-algorithm API
       was introduced.
 

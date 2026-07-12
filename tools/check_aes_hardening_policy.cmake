@@ -74,8 +74,8 @@ foreach(_line IN LISTS _symbols)
     math(EXPR _symbol_count "${_symbol_count} + 1")
   endif()
 endforeach()
-if(NOT _symbol_count EQUAL 61)
-  list(APPEND _violations "ABI-0 exported-symbol baseline must remain 61 for P1-26; found ${_symbol_count}")
+if(NOT _symbol_count EQUAL 69)
+  list(APPEND _violations "ABI-0 exported-symbol baseline must remain 69 for P1-26; found ${_symbol_count}")
 endif()
 
 file(READ "${ANO_CRYPTO_SOURCE_DIR}/src/cipher/aes.c" _aes_source)
@@ -95,7 +95,7 @@ endif()
 file(APPEND "${ANO_CRYPTO_AES_HARDENING_CHECK_OUTPUT}"
   "Result: PASS\n"
   "Public cipher API functions: 8\n"
-  "Public export baseline: 61 symbols\n"
+  "Public export baseline: 69 symbols\n"
   "Differential corpus: 96 deterministic cases per AES key size, one-shot/streaming/in-place encrypt/decrypt\n"
   "Lifecycle stress iterations: 128\n"
   "Compiler-output interpretation: manual review required\n"

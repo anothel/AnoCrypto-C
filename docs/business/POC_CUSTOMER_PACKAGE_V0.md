@@ -202,8 +202,11 @@ The generated SDK is configured with both test-hook options disabled and interna
 - Customer-facing support wording must not infer successful Linux 32-bit, Windows, macOS, or big-endian execution solely from workflow definitions.
 - PoC logs remain status-only and exclude digest, MAC, key, message, entropy, seed, DRBG state, random output, private keys, tokens, and customer data.
 
-## P1-27 CMAC planning boundary
+## P1-28 AES-CMAC package boundary
 
-The package includes `CMAC_ENTRY_GATE_PACKAGE_NOTES.txt` and the corresponding
-planning documents. The installed SDK does not include `ac_cmac.h`, a CMAC key
-type, implementation, or exported function. The note is for scope review only.
+The package includes `AES_CMAC_PACKAGE_NOTES.txt`, public `ac_cmac.h`, and the
+product library. The example computes and verifies a full tag, prints only
+status/length information, and clears the tag buffer. Internal CMAC context
+headers, implementation source, KAT/negative/differential source, OpenSSL
+provider artifacts, keys, messages, subkeys, intermediate state, and tags are
+excluded from the customer package.

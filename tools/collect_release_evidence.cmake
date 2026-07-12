@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-27 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-28 \
 #         -DANO_CRYPTO_RUN_CTEST=ON \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-27")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-28")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -62,8 +62,8 @@ if(NOT DEFINED ANO_CRYPTO_RUN_AES_HARDENING_CHECK)
     set(ANO_CRYPTO_RUN_AES_HARDENING_CHECK ON)
 endif()
 
-if(NOT DEFINED ANO_CRYPTO_RUN_CMAC_ENTRY_GATE_CHECK)
-    set(ANO_CRYPTO_RUN_CMAC_ENTRY_GATE_CHECK ON)
+if(NOT DEFINED ANO_CRYPTO_RUN_CMAC_CHECK)
+    set(ANO_CRYPTO_RUN_CMAC_CHECK ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_AES_COMPILER_REVIEW)
@@ -180,7 +180,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
 "Git status: ${_git_status}\n"
 "CMake command: ${CMAKE_COMMAND}\n"
 "CMake version: ${CMAKE_VERSION}\n"
-"Reproducible build status: P1-27 retained draft procedure; binary byte identity not claimed\n"
+"Reproducible build status: P1-28 retained draft procedure; binary byte identity not claimed\n"
 "Evidence status: engineering draft only\n"
 "Claims boundary: not official validation evidence\n")
 
@@ -423,44 +423,49 @@ else()
         "AES/CBC hardening policy check was not requested. Set ANO_CRYPTO_RUN_AES_HARDENING_CHECK=ON.\n")
 endif()
 
-if(ANO_CRYPTO_RUN_CMAC_ENTRY_GATE_CHECK)
-    set(_cmac_entry_gate_output "${ANO_CRYPTO_EVIDENCE_DIR}/CMAC_ENTRY_GATE_CHECK.txt")
+if(ANO_CRYPTO_RUN_CMAC_CHECK)
+    set(_cmac_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/AES_CMAC_IMPLEMENTATION_CHECK.txt")
     execute_process(
         COMMAND "${CMAKE_COMMAND}"
             -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
-            -DANO_CRYPTO_CMAC_ENTRY_GATE_CHECK_OUTPUT=${_cmac_entry_gate_output}
-            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_cmac_entry_gate.cmake"
-        RESULT_VARIABLE _cmac_entry_gate_result
-        OUTPUT_VARIABLE _cmac_entry_gate_stdout
-        ERROR_VARIABLE _cmac_entry_gate_stderr)
-    file(APPEND "${_cmac_entry_gate_output}" "
+            -DANO_CRYPTO_CMAC_CHECK_OUTPUT=${_cmac_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_cmac_policy.cmake"
+        RESULT_VARIABLE _cmac_check_result
+        OUTPUT_VARIABLE _cmac_check_stdout
+        ERROR_VARIABLE _cmac_check_stderr)
+    file(APPEND "${_cmac_check_output}" "
 Command output:
-${_cmac_entry_gate_stdout}${_cmac_entry_gate_stderr}
+${_cmac_check_stdout}${_cmac_check_stderr}
 ")
-    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "CMAC entry gate policy check result: ${_cmac_entry_gate_result}
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "AES-CMAC implementation policy check result: ${_cmac_check_result}
 ")
-    if(NOT _cmac_entry_gate_result EQUAL 0)
-        message(FATAL_ERROR "CMAC entry gate policy check failed; see ${_cmac_entry_gate_output}")
+    if(NOT _cmac_check_result EQUAL 0)
+        message(FATAL_ERROR "AES-CMAC implementation policy check failed; see ${_cmac_check_output}")
     endif()
 else()
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CMAC_ENTRY_GATE_CHECK.txt"
-        "CMAC entry gate policy check was not requested. Set ANO_CRYPTO_RUN_CMAC_ENTRY_GATE_CHECK=ON.
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES_CMAC_IMPLEMENTATION_CHECK.txt"
+        "AES-CMAC implementation policy check was not requested. Set ANO_CRYPTO_RUN_CMAC_CHECK=ON.
 ")
 endif()
 
-file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CMAC_ENTRY_GATE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-27 CMAC entry gate review notes
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES_CMAC_REVIEW_NOTES.txt"
+    "AnoCrypto-C P1-28 AES-CMAC review notes
 "
-    "Status: planning and no-implementation boundary only; not official validation evidence.
+    "Status: engineering implementation evidence; not official validation evidence.
 "
-    "Selected candidate: AES-CMAC with AES-128/192/256 and full 16-byte tags.
+    "Implemented scope: AES-CMAC with AES-128/192/256, full 16-byte tags, streaming compute, one-shot compute, and one-shot verify.
 "
-    "Key-purpose rule: a dedicated CMAC-purpose handle is required before implementation.
+    "Key-purpose rule: only dedicated ANO_CRYPTO_KEY_TYPE_CMAC handles are accepted; CBC and CMAC reject the other purpose.
 "
-    "Public API added by P1-27: none. Public export baseline: 61 symbols.
+    "Startup and extended KAT source: public NIST AES-CMAC examples associated with SP 800-38B.
 "
-    "Deferred: AES-CTR, tag truncation, GCM/GMAC, protocol formatting, implementation KAT results, and target-specific side-channel conclusions.
+    "Differential provider: OpenSSL 3.x test-only; no SDK or PoC runtime dependency.
+"
+    "Public API added by P1-28: eight CMAC functions. Public export baseline: 69 symbols.
+"
+    "Deferred: tag truncation, AES-CTR, GCM/GMAC, protocol formatting, persistence, export, and target-specific side-channel conclusions.
 "
     "Sensitive values recorded: none.
 ")
@@ -615,7 +620,7 @@ endif()
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "AnoCrypto-C reproducible build evidence notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-27 retained draft procedure; binary byte identity is not claimed.\n"
+    "Status: P1-28 retained draft procedure; binary byte identity is not claimed.\n"
     "Source directory: ${ANO_CRYPTO_SOURCE_DIR}\n"
     "Build directory: ${ANO_CRYPTO_BUILD_DIR}\n"
     "Source archive content list: SOURCE_ARCHIVE_CONTENTS.txt\n"
@@ -632,15 +637,15 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "Differential/portability policy check: DIFFERENTIAL_PORTABILITY_CHECK.txt\n"
     "AES/CBC implementation policy check: AES_CBC_IMPLEMENTATION_CHECK.txt\n"
     "AES/CBC hardening policy check: AES_HARDENING_CHECK.txt\n"
-    "CMAC entry gate policy check: CMAC_ENTRY_GATE_CHECK.txt\n"
+    "AES-CMAC implementation policy check: AES_CMAC_IMPLEMENTATION_CHECK.txt\n"
     "AES compiler-output review: AES_COMPILER_OUTPUT_REVIEW.txt\n"
     "TODO: normalize archive timestamps if byte-for-byte source archives become a release requirement.\n"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-27 evidence and scope-review notes\n"
+    "AnoCrypto-C P1-28 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-27 engineering scope artifact covering implemented SHA-2/HMAC, random, and AES-CBC services; not official validation evidence.\n"
+    "Status: P1-28 engineering scope artifact covering implemented SHA-2/HMAC, random, AES-CBC, and AES-CMAC services; not official validation evidence.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"
@@ -649,15 +654,15 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
     "SHA-512-family implementation check: SHA512_FAMILY_CHECK.txt\n"
     "Current implemented algorithm slice includes SHA-256/SHA-384/SHA-512, their HMAC variants, and HMAC_DRBG-SHA-256.\n"
     "The existing platform-provider-backed random service and CSP HMAC key lifecycle remain in the candidate engineering slice.\n"
-    "AES-128/192/256 and CBC without padding are implemented. P1-27 selects AES-CMAC as a future candidate but adds no implementation or public ABI; AES-CTR, AEAD, padding helpers, GMAC, hardware dispatch, and additional algorithms remain deferred.\n"
-    "OpenSSL 3.x test-only differential automation covers SHA-2/HMAC and AES-CBC; actual hosted 32-bit, Windows, macOS, big-endian, and target-specific side-channel artifacts remain review items.\n"
+    "AES-128/192/256, CBC without padding, and full-tag AES-CMAC are implemented. AES-CTR, AEAD, padding helpers, GMAC, hardware dispatch, tag truncation, and additional algorithms remain deferred.\n"
+    "OpenSSL 3.x test-only differential automation covers SHA-2/HMAC, AES-CBC, and AES-CMAC; actual hosted 32-bit, Windows, macOS, big-endian, and target-specific side-channel artifacts remain review items.\n"
     "Do not include digest values, MAC values, keys, entropy bytes, seed material, DRBG state, generated random bytes, private keys, tokens, customer data, or internal deployment details in scope evidence.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Scope review notes: SCOPE_REVIEW_NOTES.txt\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA512_FAMILY_REVIEW_NOTES.txt"
     "AnoCrypto-C SHA-384/SHA-512 family review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-27 retained implementation, KAT, differential, and portability evidence; not official validation evidence.\n"
+    "Status: P1-28 retained implementation, KAT, differential, and portability evidence; not official validation evidence.\n"
     "Implementation decision: docs/design/SHA2_384_512_SCOPE_DECISION.md\n"
     "KAT record: docs/kcmvp/SHA2_384_512_KAT_PLAN.md\n"
     "Implementation: src/hash/sha512.c, src/hash/hash.c, src/mac/hmac.c\n"
@@ -679,7 +684,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES_CBC_REVIEW_NOTES.txt"
     "Hardening policy check: AES_HARDENING_CHECK.txt\n"
     "Runtime hardening review: AES_HARDENING_REVIEW.log\n"
     "Compiler-output summary: AES_COMPILER_OUTPUT_REVIEW.txt\n"
-    "Public API: include/anocrypto/ac_cipher.h; eight reviewed functions; 61-symbol baseline unchanged.\n"
+    "Public AES/CBC API: include/anocrypto/ac_cipher.h; eight reviewed cipher functions. Current overall baseline: 69 symbols after CMAC addition.\n"
     "Context policy: private magic and exact round-key-size guard; failed reinitialization clears an earlier schedule.\n"
     "Lifecycle: CSP handle may be destroyed after successful init; caller-owned expanded context remains valid until uninit and is then cleared.\n"
     "Differential provider: OpenSSL 3.x test-only with 2,016 AES-CBC comparisons; no SDK or PoC runtime dependency.\n"
@@ -691,15 +696,15 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "AES/CBC review note
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_PORTABILITY_REVIEW_NOTES.txt"
     "AnoCrypto-C SHA-2/HMAC differential-validation and portability review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-27 retained engineering comparison and portability evidence; not official validation evidence.\n"
+    "Status: P1-28 retained engineering comparison and portability evidence; not official validation evidence.\n"
     "Provider decision: docs/kcmvp/OPENSSL_DIFFERENTIAL_PROVIDER_DECISION.md\n"
     "Portability policy: docs/design/SHA512_FAMILY_PORTABILITY_POLICY.md\n"
     "CI checklist: docs/ci/DIFFERENTIAL_PORTABILITY_CI_CHECKLIST.md\n"
     "Policy check: DIFFERENTIAL_PORTABILITY_CHECK.txt\n"
     "Differential result: DIFFERENTIAL_VALIDATION.log\n"
     "Portability result: SHA512_PORTABILITY_REVIEW.log\n"
-    "OpenSSL 3.x is linked only to the differential test executable and is not a product, installed-SDK, or PoC runtime dependency.\n"
-    "The deterministic corpus covers SHA-256/SHA-384/SHA-512 and HMAC variants across one-shot, streaming, padding/block boundaries, long keys, and intentionally unaligned input.\n"
+    "OpenSSL 3.x is linked only to differential test executables and is not a product, installed-SDK, or PoC runtime dependency.\n"
+    "The deterministic corpus covers SHA-256/SHA-384/SHA-512 and HMAC variants plus AES-CBC and AES-CMAC across one-shot, streaming, boundary, long-key, and intentionally unaligned-input cases.\n"
     "Logs retain provider/version, status, representation metadata, and comparison counts only; digest, MAC, key, message, entropy, seed, DRBG state, and generated random values are prohibited.\n"
     "Actual hosted 32-bit, Windows, macOS, and big-endian artifacts require explicit review before support wording changes.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Differential/portability review notes: DIFFERENTIAL_PORTABILITY_REVIEW_NOTES.txt\n")
@@ -707,7 +712,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Differential/portab
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RANDOM_SERVICE_REVIEW_NOTES.txt"
     "AnoCrypto-C random-service implementation review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-27 retained engineering lifecycle-hardening evidence; not official validation evidence.\n"
+    "Status: P1-28 retained engineering lifecycle-hardening evidence; not official validation evidence.\n"
     "Decision document: docs/design/PUBLIC_RANDOM_API_DECISION.md\n"
     "CI checklist: docs/ci/RANDOM_SERVICE_CI_CHECKLIST.md\n"
     "DRBG/entropy evidence notes: docs/kcmvp/DRBG_ENTROPY_BOUNDARY_EVIDENCE.md\n"
@@ -724,7 +729,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Random service revi
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RANDOM_LIFECYCLE_REVIEW_NOTES.txt"
     "AnoCrypto-C random lifecycle and portability review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-27 retained engineering regression and policy evidence; not official validation evidence.\n"
+    "Status: P1-28 retained engineering regression and policy evidence; not official validation evidence.\n"
     "Policy: docs/design/C99_RANDOM_OPERATIONAL_PORTABILITY_POLICY.md\n"
     "CI checklist: docs/ci/RANDOM_LIFECYCLE_HARDENING_CI_CHECKLIST.md\n"
     "Lifecycle stress: tests/stress/random_lifecycle_stress_tests.c\n"
@@ -740,7 +745,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Random lifecycle re
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt"
     "AnoCrypto-C exported-symbol baseline review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-27 clean Release ABI guardrail; not a complete ABI compatibility claim.\n"
+    "Status: P1-28 clean Release ABI guardrail; not a complete ABI compatibility claim.\n"
     "Baseline: abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt\n"
     "Expected public symbol count: 61\n"
     "Automated result: EXPORTED_SYMBOL_BASELINE_CHECK.txt\n"
@@ -751,7 +756,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Exported symbol bas
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_HEALTH_REVIEW_NOTES.txt"
     "AnoCrypto-C entropy failure-injection and health-test review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-27 retained engineering testability and state-transition evidence only.\n"
+    "Status: P1-28 retained engineering testability and state-transition evidence only.\n"
     "Design: docs/design/C99_ENTROPY_FAILURE_INJECTION_AND_HEALTH_TEST.md\n"
     "CI checklist: docs/ci/ENTROPY_FAILURE_CI_CHECKLIST.md\n"
     "Policy check: ENTROPY_HEALTH_CHECK.txt\n"
@@ -764,7 +769,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Entropy health revi
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_OPERATIONAL_REVIEW_NOTES.txt"
     "AnoCrypto-C entropy source and operational process-boundary review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-27 retained engineering policy and regression evidence only.\n"
+    "Status: P1-28 retained engineering policy and regression evidence only.\n"
     "Design: docs/design/C99_ENTROPY_SOURCE_OPERATIONAL_POLICY.md\n"
     "CI checklist: docs/ci/ENTROPY_OPERATIONAL_CI_CHECKLIST.md\n"
     "Policy check: ENTROPY_OPERATIONAL_POLICY_CHECK.txt\n"
@@ -779,7 +784,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Entropy operational
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SBOM_STATUS.txt"
     "AnoCrypto-C SBOM status\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: placeholder only; no complete SBOM is generated by P1-27.\n"
+    "Status: placeholder only; no complete SBOM is generated by P1-28.\n"
     "Hash manifests available: SOURCE_FILES.sha256, SOURCE_ARCHIVE.sha256, BINARY_FILES.sha256, EVIDENCE_MANIFEST.sha256.\n"
     "Candidate SBOM formats: SPDX JSON or CycloneDX JSON after tool and schema review.\n"
     "SBOM plan: docs/kcmvp/SBOM_SIGNING_PLAN.md\n"
@@ -789,7 +794,7 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SBOM status: SBOM_S
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SIGNING_STATUS.txt"
     "AnoCrypto-C signing status\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: signing not performed by P1-27 evidence collection.\n"
+    "Status: signing not performed by P1-28 evidence collection.\n"
     "Private signing keys and signing tokens must not be stored in this repository, evidence directory, or PoC package.\n"
     "Candidate signed artifacts: source archive, source hash file, binary hash file, PoC package archive, SBOM, and evidence manifest after policy review.\n"
     "Preferred future approach: detached signatures with separately reviewed verification instructions.\n"
@@ -817,185 +822,215 @@ if(ANO_CRYPTO_RUN_CTEST)
         message(FATAL_ERROR "ctest failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/ctest.log")
     endif()
 else()
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ctest.log" "CTest was not requested. Set ANO_CRYPTO_RUN_CTEST=ON to capture test output.\n")
-endif()
-
-find_program(_ctest_differential_exe ctest)
-if(_ctest_differential_exe AND EXISTS "${ANO_CRYPTO_BUILD_DIR}/CTestTestfile.cmake")
-    execute_process(
-        COMMAND "${_ctest_differential_exe}" -N -R "^ano_crypto_(sha2_hmac|aes_cbc)_openssl_differential_tests$"
-        WORKING_DIRECTORY "${ANO_CRYPTO_BUILD_DIR}"
-        RESULT_VARIABLE _differential_list_result
-        OUTPUT_VARIABLE _differential_list_stdout
-        ERROR_VARIABLE _differential_list_stderr)
-    if(_differential_list_result EQUAL 0 AND _differential_list_stdout MATCHES "Total Tests: 2")
-        execute_process(
-            COMMAND "${_ctest_differential_exe}" -R "^ano_crypto_(sha2_hmac|aes_cbc)_openssl_differential_tests$" -V
-            WORKING_DIRECTORY "${ANO_CRYPTO_BUILD_DIR}"
-            RESULT_VARIABLE _differential_test_result
-            OUTPUT_VARIABLE _differential_test_stdout
-            ERROR_VARIABLE _differential_test_stderr)
-        file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log"
-            "${_differential_test_stdout}${_differential_test_stderr}")
-        file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-            "OpenSSL differential validation result: ${_differential_test_result}
-")
-        if(NOT _differential_test_result EQUAL 0 OR
-           NOT _differential_test_stdout MATCHES "sha2-hmac-differential status=pass" OR
-           NOT _differential_test_stdout MATCHES "AES-CBC OpenSSL differential comparisons passed")
-            message(FATAL_ERROR "OpenSSL differential validation failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log")
-        endif()
+    set(_prepared_ctest_evidence_dir "${ANO_CRYPTO_BUILD_DIR}/ctest-evidence")
+    set(_prepared_ctest_log "${_prepared_ctest_evidence_dir}/ctest.log")
+    set(_prepared_ctest_summary "${_prepared_ctest_evidence_dir}/CTEST_EVIDENCE_SUMMARY.txt")
+    if(EXISTS "${_prepared_ctest_log}" AND EXISTS "${_prepared_ctest_summary}")
+        configure_file("${_prepared_ctest_log}" "${ANO_CRYPTO_EVIDENCE_DIR}/ctest.log" COPYONLY)
+        configure_file("${_prepared_ctest_summary}" "${ANO_CRYPTO_EVIDENCE_DIR}/CTEST_EVIDENCE_SUMMARY.txt" COPYONLY)
+        file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "CTest result: 0 (reused standalone evidence capture)\n")
     else()
-        file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log"
-            "Required OpenSSL differential tests were not configured. P1-27 evidence collection requires ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON.
-${_differential_list_stdout}${_differential_list_stderr}")
-        message(FATAL_ERROR "P1-27 differential evidence tests are unavailable; see ${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log")
+        file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ctest.log" "CTest was not requested. Set ANO_CRYPTO_RUN_CTEST=ON to capture test output.\n")
     endif()
-
-    execute_process(
-        COMMAND "${_ctest_differential_exe}" -R "^ano_crypto_sha512_portability_review$" -V
-        WORKING_DIRECTORY "${ANO_CRYPTO_BUILD_DIR}"
-        RESULT_VARIABLE _portability_review_result
-        OUTPUT_VARIABLE _portability_review_stdout
-        ERROR_VARIABLE _portability_review_stderr)
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA512_PORTABILITY_REVIEW.log"
-        "${_portability_review_stdout}${_portability_review_stderr}")
-    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-        "SHA-512 portability review result: ${_portability_review_result}\n")
-    if(NOT _portability_review_result EQUAL 0 OR NOT _portability_review_stdout MATCHES "sha512-portability status=pass")
-        message(FATAL_ERROR "SHA-512 portability review failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/SHA512_PORTABILITY_REVIEW.log")
-    endif()
-
-    execute_process(
-        COMMAND "${_ctest_differential_exe}" -R "^ano_crypto_aes_cbc_hardening_review$" -V
-        WORKING_DIRECTORY "${ANO_CRYPTO_BUILD_DIR}"
-        RESULT_VARIABLE _aes_hardening_review_result
-        OUTPUT_VARIABLE _aes_hardening_review_stdout
-        ERROR_VARIABLE _aes_hardening_review_stderr)
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES_HARDENING_REVIEW.log"
-        "${_aes_hardening_review_stdout}${_aes_hardening_review_stderr}")
-    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-        "AES/CBC hardening review result: ${_aes_hardening_review_result}\n")
-    if(NOT _aes_hardening_review_result EQUAL 0 OR
-       NOT _aes_hardening_review_stdout MATCHES "AES-CBC hardening review passed")
-        message(FATAL_ERROR "AES/CBC hardening review failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/AES_HARDENING_REVIEW.log")
-    endif()
-else()
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log" "ctest or configured test tree unavailable\n")
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA512_PORTABILITY_REVIEW.log" "ctest or configured test tree unavailable\n")
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES_HARDENING_REVIEW.log" "ctest or configured test tree unavailable\n")
-    message(FATAL_ERROR "P1-27 differential/portability evidence requires a configured CTest build tree")
 endif()
 
-find_program(_ctest_platform_review_exe ctest)
-if(_ctest_platform_review_exe)
-    execute_process(
-        COMMAND "${_ctest_platform_review_exe}" -R "^ano_crypto_thread_platform_review$" -V
-        WORKING_DIRECTORY "${ANO_CRYPTO_BUILD_DIR}"
-        RESULT_VARIABLE _thread_platform_review_result
-        OUTPUT_VARIABLE _thread_platform_review_stdout
-        ERROR_VARIABLE _thread_platform_review_stderr)
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/THREAD_PLATFORM_REVIEW.log"
-        "${_thread_platform_review_stdout}${_thread_platform_review_stderr}")
-    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-        "Thread platform review result: ${_thread_platform_review_result}\n")
-    if(NOT _thread_platform_review_result EQUAL 0)
-        message(FATAL_ERROR "thread platform review failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/THREAD_PLATFORM_REVIEW.log")
+function(_ano_crypto_find_evidence_test_executable _test_name _out_var)
+    set(_candidates
+        "${ANO_CRYPTO_BUILD_DIR}/${_test_name}"
+        "${ANO_CRYPTO_BUILD_DIR}/${_test_name}.exe"
+        "${ANO_CRYPTO_BUILD_DIR}/Debug/${_test_name}"
+        "${ANO_CRYPTO_BUILD_DIR}/Debug/${_test_name}.exe"
+        "${ANO_CRYPTO_BUILD_DIR}/Release/${_test_name}"
+        "${ANO_CRYPTO_BUILD_DIR}/Release/${_test_name}.exe"
+        "${ANO_CRYPTO_BUILD_DIR}/RelWithDebInfo/${_test_name}"
+        "${ANO_CRYPTO_BUILD_DIR}/RelWithDebInfo/${_test_name}.exe"
+        "${ANO_CRYPTO_BUILD_DIR}/MinSizeRel/${_test_name}"
+        "${ANO_CRYPTO_BUILD_DIR}/MinSizeRel/${_test_name}.exe")
+    foreach(_candidate IN LISTS _candidates)
+        if(EXISTS "${_candidate}" AND NOT IS_DIRECTORY "${_candidate}")
+            set(${_out_var} "${_candidate}" PARENT_SCOPE)
+            return()
+        endif()
+    endforeach()
+    set(${_out_var} "" PARENT_SCOPE)
+endfunction()
+
+function(_ano_crypto_run_evidence_test _test_name _result_var _stdout_var _stderr_var)
+    _ano_crypto_find_evidence_test_executable("${_test_name}" _test_executable)
+    if(NOT _test_executable)
+        message(FATAL_ERROR "required evidence test executable is unavailable: ${_test_name}")
     endif()
-else()
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/THREAD_PLATFORM_REVIEW.log" "ctest executable unavailable\n")
+    execute_process(
+        COMMAND "${_test_executable}"
+        WORKING_DIRECTORY "${ANO_CRYPTO_BUILD_DIR}"
+        RESULT_VARIABLE _test_result
+        OUTPUT_VARIABLE _test_stdout
+        ERROR_VARIABLE _test_stderr
+        TIMEOUT 120)
+    set(${_result_var} "${_test_result}" PARENT_SCOPE)
+    set(${_stdout_var} "${_test_stdout}" PARENT_SCOPE)
+    set(${_stderr_var} "${_test_stderr}" PARENT_SCOPE)
+endfunction()
+
+# The complete CTest pass above already executes every configured test.  Run the
+# status-only evidence programs directly here instead of starting a second
+# filtered CTest process from an outer build target.  This avoids nested CTest /
+# build-runner jobserver interactions while preserving independent exit-status
+# and output validation for each evidence artifact.
+_ano_crypto_run_evidence_test(
+    ano_crypto_sha2_hmac_openssl_differential_tests
+    _sha2_diff_result _sha2_diff_stdout _sha2_diff_stderr)
+_ano_crypto_run_evidence_test(
+    ano_crypto_aes_cbc_openssl_differential_tests
+    _aes_cbc_diff_result _aes_cbc_diff_stdout _aes_cbc_diff_stderr)
+_ano_crypto_run_evidence_test(
+    ano_crypto_aes_cmac_openssl_differential_tests
+    _aes_cmac_diff_result _aes_cmac_diff_stdout _aes_cmac_diff_stderr)
+
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log"
+    "${_sha2_diff_stdout}${_sha2_diff_stderr}"
+    "${_aes_cbc_diff_stdout}${_aes_cbc_diff_stderr}"
+    "${_aes_cmac_diff_stdout}${_aes_cmac_diff_stderr}")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "OpenSSL differential validation results: sha2-hmac=${_sha2_diff_result}; aes-cbc=${_aes_cbc_diff_result}; aes-cmac=${_aes_cmac_diff_result}\n")
+if(NOT _sha2_diff_result EQUAL 0 OR
+   NOT _aes_cbc_diff_result EQUAL 0 OR
+   NOT _aes_cmac_diff_result EQUAL 0 OR
+   NOT _sha2_diff_stdout MATCHES "sha2-hmac-differential status=pass" OR
+   NOT _aes_cbc_diff_stdout MATCHES "AES-CBC OpenSSL differential comparisons passed" OR
+   NOT _aes_cmac_diff_stdout MATCHES "OpenSSL 3.x AES-CMAC differential validation passed")
+    message(FATAL_ERROR "OpenSSL differential validation failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log")
+endif()
+
+_ano_crypto_run_evidence_test(
+    ano_crypto_sha512_portability_review
+    _portability_review_result _portability_review_stdout _portability_review_stderr)
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA512_PORTABILITY_REVIEW.log"
+    "${_portability_review_stdout}${_portability_review_stderr}")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "SHA-512 portability review result: ${_portability_review_result}\n")
+if(NOT _portability_review_result EQUAL 0 OR
+   NOT _portability_review_stdout MATCHES "sha512-portability status=pass")
+    message(FATAL_ERROR "SHA-512 portability review failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/SHA512_PORTABILITY_REVIEW.log")
+endif()
+
+_ano_crypto_run_evidence_test(
+    ano_crypto_aes_cbc_hardening_review
+    _aes_hardening_review_result _aes_hardening_review_stdout _aes_hardening_review_stderr)
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES_HARDENING_REVIEW.log"
+    "${_aes_hardening_review_stdout}${_aes_hardening_review_stderr}")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "AES/CBC hardening review result: ${_aes_hardening_review_result}\n")
+if(NOT _aes_hardening_review_result EQUAL 0 OR
+   NOT _aes_hardening_review_stdout MATCHES "AES-CBC hardening review passed")
+    message(FATAL_ERROR "AES/CBC hardening review failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/AES_HARDENING_REVIEW.log")
+endif()
+
+_ano_crypto_run_evidence_test(
+    ano_crypto_thread_platform_review
+    _thread_platform_review_result _thread_platform_review_stdout _thread_platform_review_stderr)
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/THREAD_PLATFORM_REVIEW.log"
+    "${_thread_platform_review_stdout}${_thread_platform_review_stderr}")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "Thread platform review result: ${_thread_platform_review_result}\n")
+if(NOT _thread_platform_review_result EQUAL 0 OR
+   NOT _thread_platform_review_stdout MATCHES "thread_backend=")
+    message(FATAL_ERROR "thread platform review failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/THREAD_PLATFORM_REVIEW.log")
 endif()
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CONCURRENCY_SANITIZER_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-27 concurrency and sanitizer review notes\n"
+    "AnoCrypto-C P1-28 concurrency and sanitizer review notes\n"
     "Status: engineering evidence only; not official validation evidence.\n"
     "Policy check: CONCURRENCY_SANITIZER_CHECK.txt\n"
     "Platform status: THREAD_PLATFORM_REVIEW.log\n"
     "Selected required sanitizer lane: Linux GCC address+undefined in hosted CI; Clang runtime review remains TODO.\n"
-    "ThreadSanitizer: not selected in P1-27; runtime/toolchain review remains TODO.\n"
+    "ThreadSanitizer: not selected in P1-28; runtime/toolchain review remains TODO.\n"
     "Build-identity ABI decision: docs/design/BUILD_IDENTITY_ABI_0_DECISION.md\n"
     "Actual hosted Linux/macOS/Windows artifacts require separate review before support wording is widened.\n"
     "Logs must not contain key bytes, MAC output, entropy, seed material, DRBG state, generated random bytes, private keys, tokens, or customer data.\n")
 
 if(ANO_CRYPTO_RUN_INSTALL_SMOKE)
-    if(NOT EXISTS "${ANO_CRYPTO_INSTALL_SMOKE_SOURCE_DIR}/CMakeLists.txt")
-        message(FATAL_ERROR "install smoke source directory is missing CMakeLists.txt: ${ANO_CRYPTO_INSTALL_SMOKE_SOURCE_DIR}")
-    endif()
-
-    file(REMOVE_RECURSE "${ANO_CRYPTO_INSTALL_PREFIX}" "${ANO_CRYPTO_INSTALL_SMOKE_BUILD_DIR}")
-    file(MAKE_DIRECTORY "${ANO_CRYPTO_INSTALL_PREFIX}" "${ANO_CRYPTO_INSTALL_SMOKE_BUILD_DIR}")
-
-    ano_crypto_run_logged(
-        "${ANO_CRYPTO_EVIDENCE_DIR}/INSTALL_SMOKE_INSTALL.log"
-        "Install anocrypto-c package prefix"
-        "${CMAKE_COMMAND}" --install "${ANO_CRYPTO_BUILD_DIR}" --prefix "${ANO_CRYPTO_INSTALL_PREFIX}")
-
-    ano_crypto_run_logged(
-        "${ANO_CRYPTO_EVIDENCE_DIR}/INSTALL_SMOKE_CONFIGURE.log"
-        "Configure install smoke consumer"
-        "${CMAKE_COMMAND}" -S "${ANO_CRYPTO_INSTALL_SMOKE_SOURCE_DIR}" -B "${ANO_CRYPTO_INSTALL_SMOKE_BUILD_DIR}" -DCMAKE_PREFIX_PATH=${ANO_CRYPTO_INSTALL_PREFIX})
-
-    ano_crypto_run_logged(
-        "${ANO_CRYPTO_EVIDENCE_DIR}/INSTALL_SMOKE_BUILD.log"
-        "Build install smoke consumer"
-        "${CMAKE_COMMAND}" --build "${ANO_CRYPTO_INSTALL_SMOKE_BUILD_DIR}" --parallel)
-
-    set(_smoke_exe "${ANO_CRYPTO_INSTALL_SMOKE_BUILD_DIR}/anocrypto_c_install_smoke")
-    if(NOT EXISTS "${_smoke_exe}")
-        set(_smoke_exe "${ANO_CRYPTO_INSTALL_SMOKE_BUILD_DIR}/anocrypto_c_install_smoke.exe")
-    endif()
-    if(NOT EXISTS "${_smoke_exe}")
-        file(GLOB_RECURSE _smoke_candidates
-            LIST_DIRECTORIES false
-            "${ANO_CRYPTO_INSTALL_SMOKE_BUILD_DIR}/anocrypto_c_install_smoke*")
-        foreach(_candidate IN LISTS _smoke_candidates)
-            if(NOT _candidate MATCHES "CMakeFiles")
-                set(_smoke_exe "${_candidate}")
-                break()
+    set(_prepared_install_smoke_dir "${ANO_CRYPTO_BUILD_DIR}/install-package-smoke")
+    set(_prepared_install_smoke_summary "${_prepared_install_smoke_dir}/INSTALL_SMOKE_SUMMARY.txt")
+    if(EXISTS "${_prepared_install_smoke_summary}")
+        foreach(_artifact IN ITEMS
+            INSTALL_SMOKE_INSTALL.log
+            INSTALL_SMOKE_CONFIGURE.log
+            INSTALL_SMOKE_BUILD.log
+            INSTALL_SMOKE_RUN.log
+            INSTALL_SMOKE_SUMMARY.txt)
+            if(NOT EXISTS "${_prepared_install_smoke_dir}/${_artifact}")
+                message(FATAL_ERROR "prepared install-package smoke artifact is incomplete: ${_artifact}")
             endif()
+            configure_file(
+                "${_prepared_install_smoke_dir}/${_artifact}"
+                "${ANO_CRYPTO_EVIDENCE_DIR}/${_artifact}"
+                COPYONLY)
         endforeach()
+        set(_smoke_result 0)
+    else()
+        if(NOT EXISTS "${ANO_CRYPTO_SOURCE_DIR}/tools/run_install_package_smoke.cmake")
+            message(FATAL_ERROR "install-package smoke script is missing")
+        endif()
+        execute_process(
+            COMMAND "${CMAKE_COMMAND}" -E env
+                --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
+                "${CMAKE_COMMAND}"
+                -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+                -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+                -DANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR=${_prepared_install_smoke_dir}
+                -P "${ANO_CRYPTO_SOURCE_DIR}/tools/run_install_package_smoke.cmake"
+            RESULT_VARIABLE _smoke_prepare_result
+            OUTPUT_VARIABLE _smoke_prepare_stdout
+            ERROR_VARIABLE _smoke_prepare_stderr)
+        if(NOT _smoke_prepare_result EQUAL 0 OR NOT EXISTS "${_prepared_install_smoke_summary}")
+            file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/INSTALL_SMOKE_RUN.log"
+                "${_smoke_prepare_stdout}${_smoke_prepare_stderr}")
+            message(FATAL_ERROR "install-package smoke preparation failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/INSTALL_SMOKE_RUN.log")
+        endif()
+        foreach(_artifact IN ITEMS
+            INSTALL_SMOKE_INSTALL.log
+            INSTALL_SMOKE_CONFIGURE.log
+            INSTALL_SMOKE_BUILD.log
+            INSTALL_SMOKE_RUN.log
+            INSTALL_SMOKE_SUMMARY.txt)
+            configure_file(
+                "${_prepared_install_smoke_dir}/${_artifact}"
+                "${ANO_CRYPTO_EVIDENCE_DIR}/${_artifact}"
+                COPYONLY)
+        endforeach()
+        set(_smoke_result 0)
     endif()
-    if(NOT EXISTS "${_smoke_exe}")
-        message(FATAL_ERROR "install smoke executable not found under ${ANO_CRYPTO_INSTALL_SMOKE_BUILD_DIR}")
-    endif()
-
-    execute_process(
-        COMMAND "${_smoke_exe}"
-        WORKING_DIRECTORY "${ANO_CRYPTO_INSTALL_SMOKE_BUILD_DIR}"
-        RESULT_VARIABLE _smoke_result
-        OUTPUT_VARIABLE _smoke_stdout
-        ERROR_VARIABLE _smoke_stderr)
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/INSTALL_SMOKE_RUN.log"
-        "# Run install smoke consumer\n# Executable: ${_smoke_exe}\n# Result: ${_smoke_result}\n\n${_smoke_stdout}${_smoke_stderr}")
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/INSTALL_SMOKE_SUMMARY.txt"
-        "Install prefix: ${ANO_CRYPTO_INSTALL_PREFIX}\n"
-        "Install smoke source: ${ANO_CRYPTO_INSTALL_SMOKE_SOURCE_DIR}\n"
-        "Install smoke build: ${ANO_CRYPTO_INSTALL_SMOKE_BUILD_DIR}\n"
-        "Install smoke executable: ${_smoke_exe}\n"
-        "Install smoke result: ${_smoke_result}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Install smoke result: ${_smoke_result}\n")
-    if(NOT _smoke_result EQUAL 0)
-        message(FATAL_ERROR "install smoke failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/INSTALL_SMOKE_RUN.log")
-    endif()
 else()
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/INSTALL_SMOKE_RUN.log"
         "Install smoke was not requested. Set ANO_CRYPTO_RUN_INSTALL_SMOKE=ON to capture installed-package smoke output.\n")
 endif()
 
 if(ANO_CRYPTO_RUN_POC_PACKAGE_SMOKE)
-    if(NOT EXISTS "${ANO_CRYPTO_SOURCE_DIR}/tools/run_poc_package_smoke.cmake")
-        message(FATAL_ERROR "PoC package smoke script is missing: ${ANO_CRYPTO_SOURCE_DIR}/tools/run_poc_package_smoke.cmake")
+    set(_prepared_poc_smoke_dir "${ANO_CRYPTO_BUILD_DIR}/poc-package-smoke")
+    set(_prepared_poc_summary "${_prepared_poc_smoke_dir}/POC_PACKAGE_SMOKE_SUMMARY.txt")
+    if(EXISTS "${_prepared_poc_summary}")
+        file(REMOVE_RECURSE "${ANO_CRYPTO_POC_SMOKE_DIR}")
+        file(MAKE_DIRECTORY "${ANO_CRYPTO_POC_SMOKE_DIR}")
+        file(COPY "${_prepared_poc_smoke_dir}/" DESTINATION "${ANO_CRYPTO_POC_SMOKE_DIR}")
+        set(_poc_smoke_result 0)
+        set(_poc_smoke_stdout "Reused prebuilt ano_crypto_poc_package_smoke artifact: ${_prepared_poc_smoke_dir}\n")
+        set(_poc_smoke_stderr "")
+    else()
+        if(NOT EXISTS "${ANO_CRYPTO_SOURCE_DIR}/tools/run_poc_package_smoke.cmake")
+            message(FATAL_ERROR "PoC package smoke script is missing: ${ANO_CRYPTO_SOURCE_DIR}/tools/run_poc_package_smoke.cmake")
+        endif()
+        execute_process(
+            COMMAND "${CMAKE_COMMAND}"
+                -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+                -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+                -DANO_CRYPTO_POC_SMOKE_DIR=${ANO_CRYPTO_POC_SMOKE_DIR}
+                -P "${ANO_CRYPTO_SOURCE_DIR}/tools/run_poc_package_smoke.cmake"
+            RESULT_VARIABLE _poc_smoke_result
+            OUTPUT_VARIABLE _poc_smoke_stdout
+            ERROR_VARIABLE _poc_smoke_stderr)
     endif()
-
-    execute_process(
-        COMMAND "${CMAKE_COMMAND}"
-            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
-            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
-            -DANO_CRYPTO_POC_SMOKE_DIR=${ANO_CRYPTO_POC_SMOKE_DIR}
-            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/run_poc_package_smoke.cmake"
-        RESULT_VARIABLE _poc_smoke_result
-        OUTPUT_VARIABLE _poc_smoke_stdout
-        ERROR_VARIABLE _poc_smoke_stderr)
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/POC_PACKAGE_SMOKE.log"
         "# Run customer PoC package smoke\n"
         "# Result: ${_poc_smoke_result}\n\n"
@@ -1032,16 +1067,18 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `AES_COMPILER_OUTPUT_REVIEW.txt`: compiler/target/library metadata and manual-review boundary.\n"
 "- `AES_COMPILER_OUTPUT_DISASSEMBLY.txt`: internal machine-code artifact for target-specific manual review.\n"
 "- `AES_CBC_REVIEW_NOTES.txt`: AES/CBC scope, context lifecycle, differential boundary, and remaining side-channel review notes.\n"
+"- `AES_CMAC_IMPLEMENTATION_CHECK.txt`: AES-CMAC API, CSP, KAT, differential, package, and 69-symbol policy check.\n"
+"- `AES_CMAC_REVIEW_NOTES.txt`: full-tag CMAC scope, dedicated key-purpose, differential boundary, and remaining review notes.\n"
 "- `SHA512_FAMILY_CHECK.txt`: SHA-384/SHA-512 family implementation, KAT, negative-test, and package wiring check.\n"
 "- `DIFFERENTIAL_PORTABILITY_CHECK.txt`: OpenSSL test-only provider, deterministic comparison, C99 representation, and portability policy check.\n"
-"- `DIFFERENTIAL_VALIDATION.log`: status-only OpenSSL 3.x SHA-2/HMAC and AES-CBC differential result.\n"
+"- `DIFFERENTIAL_VALIDATION.log`: status-only OpenSSL 3.x SHA-2/HMAC, AES-CBC, and AES-CMAC differential result.\n"
 "- `SHA512_PORTABILITY_REVIEW.log`: status-only representation, endian, and unaligned-input review.\n"
 "- `DIFFERENTIAL_PORTABILITY_REVIEW_NOTES.txt`: provider/product boundary and remaining hosted-artifact review notes.\n"
 "- `RANDOM_SERVICE_CHECK.txt`: public random-service implementation policy check.\n"
 "- `RANDOM_SERVICE_REVIEW_NOTES.txt`: random-service implementation review notes.\n"
 "- `RANDOM_LIFECYCLE_HARDENING_CHECK.txt`: P1-26 lifecycle, process-marker, VM policy, hook, and ABI-baseline policy check.\n"
 "- `RANDOM_LIFECYCLE_REVIEW_NOTES.txt`: status-only lifecycle and portability review notes.\n"
-"- `EXPORTED_SYMBOL_BASELINE_CHECK.txt`: clean Release comparison against the stored 61-symbol ABI-0 baseline.\n"
+"- `EXPORTED_SYMBOL_BASELINE_CHECK.txt`: clean Release comparison against the stored 69-symbol ABI-0 baseline.\n"
 "- `EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt`: exported-symbol guardrail scope and limitations.\n"
 "- `ENTROPY_HEALTH_CHECK.txt`: entropy failure-injection and health-test boundary policy check.\n"
 "- `ENTROPY_HEALTH_REVIEW_NOTES.txt`: health-test state-transition and logging review notes.\n"

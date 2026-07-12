@@ -213,6 +213,54 @@ int main(void)
     }
 
     {
+        static const uint8_t key[16] = {
+            0x2bu, 0x7eu, 0x15u, 0x16u, 0x28u, 0xaeu, 0xd2u, 0xa6u,
+            0xabu, 0xf7u, 0x15u, 0x88u, 0x09u, 0xcfu, 0x4fu, 0x3cu
+        };
+        static const uint8_t message[] = { 'c', 'm', 'a', 'c', '-', 's', 'm', 'o', 'k', 'e' };
+        ano_crypto_csp_handle_t handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+        uint8_t tag[ANO_CRYPTO_CMAC_TAG_SIZE];
+        size_t written = 0u;
+
+        st = ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_CMAC,
+                                          key, sizeof(key),
+                                          ANO_CRYPTO_KEY_FLAG_NONE,
+                                          &handle);
+        if (st != ANO_CRYPTO_OK || handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
+            fprintf(stderr, "CMAC key import smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+
+        st = ano_crypto_cmac_compute_with_key(handle,
+                                               message, sizeof(message),
+                                               tag, sizeof(tag),
+                                               &written,
+                                               ANO_CRYPTO_CMAC_FLAG_NONE);
+        if (st != ANO_CRYPTO_OK || written != ANO_CRYPTO_CMAC_TAG_SIZE) {
+            fprintf(stderr, "CMAC compute smoke failed: %s\n", ano_crypto_status_name(st));
+            (void)ano_crypto_key_destroy(handle);
+            return 1;
+        }
+
+        st = ano_crypto_cmac_verify_with_key(handle,
+                                              message, sizeof(message),
+                                              tag, sizeof(tag),
+                                              ANO_CRYPTO_CMAC_FLAG_NONE);
+        (void)ano_crypto_csp_zeroize(tag, sizeof(tag));
+        if (st != ANO_CRYPTO_OK) {
+            fprintf(stderr, "CMAC verify smoke failed: %s\n", ano_crypto_status_name(st));
+            (void)ano_crypto_key_destroy(handle);
+            return 1;
+        }
+
+        st = ano_crypto_key_destroy(handle);
+        if (st != ANO_CRYPTO_OK) {
+            fprintf(stderr, "CMAC key destroy smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+    }
+
+    {
         uint8_t ctx[256];
         uint8_t entropy[32];
         uint8_t nonce[16];

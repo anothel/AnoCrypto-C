@@ -14,6 +14,7 @@ static ano_crypto_status_t ano_crypto_key_validate_type(
     case ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER:
     case ANO_CRYPTO_KEY_TYPE_PUBLIC_KEY:
     case ANO_CRYPTO_KEY_TYPE_PRIVATE_KEY:
+    case ANO_CRYPTO_KEY_TYPE_CMAC:
         return ANO_CRYPTO_OK;
     default:
         return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
@@ -88,6 +89,8 @@ const char *ano_crypto_key_type_name(
         return "PUBLIC_KEY";
     case ANO_CRYPTO_KEY_TYPE_PRIVATE_KEY:
         return "PRIVATE_KEY";
+    case ANO_CRYPTO_KEY_TYPE_CMAC:
+        return "CMAC";
     default:
         return "UNKNOWN_KEY_TYPE";
     }

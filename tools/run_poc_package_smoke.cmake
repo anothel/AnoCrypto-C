@@ -68,7 +68,7 @@ set(_required_package_records
     "DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt"
     "AES_CBC_PACKAGE_NOTES.txt"
     "AES_HARDENING_PACKAGE_NOTES.txt"
-    "CMAC_ENTRY_GATE_PACKAGE_NOTES.txt"
+    "AES_CMAC_PACKAGE_NOTES.txt"
     "RANDOM_SERVICE_PACKAGE_NOTES.txt"
     "RANDOM_LIFECYCLE_PACKAGE_NOTES.txt"
     "ENTROPY_HEALTH_PACKAGE_NOTES.txt"
@@ -87,12 +87,11 @@ file(GLOB_RECURSE _poc_package_files LIST_DIRECTORIES false "${_package_dir}/*")
 foreach(_poc_file IN LISTS _poc_package_files)
     string(TOLOWER "${_poc_file}" _poc_file_lower)
     if(_poc_file_lower MATCHES "(^|[/\\])(libcrypto|libssl|openssl)([./\\]|$)" OR
-       _poc_file_lower MATCHES "(sha2_hmac|aes_cbc)_openssl_differential_tests\.c$" OR
+       _poc_file_lower MATCHES "(sha2_hmac|aes_cbc|aes_cmac)_openssl_differential_tests\.c$" OR
        _poc_file_lower MATCHES "sha512_portability_review\.c$" OR
        _poc_file_lower MATCHES "aes_cbc_(hardening_review|lifecycle_stress_tests)\.c$" OR
        _poc_file_lower MATCHES "aes_compiler_output_(review|disassembly)\.txt$" OR
        _poc_file_lower MATCHES "ac_(aes|cipher|cmac)_internal\.h$" OR
-       _poc_file_lower MATCHES "(^|[/\\])ac_cmac\.h$" OR
        _poc_file_lower MATCHES "cmac(_kat_tests|_api_negative_tests|_openssl_differential_tests)?\.c$")
         message(FATAL_ERROR "PoC package contains test-only differential/provider artifact: ${_poc_file}")
     endif()
@@ -102,8 +101,8 @@ if(NOT EXISTS "${_sdk_prefix}/include/anocrypto/ac_cipher.h")
     message(FATAL_ERROR "PoC SDK is missing public AES/CBC header: ${_sdk_prefix}/include/anocrypto/ac_cipher.h")
 endif()
 
-if(EXISTS "${_sdk_prefix}/include/anocrypto/ac_cmac.h")
-    message(FATAL_ERROR "P1-27 PoC SDK unexpectedly installs ac_cmac.h")
+if(NOT EXISTS "${_sdk_prefix}/include/anocrypto/ac_cmac.h")
+    message(FATAL_ERROR "PoC SDK is missing public AES-CMAC header: ${_sdk_prefix}/include/anocrypto/ac_cmac.h")
 endif()
 
 file(GLOB_RECURSE _poc_public_headers LIST_DIRECTORIES false "${_sdk_prefix}/include/*.h")
@@ -174,7 +173,7 @@ file(WRITE "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_PACKAGE_SMOKE_SUMMARY.txt"
     "Differential/portability notes: ${_package_dir}/DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt\n"
     "AES/CBC notes: ${_package_dir}/AES_CBC_PACKAGE_NOTES.txt\n"
     "AES/CBC hardening notes: ${_package_dir}/AES_HARDENING_PACKAGE_NOTES.txt\n"
-    "CMAC entry-gate notes: ${_package_dir}/CMAC_ENTRY_GATE_PACKAGE_NOTES.txt\n"
+    "AES-CMAC notes: ${_package_dir}/AES_CMAC_PACKAGE_NOTES.txt\n"
     "Random service notes: ${_package_dir}/RANDOM_SERVICE_PACKAGE_NOTES.txt\n"
     "Random lifecycle notes: ${_package_dir}/RANDOM_LIFECYCLE_PACKAGE_NOTES.txt\n"
     "Clean Release symbol baseline: ${_package_dir}/CLEAN_RELEASE_SYMBOL_BASELINE.log\n"

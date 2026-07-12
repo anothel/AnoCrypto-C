@@ -38,7 +38,7 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - AES/CBC implementation and hardening policy results
 - AES lifecycle/portability review log
 - AES compiler-output summary and disassembly for manual internal review
-- Clean Release 61-symbol baseline result
+- Clean Release 69-symbol baseline result
 
 ## P1 Evidence Notes
 
@@ -67,7 +67,7 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - `docs/ci/THREAD_SAFETY_CI_CHECKLIST.md` records the P1-14 thread-safety CI lanes and log-review rules.
 - `tools/check_thread_safety_policy.cmake` checks thread-safety policy/evidence wiring.
 - `tools/check_sha512_family_policy.cmake` checks SHA-384/SHA-512 implemented-scope wiring.
-- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, `THREAD_SAFETY_CHECK.txt`, `SHA512_FAMILY_CHECK.txt`, AES/CBC hardening/compiler-review records, and related review notes plus CMAC entry-gate records for P1-27 evidence drafts.
+- `tools/collect_release_evidence.cmake` writes `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, `THREAD_SAFETY_CHECK.txt`, `SHA512_FAMILY_CHECK.txt`, AES/CBC hardening/compiler-review records, and related review notes plus AES-CMAC implementation records for P1-28 evidence drafts.
 
 ## Commands
 
@@ -212,7 +212,7 @@ Confirm the cross-platform concurrency test uses native Win32 threads or pthread
 
 ## P1-22 SHA-512 Family Review
 
-Review `SHA512_FAMILY_CHECK.txt`, `SHA512_FAMILY_REVIEW_NOTES.txt`, startup/extended KAT results, negative tests, install/PoC smoke, and the clean 61-symbol export baseline. Evidence must not retain digest values, MAC values, HMAC keys, entropy, seed material, DRBG state, or generated random bytes. Review P1-23 differential and portability records separately from KAT provenance.
+Review `SHA512_FAMILY_CHECK.txt`, `SHA512_FAMILY_REVIEW_NOTES.txt`, startup/extended KAT results, negative tests, install/PoC smoke, and the clean 69-symbol export baseline. Evidence must not retain digest values, MAC values, HMAC keys, entropy, seed material, DRBG state, or generated random bytes. Review P1-23 differential and portability records separately from KAT provenance.
 
 
 ## P1-23 Differential and Portability Review
@@ -245,12 +245,15 @@ Confirm that:
 - no AES key, IV, plaintext, ciphertext, expanded schedule, intermediate state, entropy, seed, DRBG state, random output, private key, signing key, token, or customer data appears in logs or packages;
 - hosted workflow definitions are not marked reviewed until actual artifact hashes, toolchains, reviewers, dates, limitations, and dispositions are recorded.
 
-## P1-27 CMAC Entry Gate Review
+## P1-28 AES-CMAC Implementation Review
 
-- Review `CMAC_ENTRY_GATE_CHECK.txt` and `CMAC_ENTRY_GATE_REVIEW_NOTES.txt`.
-- Confirm no CMAC public header, enum value, function, implementation, KAT, or
-  exported symbol was added.
-- Confirm the current clean Release baseline remains 61 names.
-- Confirm the selected future scope requires a dedicated CMAC key purpose,
-  full 16-byte tags, public-source vectors, and value-free evidence logs.
-- Do not represent the gate as implementation or validation evidence.
+- Review `AES_CMAC_IMPLEMENTATION_CHECK.txt` and `AES_CMAC_REVIEW_NOTES.txt`.
+- Confirm public `ac_cmac.h`, the dedicated CMAC key purpose, startup/extended
+  KATs, negative tests, test-only differential result, install/PoC smoke, and
+  the 69-symbol clean Release baseline.
+- Confirm internal CMAC context/source/tests and OpenSSL provider artifacts are
+  absent from installed SDK and PoC packages.
+- Confirm logs contain no key, message, tag, subkey, intermediate, entropy,
+  seed, DRBG, random, private-key, token, or customer values.
+- Confirm tag truncation, CTR, GCM/GMAC, persistence, export, protocol formatting,
+  and target-specific side-channel conclusions remain deferred.

@@ -56,9 +56,9 @@ The PoC package manifest should include only package-relative files staged for t
 - Add exported-symbol baseline hash if a stable baseline file is introduced.
 - Add SBOM hash once a real SBOM generator is selected.
 
-## P1-27 CMAC gate records
+## P1-28 AES-CMAC records
 
-Include `CMAC_ENTRY_GATE_CHECK.txt` and `CMAC_ENTRY_GATE_REVIEW_NOTES.txt` in
-the generated manifest. The files may contain scope, status, symbol count, and
-review metadata only; they must not contain CMAC keys, messages, subkeys,
-intermediate state, or tags.
+Include `AES_CMAC_IMPLEMENTATION_CHECK.txt` and `AES_CMAC_REVIEW_NOTES.txt` in
+the generated manifest. The files may contain scope, status, symbol count,
+provider identity, comparison count, and review metadata only. CMAC keys,
+messages, subkeys, intermediate state, and tags are prohibited.
