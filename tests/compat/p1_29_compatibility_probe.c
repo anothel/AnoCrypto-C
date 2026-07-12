@@ -9,7 +9,7 @@
 #define ANO_CRYPTO_COMPAT_HEADER_MODE "unspecified"
 #endif
 #ifndef ANO_CRYPTO_EXPECT_RUNTIME_VERSION
-#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p1-30-release-compatibility"
+#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p1-31-release-provenance"
 #endif
 
 #define ANO_COMPAT_JOIN_INNER(a, b) a##b

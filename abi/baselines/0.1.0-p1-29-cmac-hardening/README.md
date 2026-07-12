@@ -1,7 +1,7 @@
 # P1-29 public compatibility baseline
 
 This directory preserves the project-owned public header and exported-symbol
-surface from `0.1.0-p1-29-cmac-hardening` for P1-30 compatibility checks.
+surface from `0.1.0-p1-29-cmac-hardening` for P1-30 and later compatibility checks.
 
 The snapshot is used only by tests and policy tooling. It is not installed as
 part of the SDK and is not copied into the customer PoC package.

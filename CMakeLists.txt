@@ -362,7 +362,17 @@ add_custom_target(ano_crypto_release_compatibility_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_compatibility.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Checking P1-30 release identity and P1-29 public source/ABI compatibility")
+    COMMENT "Checking P1-31 release identity and P1-29 public source/ABI compatibility")
+
+add_custom_target(ano_crypto_release_provenance_policy_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/RELEASE_PROVENANCE_POLICY_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_provenance_policy.cmake
+    USES_TERMINAL
+    VERBATIM
+    COMMENT "Checking P1-31 unsigned release provenance, source SBOM, and signing boundary")
 
 add_custom_target(ano_crypto_tagged_release_compatibility_smoke
     COMMAND ${CMAKE_COMMAND} -E env
@@ -379,7 +389,7 @@ add_custom_target(ano_crypto_tagged_release_compatibility_smoke
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_tagged_release_compatibility_smoke.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Building installed P1-30 package and running current/P1-29 header compatibility consumers")
+    COMMENT "Building installed P1-31 package and running current/P1-29 header compatibility consumers")
 
 add_custom_target(ano_crypto_public_surface_check
     COMMAND ${CMAKE_COMMAND}
@@ -443,7 +453,7 @@ add_custom_target(ano_crypto_cmac_policy_check
         -DANO_CRYPTO_CMAC_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/AES_CMAC_IMPLEMENTATION_CHECK.txt
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_cmac_policy.cmake
     USES_TERMINAL
-    COMMENT "Checking P1-30 retained AES-CMAC implementation, API, KAT, CSP, differential, and package policy")
+    COMMENT "Checking P1-31 retained AES-CMAC implementation, API, KAT, CSP, differential, and package policy")
 
 add_custom_target(ano_crypto_cmac_hardening_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -452,7 +462,7 @@ add_custom_target(ano_crypto_cmac_hardening_policy_check
         -DANO_CRYPTO_CMAC_HARDENING_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/AES_CMAC_HARDENING_CHECK.txt
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_cmac_hardening_policy.cmake
     USES_TERMINAL
-    COMMENT "Checking P1-30 retained CMAC cleanup, lifecycle, concurrency, differential, compiler-review, and ABI policy")
+    COMMENT "Checking P1-31 retained CMAC cleanup, lifecycle, concurrency, differential, compiler-review, and ABI policy")
 
 add_custom_target(ano_crypto_differential_portability_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -897,7 +907,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
     add_executable(ano_crypto_current_header_compatibility_tests
         tests/compat/p1_29_compatibility_probe.c)
     target_compile_definitions(ano_crypto_current_header_compatibility_tests PRIVATE
-        ANO_CRYPTO_COMPAT_HEADER_MODE="current-p1-30"
+        ANO_CRYPTO_COMPAT_HEADER_MODE="current-p1-31"
         ANO_CRYPTO_EXPECT_CURRENT_HEADER=1
         ANO_CRYPTO_EXPECT_RUNTIME_VERSION="${ANO_CRYPTO_RELEASE_VERSION}")
     target_link_libraries(ano_crypto_current_header_compatibility_tests PRIVATE anocrypto_c)
@@ -927,6 +937,14 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/hosted_artifact_manifest_tests.cmake)
     set_tests_properties(ano_crypto_hosted_artifact_manifest_tests PROPERTIES
         LABELS "ci-artifact;release-compatibility")
+
+    add_test(NAME ano_crypto_release_provenance_tests
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DANO_CRYPTO_TEST_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-provenance-test
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/release_provenance_tests.cmake)
+    set_tests_properties(ano_crypto_release_provenance_tests PROPERTIES
+        LABELS "ci-artifact;release-provenance;sbom;signing-boundary")
 
     add_executable(ano_crypto_build_identity_abi_tests
         tests/unit/build_identity_abi_tests.c)
@@ -1013,7 +1031,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_CTEST_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/ctest-evidence
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_ctest_evidence.cmake
         USES_TERMINAL
-        COMMENT "Capturing AnoCrypto-C P1-30 CTest evidence")
+        COMMENT "Capturing AnoCrypto-C P1-31 CTest evidence")
     add_dependencies(ano_crypto_ctest_evidence ${_ano_crypto_evidence_test_targets})
 
     # Package and tagged-release smoke targets create independent nested build
@@ -1041,7 +1059,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-30
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-31
             -DANO_CRYPTO_RUN_CTEST=OFF
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
@@ -1059,12 +1077,13 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_RANDOM_LIFECYCLE_CHECK=ON
             -DANO_CRYPTO_RUN_EXPORTED_SYMBOL_CHECK=ON
             -DANO_CRYPTO_RUN_RELEASE_COMPATIBILITY_CHECK=ON
+            -DANO_CRYPTO_RUN_RELEASE_PROVENANCE_CHECK=ON
             -DANO_CRYPTO_RUN_TAGGED_COMPATIBILITY_CHECK=ON
             -DANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK=ON
             -DANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK=ON
             -DANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
-        COMMENT "Collecting AnoCrypto-C P1-30 release evidence draft")
+        COMMENT "Collecting AnoCrypto-C P1-31 release evidence draft")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_ctest_evidence)
 endif()

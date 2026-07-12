@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-30 engineering draft.
+Status: P1-31 engineering draft.
 
 ## Purpose
 
@@ -15,7 +15,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-30/
+build/evidence/p1-31/
 ```
 
 The build target first completes installed-package, customer PoC, tagged-release
@@ -50,6 +50,9 @@ ENTROPY_HEALTH_CHECK.txt
 ENTROPY_HEALTH_REVIEW_NOTES.txt
 REPRODUCIBLE_BUILD_NOTES.txt
 SCOPE_REVIEW_NOTES.txt
+RELEASE_PROVENANCE_CHECK.txt
+RELEASE_PROVENANCE_POLICY_CHECK.txt
+release-provenance/
 SBOM_STATUS.txt
 SIGNING_STATUS.txt
 EVIDENCE_MANIFEST_README.txt
@@ -76,7 +79,7 @@ README.md
 - Confirm platform provider logs include provider name/status only.
 - Confirm PoC package manifests and logs do not disclose local customer/internal details before sharing.
 - Confirm P1-12 scope-review notes still match the intended customer and validation-target candidate boundary.
-- Confirm P1-13 SBOM/signing placeholder status and evidence manifest are accurate.
+- Confirm the historical P1-13 placeholder transition is superseded by the P1-31 source inventory and explicit unsigned/signing-TODO records.
 - Confirm P1-14 thread-safety support matrix and CI checklist match the current build configuration.
 - Confirm the P1-15 historical reservation and P1-22 SHA-512-family implementation/KAT records are both accurate.
 - Confirm the P1-16 reserved-boundary history and P1-19 implemented random-service records are both accurate.
@@ -112,8 +115,8 @@ README.md
 
 ## Known gaps
 
-- No complete SBOM generation yet; P1-13 records placeholder status only.
-- No release signing evidence yet; P1-13 records placeholder status only.
+- P1-31 generates a source-archive inventory only; dependency/component discovery, vulnerability analysis, and license conclusions remain TODO.
+- No release signature or cryptographic verification evidence exists; P1-31 records `UNSIGNED` and external authorization `NO`.
 - CI workflow has not yet been reviewed against all customer toolchains.
 - Actual hosted Windows/macOS concurrency results remain to be reviewed.
 - Clang sanitizer runtime and ThreadSanitizer remain TODO.
@@ -122,8 +125,8 @@ README.md
 - Binary reproducibility across hosts/toolchains is still TODO.
 - No official validation evidence.
 - Public random-service implementation and local lifecycle hardening are present. Actual hosted-run result review, platform-specific suspend/resume integration, and final validation-boundary mapping remain TODO.
-- No selected block cipher/mode implementation scope yet.
-- No independent SHA-512-family differential-reference tool/source has been selected yet.
+- AES-CBC and AES-CMAC are implemented within the documented scope; CTR, AEAD, padding, GMAC, and further algorithms remain separate decisions.
+- OpenSSL 3.x is the test-only differential provider for SHA-2/HMAC/AES-CBC/AES-CMAC and remains outside the product/package runtime.
 
 
 ## P1-14 additions
@@ -254,7 +257,7 @@ OpenSSL remains test-only, PoC/install packages exclude private hardening and
 compiler artifacts, and all logs remain status-only.
 
 
-## P1-30 additions
+## P1-30 compatibility additions
 
 - Central release identity: `release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake`.
 - Retained P1-29 public-header/hash/symbol baseline under `abi/baselines/0.1.0-p1-29-cmac-hardening/`.
@@ -266,3 +269,12 @@ compiler artifacts, and all logs remain status-only.
 - Expected tag/commit/`HEAD` identity check for an actual tagged Git checkout.
 
 Local evidence records expected tag metadata but does not claim that a tag exists or is authorized. Hosted-platform review and release-signature policy remain TODO.
+
+## P1-31 release provenance additions
+
+- Evidence assembly creates `release-provenance/` with the source archive, exact source-file SHA-256 manifest, SPDX 2.3 JSON source inventory, current public-header manifest, ABI-0 symbol list, hosted disposition, signing request placeholder, authorization TODO record, and complete `RELEASE_ARTIFACTS.sha256` coverage.
+- `RELEASE_PROVENANCE_CHECK.txt` verifies identity, paths, hashes, source-tree contents, source-SBOM paths/checksums, package verification code, public counts, hosted disposition, and the explicit unsigned/external-release-NO boundary.
+- `RELEASE_PROVENANCE_POLICY_CHECK.txt` verifies repository, CI, evidence, and PoC integration and rejects signature/key/token-like source files.
+- The hosted artifact index requires a `release-provenance|Linux` status bundle, but actual hosted reviewer/date disposition remains TODO.
+- The customer PoC excludes the source archive, source SBOM, provenance record, signing request, authorization record, compatibility baseline, and internal release tooling.
+- No public API, public header, cryptographic service, or ABI-0 symbol is added.

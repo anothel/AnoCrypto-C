@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-30 engineering draft.
+Status: P1-31 engineering draft.
 
 ## Identity
 
@@ -76,14 +76,14 @@ remain separate review items.
 - Installed headers continue to expose no CMAC context layout or internal state marker.
 
 
-## P1-30 release compatibility review
+## P1-31 release provenance and compatibility review
 
 - No public header, function, enum value, macro contract, or exported symbol is added or removed.
 - The public header count remains 14 and the clean Release ABI-0 export count remains 69.
 - Exact P1-29 public headers and symbol names are retained under `abi/baselines/0.1.0-p1-29-cmac-hardening/` as test/evidence input.
-- `release/PUBLIC_HEADERS.sha256` records the current P1-30 public-header files.
+- `release/PUBLIC_HEADERS.sha256` records the current P1-31 public-header files.
 - Normalized function declarations, public types, and non-version constants are compared against P1-29. Version string/prerelease macros are intentionally excluded from that equality comparison.
-- A C99 consumer built with retained P1-29 headers binds all 69 functions and runs against the P1-30 installed library.
+- A C99 consumer built with retained P1-29 headers binds all 69 functions and runs against the P1-31 installed library.
 - `AnoCryptoCConfigVersion.cmake` uses package version `0.1.0` with `SameMinorVersion`; an exact 0.1.0 request is accepted and a 0.2.0 request is rejected.
 - The retained baseline tree, compatibility source, hosted manifests, and release-internal metadata are not installed and are excluded from the customer PoC package.
 

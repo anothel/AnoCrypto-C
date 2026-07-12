@@ -1,8 +1,8 @@
 # C99 Priority TODO
 
-Status: P1-29 AES-CMAC hardening completed as an engineering slice.
+Status: P1-31 unsigned release provenance and source-SBOM gate completed as an engineering slice.
 
-## Completed foundation through P1-29
+## Completed foundation through P1-31
 
 - C99 repository, clean-room records, stable-status API style, module lifecycle,
   self-test/error-state, build identity, and install/export package structure.
@@ -19,6 +19,8 @@ Status: P1-29 AES-CMAC hardening completed as an engineering slice.
   bounded cleanup and alias rules, 128-iteration lifecycle stress, expanded
   1,728-comparison differential coverage, shared-handle concurrency regression,
   and target-specific compiler-output capture.
+- P1-30 central release identity, retained P1-29 public-header/symbol baseline, old/current-header consumers, strict tag/commit/HEAD fixture checks, and hashed hosted-artifact manifests.
+- P1-31 exact-source archive/file hash binding, SPDX 2.3 JSON source inventory, unsigned signing boundary, authorization TODO record, provenance regression tests, hosted provenance lane, and PoC exclusion checks.
 
 ## Immediate P1 candidates
 
@@ -26,12 +28,13 @@ Status: P1-29 AES-CMAC hardening completed as an engineering slice.
    artifacts instead of treating workflow presence as execution evidence.
 2. Perform target-specific human review of captured AES and CMAC compiler output
    and record the remaining timing/cache/fault backlog without overclaiming.
-3. Strengthen automated ABI/source compatibility comparison across tagged
-   releases, including public type size/alignment and semantic compatibility.
-4. Decide whether the next algorithm step is a no-implementation gate for a
+3. Select and approve an actual detached-signature/verification mechanism, signer identity, key custody, timestamping, and release authorization process without storing credentials in the repository.
+4. Expand source inventory into a reviewed dependency/component, license, and vulnerability scope only after tool, privacy, and legal requirements are selected.
+5. Strengthen automated ABI/source compatibility comparison across tagged releases, including public type size/alignment and semantic compatibility.
+6. Decide whether the next algorithm step is a no-implementation gate for a
    narrowly scoped KDF, AES-CTR, or a pause for packaging/legal/evidence
    maturity. CTR must not proceed without a counter-ownership policy.
-5. Finalize direct-noise-source health-test ownership only after a concrete
+7. Finalize direct-noise-source health-test ownership only after a concrete
    source and operating environment are selected.
 
 ## Deferred
@@ -39,7 +42,7 @@ Status: P1-29 AES-CMAC hardening completed as an engineering slice.
 - tag truncation, AES-CTR, GCM, GMAC, padding helpers, hardware dispatch;
 - key export, persistence, wrapping, multi-process CSP, platform keystore;
 - public-key algorithms and AnoPKI integration;
-- complete SBOM/signing and customer evaluation/legal notices;
+- dependency/component SBOM scope, vulnerability/license review, actual signing/verification, signer authorization, timestamping, and customer evaluation/legal notices;
 - any official-validation or completed-review claim.
 
 
@@ -61,5 +64,28 @@ Remaining TODO:
 - review actual Linux/macOS/Windows hosted compatibility artifacts;
 - review actual Linux 32-bit and s390x big-endian artifacts;
 - verify the expected tag and commit in a tagged Git workflow;
-- select signing/provenance policy before external release use;
-- decide P1-31 scope after hosted artifact disposition, without implying completed validation.
+- retain actual hosted artifact reviewer/date disposition;
+- approve an actual signing/verifier and external-release authorization procedure before distribution.
+
+## P1-31 Release Provenance and Source SBOM Gate
+
+Completed engineering scope:
+
+- deterministic SPDX 2.3 JSON source inventory for the exact source-archive file list;
+- SHA-256 binding of the source archive, source files, public-header manifest, ABI-0 symbol list, source SBOM, and hosted disposition;
+- exact bundle-manifest coverage, path-safety, source-tree, file-count, and package-verification-code checks;
+- explicit `UNSIGNED`, authorization `TODO`, and `External release authorized: NO` records;
+- negative regression for tampering, unlisted artifacts, unsafe paths, false signed/approved claims, wrong tag metadata, and incomplete hosted disposition;
+- hosted `release-provenance|Linux` bundle/index wiring;
+- customer PoC exclusion of the internal source archive, source SBOM, signing request, authorization record, and release tooling;
+- unchanged 14-header, 69-symbol `ANOCRYPTO_C_0` public surface.
+
+Remaining TODO:
+
+- review real hosted Windows/macOS/Linux 32-bit/s390x/differential/compiler/compatibility artifacts and record reviewer/date disposition;
+- verify the real expected tag, commit, and checkout in the release workflow;
+- validate SPDX syntax with the selected downstream consumer where required;
+- select dependency, license, and vulnerability inventory scope;
+- approve detached-signature format/tool, signer identity, key custody, timestamping, revocation, and verification retention;
+- record legal/product external-release authorization;
+- decide P1-32 only after the above gaps are ranked; no new public algorithm is implied.

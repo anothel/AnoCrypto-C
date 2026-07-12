@@ -246,7 +246,9 @@ P1-23 deliverables:
 | P1-27 | AES-CMAC implementation entry gate | Completed as a no-code scope/API/KAT/CSP/evidence gate. |
 | P1-28 | AES-CMAC implementation | Completed with AES-128/192/256, full tags, dedicated CMAC-purpose handles, KAT/negative/differential/package evidence, and an intentional 69-symbol baseline. |
 | P1-29 | AES-CMAC hardening | Completed with private-state/failure/cleanup/alias hardening, lifecycle/concurrency regression, 1,728 differential paths, and compiler-output capture. |
-| P1-30 | Release compatibility baseline and hosted artifact manifests | Freeze the P1-29 public contract, test old/current headers against the P1-30 package, and require manifest-backed hosted review without adding public services. |
+| P1-30 | Release compatibility baseline and hosted artifact manifests | Completed by freezing the P1-29 public contract, testing old/current headers against the P1-30 package, and requiring manifest-backed hosted review without adding public services. |
+| P1-31 | Unsigned release provenance and source SBOM gate | Completed with exact-source SPDX 2.3 JSON inventory, hash-bound unsigned provenance, signing/authorization TODO records, hosted provenance lane, negative regressions, and no public API growth. |
+| P1-32 candidate | Hosted disposition and signing-tool decision | Review real hosted artifacts and choose the detached-signature/verifier, signer, custody, timestamping, and external-authorization policy before any public algorithm expansion. |
 
 ## Stop conditions
 
@@ -274,4 +276,18 @@ P1-29 deliverables:
 - CMAC compiler-output capture and human-review plan;
 - policy, evidence, PoC, CI, roadmap, and clean-room alignment.
 
-| P1-31 candidate | Hosted artifact disposition and release provenance | Review actual cross-platform artifacts, tag/commit identity, and signing/SBOM provenance policy before another public algorithm or API expansion. |
+## P1-31 placement
+
+P1-31 is the unsigned release-provenance and source-inventory step after the P1-30 compatibility baseline. It adds no cryptographic algorithm, public function, header, or symbol.
+
+P1-31 deliverables:
+
+- exact source-archive file list and SHA-256 source manifest;
+- deterministic SPDX 2.3 JSON source inventory with explicit scope limitations;
+- self-contained unsigned provenance bundle and complete hash manifest;
+- false-signing, false-authorization, tamper, path, tag, and hosted-disposition regression;
+- hosted provenance bundle/index wiring and review template;
+- explicit PoC exclusion of internal source/SBOM/signing artifacts;
+- unchanged P1-29 public contract and 69-symbol ABI-0 line.
+
+P1-32 remains a decision step for actual hosted artifact disposition and signing/verification policy. It must not infer that a tag string, checksum, source SBOM, or uploaded artifact is authenticated or externally approved.

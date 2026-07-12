@@ -62,6 +62,7 @@ set(_required_package_records
     "PACKAGE_REVIEW_MANIFEST.md"
     "SBOM_STATUS.txt"
     "SIGNING_STATUS.txt"
+    "RELEASE_PROVENANCE_PACKAGE_NOTES.txt"
     "THREAD_SAFETY_PACKAGE_NOTES.txt"
     "CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt"
     "SHA512_FAMILY_PACKAGE_NOTES.txt"
@@ -78,6 +79,7 @@ set(_required_package_records
     "CLEAN_RELEASE_SYMBOL_BASELINE.log"
     "RELEASE_COMPATIBILITY_CHECK.log"
     "RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt"
+    "RELEASE_PROVENANCE_POLICY_CHECK.log"
     "INSTALL_PACKAGE.log")
 foreach(_record IN LISTS _required_package_records)
     if(NOT EXISTS "${_package_dir}/${_record}")
@@ -98,6 +100,7 @@ foreach(_poc_file IN LISTS _poc_package_files)
        _poc_file_lower MATCHES "cmac(_kat_tests|_api_negative_tests|_openssl_differential_tests)?\.c$" OR
        _poc_file_lower MATCHES "p1_29_compatibility_probe\.c$" OR
        _poc_file_lower MATCHES "hosted_artifact_manifest" OR
+       _poc_file_lower MATCHES "(^|[/\\])(source_sbom\.spdx\.json|source_files\.sha256|release_provenance\.txt|release_artifacts\.sha256|signing_request\.txt|release_authorization\.md|anocrypto-c-source\.tar\.gz)$" OR
        _poc_file_lower MATCHES "(^|[/\\])abi[/\\]baselines([/\\]|$)")
         message(FATAL_ERROR "PoC package contains test-only differential/provider artifact: ${_poc_file}")
     endif()
@@ -173,6 +176,7 @@ file(WRITE "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_PACKAGE_SMOKE_SUMMARY.txt"
     "Package review manifest: ${_package_dir}/PACKAGE_REVIEW_MANIFEST.md\n"
     "SBOM status: ${_package_dir}/SBOM_STATUS.txt\n"
     "Signing status: ${_package_dir}/SIGNING_STATUS.txt\n"
+    "Release provenance boundary: ${_package_dir}/RELEASE_PROVENANCE_PACKAGE_NOTES.txt\n"
     "Thread-safety notes: ${_package_dir}/THREAD_SAFETY_PACKAGE_NOTES.txt\n"
     "Concurrency/sanitizer notes: ${_package_dir}/CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt\n"
     "SHA-512-family notes: ${_package_dir}/SHA512_FAMILY_PACKAGE_NOTES.txt\n"
@@ -185,6 +189,7 @@ file(WRITE "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_PACKAGE_SMOKE_SUMMARY.txt"
     "Clean Release symbol baseline: ${_package_dir}/CLEAN_RELEASE_SYMBOL_BASELINE.log\n"
     "Release compatibility check: ${_package_dir}/RELEASE_COMPATIBILITY_CHECK.log\n"
     "Release compatibility notes: ${_package_dir}/RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt\n"
+    "Release provenance policy check: ${_package_dir}/RELEASE_PROVENANCE_POLICY_CHECK.log\n"
     "Entropy health boundary notes: ${_package_dir}/ENTROPY_HEALTH_PACKAGE_NOTES.txt\n"
     "Entropy operational policy notes: ${_package_dir}/ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt\n"
     "PoC package smoke result: ${_run_result}\n")

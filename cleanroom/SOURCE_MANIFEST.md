@@ -563,3 +563,22 @@ No public KAT vector files have been imported yet. `src/selftest/kat_manifest.c`
 | Git tag and commit metadata supplied by CI | Build metadata | Optional tagged-release identity check | Metadata is status-only; tag authorization/signature review remains TODO. |
 
 P1-30 hosted artifacts retain only status, counts, versions, target/compiler metadata, file sizes, and hashes. Cryptographic values and customer/internal deployment data remain excluded.
+
+## P1-31 Release Provenance and Source SBOM Inputs
+
+| ID | Input | Classification | Use | Boundary |
+|---|---|---|---|---|
+| SRC-3901 | SPDX Specification 2.3 public document and JSON field model | Public standard | Select the source-inventory format, package/file checksums, package verification code, and `NOASSERTION` boundaries | No SPDX implementation source, third-party generator code, or private SBOM data copied. |
+| SRC-3902 | Public SLSA/in-toto provenance concepts and GitHub artifact-attestation documentation | Public documentation | Distinguish a hash/provenance record from an authenticated attestation and keep hosted attestation as a later policy decision | P1-31 does not claim a SLSA level and does not enable hosted attestation or signing. |
+| DER-3901 | Fresh CMake source-SBOM generator and unsigned provenance bundle create/verify tools | User-owned project tooling | Bind the source archive, source-file hashes, public-header manifest, ABI symbol list, hosted disposition, and authorization state | No key, token, credential, signature, or external implementation is included. |
+| DER-3902 | Fresh tamper, unlisted-file, unsafe-path, false-signing, false-authorization, tag, and hosted-disposition regression fixtures | User-owned CMake tests | Enforce fail-closed release metadata handling | Fixtures use public repository files and status strings only. |
+| DER-3903 | Fresh P1-31 release, CI, evidence, PoC, roadmap, and clean-room documentation | User-owned project material | Keep source inventory, unsigned signing state, and review TODO boundaries explicit | No completed hosted review, signing, validation, or external-release claim is recorded. |
+
+## P1-31 Clean-room Notes
+
+- The SPDX JSON writer was created fresh from public field requirements and existing project-owned CMake conventions.
+- No third-party SBOM generator implementation, SLSA generator, signing implementation, workflow fragment, private key, token, signature, or proprietary release process was copied.
+- The source SBOM contains repository-relative paths and hashes only; it does not retain source contents, cryptographic values, customer data, or internal deployment information.
+- Public documentation is used to distinguish unsigned hash metadata from authenticated provenance; P1-31 does not claim an attestation level.
+- The rooted `.gitignore` is fresh project-owned build hygiene: it excludes generated build/hosted-review directories only, keeps ordinary untracked source visible, and avoids treating CI build output as a source change.
+- Actual hosted artifact review, signer authorization, cryptographic verification, timestamping, and external-release approval remain TODO.

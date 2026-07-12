@@ -15,6 +15,8 @@ AnoCrypto-C-PoC-v0/
   PACKAGE_REVIEW_MANIFEST.md
   SBOM_STATUS.txt
   SIGNING_STATUS.txt
+  RELEASE_PROVENANCE_PACKAGE_NOTES.txt
+  RELEASE_PROVENANCE_POLICY_CHECK.log
   THREAD_SAFETY_PACKAGE_NOTES.txt
   CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt
   SHA512_FAMILY_PACKAGE_NOTES.txt
@@ -122,6 +124,8 @@ Before sharing a package externally, review:
 - `PACKAGE_REVIEW_MANIFEST.md`
 - `SBOM_STATUS.txt`
 - `SIGNING_STATUS.txt`
+- `RELEASE_PROVENANCE_PACKAGE_NOTES.txt`
+- `RELEASE_PROVENANCE_POLICY_CHECK.log`
 - `THREAD_SAFETY_PACKAGE_NOTES.txt`
 - `CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt`
 - `SHA512_FAMILY_PACKAGE_NOTES.txt`
@@ -145,7 +149,7 @@ Do not add or retain secrets, entropy captures, generated secret bytes, private 
 
 - Decide binary SDK versus source-available evaluation terms.
 - Add license/evaluation notice text after legal review.
-- Replace SBOM/signing placeholders with reviewed generated outputs after tool and key-management policies are selected.
+- Generate a package-specific SBOM only after dependency/license/vulnerability scope is reviewed; keep the package unsigned until signer/key-custody/timestamp/verification and external-release authorization policies are approved.
 - Customer questionnaire for OS, CPU, compiler, linker, deployment model, and required algorithm scope is available as `CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md`.
 - Add a support boundary document for error reports and evidence requests.
 
@@ -219,3 +223,7 @@ fail-closed reinitialization, alias rejection, bounded cleanup, lifecycle and
 concurrency regression, test-only differential coverage, and the internal-only
 compiler-review artifact boundary. No internal test hook or private context
 layout is exposed.
+
+## P1-31 release provenance package boundary
+
+The customer PoC includes only package-local hash/status notes. It does not include the internal source archive, source SBOM, source-file manifest, `RELEASE_PROVENANCE.txt`, `RELEASE_ARTIFACTS.sha256`, signing request, authorization record, compatibility baseline, or hosted review tooling. `PACKAGE_MANIFEST.md` is not a signature or attestation. External release remains unauthorized until a separate reviewed process records tag/commit identity, hosted disposition, signing verification, and legal/product approval.

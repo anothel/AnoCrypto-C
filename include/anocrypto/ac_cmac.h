@@ -11,7 +11,7 @@ extern "C" {
 #endif
 
 /*
- * P1-30 public slice retaining the P1-29 AES-CMAC hardening boundary.
+ * P1-31 public slice retaining the P1-29 AES-CMAC hardening boundary.
  *
  * Implemented scope:
  * - AES-128, AES-192, and AES-256 through a dedicated CMAC-purpose CSP key.

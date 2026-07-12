@@ -1,10 +1,10 @@
 # Hosted Platform Artifact Review
 
-Status: P1-30 template. Actual hosted Windows, macOS, Linux 32-bit, Linux s390x big-endian, tagged-compatibility, differential, and compiler-output review results are not recorded in this source archive.
+Status: P1-31 template. Actual hosted Windows, macOS, Linux 32-bit, Linux s390x big-endian, tagged-compatibility, differential, and compiler-output review results are not recorded in this source archive.
 
 Use this table only after the corresponding workflow run has completed, its `HOSTED_ARTIFACT_MANIFEST.txt` has been verified after download, and the final hosted artifact index has been generated. Workflow YAML or artifact presence alone is not a completed review.
 
-| Platform | Workflow run/commit | Bundle manifest | Thread/CSP | SHA-512/AES/CMAC | Random/process marker | P1-29 header/P1-30 library | Reviewer/date | Limitations |
+| Platform | Workflow run/commit | Bundle manifest | Thread/CSP | SHA-512/AES/CMAC | Random/process marker | P1-29 header/P1-31 library | Reviewer/date | Limitations |
 |---|---|---|---|---|---|---|---|---|
 | Linux 64-bit | TODO | TODO | TODO | TODO | TODO | TODO | TODO | TODO |
 | Linux 32-bit | TODO | TODO | TODO | TODO | provider disabled in portability lane | TODO | TODO | TODO |

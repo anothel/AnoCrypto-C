@@ -104,7 +104,8 @@ set(_required_keys
     "linux-s390x-big-endian|Linux"
     "aes-cmac-compiler-output-gcc|Linux"
     "aes-cmac-compiler-output-clang|Linux"
-    "openssl-differential|Linux")
+    "openssl-differential|Linux"
+    "release-provenance|Linux")
 set(_missing_keys "")
 foreach(_required_key IN LISTS _required_keys)
     if(NOT _required_key IN_LIST _bundle_keys)
@@ -155,7 +156,7 @@ list(LENGTH _artifact_files _artifact_file_count)
 set(_index_file
     "${ANO_CRYPTO_HOSTED_ARTIFACT_OUTPUT_DIR}/HOSTED_ARTIFACT_INDEX.txt")
 file(WRITE "${_index_file}"
-    "AnoCrypto-C P1-30 hosted artifact index\n"
+    "AnoCrypto-C P1-31 hosted artifact index\n"
     "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Expected tag metadata: ${ANO_CRYPTO_RELEASE_TAG}\n"
     "Workflow run id: ${_run_id}\n"
@@ -205,8 +206,9 @@ file(WRITE
     "| Windows | TODO | TODO | TODO |\n"
     "| GCC/Clang compiler output | TODO | TODO | No automated timing/cache conclusion |\n"
     "| Differential validation | TODO | TODO | Test-only provider |\n"
-    "| P1-29 headers/P1-30 library | TODO | TODO | Toolchain-specific |\n"
-    "| Tag/commit/release provenance | TODO | TODO | Expected metadata is not a signature |\n\n"
+    "| P1-29 headers/P1-31 library | TODO | TODO | Toolchain-specific |\n"
+    "| Release provenance/SBOM bundle | TODO | TODO | Unsigned; external authorization remains TODO |\n"
+    "| Tag/commit/release compatibility | TODO | TODO | Expected metadata is not a signature |\n\n"
     "Do not attach keys, entropy, seed material, DRBG state, generated random bytes, AES values, CMAC tags, private keys, signing credentials, tokens, customer data, or internal deployment details.\n")
 
 message(STATUS

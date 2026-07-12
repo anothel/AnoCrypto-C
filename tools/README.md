@@ -18,7 +18,7 @@ Or run the script directly:
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-30 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-31 \
   -DANO_CRYPTO_RUN_CTEST=ON \
   -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
   -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -27,7 +27,7 @@ cmake \
   -P tools/collect_release_evidence.cmake
 ```
 
-P1-30 output includes source-file hashes, a source archive SHA-256, binary hashes, CTest output, public-surface check output, thread-safety policy check output, reproducible-build notes, scope-review notes, SBOM/signing placeholder status, an evidence manifest, install-prefix smoke logs, and optional customer PoC package smoke logs, random-service implementation checks, entropy/health policy checks, and entropy/health review notes, entropy operational policy checks, and entropy operational review notes.
+P1-31 output retains the prior build/test/package records and adds `release-provenance/`: a bound source archive, source-file SHA-256 manifest, SPDX 2.3 JSON source inventory, public-header and ABI symbol inputs, unsigned signing/TODO authorization records, and `RELEASE_ARTIFACTS.sha256`. The source inventory does not perform dependency discovery, vulnerability analysis, or license conclusions, and no signature or external-release authorization is implied.
 
 ## `check_public_surface.cmake`
 
@@ -53,7 +53,7 @@ Stages a customer PoC package v0 from a configured build tree.
 cmake --build build --target ano_crypto_create_poc_package
 ```
 
-The generated package contains a separately rebuilt clean SDK prefix, the public `examples/core_poc` integration example, selected docs, package manifest/review records, SBOM/signing placeholder status files, thread-safety/SHA-512-family/random-service notes, entropy/health boundary notes, and entropy operational policy notes.
+The generated package contains a separately rebuilt clean SDK prefix, the public `examples/core_poc` integration example, selected docs, package manifest/review records, package-specific SBOM-not-generated and unsigned signing status files, thread-safety/SHA-512-family/random-service notes, entropy/health boundary notes, and entropy operational policy notes.
 
 ## `run_poc_package_smoke.cmake`
 
@@ -167,3 +167,18 @@ cmake --build build --target ano_crypto_tagged_release_compatibility_smoke
 ```
 
 Expected tag metadata is not release provenance until a Git-backed check proves that the tag, supplied commit, and checked-out `HEAD` identify one commit.
+
+## P1-31 release provenance and source-SBOM tools
+
+- `create_source_sbom_spdx.cmake` writes a deterministic SPDX 2.3 JSON source inventory for the exact source-archive file list.
+- `create_release_provenance_bundle.cmake` binds the source archive, source hashes, source SBOM, public-header manifest, ABI-0 symbol list, hosted disposition, unsigned signing status, and authorization TODO record.
+- `check_release_provenance_bundle.cmake` verifies exact hash coverage, safe paths, release identity, source-tree hashes, source-SBOM bindings, public counts, hosted disposition, and the explicit unsigned/external-release-NO boundary.
+- `check_release_provenance_policy.cmake` checks repository/CI/evidence/PoC integration and rejects signature/key/token-like files.
+- `release_provenance_tests.cmake` covers tampering, unlisted files, false signed/approved claims, unsafe paths, wrong tag metadata, and hosted-disposition completeness.
+
+```sh
+cmake --build build --target ano_crypto_release_provenance_policy_check
+ctest --test-dir build -R ano_crypto_release_provenance_tests --output-on-failure
+```
+
+P1-31 does not select a signing tool or store a credential. Actual hosted review, signature generation/verification, signer approval, timestamping, legal/product authorization, and external distribution remain TODO.

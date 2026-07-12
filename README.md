@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: `0.1.0-p1-30-release-compatibility`, an engineering slice that retains the P1-29 cryptographic processing scope and the reviewed 69-symbol ABI-0 surface. P1-30 adds a central release-identity record, a preserved P1-29 public-header and symbol baseline, normalized declaration/type/constant comparison, a P1-29-header/P1-30-library runtime consumer, installed-package compatibility smoke, and hashed status-only hosted-artifact manifests. Expected Git tag metadata is recorded but tag existence and commit identity still require an explicit release review. Actual hosted Linux 32-bit, Windows, macOS, big-endian, and target-specific compiler/side-channel artifacts also remain review items; evidence, install, and PoC outputs remain engineering drafts.
+Current status: `0.1.0-p1-31-release-provenance`, an engineering slice that retains the P1-29 cryptographic processing scope, the reviewed 69-symbol ABI-0 surface, and the P1-30 source/ABI compatibility guard. P1-31 adds an unsigned release-provenance bundle, a deterministic SPDX 2.3 JSON source inventory, source/archive/public-header/export hash binding, explicit clean/dirty/unknown worktree recording, hosted-artifact disposition, and fail-closed signing/authorization records. The generated source inventory does not perform dependency discovery, vulnerability analysis, or license conclusions. No detached signature, signing credential, completed hosted review, or external-release approval is included; evidence, install, and PoC outputs remain engineering drafts.
 
 Implemented processing scope:
 
@@ -16,6 +16,7 @@ Implemented processing scope:
 - P1-28 AES-CMAC with AES-128/192/256 dedicated key-purpose handles, full 16-byte tags, one-shot compute/verify, streaming compute, startup/extended KATs, negative tests, and OpenSSL test-only differential coverage
 - P1-29 AES-CMAC private state guards, fail-closed reinitialization, bounded uninit and non-overlap rules, lifecycle stress, shared-handle concurrency, 1,728 comparison differential corpus, and manual compiler-output review capture
 - P1-30 release identity, P1-29 public-header snapshot, normalized source-surface comparison, old-header/current-library runtime compatibility, installed-package compatibility smoke, and hashed hosted-artifact bundle manifests
+- P1-31 unsigned release provenance, deterministic SPDX 2.3 JSON source inventory, source/archive/public-header/export hash binding, signing-request placeholder, authorization TODO record, hosted provenance lane, and PoC exclusion checks
 - AES Release compiler-output capture with compiler/target/library metadata and a manual-review-only interpretation boundary
 - HMAC_DRBG-SHA-256 deterministic core API
 - Internal HMAC_DRBG-SHA-256 instantiate/reseed helper driven by entropy source
@@ -35,7 +36,7 @@ Implemented processing scope:
 - Internal source classification and health-test ownership metadata that keeps OS-provider output outside the raw-noise health skeleton
 - Status-only OS-provider operational probe with temporary-buffer zeroization
 - Private process identity guard for source-backed DRBG state; generation after process change requires reseed and clears output
-- Release evidence draft collection with source archive hash, public-surface check, reproducible-build notes, install smoke logs, PoC package smoke logs, scope-review notes, SBOM/signing placeholder status, and evidence manifest hashes
+- Release evidence draft collection with a bound source archive, source-file hashes, SPDX 2.3 JSON source inventory, public-surface check, reproducible-build notes, install/PoC smoke logs, explicit unsigned/signing TODO status, and evidence manifest hashes
 - Limited internal locking for module/self-test/CSP global state
 - Thread-safety support matrix, cross-platform Win32/pthread CSP/HMAC test, status-only platform review, CI checklist, and policy-check targets
 - CI matrix skeleton for Linux, macOS, and Windows build/test/install-smoke paths
@@ -52,7 +53,7 @@ Skeleton-only / TODO scope:
 - Persistent keystore, key export, key wrapping, and multi-process CSP model
 - Actual hosted Linux 32-bit, Windows, macOS, thread/random/differential artifacts, and any intended big-endian target; Clang sanitizer runtime and ThreadSanitizer policy review
 - Byte-identical source archive and binary reproducibility rules
-- Complete SBOM generation and detached-signature workflow
+- Dependency/component discovery, vulnerability and license review, actual detached-signature tooling, signer authorization, and timestamping policy
 - PoC package legal/evaluation notice and customer-specific support boundary
 - Human review of captured AES compiler output and target-specific side-channel behavior; CMAC target-specific review, CTR counter policy, AEAD, padding helpers, GMAC, and domestic-algorithm decisions
 
@@ -67,8 +68,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-30
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-30
+cmake --install build --prefix /tmp/anocrypto-c-p1-31
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-31
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -86,8 +87,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-30
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-30
+cmake --install build --prefix /tmp/anocrypto-c-p1-31
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-31
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -118,7 +119,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-30/`. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, and hash-manifest records under `build/evidence/p1-31/`, including `release-provenance/` and its separately verified SHA-256 binding. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -314,8 +315,21 @@ P1-27 selected the narrow AES-CMAC scope and reviewed the API, dedicated key-pur
 - Adds `release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake` as the single reviewed metadata record for the current version, expected tag, fingerprint, evidence slice, ABI line, symbol count, and compatibility baseline.
 - Preserves the project-owned P1-29 public headers and 69-symbol list under `abi/baselines/0.1.0-p1-29-cmac-hardening/` with SHA-256 checksums.
 - Adds `ano_crypto_release_compatibility_policy_check`, which compares normalized public function declarations, types, non-version constants, and stored exports against the P1-29 baseline.
-- Builds and runs a consumer with the preserved P1-29 headers against the current P1-30 library, including through the installed CMake package.
+- Builds and runs a consumer with the preserved P1-29 headers against the then-current P1-30 library, including through the installed CMake package.
 - Adds deterministic hosted-artifact bundle creation and verification with release identity, lane/platform/compiler metadata, file sizes, SHA-256 hashes, text-only restrictions, and explicit sensitive-value marker checks.
 - Adds create/verify/tamper regression coverage for the artifact manifest.
 - Keeps the public API and ABI-0 export set unchanged at 69 symbols.
 - Records the expected tag as metadata by default; strict mode requires actual tag/commit inputs and a Git-backed check that the tag, supplied commit, and `HEAD` resolve to one commit.
+
+## P1-31 unsigned release provenance and source SBOM gate
+
+- Retains the P1-29 public-header compatibility baseline, the P1-30 installed-package compatibility consumers, and the 69-symbol `ANOCRYPTO_C_0` export set.
+- Adds a deterministic source-file inventory in SPDX 2.3 JSON for the exact files selected for `anocrypto-c-source.tar.gz`.
+- Binds the source archive, source-file hashes, source SBOM, current public-header manifest, ABI-0 symbol list, and hosted-artifact disposition into `RELEASE_PROVENANCE.txt` and `RELEASE_ARTIFACTS.sha256`.
+- Verifies exact manifest coverage, path safety, source-tree hashes, source-SBOM paths/checksums, package verification code, public-header/symbol counts, and explicit unsigned/TODO authorization state.
+- Adds regression cases for tampered SBOM data, unlisted files, false signed/approved claims, unsafe source paths, wrong tag metadata, and incomplete hosted disposition.
+- Adds a `release-provenance|Linux` hosted bundle lane and requires it in the hosted artifact index; actual reviewer/date disposition remains TODO until a real hosted run is examined.
+- Keeps signing mode `UNSIGNED`, records `External release authorized: NO`, and rejects signature/key/token-like files rather than treating them as verified inputs.
+- Keeps the internal source archive, source SBOM, signing request, and release authorization record out of the customer PoC package; the PoC receives only status/policy notes.
+- Does not add a public header, public function, cryptographic service, or exported symbol.
+- Leaves dependency discovery, vulnerability analysis, license conclusions, actual signature generation/verification, signer identity, timestamping, legal/product authorization, and external sharing approval as TODO items.

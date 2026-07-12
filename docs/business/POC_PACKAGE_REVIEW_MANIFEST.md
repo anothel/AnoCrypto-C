@@ -1,6 +1,6 @@
 # Customer PoC Package Review Manifest
 
-Status: P1-29 draft.
+Status: P1-31 engineering draft.
 
 ## Purpose
 
@@ -15,6 +15,8 @@ The PoC package should contain:
 - `PACKAGE_REVIEW_MANIFEST.md`
 - `SBOM_STATUS.txt`
 - `SIGNING_STATUS.txt`
+- `RELEASE_PROVENANCE_PACKAGE_NOTES.txt`
+- `RELEASE_PROVENANCE_POLICY_CHECK.log`
 - `THREAD_SAFETY_PACKAGE_NOTES.txt`
 - `CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt`
 - `SHA512_FAMILY_PACKAGE_NOTES.txt`
@@ -40,8 +42,8 @@ Confirm:
 - install logs do not disclose internal deployment details that should be removed
 - examples do not print key bytes, entropy bytes, seed material, nonce material, DRBG state, generated DRBG output, private keys, or tokens
 - docs do not imply official validation evidence or external review completion
-- SBOM status is clearly marked as placeholder unless an actual SBOM is generated later
-- signing status is clearly marked as not performed unless detached signature files are added later
+- SBOM status clearly states that no package-specific dependency/component SBOM was generated and that the internal source SBOM is excluded
+- signing status is `UNSIGNED`, no signature/key/token is included, and external release remains unauthorized
 - thread-safety package notes match `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md` and current build options
 - clean SDK logs record tests and both internal hook options off and internal symbol hiding on
 - installed headers and shared-library exports do not expose internal entropy, process-guard, reseed-limit, or failure-injection hook symbols
@@ -57,8 +59,8 @@ Do not add customer secrets, customer certificates with private keys, production
 
 - Add legal/evaluation notice after legal review.
 - Add package archive creation after handoff format is chosen.
-- Add detached signature records after signing tool and key-management policy are selected.
-- Add generated SBOM records after generator selection.
+- Add detached signature/verification records only after signing tool, signer authorization, key custody, timestamping, and revocation policies are approved.
+- Add a package-specific dependency/license/vulnerability SBOM only after generator, privacy, and legal scope are selected.
 
 ## P1-14 thread-safety package note
 
@@ -118,3 +120,7 @@ The PoC retains public `ac_cmac.h` and the compiled CMAC service. It may include
 headers, CMAC implementation source, hardening/lifecycle/differential tests,
 compiler disassembly, OpenSSL provider artifacts, and all key/message/tag
 values.
+
+## P1-31 provenance package note
+
+Review `RELEASE_PROVENANCE_PACKAGE_NOTES.txt` and `RELEASE_PROVENANCE_POLICY_CHECK.log`. Confirm the package contains no internal source archive/SBOM/provenance manifest/signing request/authorization record, that `PACKAGE_MANIFEST.md` is described only as a package-local hash inventory, and that no signing or external-release approval is implied.

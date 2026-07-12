@@ -1,4 +1,4 @@
-# Build a clean installed P1-30 package, then compile and run current-header and
+# Build a clean installed P1-31 package, then compile and run current-header and
 # retained-P1-29-header C99 consumers against that package.
 cmake_minimum_required(VERSION 3.16)
 
@@ -92,16 +92,16 @@ set(_release_configure
     -DANO_CRYPTO_BUILD_FINGERPRINT=${ANO_CRYPTO_RELEASE_FINGERPRINT}-compatibility-smoke
     -DCMAKE_BUILD_TYPE=Release)
 _ano_append_generator(_release_configure)
-_ano_run(RELEASE_CONFIGURE.log "Configure clean P1-30 Release package"
+_ano_run(RELEASE_CONFIGURE.log "Configure clean P1-31 Release package"
     "${CMAKE_COMMAND}" -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
     ${_release_configure})
-_ano_run(RELEASE_BUILD.log "Build clean P1-30 Release package"
+_ano_run(RELEASE_BUILD.log "Build clean P1-31 Release package"
     "${CMAKE_COMMAND}" -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
     "${CMAKE_COMMAND}" --build "${_release_build}" --config Release --parallel)
-_ano_run(RELEASE_POLICY.log "Check P1-30 release compatibility policy"
+_ano_run(RELEASE_POLICY.log "Check P1-31 release compatibility policy"
     "${CMAKE_COMMAND}" --build "${_release_build}" --config Release
     --target ano_crypto_release_compatibility_policy_check)
-_ano_run(RELEASE_INSTALL.log "Install clean P1-30 Release package"
+_ano_run(RELEASE_INSTALL.log "Install clean P1-31 Release package"
     "${CMAKE_COMMAND}" --install "${_release_build}" --config Release
     --prefix "${_install_prefix}")
 
@@ -183,7 +183,7 @@ if(NOT "${_installed_header_count}" STREQUAL "${ANO_CRYPTO_RELEASE_PUBLIC_HEADER
 endif()
 
 file(WRITE "${ANO_CRYPTO_TAGGED_COMPAT_SMOKE_DIR}/TAGGED_COMPAT_SUMMARY.txt"
-    "AnoCrypto-C P1-30 tagged-release compatibility smoke\n"
+    "AnoCrypto-C P1-31 tagged-release compatibility smoke\n"
     "Current version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Expected tag metadata: ${ANO_CRYPTO_RELEASE_TAG}\n"
     "Baseline: ${ANO_CRYPTO_COMPAT_BASELINE_VERSION}\n"

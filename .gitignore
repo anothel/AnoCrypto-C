@@ -1,0 +1,8 @@
+# AnoCrypto-C generated build and hosted-review work directories.
+# Patterns are rooted so source files such as src/core/build_identity.c remain tracked.
+/build/
+/build-*/
+/cmake-build-*/
+/out/
+/hosted-*/
+/downloaded-hosted-artifacts/

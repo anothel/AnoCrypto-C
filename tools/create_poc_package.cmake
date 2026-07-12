@@ -106,13 +106,30 @@ execute_process(
     OUTPUT_VARIABLE _release_compat_stdout
     ERROR_VARIABLE _release_compat_stderr)
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_COMPATIBILITY_CHECK.log"
-    "# Check P1-30 release identity and P1-29 public compatibility baseline\n"
+    "# Check P1-31 release identity and P1-29 public compatibility baseline\n"
     "# Expected version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "# Expected public symbols: ${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}\n"
     "# Result: ${_release_compat_result}\n\n"
     "${_release_compat_stdout}${_release_compat_stderr}")
 if(NOT _release_compat_result EQUAL 0)
     message(FATAL_ERROR "PoC release compatibility policy check failed; see ${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_COMPATIBILITY_CHECK.log")
+endif()
+
+execute_process(
+    COMMAND "${CMAKE_COMMAND}" -E env
+        --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
+        "${CMAKE_COMMAND}" --build "${_clean_build_dir}" --config "${ANO_CRYPTO_POC_BUILD_CONFIG}" --target ano_crypto_release_provenance_policy_check
+    RESULT_VARIABLE _release_provenance_result
+    OUTPUT_VARIABLE _release_provenance_stdout
+    ERROR_VARIABLE _release_provenance_stderr)
+file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_PROVENANCE_POLICY_CHECK.log"
+    "# Check P1-31 unsigned release provenance and source-SBOM policy boundary\n"
+    "# Expected version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
+    "# Signing mode: ${ANO_CRYPTO_RELEASE_SIGNING_MODE}\n"
+    "# Result: ${_release_provenance_result}\n\n"
+    "${_release_provenance_stdout}${_release_provenance_stderr}")
+if(NOT _release_provenance_result EQUAL 0)
+    message(FATAL_ERROR "PoC release provenance policy check failed; see ${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_PROVENANCE_POLICY_CHECK.log")
 endif()
 
 execute_process(
@@ -216,7 +233,9 @@ set(_doc_files
     docs/ci/AES_CMAC_CI_CHECKLIST.md
     docs/ci/CMAC_HARDENING_CI_CHECKLIST.md
     docs/ci/RELEASE_COMPATIBILITY_CI_CHECKLIST.md
+    docs/ci/RELEASE_PROVENANCE_CI_CHECKLIST.md
     docs/release/TAGGED_RELEASE_COMPATIBILITY_POLICY.md
+    docs/release/RELEASE_PROVENANCE_AND_SIGNING_POLICY.md
     docs/kcmvp/TAGGED_RELEASE_COMPATIBILITY_EVIDENCE.md
     docs/roadmap/DEVELOPMENT_WORKFLOW.md
     docs/roadmap/C99_PRIORITY_TODO.md)
@@ -251,6 +270,7 @@ file(COPY
     "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/AES_HARDENING_REVIEW.md"
     "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/AES_CMAC_IMPLEMENTATION_REVIEW.md"
     "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/AES_CMAC_HARDENING_REVIEW.md"
+    "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/RELEASE_PROVENANCE_REVIEW.md"
     DESTINATION "${_evidence_dir}")
 
 # The customer package may describe the internal boundary, but it must not
@@ -301,7 +321,15 @@ set(_forbidden_internal_package_paths
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/tests/differential"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/openssl"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/libcrypto"
-    "${ANO_CRYPTO_POC_PACKAGE_DIR}/libssl")
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/libssl"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/anocrypto-c-source.tar.gz"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/SOURCE_FILES.sha256"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/SOURCE_SBOM.spdx.json"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/SOURCE_SBOM_SUMMARY.txt"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_PROVENANCE.txt"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_ARTIFACTS.sha256"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/SIGNING_REQUEST.txt"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_AUTHORIZATION.md")
 foreach(_forbidden_path IN LISTS _forbidden_internal_package_paths)
     if(EXISTS "${_forbidden_path}")
         message(FATAL_ERROR "PoC package contains an internal entropy/test artifact: ${_forbidden_path}")
@@ -322,6 +350,7 @@ foreach(_package_file IN LISTS _package_boundary_files)
        _package_file_lower MATCHES "cmac(_kat_tests|_api_negative_tests|_openssl_differential_tests)?\.c$" OR
        _package_file_lower MATCHES "p1_29_compatibility_probe\.c$" OR
        _package_file_lower MATCHES "hosted_artifact_manifest" OR
+       _package_file_lower MATCHES "(^|[/\\])(source_sbom\.spdx\.json|source_files\.sha256|release_provenance\.txt|release_artifacts\.sha256|signing_request\.txt|release_authorization\.md|anocrypto-c-source\.tar\.gz)$" OR
        _package_file_lower MATCHES "(^|[/\\])abi[/\\]baselines([/\\]|$)")
         message(FATAL_ERROR "PoC package contains a test-only differential/provider artifact: ${_package_file}")
     endif()
@@ -332,17 +361,35 @@ string(TIMESTAMP _created_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SBOM_STATUS.txt"
     "AnoCrypto-C PoC package SBOM status\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: placeholder only; no complete SBOM is generated for this P1-30 PoC package.\n"
+    "Status: PACKAGE_SBOM_NOT_GENERATED\n"
+    "The P1-31 internal source-inventory SBOM describes the reviewed source archive, not this customer PoC package.\n"
+    "The internal source archive and source SBOM are not included in this package.\n"
     "Package hash manifest: PACKAGE_MANIFEST.md\n"
     "SBOM plan document: docs/kcmvp/SBOM_SIGNING_PLAN.md\n"
+    "Dependency discovery, vulnerability analysis, and license conclusions for this PoC package remain TODO.\n"
     "Do not add secrets, private keys, tokens, entropy captures, generated secret bytes, customer data, or internal deployment details to SBOM inputs.\n")
 
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SIGNING_STATUS.txt"
     "AnoCrypto-C PoC package signing status\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: signing not performed for this P1-30 PoC package.\n"
+    "Status: UNSIGNED\n"
+    "Detached signature present: no\n"
+    "Cryptographic verification performed: no\n"
+    "External release authorized: NO\n"
     "No private signing key, signing token, or detached signature file is included.\n"
-    "Future detached-signature workflow remains TODO until signing tool, signer identity, and verification policy are selected.\n")
+    "Future detached-signature workflow remains TODO until signing tool, signer identity, timestamping, and verification policy are selected.\n")
+
+file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_PROVENANCE_PACKAGE_NOTES.txt"
+    "AnoCrypto-C PoC package release provenance boundary\n"
+    "Generated UTC: ${_created_utc}\n"
+    "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
+    "Expected tag metadata: ${ANO_CRYPTO_RELEASE_TAG}\n"
+    "Signing mode: UNSIGNED\n"
+    "External release authorized: NO\n"
+    "The internal source archive and source SBOM are not included in this customer package.\n"
+    "The package does not include RELEASE_PROVENANCE.txt, RELEASE_ARTIFACTS.sha256, SIGNING_REQUEST.txt, a detached signature, a signing key, or a signing token.\n"
+    "PACKAGE_MANIFEST.md is a package-local hash inventory and is not a cryptographic attestation or release authorization.\n"
+    "Actual tag/commit binding, hosted artifact disposition, package-specific SBOM, signer approval, and external sharing approval remain TODO.\n")
 
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/THREAD_SAFETY_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package thread-safety notes\n"
@@ -475,7 +522,8 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_COMPATIBILITY_PACKAGE_NOTES.tx
     "Compatibility baseline: ${ANO_CRYPTO_COMPAT_BASELINE_VERSION}\n"
     "Public headers: ${ANO_CRYPTO_RELEASE_PUBLIC_HEADER_COUNT}\n"
     "Public ABI-0 exports: ${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}\n"
-    "Clean package policy result: RELEASE_COMPATIBILITY_CHECK.log\n"
+    "Clean compatibility policy result: RELEASE_COMPATIBILITY_CHECK.log\n"
+    "Clean provenance policy result: RELEASE_PROVENANCE_POLICY_CHECK.log\n"
     "The retained P1-29 header snapshot, compatibility probe source, release tooling, and hosted CI manifests are not included in the customer package.\n"
     "Expected tag metadata does not establish that a tag exists or identifies this binary; release provenance requires separate review.\n"
     "Compatibility results are toolchain-specific engineering guardrails and do not establish universal ABI or semantic compatibility.\n"
@@ -489,6 +537,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/PACKAGE_REVIEW_MANIFEST.md"
     "- Confirm `PACKAGE_MANIFEST.md` lists only package-relative paths.\n"
     "- Confirm `SBOM_STATUS.txt` is still accurate for this package.\n"
     "- Confirm `SIGNING_STATUS.txt` is still accurate for this package.\n"
+    "- Confirm `RELEASE_PROVENANCE_PACKAGE_NOTES.txt` states that the internal source archive/SBOM and signing artifacts are excluded and external release remains unauthorized.\n"
     "- Confirm `THREAD_SAFETY_PACKAGE_NOTES.txt` matches the current support matrix.\n"
     "- Confirm `CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt` records clean sanitizer mode, hosted-review limits, and ABI-0 decision.\n"
     "- Confirm `SHA512_FAMILY_PACKAGE_NOTES.txt` matches the current SHA-384/SHA-512 implementation and KAT boundary.\n"
@@ -499,8 +548,9 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/PACKAGE_REVIEW_MANIFEST.md"
     "- Confirm `RANDOM_SERVICE_PACKAGE_NOTES.txt` matches the current public random-service implementation and stated limitations.\n"
     "- Confirm `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt` records fail-closed process-marker, VM clone/snapshot, suspend/resume, and hook boundaries.\n"
     "- Confirm `CLEAN_RELEASE_SYMBOL_BASELINE.log` reports the stored 69-symbol ABI-0 baseline match.\n"
-    "- Confirm `RELEASE_COMPATIBILITY_CHECK.log` and `RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt` match the P1-30/P1-29 compatibility policy.\n"
-    "- Confirm no retained baseline header tree, compatibility test source, hosted artifact manifest, or release-internal metadata directory is packaged.\n"
+    "- Confirm `RELEASE_COMPATIBILITY_CHECK.log` and `RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt` match the P1-31/P1-29 compatibility policy.\n"
+    "- Confirm `RELEASE_PROVENANCE_POLICY_CHECK.log` records a passing unsigned/source-SBOM boundary check without asserting a signature or external approval.\n"
+    "- Confirm no retained baseline header tree, compatibility test source, hosted artifact manifest, source archive, source SBOM, signing request, release authorization record, or release-internal metadata directory is packaged.\n"
     "- Confirm `ENTROPY_HEALTH_PACKAGE_NOTES.txt` records test hooks OFF and internal symbol hiding ON.\n"
     "- Confirm `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt` records external OS-provider classification, private process guard, and implemented public random service.\n"
     "- Confirm installed headers and shared-library exports do not expose internal entropy, process-guard, reseed-limit, failure-injection test-hook, or internal AES context symbols.\n"
@@ -522,7 +572,8 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/README.md"
 "- `evidence-template/`: release evidence template notes for customer review workflows.\n"
 "- `PACKAGE_MANIFEST.md`: package-relative SHA-256 file manifest.\n"
 "- `PACKAGE_REVIEW_MANIFEST.md`: review notes before sharing.\n"
-"- `SBOM_STATUS.txt` and `SIGNING_STATUS.txt`: placeholder status records.\n"
+"- `SBOM_STATUS.txt` and `SIGNING_STATUS.txt`: explicit package-SBOM-not-generated and unsigned status records.\n"
+"- `RELEASE_PROVENANCE_PACKAGE_NOTES.txt`: customer-package exclusion and external-release authorization boundary.\n"
 "- `THREAD_SAFETY_PACKAGE_NOTES.txt`: P1-29 retained thread-safety support-matrix summary.\n"
 "- `CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt`: P1-29 retained cross-platform concurrency, diagnostic-lane, and build-identity ABI summary.\n"
 "- `SHA512_FAMILY_PACKAGE_NOTES.txt`: P1-29 retained SHA-384/SHA-512 family implementation and KAT summary.\n"
@@ -533,8 +584,9 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/README.md"
 "- `RANDOM_SERVICE_PACKAGE_NOTES.txt`: P1-29 retained public random-service implementation summary.\n"
 "- `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt`: P1-29 retained lifecycle, process-marker, VM duplication, and clean export-baseline summary.\n"
 "- `CLEAN_RELEASE_SYMBOL_BASELINE.log`: clean shared-library comparison with the stored 69-symbol ABI-0 baseline.\n"
-"- `RELEASE_COMPATIBILITY_CHECK.log`: P1-30 release identity and P1-29 public source/symbol compatibility policy result.\n"
+"- `RELEASE_COMPATIBILITY_CHECK.log`: P1-31 release identity and P1-29 public source/symbol compatibility policy result.\n"
 "- `RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt`: customer-facing compatibility scope, exclusions, and provenance limitations.\n"
+"- `RELEASE_PROVENANCE_POLICY_CHECK.log`: status-only P1-31 unsigned/source-SBOM policy result.\n"
 "- `ENTROPY_HEALTH_PACKAGE_NOTES.txt`: clean-build and internal entropy/test-hook exclusion summary.\n"
 "- `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt`: OS-provider classification, private process-boundary guard, and implemented random-service summary.\n\n"
 "## Build the PoC example\n\n"
@@ -544,7 +596,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/README.md"
 "./build-core-poc/anocrypto_c_core_poc\n"
 "```\n\n"
 "## Boundary\n\n"
-"This package is not official validation evidence. Review local paths, compiler identifiers, binary provenance, source provenance, manifest files, SBOM/signing status placeholders, thread-safety notes, random-service notes, and logs before sharing externally. Do not add secrets, entropy captures, generated secret bytes, private keys, tokens, signing keys, signing tokens, customer data, or customer deployment details to this package.\n")
+"This package is not official validation evidence. Review local paths, compiler identifiers, binary provenance, source provenance, manifest files, package SBOM/signing status boundaries, thread-safety notes, random-service notes, and logs before sharing externally. Do not add secrets, entropy captures, generated secret bytes, private keys, tokens, signing keys, signing tokens, customer data, or customer deployment details to this package.\n")
 
 file(GLOB_RECURSE _package_files
     LIST_DIRECTORIES false
@@ -556,7 +608,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/PACKAGE_MANIFEST.md"
 "# AnoCrypto-C PoC Package v0 Manifest\n\n"
 "Generated UTC: ${_created_utc}\n\n"
 "Status: engineering package draft.\n\n"
-"The manifest excludes itself and uses package-relative paths. Review `PACKAGE_REVIEW_MANIFEST.md`, `SBOM_STATUS.txt`, and `SIGNING_STATUS.txt` before external sharing.\n\n"
+"The manifest excludes itself and uses package-relative paths. Review `PACKAGE_REVIEW_MANIFEST.md`, `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, and `RELEASE_PROVENANCE_PACKAGE_NOTES.txt` before external sharing.\n\n"
 "## Files\n\n")
 foreach(_rel IN LISTS _package_files)
     if(NOT _rel STREQUAL "PACKAGE_MANIFEST.md")
