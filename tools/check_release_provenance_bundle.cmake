@@ -1,4 +1,4 @@
-# Verify an unsigned AnoCrypto-C P1-31 engineering provenance bundle.
+# Verify an unsigned AnoCrypto-C P1-32 engineering provenance bundle.
 # This checker validates path safety, complete hash coverage, release identity,
 # source-file hashes, source SBOM bindings, ABI/public-header inputs, and the
 # explicit unsigned/TODO release boundary. It does not verify a signature or
@@ -160,7 +160,7 @@ if(NOT _prov_signing_status STREQUAL "UNSIGNED" OR
    NOT _prov_external_release_authorized STREQUAL "NO" OR
    NOT _prov_result STREQUAL "PASS")
     message(FATAL_ERROR
-        "P1-31 provenance must remain unsigned and not externally authorized")
+        "P1-32 provenance must remain unsigned and not externally authorized")
 endif()
 if(NOT _prov_generated_utc MATCHES
    "^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]Z$")
@@ -641,7 +641,7 @@ elseif(NOT (_disposition_status STREQUAL "TODO" AND
     message(FATAL_ERROR "Hosted artifact disposition must be a complete PASS or explicit TODO")
 endif()
 
-# This P1-31 bundle generator does not support signature artifacts. Reject
+# This P1-32 bundle generator does not support signature artifacts. Reject
 # signature/key/credential-looking files rather than silently treating them as
 # verified release inputs.
 foreach(_relative IN LISTS _bundle_files)
@@ -680,7 +680,7 @@ endforeach()
 list(LENGTH _manifest_paths _manifest_file_count)
 string(TIMESTAMP _checked_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_PROVENANCE_CHECK_OUTPUT}"
-    "AnoCrypto-C P1-31 release provenance check\n"
+    "AnoCrypto-C P1-32 release provenance check\n"
     "Checked UTC: ${_checked_utc}\n"
     "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Expected tag: ${ANO_CRYPTO_RELEASE_TAG}\n"

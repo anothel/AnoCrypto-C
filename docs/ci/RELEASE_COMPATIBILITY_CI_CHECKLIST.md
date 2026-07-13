@@ -1,10 +1,10 @@
 # Release Compatibility CI Checklist
 
-Status: P1-31 engineering checklist. Actual hosted-run disposition remains TODO until the referenced workflow run is reviewed.
+Status: P1-32 engineering checklist. Actual hosted-run disposition remains TODO until the referenced workflow run is reviewed.
 
 ## Every supported build lane
 
-- Configure with the P1-31 release fingerprint.
+- Configure with the P1-32 release fingerprint.
 - Build and run the configured CTest set.
 - Run `ano_crypto_release_compatibility_policy_check`.
 - Preserve the 14-header and 69-export baselines.
@@ -13,7 +13,7 @@ Status: P1-31 engineering checklist. Actual hosted-run disposition remains TODO 
 ## Tagged-release lane
 
 - Checkout full Git history and tags.
-- Require `github.ref_name` to equal `v0.1.0-p1-31-release-provenance`.
+- Require `github.ref_name` to equal `v0.1.0-p1-32-signing-handoff`.
 - When strict tag mode is enabled, provide both actual-tag and actual-commit inputs at configure/review time.
 - Pass the workflow commit and require the tag, supplied commit, and `HEAD` to resolve to one commit.
 - Run `ano_crypto_tagged_release_compatibility_smoke` on Linux, macOS, and Windows.
@@ -24,7 +24,7 @@ Status: P1-31 engineering checklist. Actual hosted-run disposition remains TODO 
 - Build a clean shared Release library with tests/hooks disabled and hidden internal symbols.
 - Install to an isolated prefix.
 - Build current-header and retained-P1-29-header consumers against that prefix.
-- Confirm both consumers bind 69 functions and report the P1-31 runtime version.
+- Confirm both consumers bind 69 functions and report the P1-32 runtime version.
 - Confirm exact package version `0.1.0` is accepted.
 - Confirm incompatible package request `0.2.0` is rejected.
 - Confirm the retained header snapshot and compatibility source are not installed.

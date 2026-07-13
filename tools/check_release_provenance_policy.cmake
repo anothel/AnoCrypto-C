@@ -1,4 +1,4 @@
-# Static and generated-artifact policy check for the P1-31 unsigned release
+# Static and generated-artifact policy check for the P1-32 unsigned release
 # provenance/SBOM/signing boundary.
 cmake_minimum_required(VERSION 3.16)
 
@@ -29,7 +29,7 @@ endforeach()
 if(NOT ANO_CRYPTO_RELEASE_PROVENANCE_SCHEMA STREQUAL "1" OR
    NOT ANO_CRYPTO_RELEASE_SBOM_FORMAT STREQUAL "SPDX-2.3-JSON" OR
    NOT ANO_CRYPTO_RELEASE_SIGNING_MODE STREQUAL "UNSIGNED")
-    message(FATAL_ERROR "Unexpected P1-31 release provenance identity policy")
+    message(FATAL_ERROR "Unexpected P1-32 release provenance identity policy")
 endif()
 
 set(_required_files
@@ -77,7 +77,7 @@ _ano_require_text("tools/create_poc_package.cmake"
     "The internal source archive and source SBOM are not included")
 _ano_require_text("docs/kcmvp/SBOM_SIGNING_PLAN.md" "SPDX 2.3 JSON source inventory")
 _ano_require_text("docs/release/RELEASE_PROVENANCE_AND_SIGNING_POLICY.md"
-    "Status: P1-31 unsigned engineering policy")
+    "Status: P1-32 unsigned engineering policy")
 _ano_require_text("docs/release/RELEASE_PROVENANCE_AND_SIGNING_POLICY.md"
     "External release authorized: NO")
 _ano_require_text("docs/ci/RELEASE_PROVENANCE_CI_CHECKLIST.md"
@@ -92,7 +92,7 @@ _ano_require_text("README.md" "${ANO_CRYPTO_RELEASE_VERSION}")
 _ano_require_text("README.md" "unsigned release-provenance bundle")
 
 # A signing credential or detached signature must never be committed merely to
-# make the P1-31 engineering gate pass.
+# make the P1-32 engineering gate pass.
 file(GLOB_RECURSE _source_entries
     LIST_DIRECTORIES false
     RELATIVE "${ANO_CRYPTO_SOURCE_DIR}"
@@ -110,7 +110,7 @@ endforeach()
 if(_credential_like_files)
     list(JOIN _credential_like_files ", " _credential_text)
     message(FATAL_ERROR
-        "Credential/signature-like files are forbidden in the P1-31 source tree: ${_credential_text}")
+        "Credential/signature-like files are forbidden in the P1-32 source tree: ${_credential_text}")
 endif()
 
 # If the full evidence target has already produced a provenance bundle, verify
@@ -138,7 +138,7 @@ endif()
 
 string(TIMESTAMP _checked_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}"
-    "AnoCrypto-C P1-31 release provenance policy check\n"
+    "AnoCrypto-C P1-32 release provenance policy check\n"
     "Checked UTC: ${_checked_utc}\n"
     "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Provenance schema: ${ANO_CRYPTO_RELEASE_PROVENANCE_SCHEMA}\n"
@@ -152,8 +152,8 @@ file(WRITE "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}"
     "Credential/signature-like source files: none\n"
     "Generated evidence bundle verification: ${_generated_status}\n"
     "Actual hosted artifact disposition: TODO unless separately supplied and reviewed\n"
-    "Cryptographic signature verification: not implemented in P1-31\n"
+    "Cryptographic signature verification: not implemented in P1-32\n"
     "External release authorization: NO\n"
     "Result: PASS\n")
 
-message(STATUS "AnoCrypto-C P1-31 release provenance policy check passed")
+message(STATUS "AnoCrypto-C P1-32 release provenance policy check passed")

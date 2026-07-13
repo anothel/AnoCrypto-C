@@ -1,18 +1,18 @@
 # Tagged Release Compatibility Policy
 
-Status: P1-31 engineering policy. This document does not establish universal ABI compatibility or release provenance by itself.
+Status: P1-32 engineering policy. This document does not establish universal ABI compatibility or release provenance by itself.
 
 ## Purpose
 
-P1-31 retains a project-owned compatibility input from `0.1.0-p1-29-cmac-hardening` and checks the next engineering slice without adding public cryptographic services. The policy covers release identity consistency, the retained public C surface, installed-package consumption, and status-only hosted artifacts.
+P1-32 retains a project-owned compatibility input from `0.1.0-p1-29-cmac-hardening` and checks the next engineering slice without adding public cryptographic services. The policy covers release identity consistency, the retained public C surface, installed-package consumption, and status-only hosted artifacts.
 
 ## Reviewed identity
 
 The authoritative engineering metadata is `release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake`:
 
 - package version: `0.1.0`
-- engineering version: `0.1.0-p1-31-release-provenance`
-- expected tag metadata: `v0.1.0-p1-31-release-provenance`
+- engineering version: `0.1.0-p1-32-signing-handoff`
+- expected tag metadata: `v0.1.0-p1-32-signing-handoff`
 - ABI line: `ANOCRYPTO_C_0`
 - retained baseline: `0.1.0-p1-29-cmac-hardening`
 - public headers: 14
@@ -40,8 +40,8 @@ Baseline updates are not automatic. A later intentional public API or ABI change
 
 `ano_crypto_tagged_release_compatibility_smoke` additionally builds a clean installed package and runs:
 
-- a P1-31-header/P1-31-library consumer;
-- a P1-29-header/P1-31-library consumer that binds all 69 public functions;
+- a P1-32-header/P1-32-library consumer;
+- a P1-29-header/P1-32-library consumer that binds all 69 public functions;
 - an exact `find_package(AnoCryptoC 0.1.0 EXACT)` probe;
 - a negative request confirming the 0.1.x package does not satisfy `0.2.0`.
 

@@ -1,6 +1,6 @@
 # Customer PoC Package Review Manifest
 
-Status: P1-31 engineering draft.
+Status: P1-32 engineering draft.
 
 ## Purpose
 
@@ -121,6 +121,6 @@ headers, CMAC implementation source, hardening/lifecycle/differential tests,
 compiler disassembly, OpenSSL provider artifacts, and all key/message/tag
 values.
 
-## P1-31 provenance package note
+## P1-32 provenance package note
 
 Review `RELEASE_PROVENANCE_PACKAGE_NOTES.txt` and `RELEASE_PROVENANCE_POLICY_CHECK.log`. Confirm the package contains no internal source archive/SBOM/provenance manifest/signing request/authorization record, that `PACKAGE_MANIFEST.md` is described only as a package-local hash inventory, and that no signing or external-release approval is implied.

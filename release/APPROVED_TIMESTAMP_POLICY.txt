@@ -1,0 +1,13 @@
+ANOCRYPTO_APPROVED_TIMESTAMP_POLICY_V1
+status=UNPROVISIONED
+record_scope=PRODUCTION
+format=RFC3161
+timestamp_subject=RELEASE_ARTIFACTS.sha256.ed25519
+requirement=REQUIRED_BEFORE_EXTERNAL_RELEASE
+tsa_policy_oid=TODO
+trust_anchor_fingerprint=SHA256_CERT_DER
+trust_anchor_sha256=TODO
+service_owner=TODO
+provisioned_utc=TODO
+revocation_review=TODO
+note=Production RFC3161 policy is not provisioned in this engineering source tree.

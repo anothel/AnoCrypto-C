@@ -1,10 +1,10 @@
 # Tagged Release Compatibility Evidence
 
-Status: P1-31 engineering evidence plan; not official validation evidence.
+Status: P1-32 engineering evidence plan; not official validation evidence.
 
 ## Evidence objective
 
-Provide a reproducible record that one reviewed source snapshot retains the P1-29 public C contract while using the P1-31 engineering version identity. The evidence is intended to support configuration-management and interface-review work, not to replace formal test or submission requirements.
+Provide a reproducible record that one reviewed source snapshot retains the P1-29 public C contract while using the P1-32 engineering version identity. The evidence is intended to support configuration-management and interface-review work, not to replace formal test or submission requirements.
 
 ## Required local records
 

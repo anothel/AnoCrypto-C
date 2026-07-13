@@ -1,0 +1,13 @@
+ANOCRYPTO_APPROVED_RELEASE_SIGNERS_V1
+status=UNPROVISIONED
+record_scope=PRODUCTION
+signer_policy_id=ANO-REL-SIGNER-1
+signer_role=AnoCrypto Release Signer
+algorithm=ED25519
+public_key_format=PEM_SUBJECT_PUBLIC_KEY_INFO
+fingerprint_algorithm=SHA256_SPKI_DER
+approved_public_key_fingerprint=TODO
+key_custody=OFFLINE_HARDWARE_BACKED
+provisioned_utc=TODO
+revocation_status=NOT_PROVISIONED
+note=Production signer is not provisioned in this engineering source tree.

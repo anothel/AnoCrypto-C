@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-31 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-32 \
 #         -DANO_CRYPTO_RUN_CTEST=ON \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-31")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-32")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -208,7 +208,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
 "Expected tag metadata: ${ANO_CRYPTO_RELEASE_TAG}\n"
 "Compatibility baseline: ${ANO_CRYPTO_COMPAT_BASELINE_VERSION}\n"
 "ABI line and symbol count: ${ANO_CRYPTO_RELEASE_ABI_LINE} / ${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}\n"
-"Reproducible build status: P1-31 retained draft procedure; binary byte identity not claimed\n"
+"Reproducible build status: P1-32 retained draft procedure; binary byte identity not claimed\n"
 "Evidence status: engineering draft only\n"
 "Claims boundary: not official validation evidence\n")
 
@@ -318,7 +318,7 @@ if(ANO_CRYPTO_RUN_RELEASE_PROVENANCE_CHECK)
         OUTPUT_VARIABLE _release_provenance_stdout
         ERROR_VARIABLE _release_provenance_stderr)
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_PROVENANCE.log"
-        "# Create and verify unsigned P1-31 release provenance bundle\n"
+        "# Create and verify unsigned P1-32 release provenance bundle\n"
         "# Result: ${_release_provenance_result}\n\n"
         "${_release_provenance_stdout}${_release_provenance_stderr}")
     if(NOT _release_provenance_result EQUAL 0)
@@ -342,7 +342,7 @@ if(ANO_CRYPTO_RUN_RELEASE_PROVENANCE_CHECK)
         OUTPUT_VARIABLE _release_provenance_policy_stdout
         ERROR_VARIABLE _release_provenance_policy_stderr)
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_PROVENANCE_POLICY_CHECK.log"
-        "# P1-31 release provenance policy check\n"
+        "# P1-32 release provenance policy check\n"
         "# Result: ${_release_provenance_policy_result}\n\n"
         "${_release_provenance_policy_stdout}${_release_provenance_policy_stderr}")
     if(NOT _release_provenance_policy_result EQUAL 0)
@@ -831,7 +831,7 @@ endif()
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "AnoCrypto-C reproducible build evidence notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-31 retained draft procedure; binary byte identity is not claimed.\n"
+    "Status: P1-32 retained draft procedure; binary byte identity is not claimed.\n"
     "Source directory: ${ANO_CRYPTO_SOURCE_DIR}\n"
     "Build directory: ${ANO_CRYPTO_BUILD_DIR}\n"
     "Source archive content list: SOURCE_ARCHIVE_CONTENTS.txt\n"
@@ -856,9 +856,9 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-31 evidence and scope-review notes\n"
+    "AnoCrypto-C P1-32 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-31 engineering scope artifact covering implemented SHA-2/HMAC, random, AES-CBC, and AES-CMAC services; not official validation evidence.\n"
+    "Status: P1-32 engineering scope artifact covering implemented SHA-2/HMAC, random, AES-CBC, and AES-CMAC services; not official validation evidence.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"
@@ -967,7 +967,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Exported symbol baseline review notes: EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_COMPATIBILITY_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-31 release compatibility review notes\n"
+    "AnoCrypto-C P1-32 release compatibility review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
     "Current version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Expected tag metadata: ${ANO_CRYPTO_RELEASE_TAG}\n"
@@ -1177,12 +1177,12 @@ if(NOT _thread_platform_review_result EQUAL 0 OR
 endif()
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CONCURRENCY_SANITIZER_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-31 concurrency and sanitizer review notes\n"
+    "AnoCrypto-C P1-32 concurrency and sanitizer review notes\n"
     "Status: engineering evidence only; not official validation evidence.\n"
     "Policy check: CONCURRENCY_SANITIZER_CHECK.txt\n"
     "Platform status: THREAD_PLATFORM_REVIEW.log\n"
     "Selected required sanitizer lane: Linux GCC address+undefined in hosted CI; Clang runtime review remains TODO.\n"
-    "ThreadSanitizer: not selected in P1-31; runtime/toolchain review remains TODO.\n"
+    "ThreadSanitizer: not selected in P1-32; runtime/toolchain review remains TODO.\n"
     "Build-identity ABI decision: docs/design/BUILD_IDENTITY_ABI_0_DECISION.md\n"
     "Actual hosted Linux/macOS/Windows artifacts require separate review before support wording is widened.\n"
     "Logs must not contain key bytes, MAC output, entropy, seed material, DRBG state, generated random bytes, private keys, tokens, or customer data.\n")
@@ -1295,7 +1295,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `SOURCE_ARCHIVE.sha256`: SHA-256 hash of `anocrypto-c-source.tar.gz` when archive creation is enabled.\n"
 "- `BINARY_FILES.sha256`: SHA-256 hashes of build outputs matched by the script.\n"
 "- `PUBLIC_SURFACE_CHECK.txt`: repository naming, claims-boundary, header, and package identity check.\n"
-"- `RELEASE_COMPATIBILITY_CHECK.txt`: P1-29/P1-31 normalized public declaration, header-hash, release-identity, and stored-symbol comparison.\n"
+"- `RELEASE_COMPATIBILITY_CHECK.txt`: P1-29/P1-32 normalized public declaration, header-hash, release-identity, and stored-symbol comparison.\n"
 "- `TAGGED_COMPATIBILITY_SMOKE.txt`: clean installed-package current-header/P1-29-header and package-version smoke summary.\n"
 "- `RELEASE_COMPATIBILITY_REVIEW_NOTES.txt`: tag, source/ABI guardrail, hosted-artifact, and remaining reviewer boundaries.\n"
 "- `THREAD_SAFETY_CHECK.txt`: support-matrix, CI-checklist, lock-branch, and build-option check.\n"
@@ -1338,7 +1338,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `poc-package-smoke/`: detailed PoC package smoke logs and staged package when requested.\n"
 "- `release-provenance/`: unsigned source archive, source-file hashes, SPDX 2.3 JSON source inventory, ABI/public-header inputs, signing request placeholder, and authorization TODO bound by `RELEASE_ARTIFACTS.sha256`.\n"
 "- `RELEASE_PROVENANCE_CHECK.txt`: generated bundle hash/path/identity/SBOM/signing-boundary verification.\n"
-"- `RELEASE_PROVENANCE_POLICY_CHECK.txt`: static P1-31 integration and unsigned-release policy verification.\n"
+"- `RELEASE_PROVENANCE_POLICY_CHECK.txt`: static P1-32 integration and unsigned-release policy verification.\n"
 "- `SBOM_STATUS.txt`: source-inventory SBOM scope and limitation status.\n"
 "- `SIGNING_STATUS.txt`: explicit unsigned signing and authorization boundary.\n"
 "- `EVIDENCE_MANIFEST_README.txt`: notes for the generated evidence manifest.\n"

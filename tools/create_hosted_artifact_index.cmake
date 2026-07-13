@@ -156,7 +156,7 @@ list(LENGTH _artifact_files _artifact_file_count)
 set(_index_file
     "${ANO_CRYPTO_HOSTED_ARTIFACT_OUTPUT_DIR}/HOSTED_ARTIFACT_INDEX.txt")
 file(WRITE "${_index_file}"
-    "AnoCrypto-C P1-31 hosted artifact index\n"
+    "AnoCrypto-C P1-32 hosted artifact index\n"
     "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Expected tag metadata: ${ANO_CRYPTO_RELEASE_TAG}\n"
     "Workflow run id: ${_run_id}\n"
@@ -206,7 +206,7 @@ file(WRITE
     "| Windows | TODO | TODO | TODO |\n"
     "| GCC/Clang compiler output | TODO | TODO | No automated timing/cache conclusion |\n"
     "| Differential validation | TODO | TODO | Test-only provider |\n"
-    "| P1-29 headers/P1-31 library | TODO | TODO | Toolchain-specific |\n"
+    "| P1-29 headers/P1-32 library | TODO | TODO | Toolchain-specific |\n"
     "| Release provenance/SBOM bundle | TODO | TODO | Unsigned; external authorization remains TODO |\n"
     "| Tag/commit/release compatibility | TODO | TODO | Expected metadata is not a signature |\n\n"
     "Do not attach keys, entropy, seed material, DRBG state, generated random bytes, AES values, CMAC tags, private keys, signing credentials, tokens, customer data, or internal deployment details.\n")
