@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-32 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-33 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-32")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-33")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -243,10 +243,32 @@ string(TIMESTAMP ANO_CRYPTO_EVIDENCE_UTC "%Y-%m-%dT%H:%M:%SZ" UTC)
 set(_git_commit "unknown")
 set(_git_status "git unavailable or not a repository")
 set(_git_worktree_state "UNKNOWN")
+set(_source_is_git_root FALSE)
 find_program(_git_exe git)
 if(_git_exe)
     execute_process(
-        COMMAND "${_git_exe}" -C "${ANO_CRYPTO_SOURCE_DIR}" rev-parse --verify HEAD
+        COMMAND "${_git_exe}" -C "${ANO_CRYPTO_SOURCE_DIR}" rev-parse --show-toplevel
+        RESULT_VARIABLE _git_root_result
+        OUTPUT_VARIABLE _git_root_output
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        TIMEOUT 30)
+    if(_git_root_result EQUAL 0)
+        get_filename_component(_source_real "${ANO_CRYPTO_SOURCE_DIR}" REALPATH)
+        get_filename_component(_git_root_real "${_git_root_output}" REALPATH)
+        if(WIN32)
+            string(TOLOWER "${_source_real}" _source_real)
+            string(TOLOWER "${_git_root_real}" _git_root_real)
+        endif()
+        if(_source_real STREQUAL _git_root_real)
+            set(_source_is_git_root TRUE)
+        endif()
+    endif()
+endif()
+if(_git_exe AND _source_is_git_root)
+    execute_process(
+        COMMAND "${_git_exe}" -C "${ANO_CRYPTO_SOURCE_DIR}"
+            rev-parse --verify "HEAD^{commit}"
         RESULT_VARIABLE _git_commit_result
         OUTPUT_VARIABLE _git_commit_output
         ERROR_QUIET
@@ -273,6 +295,11 @@ if(_git_exe)
         endif()
     endif()
 endif()
+if(_source_is_git_root AND
+   (_git_commit STREQUAL "unknown" OR NOT _git_worktree_state STREQUAL "CLEAN"))
+    message(FATAL_ERROR
+        "Git-backed P1-33 evidence collection requires a known commit and clean source root")
+endif()
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
 "AnoCrypto-C Release Evidence Draft\n"
@@ -287,7 +314,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
 "Expected tag metadata: ${ANO_CRYPTO_RELEASE_TAG}\n"
 "Compatibility baseline: ${ANO_CRYPTO_COMPAT_BASELINE_VERSION}\n"
 "ABI line and symbol count: ${ANO_CRYPTO_RELEASE_ABI_LINE} / ${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}\n"
-"Reproducible build status: P1-32 retained draft procedure; binary byte identity not claimed\n"
+"Reproducible build status: P1-33 retained draft procedure; binary byte identity not claimed\n"
 "Evidence status: engineering draft only\n"
 "Claims boundary: not official validation evidence\n")
 
@@ -343,6 +370,144 @@ file(COPY "${ANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR}"
     DESTINATION "${ANO_CRYPTO_EVIDENCE_DIR}")
 configure_file("${ANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK}"
     "${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_SIGNING_HANDOFF_CHECK.txt" COPYONLY)
+
+function(_ano_read_unique_prepared_key _path _key _out)
+    if(NOT EXISTS "${_path}" OR IS_DIRECTORY "${_path}" OR IS_SYMLINK "${_path}")
+        message(FATAL_ERROR "Prepared binding input is missing or unsafe: ${_path}")
+    endif()
+    file(STRINGS "${_path}" _matches REGEX "^${_key}=")
+    list(LENGTH _matches _match_count)
+    if(NOT _match_count EQUAL 1)
+        message(FATAL_ERROR
+            "Prepared binding key ${_key} must occur exactly once in ${_path}")
+    endif()
+    list(GET _matches 0 _line)
+    string(REGEX REPLACE "^[^=]*=" "" _value "${_line}")
+    set(${_out} "${_value}" PARENT_SCOPE)
+endfunction()
+
+set(_collected_provenance
+    "${ANO_CRYPTO_EVIDENCE_DIR}/release-provenance/RELEASE_PROVENANCE.txt")
+foreach(_key IN ITEMS release_version expected_tag actual_tag source_commit
+                       worktree_state signing_status release_authorization
+                       external_release_authorized result)
+    _ano_read_unique_prepared_key(
+        "${_collected_provenance}" "${_key}" "_collected_prov_${_key}")
+endforeach()
+if(NOT _collected_prov_release_version STREQUAL ANO_CRYPTO_RELEASE_VERSION OR
+   NOT _collected_prov_expected_tag STREQUAL ANO_CRYPTO_RELEASE_TAG OR
+   NOT _collected_prov_actual_tag STREQUAL "not-recorded" OR
+   NOT _collected_prov_source_commit STREQUAL _git_commit OR
+   NOT _collected_prov_worktree_state STREQUAL _git_worktree_state OR
+   NOT _collected_prov_signing_status STREQUAL "UNSIGNED" OR
+   NOT _collected_prov_release_authorization STREQUAL "BLOCKED" OR
+   NOT _collected_prov_external_release_authorized STREQUAL "NO" OR
+   NOT _collected_prov_result STREQUAL "PASS")
+    message(FATAL_ERROR
+        "Prepared provenance does not match the current P1-33 source/release boundary")
+endif()
+
+set(_collected_handoff_request
+    "${ANO_CRYPTO_EVIDENCE_DIR}/release-signing-handoff/SIGNING_REQUEST.txt")
+foreach(_key IN ITEMS release_version expected_tag source_commit subject readiness
+                       external_release_authorized)
+    _ano_read_unique_prepared_key(
+        "${_collected_handoff_request}" "${_key}" "_collected_request_${_key}")
+endforeach()
+if(NOT _collected_request_release_version STREQUAL ANO_CRYPTO_RELEASE_VERSION OR
+   NOT _collected_request_expected_tag STREQUAL ANO_CRYPTO_RELEASE_TAG OR
+   NOT _collected_request_source_commit STREQUAL _git_commit OR
+   NOT _collected_request_subject STREQUAL "RELEASE_ARTIFACTS.sha256" OR
+   NOT _collected_request_readiness STREQUAL "BLOCKED" OR
+   NOT _collected_request_external_release_authorized STREQUAL "NO")
+    message(FATAL_ERROR
+        "Prepared signing request does not match the current P1-33 provenance boundary")
+endif()
+
+set(_collected_handoff_disposition
+    "${ANO_CRYPTO_EVIDENCE_DIR}/release-signing-handoff/HOSTED_ARTIFACT_DISPOSITION.txt")
+foreach(_key IN ITEMS review_status reviewer review_date disposition signing_status
+                       handoff_status external_release_authorized result)
+    _ano_read_unique_prepared_key(
+        "${_collected_handoff_disposition}" "${_key}"
+        "_collected_disposition_${_key}")
+endforeach()
+if(NOT _collected_disposition_review_status STREQUAL "UNREVIEWED" OR
+   NOT _collected_disposition_reviewer STREQUAL "UNPROVISIONED" OR
+   NOT _collected_disposition_review_date STREQUAL "UNREVIEWED" OR
+   NOT _collected_disposition_disposition STREQUAL "UNREVIEWED" OR
+   NOT _collected_disposition_signing_status STREQUAL "UNSIGNED" OR
+   NOT _collected_disposition_handoff_status STREQUAL "BLOCKED" OR
+   NOT _collected_disposition_external_release_authorized STREQUAL "NO" OR
+   NOT _collected_disposition_result STREQUAL "BLOCKED")
+    message(FATAL_ERROR
+        "Prepared hosted disposition crosses the P1-33 unreviewed/blocked boundary")
+endif()
+
+file(READ "${ANO_CRYPTO_EVIDENCE_DIR}/PREPARED_RELEASE_PROVENANCE_SUMMARY.txt"
+    _prepared_summary_text)
+foreach(_summary_line IN ITEMS
+        "Release version: ${ANO_CRYPTO_RELEASE_VERSION}"
+        "Git commit: ${_git_commit}"
+        "Git status: ${_git_status}"
+        "Worktree state: ${_git_worktree_state}"
+        "Provenance verification: PASS"
+        "Signing status: UNSIGNED"
+        "External release authorized: NO"
+        "Result: PASS")
+    string(FIND "${_prepared_summary_text}" "${_summary_line}" _summary_position)
+    if(_summary_position EQUAL -1)
+        message(FATAL_ERROR
+            "Prepared provenance summary does not match current evidence: ${_summary_line}")
+    endif()
+endforeach()
+
+foreach(_binding_name IN ITEMS
+        RELEASE_PROVENANCE.txt HOSTED_ARTIFACT_DISPOSITION.txt
+        RELEASE_ARTIFACTS.sha256)
+    file(SHA256
+        "${ANO_CRYPTO_EVIDENCE_DIR}/release-provenance/${_binding_name}"
+        _provenance_binding_hash)
+    file(SHA256
+        "${ANO_CRYPTO_EVIDENCE_DIR}/release-signing-handoff/${_binding_name}"
+        _handoff_binding_hash)
+    if(NOT _provenance_binding_hash STREQUAL _handoff_binding_hash)
+        message(FATAL_ERROR
+            "Prepared provenance/signing-handoff binding mismatch: ${_binding_name}")
+    endif()
+endforeach()
+
+execute_process(
+    COMMAND "${CMAKE_COMMAND}"
+        -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+        -DANO_CRYPTO_PROVENANCE_BUNDLE_DIR=${ANO_CRYPTO_EVIDENCE_DIR}/release-provenance
+        -DANO_CRYPTO_PROVENANCE_CHECK_OUTPUT=${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_PROVENANCE_CHECK.txt
+        -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_release_provenance_bundle.cmake"
+    RESULT_VARIABLE _current_provenance_check_result
+    OUTPUT_VARIABLE _current_provenance_check_stdout
+    ERROR_VARIABLE _current_provenance_check_stderr
+    TIMEOUT 300)
+if(NOT _current_provenance_check_result EQUAL 0)
+    message(FATAL_ERROR
+        "Current-source provenance recheck failed:\n${_current_provenance_check_stdout}${_current_provenance_check_stderr}")
+endif()
+execute_process(
+    COMMAND "${CMAKE_COMMAND}"
+        -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+        -DANO_CRYPTO_SIGNING_HANDOFF_DIR=${ANO_CRYPTO_EVIDENCE_DIR}/release-signing-handoff
+        -DANO_CRYPTO_SIGNING_HANDOFF_CHECK_OUTPUT=${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_SIGNING_HANDOFF_CHECK.txt
+        -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_release_signing_handoff.cmake"
+    RESULT_VARIABLE _current_handoff_check_result
+    OUTPUT_VARIABLE _current_handoff_check_stdout
+    ERROR_VARIABLE _current_handoff_check_stderr
+    TIMEOUT 300)
+if(NOT _current_handoff_check_result EQUAL 0)
+    message(FATAL_ERROR
+        "Current-source signing-handoff recheck failed:\n${_current_handoff_check_stdout}${_current_handoff_check_stderr}")
+endif()
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "Prepared provenance/current source binding: PASS\n"
+    "Prepared signing handoff/current provenance binding: PASS\n")
 
 foreach(_passed_artifact IN ITEMS
         PREPARED_RELEASE_PROVENANCE_SUMMARY.txt
@@ -462,6 +627,16 @@ if(ANO_CRYPTO_RUN_TAGGED_COMPATIBILITY_CHECK)
     endif()
     configure_file("${_prepared_tagged_compatibility_summary}"
         "${ANO_CRYPTO_EVIDENCE_DIR}/TAGGED_COMPATIBILITY_SMOKE.txt" COPYONLY)
+    set(_prepared_tag_identity
+        "${_prepared_tagged_compatibility_dir}/TAG_COMMIT_IDENTITY_CHECK.txt")
+    if(NOT EXISTS "${_prepared_tag_identity}" OR
+       IS_DIRECTORY "${_prepared_tag_identity}" OR
+       IS_SYMLINK "${_prepared_tag_identity}")
+        message(FATAL_ERROR
+            "prepared tag/commit identity status is unavailable: ${_prepared_tag_identity}")
+    endif()
+    configure_file("${_prepared_tag_identity}"
+        "${ANO_CRYPTO_EVIDENCE_DIR}/TAG_COMMIT_IDENTITY_CHECK.txt" COPYONLY)
     foreach(_compat_log IN ITEMS
             CONSUMER_CTEST.log
             PACKAGE_VERSION_EXACT_CTEST.log
@@ -823,7 +998,7 @@ endif()
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "AnoCrypto-C reproducible build evidence notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-32 retained draft procedure; binary byte identity is not claimed.\n"
+    "Status: P1-33 retained draft procedure; binary byte identity is not claimed.\n"
     "Source directory: ${ANO_CRYPTO_SOURCE_DIR}\n"
     "Build directory: ${ANO_CRYPTO_BUILD_DIR}\n"
     "Source archive content list: SOURCE_ARCHIVE_CONTENTS.txt\n"
@@ -848,9 +1023,9 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-32 evidence and scope-review notes\n"
+    "AnoCrypto-C P1-33 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-32 engineering scope artifact covering implemented SHA-2/HMAC, random, AES-CBC, and AES-CMAC services; not official validation evidence.\n"
+    "Status: P1-33 engineering scope artifact covering implemented SHA-2/HMAC, random, AES-CBC, and AES-CMAC services; not official validation evidence.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"
@@ -959,7 +1134,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Exported symbol baseline review notes: EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_COMPATIBILITY_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-32 release compatibility review notes\n"
+    "AnoCrypto-C P1-33 release compatibility review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
     "Current version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Expected tag metadata: ${ANO_CRYPTO_RELEASE_TAG}\n"
@@ -968,8 +1143,8 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_COMPATIBILITY_REVIEW_NOTES.txt"
     "ABI-0 exports: ${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}\n"
     "Automated policy: RELEASE_COMPATIBILITY_CHECK.txt\n"
     "Installed consumer smoke: TAGGED_COMPATIBILITY_SMOKE.txt\n"
-    "Hosted artifact review: TODO; local evidence does not establish Windows, macOS, Linux 32-bit, or big-endian compatibility.\n"
-    "Tag verification: expected metadata is recorded; existence and commit identity require a tagged Git checkout or signed release procedure.\n"
+    "Hosted artifact execution: NOT_RUN; review: UNREVIEWED. Local evidence does not establish Windows, macOS, Linux 32-bit, or big-endian compatibility.\n"
+    "Actual tag: NOT_CREATED; tag verification: NOT_RUN. Expected metadata is recorded, while real tag/commit identity requires a tagged Git checkout.\n"
     "Limit: normalized source declarations and symbol references are engineering guardrails, not universal ABI or semantic compatibility proof.\n"
     "Sensitive cryptographic values retained by this review: no.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
@@ -1029,6 +1204,131 @@ configure_file("${_prepared_ctest_summary}"
     "${ANO_CRYPTO_EVIDENCE_DIR}/CTEST_EVIDENCE_SUMMARY.txt" COPYONLY)
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
     "CTest result: 0 (prepared predecessor artifact)\n")
+
+set(_prepared_rehearsal_report
+    "${ANO_CRYPTO_BUILD_DIR}/tagged-release-rehearsal-test/TAGGED_RELEASE_REHEARSAL.txt")
+if(NOT EXISTS "${_prepared_rehearsal_report}" OR
+   IS_DIRECTORY "${_prepared_rehearsal_report}" OR
+   IS_SYMLINK "${_prepared_rehearsal_report}")
+    message(FATAL_ERROR "Prepared tagged-release rehearsal report is missing or unsafe")
+endif()
+file(STRINGS "${_prepared_rehearsal_report}" _rehearsal_magic_lines LIMIT_COUNT 1)
+list(GET _rehearsal_magic_lines 0 _rehearsal_magic)
+if(NOT _rehearsal_magic STREQUAL "ANOCRYPTO_TAGGED_RELEASE_REHEARSAL_V1")
+    message(FATAL_ERROR "Prepared tagged-release rehearsal has invalid magic")
+endif()
+foreach(_key IN ITEMS release_version expected_tag mode source_commit rehearsal_commit
+                       source_worktree_state source_expected_tag_before
+                       source_expected_tag_after source_repository_unchanged
+                       synthetic_tag_scope tag_commit_head_identity
+                       dirty_worktree_rejection moved_tag_rejection
+                       moved_head_rejection user_repository_tag_created tag_signing
+                       actual_signature timestamp_response hosted_runner
+                       hosted_artifact_review github_attestation
+                       repository_signing_status signing_handoff
+                       external_release_authorized release_rehearsal_status result)
+    _ano_read_unique_prepared_key(
+        "${_prepared_rehearsal_report}" "${_key}" "_rehearsal_${_key}")
+endforeach()
+if(NOT _rehearsal_release_version STREQUAL ANO_CRYPTO_RELEASE_VERSION OR
+   NOT _rehearsal_expected_tag STREQUAL ANO_CRYPTO_RELEASE_TAG OR
+   NOT _rehearsal_synthetic_tag_scope STREQUAL "ISOLATED_REPOSITORY_ONLY" OR
+   NOT _rehearsal_tag_commit_head_identity STREQUAL "PASS" OR
+   NOT _rehearsal_dirty_worktree_rejection STREQUAL "PASS" OR
+   NOT _rehearsal_moved_tag_rejection STREQUAL "PASS" OR
+   NOT _rehearsal_moved_head_rejection STREQUAL "PASS" OR
+   NOT _rehearsal_user_repository_tag_created STREQUAL "NO" OR
+   NOT _rehearsal_tag_signing STREQUAL "NOT_RUN" OR
+   NOT _rehearsal_actual_signature STREQUAL "NOT_CREATED" OR
+   NOT _rehearsal_timestamp_response STREQUAL "NOT_CREATED" OR
+   NOT _rehearsal_hosted_runner STREQUAL "NOT_RUN" OR
+   NOT _rehearsal_hosted_artifact_review STREQUAL "UNREVIEWED" OR
+   NOT _rehearsal_github_attestation STREQUAL "NOT_RUN_SECONDARY_ONLY" OR
+   NOT _rehearsal_repository_signing_status STREQUAL "UNSIGNED" OR
+   NOT _rehearsal_signing_handoff STREQUAL "BLOCKED" OR
+   NOT _rehearsal_external_release_authorized STREQUAL "NO" OR
+   NOT _rehearsal_result STREQUAL "PASS")
+    message(FATAL_ERROR "Prepared tagged-release rehearsal crosses the P1-33 boundary")
+endif()
+if(_source_is_git_root)
+    if(NOT _rehearsal_mode STREQUAL "CLEAN_GIT_CLONE" OR
+       NOT _rehearsal_source_commit STREQUAL _git_commit OR
+       NOT _rehearsal_rehearsal_commit STREQUAL _git_commit OR
+       NOT _rehearsal_source_worktree_state STREQUAL "CLEAN" OR
+       NOT _rehearsal_source_expected_tag_before STREQUAL "ABSENT" OR
+       NOT _rehearsal_source_expected_tag_after STREQUAL "ABSENT" OR
+       NOT _rehearsal_source_repository_unchanged STREQUAL "YES" OR
+       NOT _rehearsal_release_rehearsal_status STREQUAL "PASS")
+        message(FATAL_ERROR
+            "Clean Git evidence requires current commit, absent tag, and source-invariant rehearsal")
+    endif()
+else()
+    string(LENGTH "${_rehearsal_rehearsal_commit}" _archive_rehearsal_commit_length)
+    if(NOT _rehearsal_mode STREQUAL "SYNTHETIC_ARCHIVE_ONLY" OR
+       NOT _rehearsal_source_commit STREQUAL "NOT_AVAILABLE" OR
+       NOT _rehearsal_source_worktree_state STREQUAL "NOT_A_GIT_WORKTREE" OR
+       NOT _rehearsal_source_expected_tag_before STREQUAL "NOT_APPLICABLE" OR
+       NOT _rehearsal_source_expected_tag_after STREQUAL "NOT_APPLICABLE" OR
+       NOT _rehearsal_source_repository_unchanged STREQUAL "NOT_APPLICABLE" OR
+       NOT _rehearsal_release_rehearsal_status STREQUAL "SYNTHETIC_ARCHIVE_ONLY" OR
+       NOT (_archive_rehearsal_commit_length EQUAL 40 OR
+            _archive_rehearsal_commit_length EQUAL 64) OR
+       NOT _rehearsal_rehearsal_commit MATCHES "^[0-9a-fA-F]+$")
+        message(FATAL_ERROR
+            "Archive evidence must remain an explicit synthetic, non-Git rehearsal")
+    endif()
+endif()
+configure_file("${_prepared_rehearsal_report}"
+    "${ANO_CRYPTO_EVIDENCE_DIR}/TAGGED_RELEASE_REHEARSAL.txt" COPYONLY)
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "Tagged-release rehearsal: TAGGED_RELEASE_REHEARSAL.txt\n")
+
+set(_prepared_hosted_review_dir
+    "${ANO_CRYPTO_BUILD_DIR}/hosted-artifact-manifest-test")
+set(_prepared_hosted_disposition
+    "${_prepared_hosted_review_dir}/HOSTED_ARTIFACT_REVIEW_REGRESSION.txt")
+set(_prepared_hosted_matrix
+    "${_prepared_hosted_review_dir}/HOSTED_ARTIFACT_MATRIX_REGRESSION.txt")
+foreach(_prepared_hosted_file IN ITEMS
+        "${_prepared_hosted_disposition}" "${_prepared_hosted_matrix}")
+    if(NOT EXISTS "${_prepared_hosted_file}" OR
+       IS_DIRECTORY "${_prepared_hosted_file}" OR
+       IS_SYMLINK "${_prepared_hosted_file}")
+        message(FATAL_ERROR "Prepared hosted-artifact review regression is missing or unsafe")
+    endif()
+endforeach()
+file(READ "${_prepared_hosted_disposition}" _prepared_hosted_disposition_text)
+foreach(_required_hosted_text IN ITEMS
+        "ANOCRYPTO_HOSTED_ARTIFACT_DISPOSITION_V2"
+        "required_tuple_count=16"
+        "required_hosted_tuple_count=0"
+        "hosted_runner_bundle_count=0"
+        "synthetic_local_bundle_count=16"
+        "artifact_index_sha256="
+        "artifact_files_manifest_sha256="
+        "hosted_execution_status=NOT_RUN"
+        "review_status=UNREVIEWED"
+        "reviewer=UNPROVISIONED"
+        "review_date=UNREVIEWED"
+        "disposition=UNREVIEWED"
+        "signing_status=UNSIGNED"
+        "handoff_status=BLOCKED"
+        "external_release_authorized=NO"
+        "github_attestation_role=OPTIONAL_SECONDARY_NOT_TRUST_ROOT"
+        "result=BLOCKED")
+    string(FIND "${_prepared_hosted_disposition_text}" "${_required_hosted_text}"
+        _required_hosted_position)
+    if(_required_hosted_position EQUAL -1)
+        message(FATAL_ERROR
+            "Hosted-artifact review regression omits ${_required_hosted_text}")
+    endif()
+endforeach()
+configure_file("${_prepared_hosted_disposition}"
+    "${ANO_CRYPTO_EVIDENCE_DIR}/HOSTED_ARTIFACT_REVIEW_REGRESSION.txt" COPYONLY)
+configure_file("${_prepared_hosted_matrix}"
+    "${ANO_CRYPTO_EVIDENCE_DIR}/HOSTED_ARTIFACT_MATRIX_REGRESSION.txt" COPYONLY)
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "Hosted-artifact review regression: synthetic NOT_RUN / UNREVIEWED / BLOCKED\n")
 
 function(_ano_crypto_find_evidence_test_executable _test_name _out_var)
     if(ANO_CRYPTO_MULTI_CONFIG_BUILD)
@@ -1182,12 +1482,12 @@ if(NOT _thread_platform_review_result EQUAL 0 OR
 endif()
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CONCURRENCY_SANITIZER_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-32 concurrency and sanitizer review notes\n"
+    "AnoCrypto-C P1-33 concurrency and sanitizer review notes\n"
     "Status: engineering evidence only; not official validation evidence.\n"
     "Policy check: CONCURRENCY_SANITIZER_CHECK.txt\n"
     "Platform status: THREAD_PLATFORM_REVIEW.log\n"
     "Selected required sanitizer lane: Linux GCC address+undefined in hosted CI; Clang runtime review remains TODO.\n"
-    "ThreadSanitizer: not selected in P1-32; runtime/toolchain review remains TODO.\n"
+    "ThreadSanitizer: not selected in P1-33; runtime/toolchain review remains TODO.\n"
     "Build-identity ABI decision: docs/design/BUILD_IDENTITY_ABI_0_DECISION.md\n"
     "Actual hosted Linux/macOS/Windows artifacts require separate review before support wording is widened.\n"
     "Logs must not contain key bytes, MAC output, entropy, seed material, DRBG state, generated random bytes, private keys, tokens, or customer data.\n")
@@ -1306,8 +1606,12 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `SOURCE_ARCHIVE.sha256`: SHA-256 hash of `anocrypto-c-source.tar.gz` when archive creation is enabled.\n"
 "- `BINARY_FILES.sha256`: SHA-256 hashes of build outputs matched by the script.\n"
 "- `PUBLIC_SURFACE_CHECK.txt`: repository naming, claims-boundary, header, and package identity check.\n"
-"- `RELEASE_COMPATIBILITY_CHECK.txt`: P1-29/P1-32 normalized public declaration, header-hash, release-identity, and stored-symbol comparison.\n"
+"- `RELEASE_COMPATIBILITY_CHECK.txt`: P1-29/P1-33 normalized public declaration, header-hash, release-identity, and stored-symbol comparison.\n"
 "- `TAGGED_COMPATIBILITY_SMOKE.txt`: clean installed-package current-header/P1-29-header and package-version smoke summary.\n"
+"- `TAG_COMMIT_IDENTITY_CHECK.txt`: strict tagged-workflow identity result or explicit NOT_RUN placeholder when no actual tag exists.\n"
+"- `TAGGED_RELEASE_REHEARSAL.txt`: isolated synthetic-tag identity and dirty/moved-tag/moved-HEAD rejection results.\n"
+"- `HOSTED_ARTIFACT_REVIEW_REGRESSION.txt`: synthetic/local fixture disposition, explicitly NOT_RUN/UNREVIEWED/BLOCKED.\n"
+"- `HOSTED_ARTIFACT_MATRIX_REGRESSION.txt`: exact required lane/platform/architecture/compiler tuple regression index.\n"
 "- `RELEASE_COMPATIBILITY_REVIEW_NOTES.txt`: tag, source/ABI guardrail, hosted-artifact, and remaining reviewer boundaries.\n"
 "- `THREAD_SAFETY_CHECK.txt`: support-matrix, CI-checklist, lock-branch, and build-option check.\n"
 "- `CONCURRENCY_SANITIZER_CHECK.txt`: P1-26 cross-platform concurrency, sanitizer-lane, and build-identity ABI policy check.\n"
@@ -1347,9 +1651,9 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `INSTALL_SMOKE_SUMMARY.txt`: install smoke paths and result when requested.\n"
 "- `POC_PACKAGE_SMOKE.log`: customer PoC package creation/configure/build/run summary when requested.\n"
 "- `poc-package-smoke/`: detailed PoC package smoke logs and staged package when requested.\n"
-"- `release-provenance/`: unsigned source archive, source-file hashes, SPDX 2.3 JSON source inventory, ABI/public-header inputs, signing request placeholder, and authorization TODO bound by `RELEASE_ARTIFACTS.sha256`.\n"
+"- `release-provenance/`: unsigned source archive, source-file hashes, SPDX 2.3 JSON source inventory, ABI/public-header inputs, signing request placeholder, and BLOCKED authorization bound by `RELEASE_ARTIFACTS.sha256`.\n"
 "- `RELEASE_PROVENANCE_CHECK.txt`: generated bundle hash/path/identity/SBOM/signing-boundary verification.\n"
-"- `RELEASE_PROVENANCE_POLICY_CHECK.txt`: static P1-32 integration and unsigned-release policy verification.\n"
+"- `RELEASE_PROVENANCE_POLICY_CHECK.txt`: static P1-33 integration and unsigned-release policy verification.\n"
 "- `release-signing-handoff/`: key-free Ed25519/RFC 3161 offline-signing request and BLOCKED readiness metadata.\n"
 "- `RELEASE_SIGNING_HANDOFF_CHECK.txt`: manifest, policy, role-separation, and sensitive-material verification.\n"
 "- `SBOM_STATUS.txt`: source-inventory SBOM scope and limitation status.\n"

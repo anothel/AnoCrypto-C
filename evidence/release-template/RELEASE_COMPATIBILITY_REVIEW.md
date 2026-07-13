@@ -5,6 +5,7 @@ Expected tag: TODO
 Baseline: TODO
 Commit: TODO
 Reviewer/date: TODO
+Artifact origin: SYNTHETIC_LOCAL / HOSTED_RUNNER / NOT_APPLICABLE
 
 ## Automated results
 
@@ -18,8 +19,10 @@ Reviewer/date: TODO
 | Retained-header installed consumer | TODO | compatibility CTest log |
 | Exact package-version request | TODO | package-version log |
 | Incompatible package-version rejection | TODO | configure log |
-| Tag/commit/HEAD identity | TODO | tagged Git check |
-| Hosted bundle manifest/index | TODO | hosted index |
+| Clean worktree | TODO | isolated rehearsal status |
+| Tag/commit/HEAD identity | TODO | synthetic rehearsal or actual tagged Git check |
+| Moved tag/HEAD rejection | TODO | rehearsal regression |
+| Hosted bundle manifest/index | NOT_RUN / UNREVIEWED / REVIEWED | hosted index |
 
 ## Reviewer disposition
 
@@ -27,6 +30,9 @@ Reviewer/date: TODO
 - Compatibility limitations recorded: TODO
 - Baseline material excluded from installed SDK and PoC: TODO
 - Sensitive-value scan reviewed: TODO
+- Synthetic/local result not represented as hosted evidence: TODO
+- Artifact hash and workflow commit/ref agree: TODO
+- Platform/compiler/architecture metadata reviewed: TODO
 - Release authorization/signature status: TODO
 - Decision: TODO
 

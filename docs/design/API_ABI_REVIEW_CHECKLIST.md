@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-32 engineering draft.
+Status: P1-33 engineering draft.
 
 ## Identity
 
@@ -88,3 +88,12 @@ remain separate review items.
 - The retained baseline tree, compatibility source, hosted manifests, and release-internal metadata are not installed and are excluded from the customer PoC package.
 
 These checks are toolchain-specific guardrails. Calling convention, loader behavior, all semantic paths, untested architectures, and applications that persist opaque context bytes remain outside the automated conclusion.
+
+## P1-33 release rehearsal ABI review
+
+- Release version/prerelease metadata advances to `0.1.0-p1-33-release-rehearsal`; package version remains `0.1.0`.
+- No public header, function, enum value, non-version macro contract, type, or exported symbol is added or removed.
+- Public header count remains 14; clean Release export count remains 69 on `ANOCRYPTO_C_0`.
+- Normalized declarations, public types, non-version constants, and the stored symbol list remain equal to the P1-29 baseline.
+- Current-header/P1-33-library and retained-P1-29-header/P1-33-library consumers bind the same 69 functions.
+- Clean tag rehearsal, hosted review metadata, provenance, and signing-handoff changes remain build/test/evidence tooling, not public ABI.

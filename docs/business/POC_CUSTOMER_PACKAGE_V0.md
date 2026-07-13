@@ -150,7 +150,7 @@ Do not add or retain secrets, entropy captures, generated secret bytes, private 
 
 - Decide binary SDK versus source-available evaluation terms.
 - Add license/evaluation notice text after legal review.
-- Generate a package-specific SBOM only after dependency/license/vulnerability scope is reviewed; keep the package unsigned until the P1-32 policy has a provisioned production signer, approved RFC 3161 service/trust anchor, verified signature/timestamp, distinct role approvals, and external-release authorization.
+- Generate a package-specific SBOM only after dependency/license/vulnerability scope is reviewed; keep the package unsigned until the P1-32-defined policy has a provisioned production signer, approved RFC 3161 service/trust anchor, verified signature/timestamp, distinct role approvals, and external-release authorization.
 - Customer questionnaire for OS, CPU, compiler, linker, deployment model, and required algorithm scope is available as `CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md`.
 - Add a support boundary document for error reports and evidence requests.
 
@@ -236,3 +236,9 @@ P1-32 defines the internal release handoff and verifier policy: the exact subjec
 The customer PoC does not carry the handoff directory, `SIGNING_POLICY.txt`, `SIGNING_REQUEST.txt`, signer/TSA approval records, `SIGNING_HANDOFF_FILES.sha256`, `SIGNING_HANDOFF_STATUS.txt`, release authorization records, private/public signing keys, tokens, detached signatures, timestamp requests/responses, certificates, or trust anchors. It carries only package-local `UNSIGNED`/external-`NO` status and policy-boundary notes. Debug-only ephemeral signing fixtures are never part of the clean PoC SDK or package.
 
 The production signer and timestamp authority remain unprovisioned. No hosted run, release tag, production signature/timestamp verification, role approval, or external-release authorization has been performed; handoff remains `BLOCKED`.
+
+## P1-33 clean rehearsal and hosted-review package boundary
+
+P1-33 rehearses tag/commit/`HEAD` identity only in an isolated temporary repository and keeps synthetic/local artifacts distinct from actual hosted results. The customer PoC contains neither the rehearsal repository nor hosted review bundles, indexes, workflow metadata, reviewer records, or internal release evidence.
+
+No hosted execution is claimed by the package. Missing actual hosted results remain `NOT_RUN`; downloaded but undispositioned results remain `UNREVIEWED`. The package remains an unsigned integration draft and does not authorize tag creation, production signing, timestamping, or external release.

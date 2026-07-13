@@ -1,6 +1,6 @@
 # Customer PoC Package Review Manifest
 
-Status: P1-32 engineering draft.
+Status: P1-33 engineering draft.
 
 ## Purpose
 
@@ -124,3 +124,7 @@ values.
 ## P1-32 provenance package note
 
 Review `RELEASE_PROVENANCE_PACKAGE_NOTES.txt` and `RELEASE_PROVENANCE_POLICY_CHECK.log`. Confirm the package contains no internal source archive/SBOM/provenance manifest/signing request/authorization record, that `PACKAGE_MANIFEST.md` is described only as a package-local hash inventory, and that no signing or external-release approval is implied.
+
+## P1-33 rehearsal and hosted-review package note
+
+Confirm the customer package contains no synthetic tag repository, hosted bundle/index, rehearsal worktree metadata, workflow artifact, internal provenance/handoff directory, reviewer identity record, or release authorization record. Package-local smoke results do not represent an actual hosted run, tag, signature, timestamp, approval, or external-release authorization. Signing remains `UNSIGNED` and external sharing remains blocked pending separate review.

@@ -605,3 +605,21 @@ P1-30 hosted artifacts retain only status, counts, versions, target/compiler met
 - RFC 3161 timestamp verification covers `RELEASE_ARTIFACTS.sha256.ed25519`; production TSA policy and trust-anchor values remain unprovisioned.
 - Security Reviewer and Product Release Owner identities are separate project authorization roles. GitHub artifact attestation remains optional secondary evidence only.
 - Production keys, tokens, signatures, timestamp responses, certificates, trust anchors, approver identities, and credentials are not included. The repository remains unsigned and externally unauthorized.
+
+## P1-33 Clean Tagged-Release Rehearsal and Hosted Review Inputs
+
+| ID | Input | Classification | Use | Boundary |
+|---|---|---|---|---|
+| SRC-4101 | Public Git command documentation for clone, tag, rev-parse, status, and worktree identity | Public documentation | Define isolated synthetic tag creation, tag/commit/`HEAD` resolution, and clean-worktree checks | Command semantics only; no third-party release script, tag, credential, or repository history copied. |
+| SRC-3902-R2 | Public GitHub Actions artifact metadata and attestation concepts already reviewed in P1-31/P1-32 | Public documentation | Separate workflow/artifact identity from human review and keep attestation secondary | Workflow presence, hashes, or attestation do not become hosted review or release authorization. |
+| DER-4101 | Fresh clean-checkout tagged-release rehearsal and fail-closed identity checks | User-owned project tooling | Exercise synthetic tag, commit, `HEAD`, worktree, and evidence reproduction without modifying the user repository | No user-repository tag, tag signature, history rewrite, push, or production release action is performed. |
+| DER-4102 | Fresh hosted artifact review records and negative regressions | User-owned project tooling/tests | Fix required lane/platform combinations and reject incomplete, mismatched, unsafe, or falsely approved artifacts | Fixtures are explicitly synthetic and cannot be recorded as actual hosted execution. |
+| DER-4103 | Fresh P1-33 release, CI, evidence, PoC, roadmap, and clean-room documentation | User-owned project material | Keep `NOT_RUN`/`UNREVIEWED`, unsigned/BLOCKED, and actual-versus-synthetic boundaries explicit | No completed hosted review, actual tag, production signature, timestamp, or external authorization is claimed. |
+
+## P1-33 Clean-room Notes
+
+- The rehearsal and hosted-review tooling is fresh project-owned CMake/Git orchestration based on public command and metadata concepts.
+- A synthetic local tag is created only in an isolated temporary repository and is never represented as a user-repository or production tag.
+- Actual hosted records require artifact hash, workflow commit/ref, platform, compiler, architecture, reviewer, UTC review date, disposition, and `HOSTED_RUNNER` origin.
+- Synthetic fixtures remain `SYNTHETIC_LOCAL`; unavailable hosted execution remains `NOT_RUN`; downloaded but undispositioned output remains `UNREVIEWED`.
+- Production signer/TSA remain `UNPROVISIONED`; signing remains `UNSIGNED`, handoff `BLOCKED`, and external release `NO`.

@@ -1,10 +1,10 @@
 # Release Provenance CI Checklist
 
-Status: P1-32 unsigned engineering checklist. Actual tag authorization, hosted-artifact review, production signing, RFC 3161 timestamping, role approval, and external release remain incomplete.
+Status: P1-33 unsigned engineering checklist. Actual tag authorization, hosted-artifact review, production signing, RFC 3161 timestamping, role approval, and external release remain incomplete.
 
 ## Configure and static policy
 
-- Configure with release identity `0.1.0-p1-32-signing-handoff`.
+- Configure with release identity `0.1.0-p1-33-release-rehearsal`.
 - Run `ano_crypto_release_compatibility_policy_check`.
 - Run `ano_crypto_release_provenance_policy_check`.
 - Confirm the clean Release public surface remains 14 headers and 69 ABI-0 symbols.
@@ -72,7 +72,7 @@ Require the release-evidence dependency chain to prepare and verify prerequisite
 - full CTest result;
 - prepared provenance bundle/check;
 - key-free signing handoff/check;
-- complete `prepared-release-evidence/p1-32/EVIDENCE_MANIFEST.sha256` status tree.
+- complete `prepared-release-evidence/p1-33/EVIDENCE_MANIFEST.sha256` status tree.
 
 Final evidence must contain:
 
@@ -99,7 +99,16 @@ Confirm evidence manifests cover the copied provenance and handoff directories. 
 
 The hosted provenance lane may upload status/hash metadata and source inventory. It must not upload private keys, signing tokens, certificates with private keys, signatures, timestamp requests/responses, customer data, unpublished deployment data, entropy, seed, DRBG state, generated random values, AES values, or CMAC tags.
 
-The hosted artifact index requires the configured release-provenance lane. Presence, hash, workflow, or GitHub attestation does not complete human disposition and is secondary to the approved detached-signature path.
+The hosted artifact index requires the configured release-provenance and signing-handoff categories. Presence, hash, workflow, or GitHub attestation does not complete human disposition and is secondary to the approved detached-signature path.
+
+## P1-33 rehearsal and hosted-review regression
+
+- Run the tagged-release rehearsal only in an isolated clean Git checkout with a synthetic local tag.
+- Require tag, supplied commit, and `HEAD` equality; reject dirty state, moved tag, moved `HEAD`, commit mismatch, and ref mismatch.
+- Require explicit Linux, Windows, macOS, Linux 32-bit, s390x big-endian, GCC/Clang compiler-output, OpenSSL differential, release-provenance, and signing-handoff categories.
+- Bind artifact hash, workflow commit/ref, platform, compiler, architecture, reviewer, UTC review date, disposition, and actual-versus-synthetic origin.
+- Reject missing or duplicate lanes, unlisted files, hash mismatch, traversal, symlinks, oversized or unexpected binary-like files, sensitive markers, missing reviewer/date, conflicting approval roles, and false `PASS`/`APPROVED` status.
+- Keep no-run hosted results `NOT_RUN`, unreviewed downloaded artifacts `UNREVIEWED`, signing `UNSIGNED`, handoff `BLOCKED`, and external authorization `NO`.
 
 ## PoC boundary
 

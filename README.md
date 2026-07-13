@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: `0.1.0-p1-32-signing-handoff`, an engineering slice that retains the P1-29 cryptographic processing scope, reviewed 69-symbol ABI-0 surface, P1-30 compatibility guard, and P1-31 unsigned release-provenance bundle. P1-32 adds a key-free offline signing handoff and verifier policy for the exact `RELEASE_ARTIFACTS.sha256` subject: Ed25519 raw 64-byte signatures, SHA-256 fingerprints over SPKI DER public keys, and required RFC 3161 timestamps over the detached signature. Security Reviewer and Product Release Owner identities must be distinct; GitHub artifact attestation is optional secondary evidence only. The production signer and timestamp authority remain unprovisioned, so the repository is `UNSIGNED`, external release is `NO`, and handoff readiness is `BLOCKED`. No signing key, token, detached signature, timestamp response, completed hosted review, tag execution, or external-release approval is included; evidence, install, and PoC outputs remain engineering drafts.
+Current status: `0.1.0-p1-33-release-rehearsal`, an engineering slice that retains the P1-29 cryptographic processing scope, reviewed 69-symbol ABI-0 surface, P1-31 unsigned provenance, and P1-32 key-free offline signing handoff. P1-33 adds a clean-checkout synthetic tagged-release rehearsal and a fail-closed hosted-artifact review model. Synthetic/local artifacts are never recorded as hosted results; absent GitHub-hosted results remain `NOT_RUN` or `UNREVIEWED`. The production signer and timestamp authority remain `UNPROVISIONED`, the repository remains `UNSIGNED`, external release remains `NO`, and handoff readiness remains `BLOCKED`. No actual tag, tag signature, production signature, timestamp response, completed hosted review, or external-release approval is included.
 
 Implemented processing scope:
 
@@ -18,6 +18,7 @@ Implemented processing scope:
 - P1-30 release identity, P1-29 public-header snapshot, normalized source-surface comparison, old-header/current-library runtime compatibility, installed-package compatibility smoke, and hashed hosted-artifact bundle manifests
 - P1-31 unsigned release provenance, deterministic SPDX 2.3 JSON source inventory, source/archive/public-header/export hash binding, signing-request placeholder, authorization TODO record, hosted provenance lane, and PoC exclusion checks
 - P1-32 key-free offline signing handoff, Ed25519/RFC 3161 verifier policy, role-separation checks, opt-in ephemeral Debug fixtures, and fail-closed production-provisioning status
+- P1-33 clean-checkout synthetic tag rehearsal, tag/commit/HEAD and clean-worktree checks, hosted/synthetic provenance separation, required lane review records, and fail-closed negative regressions
 - AES Release compiler-output capture with compiler/target/library metadata and a manual-review-only interpretation boundary
 - HMAC_DRBG-SHA-256 deterministic core API
 - Internal HMAC_DRBG-SHA-256 instantiate/reseed helper driven by entropy source
@@ -37,7 +38,7 @@ Implemented processing scope:
 - Internal source classification and health-test ownership metadata that keeps OS-provider output outside the raw-noise health skeleton
 - Status-only OS-provider operational probe with temporary-buffer zeroization
 - Private process identity guard for source-backed DRBG state; generation after process change requires reseed and clears output
-- Release evidence draft collection with a bound source archive, source-file hashes, SPDX 2.3 JSON source inventory, public-surface check, reproducible-build notes, install/PoC smoke logs, verified key-free signing-handoff records, explicit unsigned/blocked status, and evidence manifest hashes
+- Release evidence draft collection with a bound source archive, source-file hashes, SPDX 2.3 JSON source inventory, an unsigned release-provenance bundle, public-surface check, reproducible-build notes, install/PoC smoke logs, verified key-free signing-handoff records, explicit unsigned/blocked status, and evidence manifest hashes
 - Limited internal locking for module/self-test/CSP global state
 - Thread-safety support matrix, cross-platform Win32/pthread CSP/HMAC test, status-only platform review, CI checklist, and policy-check targets
 - CI matrix skeleton for Linux, macOS, and Windows build/test/install-smoke paths
@@ -69,8 +70,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-32
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-32
+cmake --install build --prefix /tmp/anocrypto-c-p1-33
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-33
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -88,8 +89,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-32
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-32
+cmake --install build --prefix /tmp/anocrypto-c-p1-33
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-33
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -120,7 +121,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, signing-handoff, and hash-manifest records under `build/evidence/p1-32/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p1-33/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -190,6 +191,7 @@ Generated files include public-surface, thread-safety, concurrency/sanitizer, th
 - The dedicated entropy failure-injection build exposes internal test symbols only to internal tests; ordinary, Release, and PoC builds keep the hook disabled, and release-style builds hide internal symbols where supported.
 - Customer PoC package v0 is an integration draft and still needs legal/evaluation notice review before external sharing.
 - P1-32 defines and tests the offline signing handoff and verification policy, but no production signer, timestamp authority, signature, timestamp response, role approval, tag run, or external-release authorization has been provisioned or completed.
+- P1-33 rehearses the tagged-release flow only in an isolated synthetic/local repository. It creates no tag in the user repository and records no synthetic result as a hosted run.
 - P1-14 thread-safety support-matrix additions are retained.
 - P1-15 was a historical reserved-scope step; P1-22 supersedes that processing boundary with implementation, KAT, negative-test, and evidence coverage.
 - P1-16 introduced the random-service boundary; P1-19 implements the existing symbols without adding new public functions.
@@ -346,3 +348,12 @@ P1-27 selected the narrow AES-CMAC scope and reviewed the API, dedicated key-pur
 - Adds key-free negative regressions plus Debug-only, explicit opt-in ephemeral OpenSSL fixtures for signature and timestamp verification; fixture keys, signatures, and timestamp material are removed after testing.
 - Keeps the production signer and timestamp authority `UNPROVISIONED`, handoff readiness `BLOCKED`, signing mode `UNSIGNED`, and external release authorization `NO`.
 - Does not perform a hosted run, create or verify a production signature, create a release tag, provision credentials, or authorize external distribution.
+
+## P1-33 clean tagged-release rehearsal and hosted review
+
+- Rehearses expected tag, supplied commit, checked-out `HEAD`, and clean-worktree identity in an isolated clean checkout using a synthetic local tag.
+- Rejects dirty worktrees, moved tags, moved `HEAD`, commit/ref mismatches, incomplete required lanes, malformed or unsafe artifacts, and false review claims.
+- Records artifact hash, workflow commit/ref, platform, compiler, architecture, reviewer, review date, disposition, and actual-versus-synthetic origin.
+- Keeps unavailable hosted results `NOT_RUN` or `UNREVIEWED`; synthetic fixtures prove policy behavior only.
+- Retains `RELEASE_ARTIFACTS.sha256` as the only signing subject and keeps production signer/TSA `UNPROVISIONED`, repository `UNSIGNED`, handoff `BLOCKED`, and external release `NO`.
+- Adds no public header, function, type, constant, cryptographic service, or exported symbol.

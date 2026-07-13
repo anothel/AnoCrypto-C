@@ -1,4 +1,4 @@
-# Static and generated-artifact policy check for the P1-32 unsigned release
+# Static and generated-artifact policy check for the P1-33 unsigned release
 # provenance/SBOM/signing boundary.
 cmake_minimum_required(VERSION 3.16)
 
@@ -31,7 +31,7 @@ endforeach()
 if(NOT ANO_CRYPTO_RELEASE_PROVENANCE_SCHEMA STREQUAL "1" OR
    NOT ANO_CRYPTO_RELEASE_SBOM_FORMAT STREQUAL "SPDX-2.3-JSON" OR
    NOT ANO_CRYPTO_RELEASE_SIGNING_MODE STREQUAL "UNSIGNED")
-    message(FATAL_ERROR "Unexpected P1-32 release provenance identity policy")
+    message(FATAL_ERROR "Unexpected P1-33 release provenance identity policy")
 endif()
 
 set(_required_files
@@ -45,10 +45,16 @@ set(_required_files
     tools/create_release_signing_handoff.cmake
     tools/check_release_signing_handoff.cmake
     tools/verify_release_detached_signature.cmake
+    tools/create_hosted_artifact_manifest.cmake
+    tools/check_hosted_artifact_manifest.cmake
+    tools/create_hosted_artifact_index.cmake
+    tools/hosted_artifact_path_helpers.cmake
     tests/cmake/release_provenance_tests.cmake
     tests/cmake/release_signing_handoff_tests.cmake
     tests/cmake/sensitive_release_artifact_tests.cmake
     tests/cmake/release_signing_fixture_tests.cmake
+    tests/cmake/tagged_release_rehearsal_tests.cmake
+    tests/cmake/hosted_artifact_manifest_tests.cmake
     docs/release/RELEASE_PROVENANCE_AND_SIGNING_POLICY.md
     docs/ci/RELEASE_PROVENANCE_CI_CHECKLIST.md
     evidence/release-template/RELEASE_PROVENANCE_REVIEW.md)
@@ -77,10 +83,21 @@ _ano_require_text("release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake"
 _ano_require_text("CMakeLists.txt" "ano_crypto_release_provenance_policy_check")
 _ano_require_text("CMakeLists.txt" "ano_crypto_release_provenance_tests")
 _ano_require_text("CMakeLists.txt" "ano_crypto_release_signing_handoff_tests")
+_ano_require_text("CMakeLists.txt" "ano_crypto_tagged_release_rehearsal_tests")
+_ano_require_text("CMakeLists.txt" "ano_crypto_hosted_artifact_manifest_tests")
 _ano_require_text("CMakeLists.txt" "ano_crypto_release_signing_handoff_evidence")
 _ano_require_text("CMakeLists.txt" "ANO_CRYPTO_RUN_RELEASE_PROVENANCE_CHECK=ON")
 _ano_require_text(".github/workflows/ci.yml" "release-provenance")
+_ano_require_text(".github/workflows/ci.yml"
+    "ANO_CRYPTO_HOSTED_ARTIFACT_ORIGIN=HOSTED_RUNNER")
+_ano_require_text(".github/workflows/ci.yml" "release-signing-handoff")
 _ano_require_text(".github/workflows/ci.yml" "SOURCE_SBOM.spdx.json")
+_ano_require_text("tools/create_hosted_artifact_manifest.cmake"
+    "ANOCRYPTO_HOSTED_ARTIFACT_MANIFEST_V2")
+_ano_require_text("tools/create_hosted_artifact_index.cmake"
+    "release-signing-handoff|Linux|x86_64|gcc")
+_ano_require_text("tools/create_hosted_artifact_index.cmake"
+    "github_attestation_role=")
 _ano_require_text("tools/create_release_provenance_bundle.cmake" "RELEASE_PROVENANCE.txt")
 _ano_require_text("tools/create_release_provenance_bundle.cmake" "worktree_state=")
 _ano_require_text("tools/create_release_signing_handoff.cmake" "READY_FOR_OFFLINE_SIGNING")
@@ -93,7 +110,7 @@ _ano_require_text("tools/create_poc_package.cmake"
     "The internal source archive and source SBOM are not included")
 _ano_require_text("docs/kcmvp/SBOM_SIGNING_PLAN.md" "SPDX 2.3 JSON source inventory")
 _ano_require_text("docs/release/RELEASE_PROVENANCE_AND_SIGNING_POLICY.md"
-    "Status: P1-32 unsigned engineering policy")
+    "Status: P1-33 unsigned engineering policy")
 _ano_require_text("docs/release/RELEASE_PROVENANCE_AND_SIGNING_POLICY.md"
     "External release authorized: NO")
 _ano_require_text("docs/ci/RELEASE_PROVENANCE_CI_CHECKLIST.md"
@@ -108,7 +125,7 @@ _ano_require_text("README.md" "${ANO_CRYPTO_RELEASE_VERSION}")
 _ano_require_text("README.md" "unsigned release-provenance bundle")
 
 # A signing credential or detached signature must never be committed merely to
-# make the P1-32 engineering gate pass.
+# make the P1-33 engineering gate pass.
 set(_source_entries "")
 find_program(_git_executable git)
 if(_git_executable)
@@ -151,12 +168,12 @@ endforeach()
 if(_credential_like_files)
     list(JOIN _credential_like_files ", " _credential_text)
     message(FATAL_ERROR
-        "Credential/signature-like files are forbidden in the P1-32 source tree: ${_credential_text}")
+        "Credential/signature-like files are forbidden in the P1-33 source tree: ${_credential_text}")
 endif()
 if(_sensitive_source_files)
     list(JOIN _sensitive_source_files ", " _sensitive_source_text)
     message(FATAL_ERROR
-        "Sensitive signing material is forbidden in the P1-32 source tree: ${_sensitive_source_text}")
+        "Sensitive signing material is forbidden in the P1-33 source tree: ${_sensitive_source_text}")
 endif()
 
 # If the full evidence target has already produced a provenance bundle, verify
@@ -189,7 +206,7 @@ endif()
 
 string(TIMESTAMP _checked_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}"
-    "AnoCrypto-C P1-32 release provenance policy check\n"
+    "AnoCrypto-C P1-33 release provenance policy check\n"
     "Checked UTC: ${_checked_utc}\n"
     "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Provenance schema: ${ANO_CRYPTO_RELEASE_PROVENANCE_SCHEMA}\n"
@@ -202,7 +219,8 @@ file(WRITE "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}"
     "Tamper/claim/path/disposition regression: configured\n"
     "Credential/signature-like source files: none\n"
     "Generated evidence bundle verification: ${_generated_status}\n"
-    "Actual hosted artifact disposition: TODO unless separately supplied and reviewed\n"
+    "Actual hosted execution: NOT_RUN unless separately supplied\n"
+    "Hosted artifact review: UNREVIEWED\n"
     "Offline signature verifier: Ed25519 raw 64-byte over RELEASE_ARTIFACTS.sha256\n"
     "Signer identity binding: SHA-256 of DER SubjectPublicKeyInfo\n"
     "Timestamp verifier: RFC 3161 over detached signature\n"
@@ -213,4 +231,4 @@ file(WRITE "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}"
     "External release authorization: NO\n"
     "Result: PASS\n")
 
-message(STATUS "AnoCrypto-C P1-32 release provenance policy check passed")
+message(STATUS "AnoCrypto-C P1-33 release provenance policy check passed")

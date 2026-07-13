@@ -1,10 +1,10 @@
 # Tagged Release Compatibility Evidence
 
-Status: P1-32 engineering evidence plan; not official validation evidence.
+Status: P1-33 engineering evidence plan; not official validation evidence.
 
 ## Evidence objective
 
-Provide a reproducible record that one reviewed source snapshot retains the P1-29 public C contract while using the P1-32 engineering version identity. The evidence is intended to support configuration-management and interface-review work, not to replace formal test or submission requirements.
+Provide a reproducible record that one reviewed source snapshot retains the P1-29 public C contract while using the P1-33 engineering version identity. The evidence is intended to support configuration-management and interface-review work, not to replace formal test or submission requirements.
 
 ## Required local records
 
@@ -30,11 +30,15 @@ For a release-tagged workflow, record:
 - source archive and binary hashes;
 - toolchain, target, build options, and installed-package test status.
 
-The three commit identities must match. Annotated-tag signature or organization release authorization is a separate TODO until a signing policy is selected.
+The three commit identities must match and the checkout must be clean. P1-33 may prove this with a synthetic local tag in an isolated temporary repository. Actual tag creation, tag signing, and organization release authorization remain separate operations and are not performed by rehearsal.
+
+Dirty state, a moved tag, a moved `HEAD`, commit mismatch, or ref/tag mismatch invalidates the rehearsal.
 
 ## Hosted artifact review
 
-Downloaded hosted bundles must be manifest-verified and indexed. Human review must then disposition Linux 64-bit, Linux 32-bit, big-endian, macOS, Windows, compiler-output, differential, and compatibility artifacts. Presence or hash verification alone is not support approval.
+Downloaded hosted bundles must be manifest-verified and indexed. Human review must then disposition Linux 64-bit, Linux 32-bit, s390x big-endian, macOS, Windows, GCC/Clang compiler-output, OpenSSL differential, compatibility, provenance, and signing-handoff artifacts. Presence or hash verification alone is not support approval.
+
+Record artifact hash, workflow commit/ref, platform, compiler, architecture, reviewer, UTC review date, disposition, and origin. When no hosted execution exists, state is `NOT_RUN`; downloaded but undispositioned output is `UNREVIEWED`. Synthetic rehearsal artifacts remain `SYNTHETIC_LOCAL` and cannot satisfy `HOSTED_RUNNER` review.
 
 ## Data minimization
 
@@ -45,5 +49,5 @@ Evidence may contain names, statuses, counts, versions, target metadata, file si
 - Normalized declarations do not model every language-ABI rule.
 - Symbol equality does not prove calling convention, loader, layout, or semantic compatibility.
 - The P1-29 consumer covers the reviewed public surface and selected lifecycle calls, not every legal operation sequence.
-- Hosted platform results are TODO until an actual run is reviewed.
+- Hosted platform results are `NOT_RUN` or `UNREVIEWED` until an actual run is reviewed.
 - This evidence does not establish official validation status.

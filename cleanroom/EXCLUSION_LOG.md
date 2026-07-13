@@ -385,3 +385,15 @@ If excluded material is discovered:
 | EX-4007 | Marking signing `SIGNED`, handoff `READY_FOR_OFFLINE_SIGNING`, or external release `YES` while production signer, TSA, role identities, hosted disposition, or release authorization remains incomplete | False release claim | Excluded | Current repository state is `UNSIGNED`, `BLOCKED`, and external release `NO`. |
 | EX-4008 | Third-party signing scripts, proprietary key-custody procedures, copied CI workflow fragments, private PKI material, or vendor fixtures with unclear rights | Provenance and confidentiality risk | Excluded | P1-32 uses fresh project-owned CMake tooling and public standards/CLI documentation only. |
 | EX-4009 | Copying internal provenance/handoff bundles, signer/TSA policy records, release authorization records, keys, tokens, signatures, or timestamp responses into the customer PoC package | Product-boundary and disclosure risk | Excluded | The PoC contains only package-local unsigned status and policy-boundary notes. |
+
+## P1-33 Clean Tagged-Release Rehearsal and Hosted Review Exclusions
+
+| ID | Excluded material or behavior | Risk | Disposition | Note |
+|---|---|---|---|---|
+| EX-4101 | Creating, moving, signing, or pushing a tag in the user repository during rehearsal | Repository/release integrity risk | Excluded | Synthetic tags exist only in an isolated temporary repository. |
+| EX-4102 | Treating synthetic/local fixture output as an actual GitHub-hosted result | Evidence overstatement | Rejected | Synthetic origin cannot satisfy required hosted review; missing execution remains `NOT_RUN`. |
+| EX-4103 | Accepting a dirty checkout, moved tag, moved `HEAD`, commit mismatch, or ref/tag mismatch | Provenance integrity risk | Rejected | Expected tag, supplied commit, tag-resolved commit, and clean checked-out `HEAD` must agree. |
+| EX-4104 | Accepting missing/duplicate lanes, unlisted files, hash mismatch, traversal, symlink, oversized or unexpected binary-like files, or sensitive markers | Artifact integrity/disclosure risk | Rejected | Hosted review input is complete, manifest-bound, regular-file-only, bounded, and status-only. |
+| EX-4105 | Recording hosted `PASS`/`APPROVED` without artifact/workflow identity, reviewer, UTC review date, disposition, and limitations | False review claim | Rejected | Downloaded but undispositioned artifacts remain `UNREVIEWED`. |
+| EX-4106 | Assigning the same identity to conflicting Security Reviewer and Product Release Owner approvals | Authorization separation risk | Rejected | Distinct stable non-placeholder identities remain required before release authorization. |
+| EX-4107 | Adding actual signatures, timestamp responses, signing credentials, entropy/seed/DRBG state, AES values, CMAC tags, tokens, or customer data to rehearsal/hosted artifacts | Sensitive-material and false-release risk | Excluded | P1-33 retains status/hash metadata only and performs no production signing or timestamping. |

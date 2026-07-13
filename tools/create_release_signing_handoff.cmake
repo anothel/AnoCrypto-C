@@ -141,7 +141,8 @@ foreach(_key IN ITEMS release_version expected_tag actual_tag source_commit
     _ano_read_key("${_provenance}" "${_key}" "_prov_${_key}")
 endforeach()
 set(_disposition "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}/HOSTED_ARTIFACT_DISPOSITION.txt")
-foreach(_key IN ITEMS release_version expected_tag workflow_commit status result)
+foreach(_key IN ITEMS release_version expected_tag workflow_commit review_status
+        disposition result)
     _ano_read_key("${_disposition}" "${_key}" "_disp_${_key}")
 endforeach()
 set(_signer "${ANO_CRYPTO_APPROVED_SIGNER_RECORD}")
@@ -161,7 +162,7 @@ if(NOT _prov_release_version STREQUAL ANO_CRYPTO_RELEASE_VERSION OR
    NOT _prov_signing_status STREQUAL "UNSIGNED" OR
    NOT _prov_external_release_authorized STREQUAL "NO" OR
    NOT _prov_result STREQUAL "PASS")
-    message(FATAL_ERROR "Provenance identity/signing boundary is incompatible with P1-32 handoff")
+    message(FATAL_ERROR "Provenance identity/signing boundary is incompatible with P1-33 handoff")
 endif()
 
 set(_block_reasons "")
@@ -184,8 +185,9 @@ if(NOT _prov_actual_tag STREQUAL ANO_CRYPTO_RELEASE_TAG)
 endif()
 if(NOT _disp_release_version STREQUAL ANO_CRYPTO_RELEASE_VERSION OR
    NOT _disp_expected_tag STREQUAL ANO_CRYPTO_RELEASE_TAG OR
-   NOT _disp_status STREQUAL "PASS" OR
-   NOT _disp_result STREQUAL "PASS")
+   NOT _disp_review_status STREQUAL "REVIEWED" OR
+   NOT _disp_disposition STREQUAL "ACCEPTED_WITH_LIMITATIONS" OR
+   NOT _disp_result STREQUAL "BLOCKED")
     _ano_append_block_reason("HOSTED_ARTIFACT_DISPOSITION_INCOMPLETE")
 endif()
 if(NOT _disp_workflow_commit STREQUAL _prov_source_commit)

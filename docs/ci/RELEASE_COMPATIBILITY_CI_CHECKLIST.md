@@ -1,10 +1,10 @@
 # Release Compatibility CI Checklist
 
-Status: P1-32 engineering checklist. Actual hosted-run disposition remains TODO until the referenced workflow run is reviewed.
+Status: P1-33 engineering checklist. Actual hosted runs remain `NOT_RUN` or `UNREVIEWED` until referenced artifacts are reviewed.
 
 ## Every supported build lane
 
-- Configure with the P1-32 release fingerprint.
+- Configure with the P1-33 release fingerprint.
 - Build and run the configured CTest set.
 - Run `ano_crypto_release_compatibility_policy_check`.
 - Preserve the 14-header and 69-export baselines.
@@ -13,9 +13,11 @@ Status: P1-32 engineering checklist. Actual hosted-run disposition remains TODO 
 ## Tagged-release lane
 
 - Checkout full Git history and tags.
-- Require `github.ref_name` to equal `v0.1.0-p1-32-signing-handoff`.
+- Require the rehearsal tag to equal `v0.1.0-p1-33-release-rehearsal`.
 - When strict tag mode is enabled, provide both actual-tag and actual-commit inputs at configure/review time.
 - Pass the workflow commit and require the tag, supplied commit, and `HEAD` to resolve to one commit.
+- Require a clean checkout; reject dirty state, moved tag, moved `HEAD`, commit mismatch, and ref mismatch.
+- Create a synthetic tag only in an isolated temporary clone or repository; never tag the user repository during rehearsal.
 - Run `ano_crypto_tagged_release_compatibility_smoke` on Linux, macOS, and Windows.
 - Retain only status logs; do not retain cryptographic inputs or outputs.
 
@@ -24,7 +26,7 @@ Status: P1-32 engineering checklist. Actual hosted-run disposition remains TODO 
 - Build a clean shared Release library with tests/hooks disabled and hidden internal symbols.
 - Install to an isolated prefix.
 - Build current-header and retained-P1-29-header consumers against that prefix.
-- Confirm both consumers bind 69 functions and report the P1-32 runtime version.
+- Confirm both consumers bind 69 functions and report the P1-33 runtime version.
 - Confirm exact package version `0.1.0` is accepted.
 - Confirm incompatible package request `0.2.0` is rejected.
 - Confirm the retained header snapshot and compatibility source are not installed.
@@ -36,6 +38,8 @@ Status: P1-32 engineering checklist. Actual hosted-run disposition remains TODO 
 - Reject binary/NUL-containing files, unlisted files, path traversal, duplicate basenames, oversized files, and sensitive-value markers.
 - Build the final hosted artifact index only after all required lane/platform manifests are downloaded.
 - Record reviewer, date, result, and limitations before changing support wording.
+- Record artifact origin as `HOSTED_RUNNER` or `SYNTHETIC_LOCAL`; never use a synthetic pass as hosted evidence.
+- Record absent hosted execution as `NOT_RUN` and downloaded-but-unreviewed output as `UNREVIEWED`.
 
 ## Claims boundary
 

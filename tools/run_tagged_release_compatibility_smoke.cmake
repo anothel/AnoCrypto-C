@@ -1,4 +1,4 @@
-# Build a clean installed P1-32 package, then compile and run current-header and
+# Build a clean installed P1-33 package, then compile and run current-header and
 # retained-P1-29-header C99 consumers against that package.
 cmake_minimum_required(VERSION 3.16)
 
@@ -23,6 +23,13 @@ endif()
 get_filename_component(ANO_CRYPTO_BUILD_DIR "${ANO_CRYPTO_BUILD_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_TAGGED_COMPAT_SMOKE_DIR
     "${ANO_CRYPTO_TAGGED_COMPAT_SMOKE_DIR}" ABSOLUTE)
+if(NOT DEFINED ANO_CRYPTO_TAG_IDENTITY_STATUS_OUTPUT OR
+   ANO_CRYPTO_TAG_IDENTITY_STATUS_OUTPUT STREQUAL "")
+    set(ANO_CRYPTO_TAG_IDENTITY_STATUS_OUTPUT
+        "${ANO_CRYPTO_TAGGED_COMPAT_SMOKE_DIR}/TAG_COMMIT_IDENTITY_CHECK.txt")
+endif()
+get_filename_component(ANO_CRYPTO_TAG_IDENTITY_STATUS_OUTPUT
+    "${ANO_CRYPTO_TAG_IDENTITY_STATUS_OUTPUT}" ABSOLUTE)
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
 
 set(_baseline_include
@@ -96,16 +103,16 @@ set(_release_configure
     -DANO_CRYPTO_BUILD_FINGERPRINT=${ANO_CRYPTO_RELEASE_FINGERPRINT}-compatibility-smoke
     -DCMAKE_BUILD_TYPE=Release)
 _ano_append_generator(_release_configure)
-_ano_run(RELEASE_CONFIGURE.log "Configure clean P1-32 Release package"
+_ano_run(RELEASE_CONFIGURE.log "Configure clean P1-33 Release package"
     "${CMAKE_COMMAND}" -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
     ${_release_configure})
-_ano_run(RELEASE_BUILD.log "Build clean P1-32 Release package"
+_ano_run(RELEASE_BUILD.log "Build clean P1-33 Release package"
     "${CMAKE_COMMAND}" -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
     "${CMAKE_COMMAND}" --build "${_release_build}" --config Release --parallel)
-_ano_run(RELEASE_POLICY.log "Check P1-32 release compatibility policy"
+_ano_run(RELEASE_POLICY.log "Check P1-33 release compatibility policy"
     "${CMAKE_COMMAND}" --build "${_release_build}" --config Release
     --target ano_crypto_release_compatibility_policy_check)
-_ano_run(RELEASE_INSTALL.log "Install clean P1-32 Release package"
+_ano_run(RELEASE_INSTALL.log "Install clean P1-33 Release package"
     "${CMAKE_COMMAND}" --install "${_release_build}" --config Release
     --prefix "${_install_prefix}")
 
@@ -187,7 +194,7 @@ if(NOT "${_installed_header_count}" STREQUAL "${ANO_CRYPTO_RELEASE_PUBLIC_HEADER
 endif()
 
 file(WRITE "${ANO_CRYPTO_TAGGED_COMPAT_SMOKE_DIR}/TAGGED_COMPAT_SUMMARY.txt"
-    "AnoCrypto-C P1-32 tagged-release compatibility smoke\n"
+    "AnoCrypto-C P1-33 tagged-release compatibility smoke\n"
     "Current version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Expected tag metadata: ${ANO_CRYPTO_RELEASE_TAG}\n"
     "Baseline: ${ANO_CRYPTO_COMPAT_BASELINE_VERSION}\n"
@@ -203,5 +210,21 @@ file(WRITE "${ANO_CRYPTO_TAGGED_COMPAT_SMOKE_DIR}/TAGGED_COMPAT_SUMMARY.txt"
     "Limit: tag existence and commit identity are checked separately in a tagged Git build.\n"
     "Limit: untested compiler ABIs, loaders, and complete semantic compatibility are not established.\n"
     "Result: PASS\n")
+if(NOT EXISTS "${ANO_CRYPTO_TAG_IDENTITY_STATUS_OUTPUT}")
+    get_filename_component(_tag_identity_output_dir
+        "${ANO_CRYPTO_TAG_IDENTITY_STATUS_OUTPUT}" DIRECTORY)
+    file(MAKE_DIRECTORY "${_tag_identity_output_dir}")
+    file(WRITE "${ANO_CRYPTO_TAG_IDENTITY_STATUS_OUTPUT}"
+        "ANOCRYPTO_TAG_COMMIT_IDENTITY_STATUS_V1\n"
+        "release_version=${ANO_CRYPTO_RELEASE_VERSION}\n"
+        "expected_tag=${ANO_CRYPTO_RELEASE_TAG}\n"
+        "actual_tag=NOT_CREATED\n"
+        "actual_commit=NOT_RECORDED\n"
+        "worktree_state=NOT_CHECKED\n"
+        "tag_commit_head_identity=NOT_RUN\n"
+        "tag_signing=NOT_RUN\n"
+        "result=NOT_RUN\n"
+        "limit=This placeholder is overwritten only by a strict Git-backed tagged workflow check.\n")
+endif()
 message(STATUS
     "AnoCrypto-C tagged-release compatibility smoke passed: ${ANO_CRYPTO_TAGGED_COMPAT_SMOKE_DIR}")

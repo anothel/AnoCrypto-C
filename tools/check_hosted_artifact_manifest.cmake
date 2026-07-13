@@ -19,16 +19,31 @@ get_filename_component(ANO_CRYPTO_HOSTED_ARTIFACT_MANIFEST
     "${ANO_CRYPTO_HOSTED_ARTIFACT_MANIFEST}" ABSOLUTE)
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/tools/sensitive_signing_material_helpers.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/hosted_artifact_path_helpers.cmake")
+
+function(_ano_require_safe_relative_path _path _description)
+    string(FIND "${_path}" "\\" _backslash)
+    if(_path STREQUAL "" OR NOT _backslash EQUAL -1 OR
+       _path MATCHES "^/" OR _path MATCHES "^[A-Za-z]:" OR
+       _path MATCHES "(^|/)[.][.](/|$)" OR
+       _path MATCHES "(^|/)[.](/|$)" OR _path MATCHES "//" OR
+       _path MATCHES "[:|]")
+        message(FATAL_ERROR "Unsafe ${_description}: ${_path}")
+    endif()
+endfunction()
+
+ano_crypto_reject_hosted_root_alias(
+    "${ANO_CRYPTO_HOSTED_ARTIFACT_ROOT}" "Hosted artifact root")
+
 file(RELATIVE_PATH _manifest_relative
     "${ANO_CRYPTO_HOSTED_ARTIFACT_ROOT}" "${ANO_CRYPTO_HOSTED_ARTIFACT_MANIFEST}")
-if(_manifest_relative MATCHES "(^|/)\\.\\.(/|$)" OR IS_ABSOLUTE "${_manifest_relative}")
+if(IS_ABSOLUTE "${_manifest_relative}")
     message(FATAL_ERROR "Hosted artifact manifest must remain under the bundle root")
 endif()
-if(NOT EXISTS "${ANO_CRYPTO_HOSTED_ARTIFACT_MANIFEST}" OR
-   IS_DIRECTORY "${ANO_CRYPTO_HOSTED_ARTIFACT_MANIFEST}" OR
-   IS_SYMLINK "${ANO_CRYPTO_HOSTED_ARTIFACT_MANIFEST}")
-    message(FATAL_ERROR "Hosted artifact manifest is missing or unsafe")
-endif()
+_ano_require_safe_relative_path("${_manifest_relative}" "hosted artifact manifest path")
+ano_crypto_require_regular_unaliased_hosted_child(
+    "${ANO_CRYPTO_HOSTED_ARTIFACT_ROOT}" "${_manifest_relative}"
+    "Hosted artifact manifest")
 
 function(_ano_reject_nul _path _relative)
     file(READ "${_path}" _hex HEX)
@@ -37,7 +52,7 @@ function(_ano_reject_nul _path _relative)
     if(_last GREATER_EQUAL 0)
         foreach(_offset RANGE 0 ${_last} 2)
             string(SUBSTRING "${_hex}" ${_offset} 2 _byte)
-            if(_byte STREQUAL "00")
+            if(_byte MATCHES "^(0[0-8bBcCeEfF]|1[0-9a-fA-F]|7[fF])$")
                 message(FATAL_ERROR "Hosted artifact must be text-only: ${_relative}")
             endif()
         endforeach()
@@ -71,23 +86,25 @@ endfunction()
 
 file(STRINGS "${ANO_CRYPTO_HOSTED_ARTIFACT_MANIFEST}" _lines)
 list(LENGTH _lines _line_count)
-if(_line_count LESS 14)
+if(_line_count LESS 22)
     message(FATAL_ERROR "Hosted artifact manifest is incomplete")
 endif()
 list(GET _lines 0 _magic)
-if(NOT _magic STREQUAL "ANOCRYPTO_HOSTED_ARTIFACT_MANIFEST_V1")
+if(NOT _magic STREQUAL "ANOCRYPTO_HOSTED_ARTIFACT_MANIFEST_V2")
     message(FATAL_ERROR "Hosted artifact manifest magic is invalid")
 endif()
 
 set(_listed_files "")
 set(_metadata_keys "")
 foreach(_field IN ITEMS policy_schema release_version expected_tag abi_line lane platform
-                        architecture compiler commit file_count sensitive_value_scan result)
+                        architecture compiler commit artifact_origin execution_status
+                        workflow_commit workflow_ref review_status reviewer review_date
+                        disposition file_count sensitive_value_scan integrity_status)
     set(_${_field} "")
 endforeach()
 
 foreach(_line IN LISTS _lines)
-    if(_line STREQUAL "ANOCRYPTO_HOSTED_ARTIFACT_MANIFEST_V1")
+    if(_line STREQUAL "ANOCRYPTO_HOSTED_ARTIFACT_MANIFEST_V2")
         continue()
     elseif(_line MATCHES "^file=([^|]+)\\|size=([0-9]+)\\|sha256=([0-9a-fA-F]+)$")
         set(_relative "${CMAKE_MATCH_1}")
@@ -97,21 +114,25 @@ foreach(_line IN LISTS _lines)
         if(NOT _hash_length EQUAL 64)
             message(FATAL_ERROR "Hosted artifact hash has an invalid length: ${_relative}")
         endif()
-        if(_relative MATCHES "(^/|(^|/)\\.\\.(/|$))" OR
-           _relative STREQUAL "HOSTED_ARTIFACT_MANIFEST.txt")
+        _ano_require_safe_relative_path(
+            "${_relative}" "hosted artifact manifest entry")
+        if(_relative STREQUAL "HOSTED_ARTIFACT_MANIFEST.txt")
             message(FATAL_ERROR "Unsafe hosted artifact manifest path: ${_relative}")
         endif()
         if(_relative IN_LIST _listed_files)
             message(FATAL_ERROR "Duplicate hosted artifact manifest path: ${_relative}")
         endif()
         set(_full "${ANO_CRYPTO_HOSTED_ARTIFACT_ROOT}/${_relative}")
-        if(NOT EXISTS "${_full}" OR IS_DIRECTORY "${_full}" OR IS_SYMLINK "${_full}")
-            message(FATAL_ERROR "Hosted artifact file is missing or unsafe: ${_relative}")
-        endif()
+        ano_crypto_require_regular_unaliased_hosted_child(
+            "${ANO_CRYPTO_HOSTED_ARTIFACT_ROOT}" "${_relative}"
+            "Hosted artifact file")
         if(NOT _relative MATCHES "\\.(txt|md|json|sha256|asm|disasm)$")
             message(FATAL_ERROR "Hosted artifact file type is not approved: ${_relative}")
         endif()
         file(SIZE "${_full}" _actual_size)
+        if(_actual_size GREATER 10485760)
+            message(FATAL_ERROR "Hosted artifact file exceeds 10 MiB: ${_relative}")
+        endif()
         file(SHA256 "${_full}" _actual_hash)
         if(NOT "${_actual_size}" STREQUAL "${_expected_size}")
             message(FATAL_ERROR "Hosted artifact size mismatch: ${_relative}")
@@ -126,7 +147,7 @@ foreach(_line IN LISTS _lines)
         set(_key "${CMAKE_MATCH_1}")
         set(_value "${CMAKE_MATCH_2}")
         if(NOT _key IN_LIST _metadata_keys)
-            if(NOT _key MATCHES "^(policy_schema|release_version|expected_tag|abi_line|lane|platform|architecture|compiler|commit|file_count|sensitive_value_scan|result)$")
+            if(NOT _key MATCHES "^(policy_schema|release_version|expected_tag|abi_line|lane|platform|architecture|compiler|commit|artifact_origin|execution_status|workflow_commit|workflow_ref|review_status|reviewer|review_date|disposition|file_count|sensitive_value_scan|integrity_status)$")
                 message(FATAL_ERROR "Unknown hosted artifact metadata field: ${_key}")
             endif()
             list(APPEND _metadata_keys "${_key}")
@@ -140,7 +161,9 @@ foreach(_line IN LISTS _lines)
 endforeach()
 
 foreach(_required_key IN ITEMS policy_schema release_version expected_tag abi_line lane platform
-                               architecture compiler commit file_count sensitive_value_scan result)
+                               architecture compiler commit artifact_origin execution_status
+                               workflow_commit workflow_ref review_status reviewer review_date
+                               disposition file_count sensitive_value_scan integrity_status)
     if(NOT _required_key IN_LIST _metadata_keys)
         message(FATAL_ERROR "Hosted artifact metadata is missing: ${_required_key}")
     endif()
@@ -155,6 +178,56 @@ if(_lane STREQUAL "" OR _platform STREQUAL "" OR _architecture STREQUAL "" OR
    _compiler STREQUAL "" OR _commit STREQUAL "")
     message(FATAL_ERROR "Hosted artifact lane metadata is incomplete")
 endif()
+foreach(_metadata IN ITEMS
+        "${_lane}" "${_platform}" "${_architecture}" "${_compiler}"
+        "${_commit}" "${_artifact_origin}" "${_execution_status}"
+        "${_workflow_commit}" "${_workflow_ref}" "${_review_status}"
+        "${_reviewer}" "${_review_date}" "${_disposition}")
+    if(_metadata MATCHES "[|;\r\n]")
+        message(FATAL_ERROR "Hosted artifact metadata contains a forbidden separator")
+    endif()
+endforeach()
+if(NOT _artifact_origin MATCHES "^(HOSTED_RUNNER|SYNTHETIC_LOCAL)$" OR
+   NOT _execution_status MATCHES "^(COMPLETED|NOT_RUN)$")
+    message(FATAL_ERROR "Hosted artifact origin or execution status is invalid")
+endif()
+if((_artifact_origin STREQUAL "HOSTED_RUNNER" AND
+    NOT _execution_status STREQUAL "COMPLETED") OR
+   (_artifact_origin STREQUAL "SYNTHETIC_LOCAL" AND
+    NOT _execution_status STREQUAL "NOT_RUN"))
+    message(FATAL_ERROR "Hosted artifact origin and execution status disagree")
+endif()
+if(NOT _commit STREQUAL _workflow_commit)
+    message(FATAL_ERROR "Hosted artifact commit and workflow commit disagree")
+endif()
+if(_artifact_origin STREQUAL "HOSTED_RUNNER" AND
+   (_workflow_commit STREQUAL "unknown" OR _workflow_ref STREQUAL "unknown"))
+    message(FATAL_ERROR "Hosted runner artifacts require workflow commit and ref")
+endif()
+string(TOUPPER "${_disposition}" _disposition_upper)
+if(_disposition_upper MATCHES "^(PASS|APPROVED)$")
+    message(FATAL_ERROR "Hosted review disposition may not claim PASS or APPROVED")
+endif()
+if(_review_status STREQUAL "UNREVIEWED")
+    if(NOT _reviewer STREQUAL "UNPROVISIONED" OR
+       NOT _review_date STREQUAL "UNREVIEWED" OR
+       NOT _disposition STREQUAL "UNREVIEWED")
+        message(FATAL_ERROR "Unreviewed hosted artifacts must retain safe review placeholders")
+    endif()
+elseif(_review_status STREQUAL "REVIEWED")
+    string(TOLOWER "${_reviewer}" _reviewer_lower)
+    if(NOT _artifact_origin STREQUAL "HOSTED_RUNNER" OR
+       NOT _execution_status STREQUAL "COMPLETED" OR
+       NOT _reviewer MATCHES "^[A-Za-z0-9_.@:+-]+$" OR
+       _reviewer_lower MATCHES "^(todo|unknown|unreviewed|unprovisioned|none)$" OR
+       NOT _review_date MATCHES
+           "^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]Z$" OR
+       NOT _disposition MATCHES "^(ACCEPTED_WITH_LIMITATIONS|REJECTED)$")
+        message(FATAL_ERROR "Completed hosted review metadata is incomplete or invalid")
+    endif()
+else()
+    message(FATAL_ERROR "Hosted review status is invalid")
+endif()
 if(DEFINED ANO_CRYPTO_EXPECTED_HOSTED_LANE AND
    NOT ANO_CRYPTO_EXPECTED_HOSTED_LANE STREQUAL "" AND
    NOT _lane STREQUAL ANO_CRYPTO_EXPECTED_HOSTED_LANE)
@@ -165,8 +238,30 @@ if(DEFINED ANO_CRYPTO_EXPECTED_HOSTED_PLATFORM AND
    NOT _platform STREQUAL ANO_CRYPTO_EXPECTED_HOSTED_PLATFORM)
     message(FATAL_ERROR "Hosted artifact platform does not match expected input")
 endif()
-if(NOT _sensitive_value_scan STREQUAL "PASS" OR NOT _result STREQUAL "PASS")
-    message(FATAL_ERROR "Hosted artifact manifest does not record a passing result")
+if(DEFINED ANO_CRYPTO_EXPECTED_HOSTED_ARCH AND
+   NOT ANO_CRYPTO_EXPECTED_HOSTED_ARCH STREQUAL "" AND
+   NOT _architecture STREQUAL ANO_CRYPTO_EXPECTED_HOSTED_ARCH)
+    message(FATAL_ERROR "Hosted artifact architecture does not match expected input")
+endif()
+if(DEFINED ANO_CRYPTO_EXPECTED_HOSTED_COMPILER AND
+   NOT ANO_CRYPTO_EXPECTED_HOSTED_COMPILER STREQUAL "" AND
+   NOT _compiler STREQUAL ANO_CRYPTO_EXPECTED_HOSTED_COMPILER)
+    message(FATAL_ERROR "Hosted artifact compiler does not match expected input")
+endif()
+if(DEFINED ANO_CRYPTO_EXPECTED_HOSTED_COMMIT AND
+   NOT ANO_CRYPTO_EXPECTED_HOSTED_COMMIT STREQUAL "" AND
+   (NOT _commit STREQUAL ANO_CRYPTO_EXPECTED_HOSTED_COMMIT OR
+    NOT _workflow_commit STREQUAL ANO_CRYPTO_EXPECTED_HOSTED_COMMIT))
+    message(FATAL_ERROR "Hosted artifact commit does not match expected input")
+endif()
+if(DEFINED ANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF AND
+   NOT ANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF STREQUAL "" AND
+   NOT _workflow_ref STREQUAL ANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF)
+    message(FATAL_ERROR "Hosted artifact workflow ref does not match expected input")
+endif()
+if(NOT _sensitive_value_scan STREQUAL "PASS" OR
+   NOT _integrity_status STREQUAL "PASS")
+    message(FATAL_ERROR "Hosted artifact manifest integrity did not pass")
 endif()
 list(LENGTH _listed_files _actual_count)
 if(NOT "${_actual_count}" STREQUAL "${_file_count}")
@@ -178,10 +273,14 @@ file(GLOB_RECURSE _bundle_files
     "${ANO_CRYPTO_HOSTED_ARTIFACT_ROOT}/*")
 foreach(_relative IN LISTS _bundle_files)
     set(_full "${ANO_CRYPTO_HOSTED_ARTIFACT_ROOT}/${_relative}")
+    _ano_require_safe_relative_path("${_relative}" "hosted artifact bundle path")
     get_filename_component(_full_abs "${_full}" ABSOLUTE)
     if(_full_abs STREQUAL ANO_CRYPTO_HOSTED_ARTIFACT_MANIFEST)
         continue()
     endif()
+    ano_crypto_require_regular_unaliased_hosted_child(
+        "${ANO_CRYPTO_HOSTED_ARTIFACT_ROOT}" "${_relative}"
+        "Hosted artifact bundle file")
     if(NOT _relative IN_LIST _listed_files)
         message(FATAL_ERROR "Unlisted hosted artifact file: ${_relative}")
     endif()

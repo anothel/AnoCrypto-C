@@ -1,4 +1,4 @@
-# AnoCrypto-C P1-32 release identity and P1-29 source/ABI compatibility check.
+# AnoCrypto-C P1-33 release identity and P1-29 source/ABI compatibility check.
 # Engineering guardrail only; universal ABI compatibility is not established.
 cmake_minimum_required(VERSION 3.16)
 
@@ -58,12 +58,12 @@ if(NOT ANO_CRYPTO_RELEASE_POLICY_SCHEMA STREQUAL "1")
     message(FATAL_ERROR "Unsupported release identity policy schema")
 endif()
 if(NOT ANO_CRYPTO_RELEASE_PACKAGE_COMPATIBILITY STREQUAL "SameMinorVersion")
-    message(FATAL_ERROR "P1-32 package compatibility policy must be SameMinorVersion")
+    message(FATAL_ERROR "P1-33 package compatibility policy must be SameMinorVersion")
 endif()
 if(NOT ANO_CRYPTO_RELEASE_PROVENANCE_SCHEMA STREQUAL "1" OR
    NOT ANO_CRYPTO_RELEASE_SBOM_FORMAT STREQUAL "SPDX-2.3-JSON" OR
    NOT ANO_CRYPTO_RELEASE_SIGNING_MODE STREQUAL "UNSIGNED")
-    message(FATAL_ERROR "P1-32 provenance/SBOM/signing identity policy is inconsistent")
+    message(FATAL_ERROR "P1-33 provenance/SBOM/signing identity policy is inconsistent")
 endif()
 foreach(_metadata IN ITEMS
         "${ANO_CRYPTO_ACTUAL_RELEASE_TAG}"
@@ -310,7 +310,7 @@ _ano_verify_hash_manifest(
     "${ANO_CRYPTO_RELEASE_PUBLIC_HEADER_COUNT}" "current public header")
 
 set(_baseline_manifest "${_output_dir}/P1_29_PUBLIC_API_NORMALIZED.txt")
-set(_current_manifest "${_output_dir}/P1_31_PUBLIC_API_NORMALIZED.txt")
+set(_current_manifest "${_output_dir}/CURRENT_PUBLIC_API_NORMALIZED.txt")
 _ano_collect_api_manifest("${_baseline_include}" "${_baseline_manifest}" BASELINE)
 _ano_collect_api_manifest("${_current_include}" "${_current_manifest}" CURRENT)
 if(NOT "${BASELINE_HEADER_COUNT}" STREQUAL "${ANO_CRYPTO_RELEASE_PUBLIC_HEADER_COUNT}" OR
@@ -354,7 +354,7 @@ _ano_require_text("CMakeLists.txt"
     "include(\"\${CMAKE_CURRENT_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake\")")
 _ano_require_text("CMakeLists.txt"
     "COMPATIBILITY \${ANO_CRYPTO_RELEASE_PACKAGE_COMPATIBILITY}")
-_ano_require_text("src/core/build_identity.c" "P1-32 C99 engineering slice")
+_ano_require_text("src/core/build_identity.c" "P1-33 C99 engineering slice")
 _ano_require_text("README.md" "${ANO_CRYPTO_RELEASE_VERSION}")
 _ano_require_text(".github/workflows/ci.yml" "${ANO_CRYPTO_RELEASE_FINGERPRINT}")
 _ano_require_text(".github/workflows/ci.yml"
@@ -380,6 +380,7 @@ _ano_require_text("tests/cmake/hosted_artifact_manifest_tests.cmake"
 set(_tag_verification "NOT_REQUESTED")
 set(_tag_commit "")
 set(_head_commit "")
+set(_tagged_worktree_state "NOT_REQUESTED")
 if(NOT ANO_CRYPTO_ACTUAL_RELEASE_TAG STREQUAL "" AND
    NOT ANO_CRYPTO_ACTUAL_RELEASE_TAG STREQUAL ANO_CRYPTO_RELEASE_TAG)
     message(FATAL_ERROR
@@ -391,11 +392,56 @@ if(ANO_CRYPTO_REQUIRE_ACTUAL_RELEASE_TAG)
         message(FATAL_ERROR "Tagged release verification requires actual tag and commit inputs")
     endif()
     find_program(_git_executable NAMES git)
-    if(NOT _git_executable OR NOT EXISTS "${ANO_CRYPTO_SOURCE_DIR}/.git")
-        message(FATAL_ERROR "Tagged release verification requires a Git work tree")
+    if(NOT _git_executable)
+        message(FATAL_ERROR "Tagged release verification requires Git")
     endif()
     execute_process(
-        COMMAND "${_git_executable}" -C "${ANO_CRYPTO_SOURCE_DIR}" rev-parse HEAD
+        COMMAND "${_git_executable}" -C "${ANO_CRYPTO_SOURCE_DIR}"
+            rev-parse --is-inside-work-tree
+        RESULT_VARIABLE _worktree_result OUTPUT_VARIABLE _worktree_output
+        ERROR_VARIABLE _worktree_error OUTPUT_STRIP_TRAILING_WHITESPACE
+        TIMEOUT 60)
+    if(NOT _worktree_result EQUAL 0 OR NOT _worktree_output STREQUAL "true")
+        message(FATAL_ERROR
+            "Tagged release verification requires a Git work tree: ${_worktree_error}")
+    endif()
+    execute_process(
+        COMMAND "${_git_executable}" -C "${ANO_CRYPTO_SOURCE_DIR}"
+            rev-parse --show-toplevel
+        RESULT_VARIABLE _root_result OUTPUT_VARIABLE _git_root
+        ERROR_VARIABLE _root_error OUTPUT_STRIP_TRAILING_WHITESPACE
+        TIMEOUT 60)
+    if(NOT _root_result EQUAL 0 OR _git_root STREQUAL "")
+        message(FATAL_ERROR
+            "Tagged release Git root resolution failed: ${_root_error}")
+    endif()
+    get_filename_component(_source_real "${ANO_CRYPTO_SOURCE_DIR}" REALPATH)
+    get_filename_component(_git_root_real "${_git_root}" REALPATH)
+    if(WIN32)
+        string(TOLOWER "${_source_real}" _source_real)
+        string(TOLOWER "${_git_root_real}" _git_root_real)
+    endif()
+    if(NOT _source_real STREQUAL _git_root_real)
+        message(FATAL_ERROR
+            "Tagged release source directory is not the Git work-tree root")
+    endif()
+    execute_process(
+        COMMAND "${_git_executable}" -C "${ANO_CRYPTO_SOURCE_DIR}"
+            status --porcelain=v1 --untracked-files=all
+        RESULT_VARIABLE _status_result OUTPUT_VARIABLE _status_output
+        ERROR_VARIABLE _status_error OUTPUT_STRIP_TRAILING_WHITESPACE
+        TIMEOUT 60)
+    if(NOT _status_result EQUAL 0)
+        message(FATAL_ERROR
+            "Tagged release work-tree status failed: ${_status_error}")
+    endif()
+    if(NOT _status_output STREQUAL "")
+        message(FATAL_ERROR "Tagged release verification requires a clean work tree")
+    endif()
+    set(_tagged_worktree_state "CLEAN")
+    execute_process(
+        COMMAND "${_git_executable}" -C "${ANO_CRYPTO_SOURCE_DIR}"
+            rev-parse --verify "HEAD^{commit}"
         RESULT_VARIABLE _head_result OUTPUT_VARIABLE _head_commit
         ERROR_VARIABLE _head_error OUTPUT_STRIP_TRAILING_WHITESPACE
         TIMEOUT 60)
@@ -427,7 +473,7 @@ endif()
 
 string(TIMESTAMP _checked_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_RELEASE_COMPATIBILITY_CHECK_OUTPUT}"
-    "AnoCrypto-C P1-32 release compatibility check\n"
+    "AnoCrypto-C P1-33 release compatibility check\n"
     "Checked UTC: ${_checked_utc}\n"
     "Policy schema: ${ANO_CRYPTO_RELEASE_POLICY_SCHEMA}\n"
     "Current version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
@@ -437,6 +483,7 @@ file(WRITE "${ANO_CRYPTO_RELEASE_COMPATIBILITY_CHECK_OUTPUT}"
     "Actual tag input: ${ANO_CRYPTO_ACTUAL_RELEASE_TAG}\n"
     "Actual commit input: ${ANO_CRYPTO_ACTUAL_RELEASE_COMMIT}\n"
     "Tag/commit verification: ${_tag_verification}\n"
+    "Tagged worktree state: ${_tagged_worktree_state}\n"
     "Resolved tag commit: ${_tag_commit}\n"
     "Resolved HEAD commit: ${_head_commit}\n"
     "Compatibility baseline version: ${ANO_CRYPTO_COMPAT_BASELINE_VERSION}\n"

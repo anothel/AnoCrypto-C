@@ -1,12 +1,12 @@
 # SBOM and Signing Plan
 
-Status: P1-32 unsigned engineering plan. Repository state: `UNSIGNED`; external release: `NO`; offline-signing handoff: `BLOCKED`.
+Status: P1-33 unsigned engineering plan. Repository state: `UNSIGNED`; external release: `NO`; offline-signing handoff: `BLOCKED`.
 
 ## Purpose
 
 AnoCrypto-C records source-archive contents and release hash bindings, then prepares a key-free offline-signing handoff. Private signing keys, signing tokens, customer data, unpublished deployment details, detached signatures, and timestamp protocol artifacts are excluded from repository, evidence, and customer PoC paths.
 
-P1-32 implements policy, handoff generation/verification, and opt-in test fixtures. It does not provision a production signer/TSA, sign a release, timestamp a production signature, approve hosted artifacts, authorize a tag, or authorize external release.
+P1-33 retains the P1-32 signing policy, handoff generation/verification, and opt-in test fixtures, then adds a clean synthetic tag rehearsal and hosted-review model. It does not provision a production signer/TSA, create or sign an actual tag, sign a release, timestamp a production signature, approve hosted artifacts, or authorize external release.
 
 ## Source SBOM scope
 
@@ -66,6 +66,8 @@ Fixture cryptographic success is test evidence only. Fixture keys, certificates,
 ## Hosted attestation boundary
 
 GitHub-hosted attestation may supplement a later release record. It cannot replace the raw Ed25519 signature, approved signer fingerprint, RFC 3161 timestamp, independent role approvals, or external authorization. Workflow YAML, an uploaded artifact, a Git tag string, or a hash manifest alone is not authenticated release provenance.
+
+P1-33 synthetic/local rehearsal records remain distinct from actual hosted output. Required hosted records remain `NOT_RUN` without a run and `UNREVIEWED` until a named reviewer/date disposition is recorded. Synthetic output cannot satisfy hosted review or unblock signing.
 
 ## PoC boundary
 

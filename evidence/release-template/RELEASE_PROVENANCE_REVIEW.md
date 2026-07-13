@@ -5,6 +5,7 @@ Expected tag: TODO
 Source commit: TODO
 Worktree state: TODO
 Reviewer/date: TODO
+Artifact origin: SYNTHETIC_LOCAL / HOSTED_RUNNER / NOT_APPLICABLE
 
 ## Mechanical checks
 
@@ -15,7 +16,10 @@ Reviewer/date: TODO
 | Public-header manifest | TODO | 14 reviewed headers |
 | Exported-symbol list | TODO | 69-symbol ABI-0 line |
 | Git worktree state | TODO | Recorded tag or completed hosted disposition requires `CLEAN` |
-| Hosted artifact disposition | TODO | Non-placeholder reviewer/date/commit-bound `PASS` required |
+| Synthetic tag rehearsal | TODO | Isolated repository only; tag/commit/`HEAD` must match |
+| Hosted artifact disposition | NOT_RUN / UNREVIEWED / REVIEWED | Non-placeholder reviewer/date/commit-bound disposition required |
+| Hosted artifact identity | TODO | Hash, workflow commit/ref, platform, compiler, architecture, and origin must agree |
+| Hosted index binding | TODO | Disposition SHA-256 values match `HOSTED_ARTIFACT_INDEX.txt` and `HOSTED_ARTIFACT_FILES.sha256` |
 | Provenance bundle verification | TODO | `RELEASE_PROVENANCE_CHECK.txt` |
 | Signing handoff verification | TODO | `RELEASE_SIGNING_HANDOFF_CHECK.txt`; verifies metadata, not a signature |
 | Sensitive artifact scan | TODO | Evidence, installed SDK, and PoC package must pass |
@@ -36,6 +40,8 @@ Reviewer/date: TODO
 | Cryptographic signature verification | NOT PERFORMED | Fixture verification does not verify a production signature |
 | GitHub attestation | SECONDARY ONLY | Never trust root or detached-signature replacement |
 | External release authorization | NO | Authorization handoff remains `BLOCKED` |
+
+Synthetic rehearsal success is procedure evidence only. It cannot change hosted state to `PASS` or `APPROVED`, satisfy an actual tag requirement, or unblock release authorization.
 
 ## Fixture boundary
 

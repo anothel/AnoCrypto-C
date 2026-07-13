@@ -1,10 +1,10 @@
 # Release Provenance and Signing Policy
 
-Status: P1-32 unsigned engineering policy. External release authorized: NO. The repository is `UNSIGNED`; the offline-signing handoff is `BLOCKED` because the production signer, RFC 3161 timestamp policy, required role identities, actual tag/hosted review, and product release authorization are not provisioned or completed.
+Status: P1-33 unsigned engineering policy. External release authorized: NO. The repository is `UNSIGNED`; the offline-signing handoff is `BLOCKED` because the production signer, RFC 3161 timestamp policy, required role identities, actual tag/hosted review, and product release authorization are not provisioned or completed.
 
 ## Purpose
 
-P1-32 binds the reviewed source archive and public compatibility inputs into a self-contained provenance bundle, then creates a key-free offline-signing handoff. The generator and verifier make missing, stale, or tampered metadata visible. They do not sign a release or authorize distribution.
+P1-33 retains the P1-32 key-free offline-signing profile, binds the reviewed source archive and public compatibility inputs into a self-contained provenance bundle, and rehearses tag identity only in an isolated synthetic checkout. The generators and verifiers make missing, stale, or tampered metadata visible. They do not create an actual tag, sign a release, or authorize distribution.
 
 The generated records are engineering evidence. They are not substitutes for:
 
@@ -40,7 +40,7 @@ release-provenance/
 
 ## Source SBOM boundary
 
-P1-32 generates an SPDX 2.3 JSON source inventory for the exact regular-file list used to create `anocrypto-c-source.tar.gz`.
+P1-33 generates an SPDX 2.3 JSON source inventory for the exact regular-file list used to create `anocrypto-c-source.tar.gz`.
 
 Included:
 
@@ -66,7 +66,13 @@ The verifier compares archive member names and extracted regular-file hashes wit
 
 A tag or commit string is not an attestation. A recorded release tag or completed hosted disposition requires a known commit and `CLEAN` worktree. Strict Git checks must prove that expected tag, supplied commit, and checked-out `HEAD` resolve to one reviewed commit.
 
-The default hosted disposition is `TODO`. A `PASS` record is accepted only when release/tag identity, non-placeholder reviewer, UTC timestamp, workflow commit, clean provenance commit, and result fields agree. Mechanical verification does not perform human platform, compiler-output, ABI, side-channel, or product review.
+The default hosted execution state is `NOT_RUN`. Downloaded but undispositioned output is `UNREVIEWED`. `PASS` and `APPROVED` are not hosted-review disposition values. The manifest schema reserves `ACCEPTED_WITH_LIMITATIONS` and `REJECTED` for a later named-review workflow, but the P1-33 provenance importer accepts only the explicit `UNREVIEWED` state. Mechanical verification does not perform human platform, compiler-output, ABI, side-channel, or product review.
+
+## Rehearsal and hosted-review boundary
+
+An isolated synthetic local tag may exercise the release procedure, including clean-worktree and tag/commit/`HEAD` equality checks. It does not become actual tag evidence and must be recorded as `SYNTHETIC_LOCAL`. Dirty worktrees, moved tags, moved `HEAD`, commit/ref mismatch, duplicate or missing required lanes, unlisted files, hash mismatch, traversal, symlink, oversized or unexpected binary-like files, sensitive markers, incomplete reviewer metadata, conflicting approval roles, and false `PASS`/`APPROVED` claims are rejected.
+
+Hosted records must bind artifact hashes to workflow commit/ref, platform, compiler, and architecture. P1-33 imports a supplied disposition into provenance only when matching `HOSTED_ARTIFACT_INDEX.txt` and `HOSTED_ARTIFACT_FILES.sha256` hashes accompany an explicit `UNREVIEWED` record; the default no-run record uses `NOT_RUN` sentinels. Promotion to a reviewed disposition is deferred until a later schema validates the complete structured index, reviewer authority, and review record. Synthetic artifacts cannot satisfy hosted review. The signing handoff remains `BLOCKED` and external release remains `NO`.
 
 ## Offline-signing profile
 
@@ -133,4 +139,4 @@ External release requires all of the following outside this repository state:
 
 ## Claims boundary
 
-P1-32 supports the phrases `unsigned engineering provenance bundle`, `source inventory`, `key-free offline-signing handoff`, and `release preparation gate`. It does not support wording that implies completed signing, completed hosted review, authenticated production attestation, external-release approval, universal ABI compatibility, side-channel assurance, or official validation.
+P1-33 supports the phrases `unsigned engineering provenance bundle`, `source inventory`, `key-free offline-signing handoff`, `synthetic tagged-release rehearsal`, and `release preparation gate`. It does not support wording that implies an actual tag, completed signing, completed hosted review, authenticated production attestation, external-release approval, universal ABI compatibility, side-channel assurance, or official validation.

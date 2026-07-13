@@ -1,4 +1,4 @@
-# Verify an unsigned AnoCrypto-C P1-32 engineering provenance bundle.
+# Verify an unsigned AnoCrypto-C P1-33 engineering provenance bundle.
 # This checker validates path safety, complete hash coverage, release identity,
 # source-file hashes, source SBOM bindings, ABI/public-header inputs, and the
 # explicit unsigned/BLOCKED release boundary. It does not verify a signature or
@@ -166,11 +166,11 @@ if(NOT _prov_source_archive STREQUAL "anocrypto-c-source.tar.gz" OR
     message(FATAL_ERROR "Provenance record references an unexpected artifact name")
 endif()
 if(NOT _prov_signing_status STREQUAL "UNSIGNED" OR
-   NOT _prov_release_authorization STREQUAL "TODO" OR
+   NOT _prov_release_authorization STREQUAL "BLOCKED" OR
    NOT _prov_external_release_authorized STREQUAL "NO" OR
    NOT _prov_result STREQUAL "PASS")
     message(FATAL_ERROR
-        "P1-32 provenance must remain unsigned and not externally authorized")
+        "P1-33 provenance must remain unsigned and not externally authorized")
 endif()
 if(NOT _prov_generated_utc MATCHES
    "^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]Z$")
@@ -635,11 +635,14 @@ endforeach()
 
 file(READ "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}/RELEASE_AUTHORIZATION.md" _authorization)
 foreach(_text IN ITEMS
-        "Status: TODO"
+        "Status: BLOCKED"
+        "Actual release tag generated: NO"
+        "GitHub attestation role: OPTIONAL_SECONDARY_NOT_TRUST_ROOT"
         "External release authorized: NO"
-        "Reviewer: TODO"
+        "Reviewer: UNPROVISIONED"
+        "Review date: UNREVIEWED"
         "Recorded worktree state: `${_prov_worktree_state}`"
-        "actual hosted review, tag, production signer/timestamp provisioning, and signing remain TODO")
+        "actual hosted review, tag, production signer/timestamp provisioning, and signing remain incomplete")
     string(FIND "${_authorization}" "${_text}" _position)
     if(_position EQUAL -1)
         message(FATAL_ERROR "Release authorization is missing boundary text: ${_text}")
@@ -648,35 +651,160 @@ endforeach()
 
 set(_disposition
     "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}/HOSTED_ARTIFACT_DISPOSITION.txt")
+file(STRINGS "${_disposition}" _disposition_lines LIMIT_COUNT 1)
+list(GET _disposition_lines 0 _disposition_magic)
+if(NOT _disposition_magic STREQUAL "ANOCRYPTO_HOSTED_ARTIFACT_DISPOSITION_V2")
+    message(FATAL_ERROR "Hosted artifact disposition must use the V2 review model")
+endif()
 _ano_read_key("${_disposition}" "release_version" _disposition_release)
 _ano_read_key("${_disposition}" "expected_tag" _disposition_tag)
 _ano_read_key("${_disposition}" "workflow_commit" _disposition_commit)
+_ano_read_key("${_disposition}" "workflow_ref" _disposition_ref)
+_ano_read_key("${_disposition}" "required_tuple_count" _disposition_required_count)
+_ano_read_key("${_disposition}" "required_hosted_tuple_count"
+    _disposition_required_hosted_count)
+_ano_read_key("${_disposition}" "hosted_runner_bundle_count"
+    _disposition_hosted_count)
+_ano_read_key("${_disposition}" "synthetic_local_bundle_count"
+    _disposition_synthetic_count)
+_ano_read_key("${_disposition}" "artifact_index_sha256"
+    _disposition_index_sha256)
+_ano_read_key("${_disposition}" "artifact_files_manifest_sha256"
+    _disposition_files_manifest_sha256)
+_ano_read_key("${_disposition}" "hosted_execution_status" _disposition_execution)
+_ano_read_key("${_disposition}" "review_status" _disposition_review_status)
 _ano_read_key("${_disposition}" "reviewer" _disposition_reviewer)
-_ano_read_key("${_disposition}" "reviewed_utc" _disposition_reviewed_utc)
-_ano_read_key("${_disposition}" "status" _disposition_status)
+_ano_read_key("${_disposition}" "review_date" _disposition_review_date)
+_ano_read_key("${_disposition}" "disposition" _disposition_value)
+_ano_read_key("${_disposition}" "security_reviewer_identity" _disposition_security_reviewer)
+_ano_read_key("${_disposition}" "product_release_owner_identity" _disposition_product_owner)
+_ano_read_key("${_disposition}" "role_separation_status" _disposition_role_separation)
+_ano_read_key("${_disposition}" "signing_status" _disposition_signing)
+_ano_read_key("${_disposition}" "handoff_status" _disposition_handoff)
+_ano_read_key("${_disposition}" "external_release_authorized" _disposition_external_release)
+_ano_read_key("${_disposition}" "github_attestation_role" _disposition_attestation_role)
+_ano_read_key("${_disposition}" "integrity_status" _disposition_integrity)
 _ano_read_key("${_disposition}" "result" _disposition_result)
 if(NOT _disposition_release STREQUAL ANO_CRYPTO_RELEASE_VERSION OR
    NOT _disposition_tag STREQUAL ANO_CRYPTO_RELEASE_TAG)
     message(FATAL_ERROR "Hosted artifact disposition has a different release identity")
 endif()
-if(_disposition_status STREQUAL "PASS")
-    if(_disposition_reviewer STREQUAL "TODO" OR
-       NOT _disposition_reviewed_utc MATCHES
-           "^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]Z$" OR
-       NOT _disposition_result STREQUAL "PASS" OR
+foreach(_count IN ITEMS
+        "${_disposition_required_count}"
+        "${_disposition_required_hosted_count}"
+        "${_disposition_hosted_count}"
+        "${_disposition_synthetic_count}")
+    if(NOT _count MATCHES "^[0-9]+$")
+        message(FATAL_ERROR "Hosted artifact disposition has a malformed count")
+    endif()
+endforeach()
+if(NOT _disposition_required_count STREQUAL "16" OR
+   _disposition_required_hosted_count GREATER _disposition_required_count OR
+   _disposition_required_hosted_count GREATER _disposition_hosted_count)
+    message(FATAL_ERROR "Hosted artifact disposition tuple counts are inconsistent")
+endif()
+if(_disposition_value STREQUAL "PASS" OR
+   _disposition_value STREQUAL "APPROVED" OR
+   _disposition_result STREQUAL "PASS" OR
+   _disposition_result STREQUAL "APPROVED")
+    message(FATAL_ERROR "Hosted review must not claim PASS or APPROVED")
+endif()
+if(NOT (_disposition_execution STREQUAL "COMPLETED" OR
+        _disposition_execution STREQUAL "NOT_RUN") OR
+   NOT (_disposition_review_status STREQUAL "REVIEWED" OR
+        _disposition_review_status STREQUAL "UNREVIEWED") OR
+   NOT (_disposition_value STREQUAL "UNREVIEWED" OR
+        _disposition_value STREQUAL "ACCEPTED_WITH_LIMITATIONS" OR
+        _disposition_value STREQUAL "REJECTED") OR
+   NOT (_disposition_integrity STREQUAL "PASS" OR
+        _disposition_integrity STREQUAL "NOT_RUN"))
+    message(FATAL_ERROR "Hosted artifact disposition has an invalid status vocabulary")
+endif()
+if(_disposition_execution STREQUAL "COMPLETED")
+    if(NOT _disposition_required_hosted_count STREQUAL
+           _disposition_required_count OR
+       _disposition_hosted_count LESS _disposition_required_count OR
        _disposition_commit STREQUAL "unknown" OR
        NOT _disposition_commit STREQUAL _prov_source_commit OR
-       NOT _prov_worktree_state STREQUAL "CLEAN")
-        message(FATAL_ERROR "Completed hosted disposition lacks reviewer/date/commit binding")
+       _disposition_ref STREQUAL "" OR
+       _disposition_ref MATCHES "^(NOT_RUN|unknown)$")
+        message(FATAL_ERROR
+            "Completed hosted execution lacks required tuples or workflow identity")
     endif()
-elseif(NOT (_disposition_status STREQUAL "TODO" AND
-             _disposition_result STREQUAL "TODO" AND
-             _disposition_reviewer STREQUAL "TODO" AND
-             _disposition_reviewed_utc STREQUAL "TODO"))
-    message(FATAL_ERROR "Hosted artifact disposition must be a complete PASS or explicit TODO")
+elseif(_disposition_required_hosted_count GREATER_EQUAL
+       _disposition_required_count)
+    message(FATAL_ERROR
+        "NOT_RUN hosted execution may not claim every required hosted tuple")
+endif()
+if(NOT _disposition_signing STREQUAL "UNSIGNED" OR
+   NOT _disposition_handoff STREQUAL "BLOCKED" OR
+   NOT _disposition_external_release STREQUAL "NO" OR
+   NOT _disposition_attestation_role STREQUAL "OPTIONAL_SECONDARY_NOT_TRUST_ROOT" OR
+   NOT _disposition_result STREQUAL "BLOCKED")
+    message(FATAL_ERROR "Hosted disposition crosses the unsigned release boundary")
+endif()
+if(NOT (_disposition_review_status STREQUAL "UNREVIEWED" AND
+        _disposition_reviewer STREQUAL "UNPROVISIONED" AND
+        _disposition_review_date STREQUAL "UNREVIEWED" AND
+        _disposition_value STREQUAL "UNREVIEWED"))
+    message(FATAL_ERROR
+        "P1-33 provenance accepts only an explicit UNREVIEWED hosted disposition")
+endif()
+if(NOT _disposition_commit STREQUAL "unknown" AND
+   NOT _disposition_commit STREQUAL _prov_source_commit)
+    message(FATAL_ERROR "Hosted disposition workflow commit does not match provenance")
+endif()
+if(_disposition_execution STREQUAL "NOT_RUN" AND
+   NOT _disposition_ref STREQUAL "NOT_RUN")
+    message(FATAL_ERROR "A NOT_RUN hosted disposition must record workflow_ref=NOT_RUN")
 endif()
 
-# This P1-32 bundle generator does not support signature artifacts. Reject
+set(_bound_hosted_index
+    "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}/HOSTED_ARTIFACT_INDEX.txt")
+set(_bound_hosted_files_manifest
+    "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}/HOSTED_ARTIFACT_FILES.sha256")
+if(_disposition_index_sha256 STREQUAL "NOT_RUN" AND
+   _disposition_files_manifest_sha256 STREQUAL "NOT_RUN")
+    if(EXISTS "${_bound_hosted_index}" OR
+       EXISTS "${_bound_hosted_files_manifest}" OR
+       _disposition_execution STREQUAL "COMPLETED")
+        message(FATAL_ERROR
+            "Hosted artifact binding files/status disagree with the disposition")
+    endif()
+else()
+    string(LENGTH "${_disposition_index_sha256}" _index_hash_length)
+    string(LENGTH "${_disposition_files_manifest_sha256}" _files_hash_length)
+    if(NOT _index_hash_length EQUAL 64 OR
+       NOT _files_hash_length EQUAL 64 OR
+       NOT _disposition_index_sha256 MATCHES "^[0-9a-fA-F]+$" OR
+       NOT _disposition_files_manifest_sha256 MATCHES "^[0-9a-fA-F]+$" OR
+       NOT EXISTS "${_bound_hosted_index}" OR
+       IS_DIRECTORY "${_bound_hosted_index}" OR
+       IS_SYMLINK "${_bound_hosted_index}" OR
+       NOT EXISTS "${_bound_hosted_files_manifest}" OR
+       IS_DIRECTORY "${_bound_hosted_files_manifest}" OR
+       IS_SYMLINK "${_bound_hosted_files_manifest}")
+        message(FATAL_ERROR "Hosted artifact index bindings are missing or malformed")
+    endif()
+    file(SHA256 "${_bound_hosted_index}" _actual_index_sha256)
+    file(SHA256 "${_bound_hosted_files_manifest}" _actual_files_manifest_sha256)
+    if(NOT _actual_index_sha256 STREQUAL _disposition_index_sha256 OR
+       NOT _actual_files_manifest_sha256 STREQUAL
+           _disposition_files_manifest_sha256)
+        message(FATAL_ERROR "Hosted artifact index binding hash mismatch")
+    endif()
+endif()
+if(_disposition_security_reviewer STREQUAL "UNPROVISIONED" OR
+   _disposition_product_owner STREQUAL "UNPROVISIONED")
+    if(NOT _disposition_role_separation STREQUAL "UNPROVISIONED")
+        message(FATAL_ERROR "Unprovisioned approval roles require UNPROVISIONED separation status")
+    endif()
+elseif(_disposition_security_reviewer STREQUAL _disposition_product_owner OR
+       NOT _disposition_role_separation STREQUAL "PASS")
+    message(FATAL_ERROR "Hosted disposition approval roles are not separated")
+endif()
+
+# This P1-33 bundle generator does not support signature artifacts. Reject
 # signature/key/credential-looking files rather than silently treating them as
 # verified release inputs.
 foreach(_relative IN LISTS _bundle_files)
@@ -702,7 +830,7 @@ endforeach()
 list(LENGTH _manifest_paths _manifest_file_count)
 string(TIMESTAMP _checked_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_PROVENANCE_CHECK_OUTPUT}"
-    "AnoCrypto-C P1-32 release provenance check\n"
+    "AnoCrypto-C P1-33 release provenance check\n"
     "Checked UTC: ${_checked_utc}\n"
     "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Expected tag: ${ANO_CRYPTO_RELEASE_TAG}\n"
@@ -718,9 +846,13 @@ file(WRITE "${ANO_CRYPTO_PROVENANCE_CHECK_OUTPUT}"
     "SPDX file path/SHA-256/SHA-1 binding: PASS\n"
     "SPDX package verification code: ${_package_verification_code}\n"
     "Manifest-covered bundle files: ${_manifest_file_count}\n"
-    "Hosted artifact disposition: ${_disposition_status}\n"
+    "Hosted execution status: ${_disposition_execution}\n"
+    "Hosted required tuples: ${_disposition_required_hosted_count}/${_disposition_required_count}\n"
+    "Hosted review status: ${_disposition_review_status}\n"
+    "Hosted artifact disposition: ${_disposition_value}\n"
+    "Hosted index/files-manifest binding: ${_disposition_index_sha256}/${_disposition_files_manifest_sha256}\n"
     "Signing status: UNSIGNED\n"
-    "Release authorization: TODO\n"
+    "Release authorization: BLOCKED\n"
     "External release authorized: NO\n"
     "Hash/path/sensitive-marker verification: PASS\n"
     "Limit: JSON schema validation, dependency discovery, vulnerability analysis, cryptographic signature verification, and external-release approval were not performed.\n"

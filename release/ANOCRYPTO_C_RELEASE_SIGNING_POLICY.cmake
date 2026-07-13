@@ -1,4 +1,4 @@
-# AnoCrypto-C P1-32 offline release-signing handoff policy.
+# AnoCrypto-C P1-33 offline release-signing handoff policy.
 # This file defines verification metadata only. It contains no signing key,
 # credential, detached signature, timestamp response, or release approval.
 set(ANO_CRYPTO_RELEASE_SIGNING_POLICY_SCHEMA "1")

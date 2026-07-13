@@ -31,13 +31,70 @@ function(ano_crypto_detect_sensitive_signing_material_text
                 "${_seed_assignment}"
                 "${_drbg_assignment}")
             string(REGEX MATCH
-                "(^|[\r\n])[ \t]*(export[ \t]+)?${_assignment}[ \t]*="
+                "(^|[\r\n])[ \t]*(export[ \t]+|set[ \t]+)?${_assignment}[ \t]*="
                 _assignment_match "${_content_lower}")
             if(_assignment_match)
                 set(${_out_reason} "sensitive assignment" PARENT_SCOPE)
                 return()
             endif()
         endforeach()
+
+        foreach(_assignment IN ITEMS
+                aes_key aes_iv plaintext ciphertext cmac_tag)
+            string(REGEX MATCH
+                "(^|[\r\n])[ \t]*(export[ \t]+|set[ \t]+)?${_assignment}[ \t]*="
+                _assignment_match "${_content_lower}")
+            if(_assignment_match)
+                set(${_out_reason} "sensitive cryptographic value assignment" PARENT_SCOPE)
+                return()
+            endif()
+        endforeach()
+
+        set(_status_lines "${_content_lower}")
+        string(REPLACE ";" "\;" _status_lines "${_status_lines}")
+        string(REPLACE "\r\n" "\n" _status_lines "${_status_lines}")
+        string(REPLACE "\r" "\n" _status_lines "${_status_lines}")
+        string(REPLACE "\n" ";" _status_lines "${_status_lines}")
+        foreach(_status_line IN LISTS _status_lines)
+            foreach(_status_key IN ITEMS token actual_signature signature_value
+                    detached_signature timestamp_response)
+                if(_status_line MATCHES
+                   "^[ \t]*(export[ \t]+|set[ \t]+)?${_status_key}[ \t]*=[ \t]*(.*)$")
+                    set(_status_value "${CMAKE_MATCH_2}")
+                    string(STRIP "${_status_value}" _status_value)
+                    if(NOT _status_value MATCHES
+                       "^(no|none|absent|not_created|not_run|unprovisioned|unreviewed)$")
+                        set(${_out_reason} "sensitive status/value assignment" PARENT_SCOPE)
+                        return()
+                    endif()
+                endif()
+            endforeach()
+            if(_status_line MATCHES
+               "^[ \t]*(export[ \t]+|set[ \t]+)?(entropy|seed|signature|[a-z0-9_]*token[a-z0-9_]*)[ \t]*=[ \t]*(.*)$")
+                set(_status_value "${CMAKE_MATCH_3}")
+                string(STRIP "${_status_value}" _status_value)
+                if(NOT _status_value MATCHES
+                   "^(no|none|absent|not_created|not_run|unprovisioned|unreviewed)$")
+                    set(${_out_reason} "sensitive generic value assignment" PARENT_SCOPE)
+                    return()
+                endif()
+            endif()
+        endforeach()
+
+        string(CONCAT _json_sensitive_keys
+            "private" "_key|certificate" "_private_key|signing" "_token|"
+            "entropy" "_material|seed" "_material|drbg" "_state|"
+            "aes" "_key|aes" "_iv|plain" "text|cipher" "text|cmac" "_tag|"
+            "entropy|seed|signature|[a-z0-9_]*to" "ken[a-z0-9_]*|"
+            "to" "ken|actual" "_signature|signature" "_value|"
+            "detached" "_signature|timestamp" "_response")
+        string(REGEX MATCH
+            "(^|[\r\n{,])[ \t]*[\"']?(${_json_sensitive_keys})[\"']?[ \t]*:"
+            _json_sensitive_match "${_content_lower}")
+        if(_json_sensitive_match)
+            set(${_out_reason} "sensitive JSON/record key" PARENT_SCOPE)
+            return()
+        endif()
     endif()
 
     set(${_out_reason} "" PARENT_SCOPE)

@@ -325,7 +325,7 @@ if(DEFINED ANO_CRYPTO_SIGNATURE_VERIFY_OUTPUT AND
     get_filename_component(_output_parent "${ANO_CRYPTO_SIGNATURE_VERIFY_OUTPUT}" DIRECTORY)
     file(MAKE_DIRECTORY "${_output_parent}")
     file(WRITE "${ANO_CRYPTO_SIGNATURE_VERIFY_OUTPUT}"
-        "AnoCrypto-C P1-32 detached-signature verification\n"
+        "AnoCrypto-C P1-33 detached-signature verification\n"
         "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
         "Expected tag: ${ANO_CRYPTO_RELEASE_TAG}\n"
         "Subject: ${ANO_CRYPTO_RELEASE_SIGNING_SUBJECT}\n"

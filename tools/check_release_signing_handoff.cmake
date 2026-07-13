@@ -232,7 +232,8 @@ foreach(_key IN ITEMS release_version expected_tag actual_tag source_commit work
     _ano_read_key("${_provenance}" "${_key}" "_prov_${_key}")
 endforeach()
 set(_disposition "${ANO_CRYPTO_SIGNING_HANDOFF_DIR}/HOSTED_ARTIFACT_DISPOSITION.txt")
-foreach(_key IN ITEMS release_version expected_tag workflow_commit status result)
+foreach(_key IN ITEMS release_version expected_tag workflow_commit review_status
+        disposition result)
     _ano_read_key("${_disposition}" "${_key}" "_disp_${_key}")
 endforeach()
 set(_signer "${ANO_CRYPTO_SIGNING_HANDOFF_DIR}/APPROVED_RELEASE_SIGNERS.txt")
@@ -277,7 +278,9 @@ if(NOT _prov_actual_tag STREQUAL ANO_CRYPTO_RELEASE_TAG)
 endif()
 if(NOT _disp_release_version STREQUAL ANO_CRYPTO_RELEASE_VERSION OR
    NOT _disp_expected_tag STREQUAL ANO_CRYPTO_RELEASE_TAG OR
-   NOT _disp_status STREQUAL "PASS" OR NOT _disp_result STREQUAL "PASS")
+   NOT _disp_review_status STREQUAL "REVIEWED" OR
+   NOT _disp_disposition STREQUAL "ACCEPTED_WITH_LIMITATIONS" OR
+   NOT _disp_result STREQUAL "BLOCKED")
     _ano_append_block_reason("HOSTED_ARTIFACT_DISPOSITION_INCOMPLETE")
 endif()
 if(NOT _disp_workflow_commit STREQUAL _prov_source_commit)
@@ -375,7 +378,7 @@ if(DEFINED ANO_CRYPTO_SIGNING_HANDOFF_CHECK_OUTPUT AND
     get_filename_component(_check_parent "${ANO_CRYPTO_SIGNING_HANDOFF_CHECK_OUTPUT}" DIRECTORY)
     file(MAKE_DIRECTORY "${_check_parent}")
     file(WRITE "${ANO_CRYPTO_SIGNING_HANDOFF_CHECK_OUTPUT}"
-        "AnoCrypto-C P1-32 release signing handoff check\n"
+        "AnoCrypto-C P1-33 release signing handoff check\n"
         "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
         "Signing policy: ${ANO_CRYPTO_RELEASE_SIGNING_POLICY_ID}\n"
         "Readiness: ${_recomputed_readiness}\n"

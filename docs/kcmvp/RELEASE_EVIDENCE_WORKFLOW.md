@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-32 unsigned engineering draft. It prepares a key-free offline-signing handoff but performs no production signing or external-release authorization.
+Status: P1-33 unsigned engineering draft. It prepares a key-free offline-signing handoff and clean synthetic tag rehearsal but performs no actual tag creation, production signing, or external-release authorization.
 
 ## Purpose
 
@@ -15,15 +15,15 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-32/
+build/evidence/p1-33/
 ```
 
 The build graph serializes clean Release symbol/runtime-dependency inspection,
 installed-package smoke, customer PoC smoke, tagged-release compatibility,
 compiler-output capture, full CTest, provenance preparation, and key-free
 signing-handoff verification. A predecessor writes a complete hash-bound tree
-under `build/prepared-release-evidence/p1-32/`. Final collection verifies that
-manifest and copies only regular-file content into `build/evidence/p1-32/`; it
+under `build/prepared-release-evidence/p1-33/`. Final collection verifies that
+manifest and copies only regular-file content into `build/evidence/p1-33/`; it
 does not run a configure, build, CTest, package, policy, or status-test process.
 Outer Make/Ninja jobserver variables are removed from nested prerequisite
 processes, and child processes have explicit timeouts.
@@ -302,3 +302,14 @@ Local evidence records expected tag metadata but does not claim that a tag exist
 - Debug-only opt-in OpenSSL fixtures exercise positive/negative Ed25519 and RFC 3161 verification. Generated fixture material is ephemeral and excluded from evidence.
 - Final evidence collection consumes prepared prerequisite outputs and writes `SENSITIVE_ARTIFACT_SCAN.txt`; it does not recursively rebuild package/test trees.
 - Actual hosted review, tag authorization, production signing/timestamping, role approval, and external release are not performed.
+
+## P1-33 clean rehearsal and hosted-review additions
+
+- Release identity is `0.1.0-p1-33-release-rehearsal`; public surface remains 14 headers and 69 `ANOCRYPTO_C_0` symbols.
+- A temporary clean Git repository creates a synthetic local tag and proves expected tag, supplied commit, tag-resolved commit, and `HEAD` equality without tagging the user repository.
+- Dirty state, moved tag, moved `HEAD`, commit/ref mismatch, missing or duplicate lanes, unsafe/unlisted/tampered artifacts, incomplete reviewer metadata, conflicting roles, and false approval claims fail closed.
+- Required review categories cover Linux, Windows, macOS, Linux 32-bit, s390x big-endian, GCC/Clang compiler output, OpenSSL differential, provenance, and signing handoff.
+- Hosted records bind artifact hash, workflow commit/ref, platform, compiler, architecture, reviewer, UTC review date, disposition, and origin.
+- Synthetic/local output is never hosted evidence. Missing hosted execution remains `NOT_RUN`; downloaded but unreviewed output remains `UNREVIEWED`.
+- The clean checkout reproduces configure/build/CTest, install, PoC, compatibility, provenance, signing handoff, and final evidence collection.
+- Production signer/TSA remain `UNPROVISIONED`; signing remains `UNSIGNED`, handoff `BLOCKED`, and external authorization `NO`.

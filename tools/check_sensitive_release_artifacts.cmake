@@ -70,7 +70,7 @@ get_filename_component(_scan_output_parent
     "${ANO_CRYPTO_SENSITIVE_ARTIFACT_SCAN_OUTPUT}" DIRECTORY)
 file(MAKE_DIRECTORY "${_scan_output_parent}")
 file(WRITE "${ANO_CRYPTO_SENSITIVE_ARTIFACT_SCAN_OUTPUT}"
-    "AnoCrypto-C P1-32 sensitive artifact scan\n"
+    "AnoCrypto-C P1-33 sensitive artifact scan\n"
     "Scanned files: ${_scan_count}\n"
     "Private-key marker present: no\n"
     "Credential/signature-like file present: no\n"

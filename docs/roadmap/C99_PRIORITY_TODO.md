@@ -1,8 +1,8 @@
 # C99 Priority TODO
 
-Status: P1-32 offline release-signing handoff completed as an engineering slice.
+Status: P1-33 clean tagged-release rehearsal and hosted artifact review completed as an engineering slice.
 
-## Completed foundation through P1-32
+## Completed foundation through P1-33
 
 - C99 repository, clean-room records, stable-status API style, module lifecycle,
   self-test/error-state, build identity, and install/export package structure.
@@ -22,6 +22,7 @@ Status: P1-32 offline release-signing handoff completed as an engineering slice.
 - P1-30 central release identity, retained P1-29 public-header/symbol baseline, old/current-header consumers, strict tag/commit/HEAD fixture checks, and hashed hosted-artifact manifests.
 - P1-31 exact-source archive/file hash binding, SPDX 2.3 JSON source inventory, unsigned signing boundary, authorization TODO record, provenance regression tests, hosted provenance lane, and PoC exclusion checks.
 - P1-32 key-free offline signing handoff and verifier policy for Ed25519 raw 64-byte signatures over `RELEASE_ARTIFACTS.sha256`, SHA-256 SPKI DER fingerprints, required RFC 3161 timestamps over the signature, distinct Security Reviewer/Product Release Owner identities, and optional secondary-only GitHub attestation.
+- P1-33 isolated clean-checkout synthetic tag rehearsal, dirty/moved identity rejection, explicit required hosted lane model, actual/synthetic status separation, and fail-closed hosted review metadata checks.
 
 ## Immediate P1 candidates
 
@@ -114,3 +115,16 @@ Remaining TODO:
 - record legal/product external-release authorization.
 
 Until those items are complete, signing remains `UNSIGNED`, external release remains `NO`, and handoff readiness remains `BLOCKED`.
+
+## P1-33 Clean Tagged-Release Rehearsal and Hosted Artifact Review
+
+Completed engineering scope:
+
+- isolated clean checkout with a synthetic local tag; no tag is created in the user repository;
+- expected tag, supplied commit, tag-resolved commit, and checked-out `HEAD` identity checks;
+- dirty worktree, moved tag, moved `HEAD`, commit/ref mismatch, and false approval rejection;
+- explicit required Linux, Windows, macOS, Linux 32-bit, s390x big-endian, GCC/Clang compiler-output, OpenSSL differential, provenance, and signing-handoff review categories;
+- artifact hash, workflow commit/ref, platform, compiler, architecture, reviewer, review date, disposition, and actual-versus-synthetic origin records;
+- unchanged 14-header, 69-symbol `ANOCRYPTO_C_0` public surface.
+
+Actual hosted results remain `NOT_RUN` or `UNREVIEWED` until downloaded artifacts are independently reviewed. Production signer/TSA remain `UNPROVISIONED`; no actual tag, production signature, timestamp, or external release is created or authorized.

@@ -1,4 +1,4 @@
-# Assemble the final P1-32 evidence directory from one complete, hash-bound
+# Assemble the final P1-33 evidence directory from one complete, hash-bound
 # predecessor artifact. This script intentionally launches no child process.
 cmake_minimum_required(VERSION 3.16)
 

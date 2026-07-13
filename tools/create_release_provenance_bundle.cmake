@@ -152,20 +152,68 @@ if(DEFINED ANO_CRYPTO_HOSTED_ARTIFACT_DISPOSITION_FILE AND
     configure_file("${_input_disposition}" "${_disposition}" COPYONLY)
 else()
     file(WRITE "${_disposition}"
-        "ANOCRYPTO_HOSTED_ARTIFACT_DISPOSITION_V1\n"
+        "ANOCRYPTO_HOSTED_ARTIFACT_DISPOSITION_V2\n"
         "release_version=${ANO_CRYPTO_RELEASE_VERSION}\n"
         "expected_tag=${ANO_CRYPTO_RELEASE_TAG}\n"
-        "workflow_run_id=unknown\n"
+        "workflow_run_id=NOT_RUN\n"
         "workflow_commit=unknown\n"
-        "reviewer=TODO\n"
-        "reviewed_utc=TODO\n"
-        "platform_review=TODO\n"
-        "compiler_output_review=TODO\n"
-        "differential_review=TODO\n"
-        "tag_commit_review=TODO\n"
-        "status=TODO\n"
-        "result=TODO\n"
+        "workflow_ref=NOT_RUN\n"
+        "required_tuple_count=16\n"
+        "required_hosted_tuple_count=0\n"
+        "hosted_runner_bundle_count=0\n"
+        "synthetic_local_bundle_count=0\n"
+        "artifact_index_sha256=NOT_RUN\n"
+        "artifact_files_manifest_sha256=NOT_RUN\n"
+        "hosted_execution_status=NOT_RUN\n"
+        "review_status=UNREVIEWED\n"
+        "reviewer=UNPROVISIONED\n"
+        "review_date=UNREVIEWED\n"
+        "disposition=UNREVIEWED\n"
+        "security_reviewer_identity=UNPROVISIONED\n"
+        "product_release_owner_identity=UNPROVISIONED\n"
+        "role_separation_status=UNPROVISIONED\n"
+        "signing_status=UNSIGNED\n"
+        "handoff_status=BLOCKED\n"
+        "external_release_authorized=NO\n"
+        "github_attestation_role=OPTIONAL_SECONDARY_NOT_TRUST_ROOT\n"
+        "integrity_status=NOT_RUN\n"
+        "status=UNREVIEWED\n"
+        "result=BLOCKED\n"
         "limit=No actual hosted artifact disposition was supplied to this local engineering bundle.\n")
+endif()
+
+set(_hosted_index_input "")
+set(_hosted_files_manifest_input "")
+if(DEFINED ANO_CRYPTO_HOSTED_ARTIFACT_INDEX_FILE AND
+   NOT ANO_CRYPTO_HOSTED_ARTIFACT_INDEX_FILE STREQUAL "")
+    get_filename_component(_hosted_index_input
+        "${ANO_CRYPTO_HOSTED_ARTIFACT_INDEX_FILE}" ABSOLUTE)
+endif()
+if(DEFINED ANO_CRYPTO_HOSTED_ARTIFACT_FILES_MANIFEST AND
+   NOT ANO_CRYPTO_HOSTED_ARTIFACT_FILES_MANIFEST STREQUAL "")
+    get_filename_component(_hosted_files_manifest_input
+        "${ANO_CRYPTO_HOSTED_ARTIFACT_FILES_MANIFEST}" ABSOLUTE)
+endif()
+if((_hosted_index_input STREQUAL "" AND
+    NOT _hosted_files_manifest_input STREQUAL "") OR
+   (NOT _hosted_index_input STREQUAL "" AND
+    _hosted_files_manifest_input STREQUAL ""))
+    message(FATAL_ERROR
+        "Hosted artifact index and files manifest must be supplied together")
+endif()
+if(NOT _hosted_index_input STREQUAL "")
+    foreach(_hosted_input IN ITEMS
+            "${_hosted_index_input}" "${_hosted_files_manifest_input}")
+        if(NOT EXISTS "${_hosted_input}" OR
+           IS_DIRECTORY "${_hosted_input}" OR
+           IS_SYMLINK "${_hosted_input}")
+            message(FATAL_ERROR "Hosted artifact binding input is missing or unsafe")
+        endif()
+    endforeach()
+    configure_file("${_hosted_index_input}"
+        "${ANO_CRYPTO_PROVENANCE_OUTPUT_DIR}/HOSTED_ARTIFACT_INDEX.txt" COPYONLY)
+    configure_file("${_hosted_files_manifest_input}"
+        "${ANO_CRYPTO_PROVENANCE_OUTPUT_DIR}/HOSTED_ARTIFACT_FILES.sha256" COPYONLY)
 endif()
 
 file(SHA256 "${_archive_out}" _archive_hash)
@@ -243,7 +291,7 @@ file(WRITE "${ANO_CRYPTO_PROVENANCE_OUTPUT_DIR}/SIGNING_REQUEST.txt"
 
 file(WRITE "${ANO_CRYPTO_PROVENANCE_OUTPUT_DIR}/RELEASE_AUTHORIZATION.md"
     "# Release Authorization Record\n\n"
-    "Status: TODO\n\n"
+    "Status: BLOCKED\n\n"
     "Release: `${ANO_CRYPTO_RELEASE_VERSION}`  \n"
     "Expected tag: `${ANO_CRYPTO_RELEASE_TAG}`  \n"
     "Recorded commit: `${ANO_CRYPTO_PROVENANCE_COMMIT}`  \n"
@@ -253,12 +301,14 @@ file(WRITE "${ANO_CRYPTO_PROVENANCE_OUTPUT_DIR}/RELEASE_AUTHORIZATION.md"
     "- [ ] Required hosted artifacts have an explicit reviewer/date disposition.\n"
     "- [ ] Source SBOM scope and limitations have been reviewed.\n"
     "- [ ] Production signer identity and timestamp trust source are provisioned and approved.\n"
-    "- [ ] The raw Ed25519 detached signature and RFC 3161 timestamp have been verified by the P1-32 offline verifier.\n"
+    "- [ ] The raw Ed25519 detached signature and RFC 3161 timestamp have been verified by the P1-33 offline verifier.\n"
     "- [ ] Legal/product approval and customer-sharing scope are recorded.\n\n"
+    "Actual release tag generated: NO\n"
+    "GitHub attestation role: OPTIONAL_SECONDARY_NOT_TRUST_ROOT\n"
     "External release authorized: NO\n"
-    "Reviewer: TODO\n"
-    "Reviewed UTC: TODO\n"
-    "Limitations: actual hosted review, tag, production signer/timestamp provisioning, and signing remain TODO.\n")
+    "Reviewer: UNPROVISIONED\n"
+    "Review date: UNREVIEWED\n"
+    "Limitations: actual hosted review, tag, production signer/timestamp provisioning, and signing remain incomplete.\n")
 
 file(WRITE "${ANO_CRYPTO_PROVENANCE_OUTPUT_DIR}/RELEASE_PROVENANCE.txt"
     "ANOCRYPTO_RELEASE_PROVENANCE_V1\n"
@@ -289,7 +339,7 @@ file(WRITE "${ANO_CRYPTO_PROVENANCE_OUTPUT_DIR}/RELEASE_PROVENANCE.txt"
     "hosted_artifact_disposition=HOSTED_ARTIFACT_DISPOSITION.txt\n"
     "hosted_artifact_disposition_sha256=${_disposition_hash}\n"
     "signing_status=UNSIGNED\n"
-    "release_authorization=TODO\n"
+    "release_authorization=BLOCKED\n"
     "external_release_authorized=NO\n"
     "generated_utc=${ANO_CRYPTO_PROVENANCE_CREATED_UTC}\n"
     "result=PASS\n"

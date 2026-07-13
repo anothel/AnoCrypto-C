@@ -16,7 +16,7 @@ extern "C" {
 /*
  * Runs the current startup self-test sequence.
  *
- * The P1-32 sequence retains the P1-29 build/manifest checks, SHA-2/HMAC KATs,
+ * The P1-33 sequence retains the P1-29 build/manifest checks, SHA-2/HMAC KATs,
  * AES-128/192/256 and CBC path KATs, full-tag AES-CMAC KATs, and
  * HMAC_DRBG-SHA-256 KATs.
  *

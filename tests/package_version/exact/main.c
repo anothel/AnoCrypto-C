@@ -8,5 +8,5 @@ int main(void)
     if (ano_crypto_version_string(&version) != ANO_CRYPTO_OK || version == 0) {
         return 1;
     }
-    return strcmp(version, "0.1.0-p1-32-signing-handoff") == 0 ? 0 : 2;
+    return strcmp(version, "0.1.0-p1-33-release-rehearsal") == 0 ? 0 : 2;
 }

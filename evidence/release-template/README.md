@@ -26,6 +26,8 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - Unsigned signing status, key-free handoff readiness, and release authorization state
 - Release provenance bundle/check result
 - Offline-signing handoff/check result
+- Clean tagged-release rehearsal/check result and explicit synthetic origin
+- Hosted artifact review matrix with `NOT_RUN`/`UNREVIEWED` state
 - Sensitive-artifact scan across evidence, installed SDK, and PoC package
 - Reproducible build notes
 - Public surface check result
@@ -63,7 +65,7 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - `docs/design/BLOCK_CIPHER_MODE_SELECTION.md` records the block-cipher implementation gate.
 - `docs/security/SIDE_CHANNEL_REVIEW_CHECKLIST.md` records key-dependent code path review questions.
 - `docs/business/CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md` records non-secret customer intake questions.
-- `docs/kcmvp/SBOM_SIGNING_PLAN.md` records the P1-32 source-inventory, Ed25519/RFC-3161 offline-signing profile, unsigned/BLOCKED state, and authorization boundary.
+- `docs/kcmvp/SBOM_SIGNING_PLAN.md` records the retained P1-32 Ed25519/RFC-3161 profile plus P1-33 clean-rehearsal/hosted-review, unsigned/BLOCKED, and authorization boundaries.
 - `docs/kcmvp/EVIDENCE_MANIFEST_POLICY.md` records manifest generation rules.
 - `docs/business/POC_PACKAGE_REVIEW_MANIFEST.md` records customer package review fields.
 - `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md` records the P1-14 public thread-safety support boundary.
@@ -83,8 +85,8 @@ ctest --test-dir build --output-on-failure
 Install smoke:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-32
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-32
+cmake --install build --prefix /tmp/anocrypto-c-p1-33
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-33
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -105,7 +107,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 - Add KAT vector local-copy hash policy when vectors are stored as separate data files.
 - Add CI-produced evidence bundle layout after workflow review.
-- Retain the P1-32 source-inventory scope, fixed signing profile, and unsigned/BLOCKED boundary until production signer/TSA provisioning, distinct role approvals, cryptographic verification, and release authorization complete.
+- Retain the P1-32 source-inventory/signing profile and P1-33 unsigned/BLOCKED boundary until actual hosted review, production signer/TSA provisioning, distinct role approvals, cryptographic verification, and release authorization complete.
 - Add customer PoC legal/evaluation notice after legal review.
 - Add reviewed platform CI evidence for Linux, Windows, and Apple entropy provider branches.
 - Review actual Windows and POSIX concurrent CSP HMAC/AES artifacts.
@@ -300,3 +302,15 @@ Review together:
 Confirm `RELEASE_ARTIFACTS.sha256` is the only subject; signature profile is Ed25519/raw 64 bytes; approved-key fingerprint is SHA-256 over DER SubjectPublicKeyInfo; RFC 3161 timestamp subject is the detached-signature file; required Security Reviewer and Product Release Owner identities are non-placeholder and different once provisioned; GitHub attestation is secondary only. Current production signer/TSA/role state remains unprovisioned, so repository state is `UNSIGNED`, readiness `BLOCKED`, and external authorization `NO`.
 
 Debug-only OpenSSL fixtures are test-path evidence only. Do not retain fixture key, certificate, signature, timestamp request, or timestamp response files in release evidence.
+
+## P1-33 clean release rehearsal and hosted review
+
+Review together:
+
+- clean-checkout rehearsal summary and tag/commit/`HEAD` identity result;
+- dirty-worktree, moved-tag, moved-`HEAD`, commit/ref mismatch regressions;
+- hosted required-lane index and per-artifact review records;
+- artifact SHA-256, workflow commit/ref, platform, compiler, architecture, reviewer, UTC review date, disposition, and origin fields;
+- hosted negative-test result for missing/duplicate lanes, unsafe or unlisted files, hash mismatch, oversized/binary-like files, sensitive markers, incomplete reviewer data, conflicting roles, and false approval state.
+
+Confirm the rehearsal tag exists only in an isolated temporary repository. Mark synthetic/local artifacts `SYNTHETIC_LOCAL`, actual hosted-runner artifacts `HOSTED_RUNNER`, absent hosted execution `NOT_RUN`, and downloaded-but-unreviewed output `UNREVIEWED`. No synthetic result may be represented as hosted `PASS` or `APPROVED`. Signing remains `UNSIGNED`, handoff `BLOCKED`, and external authorization `NO`.

@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P1-32 engineering draft.
+Status: P1-33 engineering draft.
 
 ## Purpose
 
@@ -13,7 +13,7 @@ This document explains the working flow used for AnoCrypto-C after the C99 reboo
 | P0 Foundation | Repository, clean-room records, C ABI skeleton, module lifecycle, self-test, build identity, install smoke | A consumer can build, install, link, initialize, self-test, and shut down the module. |
 | P1 Core slice | Small algorithm slice, KATs, negative tests, entropy/DRBG/CSP seams, CI/reproducibility notes, API/ABI review, customer PoC package | The SHA-256/SHA-384/SHA-512 hash and HMAC slice, HMAC_DRBG-SHA-256, random service, CSP lifecycle, and supporting evidence have repeatable tests and explicit scope records. |
 | P1 Scope lock | Decide the next validation-target candidate scope before expanding code | Algorithm scope, service matrix, differential-validation strategy, side-channel review checklist, and customer intake inputs are recorded. |
-| P1 Evidence/package hardening | Source provenance, package manifest review, evidence generation, and offline signing handoff | Evidence and PoC packages have explicit status/hash records; the key-free handoff is verified without storing credentials or claiming production signing. |
+| P1 Evidence/package hardening | Source provenance, package manifest review, evidence generation, offline signing handoff, and clean release rehearsal | Evidence and PoC packages have explicit status/hash records; synthetic/local rehearsal is separated from actual hosted review without storing credentials or claiming production signing. |
 | P2 Productization | Customer PoC hardening, toolchain support matrix, SecureKit/PKI boundary planning | A customer-specific PoC package can be reviewed without mixing core, SecureKit, and PKI scope. |
 | P3 Validation readiness | Gap review with selected platform/toolchain/scope and external preparation | Submission-facing artifacts are prepared from reviewed evidence, not from ad-hoc logs. |
 
@@ -250,7 +250,8 @@ P1-23 deliverables:
 | P1-30 | Release compatibility baseline and hosted artifact manifests | Completed by freezing the P1-29 public contract, testing old/current headers against the P1-30 package, and requiring manifest-backed hosted review without adding public services. |
 | P1-31 | Unsigned release provenance and source SBOM gate | Completed with exact-source SPDX 2.3 JSON inventory, hash-bound unsigned provenance, signing/authorization TODO records, hosted provenance lane, negative regressions, and no public API growth. |
 | P1-32 | Offline release-signing handoff | Completed with an Ed25519/RFC 3161 verifier policy, key-free handoff bundle, role separation, opt-in ephemeral Debug fixtures, and fail-closed unprovisioned production state. |
-| Next candidate | Production release provisioning and hosted disposition | Provision approved signer/TSA/approver identities and review real hosted/tag evidence before any signed or externally authorized release claim. |
+| P1-33 | Clean tagged-release rehearsal and hosted artifact review | Completed with an isolated synthetic tag rehearsal, clean/moved identity checks, explicit hosted lane records, actual/synthetic separation, and fail-closed review regressions. |
+| Next candidate | Production release provisioning and actual hosted disposition | Provision approved signer/TSA/approver identities and review real hosted/tag evidence before any signed or externally authorized release claim. |
 
 ## Stop conditions
 
@@ -311,3 +312,19 @@ P1-32 deliverables:
 - PoC exclusion of internal provenance/handoff records, keys, tokens, signatures, and timestamp responses.
 
 Actual hosted disposition, tag execution, production signer/TSA provisioning, detached signature/timestamp generation and verification, distinct human approvals, and external-release authorization remain future release operations.
+
+## P1-33 placement
+
+P1-33 follows the P1-32 offline signing handoff. It adds no cryptographic service or public API. It rehearses release identity in an isolated clean checkout and makes hosted review state explicit without creating a real tag or claiming a hosted run.
+
+P1-33 deliverables:
+
+- synthetic local tag in a temporary clean repository only;
+- tag, supplied commit, and `HEAD` equality plus clean-worktree enforcement;
+- dirty, moved-tag, moved-HEAD, mismatch, unsafe-artifact, and false-approval negative tests;
+- fixed required lane/platform review model with artifact and workflow identity metadata;
+- explicit `HOSTED_RUNNER` versus `SYNTHETIC_LOCAL` origin and `NOT_RUN`/`UNREVIEWED` state;
+- clean-checkout build, CTest, install, PoC, compatibility, provenance, signing-handoff, and evidence reproduction;
+- unchanged 14-header, 69-symbol `ANOCRYPTO_C_0` boundary.
+
+Actual hosted review, user-repository tag creation, tag signing, production signing/timestamping, and external release remain blocked operations.

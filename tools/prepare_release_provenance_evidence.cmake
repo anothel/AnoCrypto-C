@@ -32,10 +32,32 @@ file(MAKE_DIRECTORY "${ANO_CRYPTO_PROVENANCE_EVIDENCE_DIR}")
 set(_git_commit "unknown")
 set(_git_status "git unavailable or not a repository")
 set(_git_worktree_state "UNKNOWN")
+set(_source_is_git_root FALSE)
 find_program(_git_exe git)
 if(_git_exe)
     execute_process(
-        COMMAND "${_git_exe}" -C "${ANO_CRYPTO_SOURCE_DIR}" rev-parse --verify HEAD
+        COMMAND "${_git_exe}" -C "${ANO_CRYPTO_SOURCE_DIR}" rev-parse --show-toplevel
+        RESULT_VARIABLE _git_root_result
+        OUTPUT_VARIABLE _git_root_output
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        TIMEOUT 30)
+    if("${_git_root_result}" STREQUAL "0")
+        get_filename_component(_source_real "${ANO_CRYPTO_SOURCE_DIR}" REALPATH)
+        get_filename_component(_git_root_real "${_git_root_output}" REALPATH)
+        if(WIN32)
+            string(TOLOWER "${_source_real}" _source_real)
+            string(TOLOWER "${_git_root_real}" _git_root_real)
+        endif()
+        if(_source_real STREQUAL _git_root_real)
+            set(_source_is_git_root TRUE)
+        endif()
+    endif()
+endif()
+if(_git_exe AND _source_is_git_root)
+    execute_process(
+        COMMAND "${_git_exe}" -C "${ANO_CRYPTO_SOURCE_DIR}"
+            rev-parse --verify "HEAD^{commit}"
         RESULT_VARIABLE _git_commit_result
         OUTPUT_VARIABLE _git_commit_output
         ERROR_QUIET
@@ -63,7 +85,7 @@ if(_git_exe)
 endif()
 
 set(_source_files "")
-if(_git_exe)
+if(_git_exe AND _source_is_git_root)
     execute_process(
         COMMAND "${_git_exe}" -C "${ANO_CRYPTO_SOURCE_DIR}"
             ls-files --cached --others --exclude-standard
@@ -165,7 +187,7 @@ execute_process(
     ERROR_VARIABLE _bundle_stderr
     TIMEOUT 300)
 file(WRITE "${ANO_CRYPTO_PROVENANCE_EVIDENCE_DIR}/RELEASE_PROVENANCE.log"
-    "# Create and verify unsigned P1-32 release provenance bundle\n"
+    "# Create and verify unsigned P1-33 release provenance bundle\n"
     "# Result: ${_bundle_result}\n\n${_bundle_stdout}${_bundle_stderr}")
 if(NOT "${_bundle_result}" STREQUAL "0")
     message(FATAL_ERROR "Release provenance generation failed; see ${ANO_CRYPTO_PROVENANCE_EVIDENCE_DIR}/RELEASE_PROVENANCE.log")
@@ -183,7 +205,7 @@ execute_process(
     ERROR_VARIABLE _policy_stderr
     TIMEOUT 180)
 file(WRITE "${ANO_CRYPTO_PROVENANCE_EVIDENCE_DIR}/RELEASE_PROVENANCE_POLICY_CHECK.log"
-    "# P1-32 release provenance policy check\n# Result: ${_policy_result}\n\n"
+    "# P1-33 release provenance policy check\n# Result: ${_policy_result}\n\n"
     "${_policy_stdout}${_policy_stderr}")
 if(NOT "${_policy_result}" STREQUAL "0")
     message(FATAL_ERROR "Release provenance policy check failed; see ${ANO_CRYPTO_PROVENANCE_EVIDENCE_DIR}/RELEASE_PROVENANCE_POLICY_CHECK.log")
@@ -194,7 +216,7 @@ foreach(_status IN ITEMS SBOM_STATUS.txt SIGNING_STATUS.txt)
         "${ANO_CRYPTO_PROVENANCE_EVIDENCE_DIR}/${_status}" COPYONLY)
 endforeach()
 file(WRITE "${ANO_CRYPTO_PROVENANCE_EVIDENCE_DIR}/PREPARED_RELEASE_PROVENANCE_SUMMARY.txt"
-    "AnoCrypto-C P1-32 prepared release provenance evidence\n"
+    "AnoCrypto-C P1-33 prepared release provenance evidence\n"
     "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Git commit: ${_git_commit}\n"
     "Git status: ${_git_status}\n"
