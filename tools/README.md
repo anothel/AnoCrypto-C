@@ -173,7 +173,7 @@ AES schedule, or chaining-state values.
 
 ## P1-30 release compatibility and hosted artifact tools
 
-- `check_release_compatibility.cmake` validates central release identity, 14 baseline/current public-header hashes, normalized public declarations/types/constants, and the unchanged 69-symbol ABI line.
+- `check_release_compatibility.cmake` validates central release identity, 14 baseline/current canonical-LF public-header hashes, normalized public declarations/types/constants, and the unchanged 69-symbol ABI line.
 - `run_tagged_release_compatibility_smoke.cmake` builds a clean installed package and runs current-header, P1-29-header, exact-version, and incompatible-version consumers.
 - `create_hosted_artifact_manifest.cmake` creates a text-only status bundle with release/lane/platform/compiler metadata, sizes, and SHA-256.
 - `check_hosted_artifact_manifest.cmake` rejects tampering, unlisted files, unsafe paths, binary/NUL content, and sensitive-value markers.

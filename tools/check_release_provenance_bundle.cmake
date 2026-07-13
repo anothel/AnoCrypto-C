@@ -20,6 +20,14 @@ include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_SIGNING_POLICY.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/tools/sensitive_signing_material_helpers.cmake")
 
+function(_ano_sha256_normalized_text _path _output)
+    file(READ "${_path}" _content)
+    string(REPLACE "\r\n" "\n" _content "${_content}")
+    string(REPLACE "\r" "\n" _content "${_content}")
+    string(SHA256 _hash "${_content}")
+    set(${_output} "${_hash}" PARENT_SCOPE)
+endfunction()
+
 if(NOT IS_DIRECTORY "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}" OR
    IS_SYMLINK "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}")
     message(FATAL_ERROR
@@ -269,7 +277,9 @@ foreach(_line IN LISTS _header_hash_lines)
     if(NOT EXISTS "${_full}" OR IS_DIRECTORY "${_full}" OR IS_SYMLINK "${_full}")
         message(FATAL_ERROR "Public header is missing or unsafe: ${_relative}")
     endif()
-    file(SHA256 "${_full}" _actual_hash)
+    # Public headers are text inputs. Hash their canonical LF form so the
+    # reviewed manifest is stable across LF checkouts and CRLF archives.
+    _ano_sha256_normalized_text("${_full}" _actual_hash)
     if(NOT _actual_hash STREQUAL _expected_hash)
         message(FATAL_ERROR "Public-header hash differs from the source tree: ${_relative}")
     endif()

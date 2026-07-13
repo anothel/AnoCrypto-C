@@ -32,7 +32,7 @@ Baseline updates are not automatic. A later intentional public API or ABI change
 `ano_crypto_release_compatibility_policy_check` verifies:
 
 - central release metadata and current version macros agree;
-- the baseline and current public-header hash manifests contain 14 entries;
+- the baseline and current public-header hash manifests contain 14 canonical-LF text hashes, independent of checkout/archive line endings;
 - normalized public function declarations, public types, and non-version constants match P1-29;
 - both stored exported-symbol lists contain the same 69 names;
 - package compatibility generation uses the reviewed policy;
