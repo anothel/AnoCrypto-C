@@ -20,6 +20,7 @@ get_filename_component(ANO_CRYPTO_APPROVED_SIGNER_RECORD "${ANO_CRYPTO_APPROVED_
 get_filename_component(ANO_CRYPTO_OPENSSL_EXECUTABLE "${ANO_CRYPTO_OPENSSL_EXECUTABLE}" ABSOLUTE)
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_SIGNING_POLICY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/sensitive_signing_material_helpers.cmake")
 if(NOT DEFINED ANO_CRYPTO_ALLOW_TEST_SIGNER_RECORD)
     set(ANO_CRYPTO_ALLOW_TEST_SIGNER_RECORD OFF)
 endif()
@@ -50,7 +51,8 @@ execute_process(
         -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_release_signing_handoff.cmake"
     RESULT_VARIABLE _handoff_result
     OUTPUT_VARIABLE _handoff_stdout
-    ERROR_VARIABLE _handoff_stderr)
+    ERROR_VARIABLE _handoff_stderr
+    TIMEOUT 60)
 file(REMOVE "${_handoff_check}")
 if(NOT _handoff_result EQUAL 0)
     message(FATAL_ERROR "Detached signature requires a valid handoff:\n${_handoff_stdout}${_handoff_stderr}")
@@ -61,7 +63,8 @@ execute_process(
     RESULT_VARIABLE _version_result
     OUTPUT_VARIABLE _version_stdout
     ERROR_VARIABLE _version_stderr
-    OUTPUT_STRIP_TRAILING_WHITESPACE)
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    TIMEOUT 60)
 if(NOT _version_result EQUAL 0 OR
    NOT _version_stdout MATCHES "^OpenSSL ([3-9]|[1-9][0-9]+)[.]")
     message(FATAL_ERROR "Detached-signature verifier requires OpenSSL 3.x or later")
@@ -120,9 +123,9 @@ endif()
 string(TOLOWER "${_signer_approved_public_key_fingerprint}" _approved_fingerprint)
 
 file(READ "${ANO_CRYPTO_SIGNER_PUBLIC_KEY_FILE}" _public_pem)
-string(FIND "${_public_pem}" "-----BEGIN PRIVATE KEY-----" _private_pkcs8)
-string(FIND "${_public_pem}" "-----BEGIN ENCRYPTED PRIVATE KEY-----" _private_encrypted)
-if(NOT _private_pkcs8 EQUAL -1 OR NOT _private_encrypted EQUAL -1)
+ano_crypto_detect_sensitive_signing_material_text(
+    "${_public_pem}" OFF _public_key_sensitive_reason)
+if(_public_key_sensitive_reason)
     message(FATAL_ERROR "Public-key input contains private-key material")
 endif()
 string(REGEX MATCHALL "-----BEGIN [A-Z0-9 ]+-----" _pem_begins "${_public_pem}")
@@ -137,12 +140,21 @@ endif()
 
 if(DEFINED ANO_CRYPTO_SIGNATURE_VERIFY_WORK_DIR AND
    NOT ANO_CRYPTO_SIGNATURE_VERIFY_WORK_DIR STREQUAL "")
-    get_filename_component(_work "${ANO_CRYPTO_SIGNATURE_VERIFY_WORK_DIR}" ABSOLUTE)
+    get_filename_component(_work_root "${ANO_CRYPTO_SIGNATURE_VERIFY_WORK_DIR}" ABSOLUTE)
 else()
     get_filename_component(_signature_parent "${ANO_CRYPTO_DETACHED_SIGNATURE_FILE}" DIRECTORY)
-    set(_work "${_signature_parent}/.anocrypto-signature-verify")
+    set(_work_root "${_signature_parent}")
 endif()
-file(REMOVE_RECURSE "${_work}")
+if(EXISTS "${_work_root}" AND
+   (NOT IS_DIRECTORY "${_work_root}" OR IS_SYMLINK "${_work_root}"))
+    message(FATAL_ERROR "Signature verification work root is unsafe")
+endif()
+file(MAKE_DIRECTORY "${_work_root}")
+string(RANDOM LENGTH 16 ALPHABET 0123456789abcdef _work_nonce)
+set(_work "${_work_root}/.anocrypto-signature-verify-${_work_nonce}")
+if(EXISTS "${_work}")
+    message(FATAL_ERROR "Signature verification work directory collision")
+endif()
 file(MAKE_DIRECTORY "${_work}")
 set(_public_der "${_work}/signer-public.der")
 execute_process(
@@ -150,7 +162,8 @@ execute_process(
         -in "${ANO_CRYPTO_SIGNER_PUBLIC_KEY_FILE}" -outform DER -out "${_public_der}"
     RESULT_VARIABLE _pkey_result
     OUTPUT_VARIABLE _pkey_stdout
-    ERROR_VARIABLE _pkey_stderr)
+    ERROR_VARIABLE _pkey_stderr
+    TIMEOUT 60)
 if(NOT _pkey_result EQUAL 0)
     file(REMOVE_RECURSE "${_work}")
     message(FATAL_ERROR "Signer public key is not a reviewed public key:\n${_pkey_stdout}${_pkey_stderr}")
@@ -183,7 +196,8 @@ execute_process(
         -sigfile "${ANO_CRYPTO_DETACHED_SIGNATURE_FILE}"
     RESULT_VARIABLE _verify_result
     OUTPUT_VARIABLE _verify_stdout
-    ERROR_VARIABLE _verify_stderr)
+    ERROR_VARIABLE _verify_stderr
+    TIMEOUT 60)
 if(NOT _verify_result EQUAL 0)
     file(REMOVE_RECURSE "${_work}")
     message(FATAL_ERROR "Ed25519 detached signature verification failed")
@@ -247,13 +261,13 @@ if(ANO_CRYPTO_REQUIRE_TIMESTAMP)
     string(TOLOWER "${_tsa_trust_anchor_sha256}" _approved_tsa_hash)
 
     file(READ "${ANO_CRYPTO_TIMESTAMP_TRUST_ANCHOR_FILE}" _ca_pem)
-    string(FIND "${_ca_pem}" "-----BEGIN PRIVATE KEY-----" _ca_private)
-    string(FIND "${_ca_pem}" "-----BEGIN ENCRYPTED PRIVATE KEY-----" _ca_encrypted_private)
+    ano_crypto_detect_sensitive_signing_material_text(
+        "${_ca_pem}" OFF _ca_sensitive_reason)
     string(REGEX MATCHALL "-----BEGIN [A-Z0-9 ]+-----" _ca_begins "${_ca_pem}")
     list(LENGTH _ca_begins _ca_begin_count)
     string(REGEX MATCHALL "-----END [A-Z0-9 ]+-----" _ca_ends "${_ca_pem}")
     list(LENGTH _ca_ends _ca_end_count)
-    if(NOT _ca_private EQUAL -1 OR NOT _ca_encrypted_private EQUAL -1 OR
+    if(_ca_sensitive_reason OR
        NOT _ca_begin_count EQUAL 1 OR NOT _ca_end_count EQUAL 1 OR
        NOT _ca_pem MATCHES "-----BEGIN CERTIFICATE-----" OR
        NOT _ca_pem MATCHES "-----END CERTIFICATE-----")
@@ -266,7 +280,8 @@ if(ANO_CRYPTO_REQUIRE_TIMESTAMP)
             -in "${ANO_CRYPTO_TIMESTAMP_TRUST_ANCHOR_FILE}" -outform DER -out "${_ca_der}"
         RESULT_VARIABLE _x509_result
         OUTPUT_VARIABLE _x509_stdout
-        ERROR_VARIABLE _x509_stderr)
+        ERROR_VARIABLE _x509_stderr
+        TIMEOUT 60)
     if(NOT _x509_result EQUAL 0)
         file(REMOVE_RECURSE "${_work}")
         message(FATAL_ERROR "Timestamp trust anchor is not a valid certificate")
@@ -283,7 +298,8 @@ if(ANO_CRYPTO_REQUIRE_TIMESTAMP)
             -CAfile "${ANO_CRYPTO_TIMESTAMP_TRUST_ANCHOR_FILE}"
         RESULT_VARIABLE _ts_verify_result
         OUTPUT_VARIABLE _ts_verify_stdout
-        ERROR_VARIABLE _ts_verify_stderr)
+        ERROR_VARIABLE _ts_verify_stderr
+        TIMEOUT 60)
     if(NOT _ts_verify_result EQUAL 0)
         file(REMOVE_RECURSE "${_work}")
         message(FATAL_ERROR "RFC3161 timestamp response verification failed")
@@ -293,7 +309,8 @@ if(ANO_CRYPTO_REQUIRE_TIMESTAMP)
             -in "${ANO_CRYPTO_TIMESTAMP_RESPONSE_FILE}" -text
         RESULT_VARIABLE _ts_text_result
         OUTPUT_VARIABLE _ts_text_stdout
-        ERROR_VARIABLE _ts_text_stderr)
+        ERROR_VARIABLE _ts_text_stderr
+        TIMEOUT 60)
     if(NOT _ts_text_result EQUAL 0 OR
        NOT _ts_text_stdout MATCHES "Policy OID:[ \t]*${_tsa_tsa_policy_oid}([\r\n]|$)")
         file(REMOVE_RECURSE "${_work}")

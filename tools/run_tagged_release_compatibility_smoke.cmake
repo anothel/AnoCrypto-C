@@ -15,7 +15,10 @@ endif()
 
 get_filename_component(ANO_CRYPTO_SOURCE_DIR "${ANO_CRYPTO_SOURCE_DIR}" ABSOLUTE)
 if(NOT CMAKE_CTEST_COMMAND)
-    find_program(CMAKE_CTEST_COMMAND NAMES ctest REQUIRED)
+    find_program(CMAKE_CTEST_COMMAND NAMES ctest)
+    if(NOT CMAKE_CTEST_COMMAND)
+        message(FATAL_ERROR "CTest executable is unavailable")
+    endif()
 endif()
 get_filename_component(ANO_CRYPTO_BUILD_DIR "${ANO_CRYPTO_BUILD_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_TAGGED_COMPAT_SMOKE_DIR
@@ -52,10 +55,11 @@ function(_ano_run _log_name _description)
         COMMAND ${ARGN}
         RESULT_VARIABLE _result
         OUTPUT_VARIABLE _stdout
-        ERROR_VARIABLE _stderr)
+        ERROR_VARIABLE _stderr
+        TIMEOUT 900)
     file(WRITE "${ANO_CRYPTO_TAGGED_COMPAT_SMOKE_DIR}/${_log_name}"
         "# ${_description}\n# Result: ${_result}\n\n${_stdout}${_stderr}")
-    if(NOT _result EQUAL 0)
+    if(NOT "${_result}" STREQUAL "0")
         message(FATAL_ERROR
             "${_description} failed; see ${ANO_CRYPTO_TAGGED_COMPAT_SMOKE_DIR}/${_log_name}")
     endif()

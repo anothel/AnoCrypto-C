@@ -11,26 +11,36 @@ Reviewer/date: TODO
 | Item | Result | Evidence/limitations |
 |---|---|---|
 | Source archive hash and content binding | TODO | Member list and extracted regular-file hashes must match `SOURCE_FILES.sha256` |
-| Source-file hash manifest | TODO | Repository-relative paths only |
 | SPDX 2.3 source inventory | TODO | Exact path/SHA-256/SHA-1 records; source files only; no dependency/vulnerability analysis |
 | Public-header manifest | TODO | 14 reviewed headers |
 | Exported-symbol list | TODO | 69-symbol ABI-0 line |
-| Git worktree state | TODO | Tagged or completed hosted review requires `CLEAN` |
-| Hosted artifact disposition | TODO | Must include reviewer/date/commit binding for PASS |
-| Bundle tamper/path scan | TODO | `RELEASE_PROVENANCE_CHECK.txt` |
-| Sensitive material scan | TODO | Status-only; review before sharing |
+| Git worktree state | TODO | Recorded tag or completed hosted disposition requires `CLEAN` |
+| Hosted artifact disposition | TODO | Non-placeholder reviewer/date/commit-bound `PASS` required |
+| Provenance bundle verification | TODO | `RELEASE_PROVENANCE_CHECK.txt` |
+| Signing handoff verification | TODO | `RELEASE_SIGNING_HANDOFF_CHECK.txt`; verifies metadata, not a signature |
+| Sensitive artifact scan | TODO | Evidence, installed SDK, and PoC package must pass |
 
-## Signing and authorization
+## Offline signing and authorization
 
 | Item | Result | Evidence/limitations |
 |---|---|---|
-| Signing status | UNSIGNED | P1-31 generator performs no signing |
-| Detached-signature tool approved | TODO | Tool and format not selected |
-| Signer/key-custody policy approved | TODO | No key or token belongs in the repository |
-| Cryptographic signature verification | TODO | Must be performed by a future approved verifier |
-| Timestamp/revocation policy | TODO | Infrastructure/legal review required |
-| External release authorization | NO | `RELEASE_AUTHORIZATION.md` remains TODO |
+| Repository signing status | UNSIGNED | No production detached signature exists |
+| Handoff readiness | BLOCKED | Production signer/TSA, hosted/tag state, and approver identities remain incomplete |
+| Signature subject | POLICY SET | `RELEASE_ARTIFACTS.sha256` only |
+| Detached-signature profile | POLICY SET | Ed25519, raw 64 bytes, `RELEASE_ARTIFACTS.sha256.ed25519` |
+| Approved signer fingerprint | UNPROVISIONED | SHA-256 over DER SubjectPublicKeyInfo required |
+| Production key custody | UNPROVISIONED | Offline hardware-backed custody required; no key/token belongs in repository, CI, evidence, or PoC package |
+| RFC 3161 timestamp | UNPROVISIONED | Required over detached-signature file; TSA policy/trust anchor not provisioned |
+| Security Reviewer identity | UNPROVISIONED | Must become stable, non-placeholder identity |
+| Product Release Owner identity | UNPROVISIONED | Must become stable, non-placeholder identity different from Security Reviewer |
+| Cryptographic signature verification | NOT PERFORMED | Fixture verification does not verify a production signature |
+| GitHub attestation | SECONDARY ONLY | Never trust root or detached-signature replacement |
+| External release authorization | NO | Authorization handoff remains `BLOCKED` |
+
+## Fixture boundary
+
+Debug-only opt-in OpenSSL fixtures may generate ephemeral test keys, signatures, certificates, and RFC 3161 messages. Confirm tests remove them. Never retain them as evidence or treat them as production signer/TSA provisioning.
 
 ## Claims boundary
 
-Do not treat a hash manifest, source inventory, expected tag string, uploaded artifact, or reviewer template as proof of signing, provenance attestation, universal compatibility, side-channel review, official validation, or external-release approval.
+Do not treat a hash manifest, source inventory, expected tag, workflow artifact, GitHub attestation, policy record, or passing fixture as proof of production signing, completed hosted review, external-release authorization, universal compatibility, side-channel assurance, or official validation.

@@ -21,19 +21,22 @@ if(ANO_CRYPTO_SYMBOL_STYLE STREQUAL "GNU")
         COMMAND "${ANO_CRYPTO_SYMBOL_TOOL}" -D --defined-only "${ANO_CRYPTO_LIBRARY_FILE}"
         RESULT_VARIABLE _tool_result
         OUTPUT_VARIABLE _tool_output
-        ERROR_VARIABLE _tool_error)
+        ERROR_VARIABLE _tool_error
+        TIMEOUT 60)
 elseif(ANO_CRYPTO_SYMBOL_STYLE STREQUAL "APPLE")
     execute_process(
         COMMAND "${ANO_CRYPTO_SYMBOL_TOOL}" -gU "${ANO_CRYPTO_LIBRARY_FILE}"
         RESULT_VARIABLE _tool_result
         OUTPUT_VARIABLE _tool_output
-        ERROR_VARIABLE _tool_error)
+        ERROR_VARIABLE _tool_error
+        TIMEOUT 60)
 elseif(ANO_CRYPTO_SYMBOL_STYLE STREQUAL "MSVC")
     execute_process(
         COMMAND "${ANO_CRYPTO_SYMBOL_TOOL}" /nologo /exports "${ANO_CRYPTO_LIBRARY_FILE}"
         RESULT_VARIABLE _tool_result
         OUTPUT_VARIABLE _tool_output
-        ERROR_VARIABLE _tool_error)
+        ERROR_VARIABLE _tool_error
+        TIMEOUT 60)
 else()
     message(FATAL_ERROR "Unsupported symbol tool style: ${ANO_CRYPTO_SYMBOL_STYLE}")
 endif()

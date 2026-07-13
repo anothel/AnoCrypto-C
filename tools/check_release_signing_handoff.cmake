@@ -10,6 +10,7 @@ get_filename_component(ANO_CRYPTO_SIGNING_HANDOFF_DIR
     "${ANO_CRYPTO_SIGNING_HANDOFF_DIR}" ABSOLUTE)
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_SIGNING_POLICY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/sensitive_signing_material_helpers.cmake")
 
 set(_required_files
     APPROVED_RELEASE_SIGNERS.txt
@@ -28,9 +29,15 @@ foreach(_relative IN LISTS _required_files)
         message(FATAL_ERROR "Required signing-handoff file is missing or unsafe: ${_relative}")
     endif()
 endforeach()
-file(GLOB _actual_files LIST_DIRECTORIES false RELATIVE
+file(GLOB _actual_files RELATIVE
     "${ANO_CRYPTO_SIGNING_HANDOFF_DIR}" "${ANO_CRYPTO_SIGNING_HANDOFF_DIR}/*")
 list(SORT _actual_files)
+foreach(_relative IN LISTS _actual_files)
+    if(IS_DIRECTORY "${ANO_CRYPTO_SIGNING_HANDOFF_DIR}/${_relative}" OR
+       IS_SYMLINK "${ANO_CRYPTO_SIGNING_HANDOFF_DIR}/${_relative}")
+        message(FATAL_ERROR "Signing handoff rejects directories and symlinks: ${_relative}")
+    endif()
+endforeach()
 set(_expected_files "${_required_files}")
 list(SORT _expected_files)
 if(NOT _actual_files STREQUAL _expected_files)
@@ -109,7 +116,9 @@ set(_request "${ANO_CRYPTO_SIGNING_HANDOFF_DIR}/SIGNING_REQUEST.txt")
 foreach(_key IN ITEMS release_version expected_tag source_commit subject subject_sha256
         provenance_sha256 hosted_disposition_sha256 approved_signer_record_sha256
         approved_timestamp_policy_sha256 algorithm signature_encoding signature_filename
-        signer_policy_id timestamp_requirement readiness block_reasons
+        signer_policy_id timestamp_requirement security_reviewer_identity
+        security_reviewer_identity_status product_release_owner_identity
+        product_release_owner_identity_status role_separation_status readiness block_reasons
         external_release_authorized)
     _ano_read_key("${_request}" "${_key}" "_request_${_key}")
 endforeach()
@@ -153,6 +162,50 @@ if(NOT _request_release_version STREQUAL ANO_CRYPTO_RELEASE_VERSION OR
    NOT _request_external_release_authorized STREQUAL "NO")
     message(FATAL_ERROR "Signing request identity/policy mismatch")
 endif()
+foreach(_role IN ITEMS security_reviewer product_release_owner)
+    set(_role_identity "${_request_${_role}_identity}")
+    set(_role_identity_status "${_request_${_role}_identity_status}")
+    if(NOT _role_identity MATCHES "^[A-Za-z0-9_.@:+-]+$" OR
+       NOT _role_identity_status MATCHES "^(RECORDED|UNPROVISIONED)$")
+        message(FATAL_ERROR "Signing request contains an invalid ${_role} identity state")
+    endif()
+endforeach()
+string(TOLOWER "${_request_security_reviewer_identity}" _security_reviewer_identity_normalized)
+string(TOLOWER "${_request_product_release_owner_identity}" _product_release_owner_identity_normalized)
+foreach(_identity_normalized IN ITEMS
+        "${_security_reviewer_identity_normalized}"
+        "${_product_release_owner_identity_normalized}")
+    if(_identity_normalized MATCHES "^(todo|tbd|unknown|placeholder|none)$")
+        message(FATAL_ERROR "Signing request uses a placeholder approval identity")
+    endif()
+endforeach()
+if(NOT _request_security_reviewer_identity STREQUAL "UNPROVISIONED" AND
+   NOT _request_product_release_owner_identity STREQUAL "UNPROVISIONED" AND
+   _security_reviewer_identity_normalized STREQUAL _product_release_owner_identity_normalized)
+    message(FATAL_ERROR
+        "Security Reviewer and Product Release Owner identities must be different")
+endif()
+if(_security_reviewer_identity_normalized STREQUAL "unprovisioned")
+    set(_expected_security_reviewer_identity_status "UNPROVISIONED")
+else()
+    set(_expected_security_reviewer_identity_status "RECORDED")
+endif()
+if(_product_release_owner_identity_normalized STREQUAL "unprovisioned")
+    set(_expected_product_release_owner_identity_status "UNPROVISIONED")
+else()
+    set(_expected_product_release_owner_identity_status "RECORDED")
+endif()
+if(_expected_security_reviewer_identity_status STREQUAL "RECORDED" AND
+   _expected_product_release_owner_identity_status STREQUAL "RECORDED")
+    set(_expected_role_separation_status "PASS")
+else()
+    set(_expected_role_separation_status "UNPROVISIONED")
+endif()
+if(NOT _request_security_reviewer_identity_status STREQUAL _expected_security_reviewer_identity_status OR
+   NOT _request_product_release_owner_identity_status STREQUAL _expected_product_release_owner_identity_status OR
+   NOT _request_role_separation_status STREQUAL _expected_role_separation_status)
+    message(FATAL_ERROR "Signing request role identity state is inconsistent")
+endif()
 
 foreach(_binding IN ITEMS
         "RELEASE_ARTIFACTS.sha256|${_request_subject_sha256}"
@@ -195,6 +248,12 @@ foreach(_key IN ITEMS status record_scope format timestamp_subject requirement
 endforeach()
 
 set(_recomputed_reasons "")
+if(_expected_security_reviewer_identity_status STREQUAL "UNPROVISIONED")
+    _ano_append_block_reason("SECURITY_REVIEWER_IDENTITY_UNPROVISIONED")
+endif()
+if(_expected_product_release_owner_identity_status STREQUAL "UNPROVISIONED")
+    _ano_append_block_reason("PRODUCT_RELEASE_OWNER_IDENTITY_UNPROVISIONED")
+endif()
 if(NOT _prov_release_version STREQUAL ANO_CRYPTO_RELEASE_VERSION OR
    NOT _prov_expected_tag STREQUAL ANO_CRYPTO_RELEASE_TAG OR
    NOT _prov_signing_status STREQUAL "UNSIGNED" OR
@@ -273,6 +332,11 @@ foreach(_required_text IN ITEMS
         "Detached signature present: no"
         "Cryptographic signature verification performed: no"
         "RFC3161 timestamp response present: no"
+        "Security Reviewer identity: ${_request_security_reviewer_identity}"
+        "Security Reviewer identity status: ${_expected_security_reviewer_identity_status}"
+        "Product Release Owner identity: ${_request_product_release_owner_identity}"
+        "Product Release Owner identity status: ${_expected_product_release_owner_identity_status}"
+        "Role separation status: ${_expected_role_separation_status}"
         "External release authorized: NO"
         "Result: PASS")
     string(FIND "${_status_text}" "${_required_text}" _found)
@@ -281,30 +345,29 @@ foreach(_required_text IN ITEMS
     endif()
 endforeach()
 file(READ "${ANO_CRYPTO_SIGNING_HANDOFF_DIR}/RELEASE_AUTHORIZATION.md" _authorization_text)
-foreach(_required_text IN ITEMS "Status: BLOCKED" "External release authorized: NO" "Signing credentials included: no")
+foreach(_required_text IN ITEMS
+        "Status: BLOCKED"
+        "Security Reviewer identity: ${_request_security_reviewer_identity}"
+        "Security Reviewer identity status: ${_expected_security_reviewer_identity_status}"
+        "Product Release Owner identity: ${_request_product_release_owner_identity}"
+        "Product Release Owner identity status: ${_expected_product_release_owner_identity_status}"
+        "Role separation status: ${_expected_role_separation_status}"
+        "External release authorized: NO"
+        "Signing credentials included: no")
     string(FIND "${_authorization_text}" "${_required_text}" _found)
     if(_found EQUAL -1)
         message(FATAL_ERROR "Signing-handoff authorization record is unsafe")
     endif()
 endforeach()
 
-# Reject actual secret/key material markers without flagging explanatory prose.
-set(_pem_private_begin "-----BEGIN PRIVATE" " KEY-----")
-list(JOIN _pem_private_begin "" _pem_private_begin)
-set(_forbidden_assignments "private_key=" "signing_token=" "entropy_material=" "seed_material=" "drbg_state=")
 foreach(_relative IN LISTS _actual_files)
-    file(READ "${ANO_CRYPTO_SIGNING_HANDOFF_DIR}/${_relative}" _content)
-    string(FIND "${_content}" "${_pem_private_begin}" _private_marker)
-    if(NOT _private_marker EQUAL -1)
-        message(FATAL_ERROR "Signing handoff contains a private-key PEM marker: ${_relative}")
+    ano_crypto_detect_sensitive_signing_material_file(
+        "${ANO_CRYPTO_SIGNING_HANDOFF_DIR}/${_relative}"
+        ON _handoff_sensitive_reason)
+    if(_handoff_sensitive_reason)
+        message(FATAL_ERROR
+            "Signing handoff contains sensitive material: ${_relative} (${_handoff_sensitive_reason})")
     endif()
-    string(TOLOWER "${_content}" _content_lower)
-    foreach(_marker IN LISTS _forbidden_assignments)
-        string(FIND "${_content_lower}" "${_marker}" _marker_pos)
-        if(NOT _marker_pos EQUAL -1)
-            message(FATAL_ERROR "Signing handoff contains forbidden sensitive assignment: ${_relative}")
-        endif()
-    endforeach()
 endforeach()
 
 if(DEFINED ANO_CRYPTO_SIGNING_HANDOFF_CHECK_OUTPUT AND
@@ -317,6 +380,7 @@ if(DEFINED ANO_CRYPTO_SIGNING_HANDOFF_CHECK_OUTPUT AND
         "Signing policy: ${ANO_CRYPTO_RELEASE_SIGNING_POLICY_ID}\n"
         "Readiness: ${_recomputed_readiness}\n"
         "Block reasons: ${_recomputed_reasons}\n"
+        "Role separation: ${_expected_role_separation_status}\n"
         "Manifest coverage: PASS\n"
         "Hash bindings: PASS\n"
         "Private signing material present: no\n"

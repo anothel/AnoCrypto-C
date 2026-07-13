@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P1-31 engineering draft.
+Status: P1-32 unsigned engineering draft. It prepares a key-free offline-signing handoff but performs no production signing or external-release authorization.
 
 ## Purpose
 
@@ -15,14 +15,18 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p1-31/
+build/evidence/p1-32/
 ```
 
-The build target first completes installed-package, customer PoC, tagged-release
-compatibility, and compiler-output prerequisite steps. It then captures the
-complete CTest run to files and finally assembles the status-only evidence.
-Ordering the nested build trees before CTest avoids concurrent CMake/CTest
-runner interactions while keeping the standalone script fallback available.
+The build graph serializes clean Release symbol/runtime-dependency inspection,
+installed-package smoke, customer PoC smoke, tagged-release compatibility,
+compiler-output capture, full CTest, provenance preparation, and key-free
+signing-handoff verification. A predecessor writes a complete hash-bound tree
+under `build/prepared-release-evidence/p1-32/`. Final collection verifies that
+manifest and copies only regular-file content into `build/evidence/p1-32/`; it
+does not run a configure, build, CTest, package, policy, or status-test process.
+Outer Make/Ninja jobserver variables are removed from nested prerequisite
+processes, and child processes have explicit timeouts.
 
 ## Expected generated files
 
@@ -53,8 +57,12 @@ SCOPE_REVIEW_NOTES.txt
 RELEASE_PROVENANCE_CHECK.txt
 RELEASE_PROVENANCE_POLICY_CHECK.txt
 release-provenance/
+PREPARED_RELEASE_PROVENANCE_SUMMARY.txt
+release-signing-handoff/
+RELEASE_SIGNING_HANDOFF_CHECK.txt
 SBOM_STATUS.txt
 SIGNING_STATUS.txt
+SENSITIVE_ARTIFACT_SCAN.txt
 EVIDENCE_MANIFEST_README.txt
 EVIDENCE_MANIFEST.sha256
 ctest.log
@@ -79,7 +87,7 @@ README.md
 - Confirm platform provider logs include provider name/status only.
 - Confirm PoC package manifests and logs do not disclose local customer/internal details before sharing.
 - Confirm P1-12 scope-review notes still match the intended customer and validation-target candidate boundary.
-- Confirm the historical P1-13 placeholder transition is superseded by the P1-31 source inventory and explicit unsigned/signing-TODO records.
+- Confirm the historical P1-13 placeholder transition is superseded by the P1-32 source inventory, fixed offline-signing profile, and explicit unsigned/BLOCKED records.
 - Confirm P1-14 thread-safety support matrix and CI checklist match the current build configuration.
 - Confirm the P1-15 historical reservation and P1-22 SHA-512-family implementation/KAT records are both accurate.
 - Confirm the P1-16 reserved-boundary history and P1-19 implemented random-service records are both accurate.
@@ -88,6 +96,9 @@ README.md
 - Confirm P1-20 random lifecycle, reseed-limit, hosted-platform, and exported-symbol records contain status/metadata only and no provider or generated output.
 - Confirm the clean Release report matches the stored 69-symbol ABI-0 baseline.
 - Confirm VM snapshot/clone and suspend/resume limitations remain explicit.
+- Confirm `release-signing-handoff/SIGNING_HANDOFF_STATUS.txt` records `Readiness: BLOCKED`, no detached signature/timestamp response, and external authorization `NO`.
+- Confirm production signer/TSA records and both required role identities remain `UNPROVISIONED` unless separately approved outside this source state.
+- Confirm the evidence, installed SDK, and PoC package pass `SENSITIVE_ARTIFACT_SCAN.txt` with no key, token, signature, or RFC 3161 request/response artifacts.
 
 ## P1-12 additions
 
@@ -115,8 +126,10 @@ README.md
 
 ## Known gaps
 
-- P1-31 generates a source-archive inventory only; dependency/component discovery, vulnerability analysis, and license conclusions remain TODO.
-- No release signature or cryptographic verification evidence exists; P1-31 records `UNSIGNED` and external authorization `NO`.
+- P1-32 generates a source-archive inventory only; dependency/component discovery, vulnerability analysis, and license conclusions remain TODO.
+- P1-32 fixes the Ed25519/raw-64/SPKI-fingerprint/RFC-3161 profile and verifies the key-free handoff. No production signature, timestamp, or cryptographic verification record exists; state remains `UNSIGNED`, handoff `BLOCKED`, and external authorization `NO`.
+- Production signer identity/fingerprint, offline hardware-backed key custody, TSA policy/trust anchor, and distinct Security Reviewer/Product Release Owner approvals remain unprovisioned.
+- GitHub attestation is optional secondary evidence only; it is not a trust root or detached-signature replacement.
 - CI workflow has not yet been reviewed against all customer toolchains.
 - Actual hosted Windows/macOS concurrency results remain to be reviewed.
 - Clang sanitizer runtime and ThreadSanitizer remain TODO.
@@ -278,3 +291,14 @@ Local evidence records expected tag metadata but does not claim that a tag exist
 - The hosted artifact index requires a `release-provenance|Linux` status bundle, but actual hosted reviewer/date disposition remains TODO.
 - The customer PoC excludes the source archive, source SBOM, provenance record, signing request, authorization record, compatibility baseline, and internal release tooling.
 - No public API, public header, cryptographic service, or ABI-0 symbol is added.
+
+## P1-32 offline-signing handoff additions
+
+- Release identity is `0.1.0-p1-32-signing-handoff`; public surface remains 14 headers and 69 ABI-0 symbols.
+- `RELEASE_ARTIFACTS.sha256` is the only signing subject. Policy requires Ed25519, raw 64-byte signature, SHA-256 fingerprint of DER SubjectPublicKeyInfo, and RFC 3161 timestamping over `RELEASE_ARTIFACTS.sha256.ed25519`.
+- `tools/create_release_signing_handoff.cmake` produces a manifest-bound, key-free request/status/authorization handoff from verified provenance inputs.
+- `tools/check_release_signing_handoff.cmake` re-derives readiness, verifies policy and hashes, enforces distinct non-placeholder Security Reviewer/Product Release Owner identities when provisioned, and rejects private signing material.
+- Default production signer and timestamp records are explicitly `UNPROVISIONED`; the generated handoff therefore remains `BLOCKED` while its mechanical check passes.
+- Debug-only opt-in OpenSSL fixtures exercise positive/negative Ed25519 and RFC 3161 verification. Generated fixture material is ephemeral and excluded from evidence.
+- Final evidence collection consumes prepared prerequisite outputs and writes `SENSITIVE_ARTIFACT_SCAN.txt`; it does not recursively rebuild package/test trees.
+- Actual hosted review, tag authorization, production signing/timestamping, role approval, and external release are not performed.

@@ -7,11 +7,13 @@
 #  define WIN32_LEAN_AND_MEAN
 #  include <windows.h>
 typedef HANDLE test_thread_t;
+typedef DWORD (WINAPI *test_thread_entry_t)(LPVOID);
 #  define TEST_THREAD_RETURN DWORD WINAPI
 #  define TEST_THREAD_ARG LPVOID
 #else
 #  include <pthread.h>
 typedef pthread_t test_thread_t;
+typedef void *(*test_thread_entry_t)(void *);
 #  define TEST_THREAD_RETURN void *
 #  define TEST_THREAD_ARG void *
 #endif
@@ -29,7 +31,7 @@ typedef struct worker_result_s {
 } worker_result_t;
 
 static int create_thread(test_thread_t *out_thread,
-                         TEST_THREAD_RETURN (*entry)(TEST_THREAD_ARG),
+                         test_thread_entry_t entry,
                          void *arg)
 {
 #if defined(_WIN32)

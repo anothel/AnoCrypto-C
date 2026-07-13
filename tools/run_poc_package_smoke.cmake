@@ -17,6 +17,9 @@ endif()
 get_filename_component(ANO_CRYPTO_SOURCE_DIR "${ANO_CRYPTO_SOURCE_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_BUILD_DIR "${ANO_CRYPTO_BUILD_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_POC_SMOKE_DIR "${ANO_CRYPTO_POC_SMOKE_DIR}" ABSOLUTE)
+if(NOT DEFINED ANO_CRYPTO_BUILD_CONFIG OR ANO_CRYPTO_BUILD_CONFIG STREQUAL "")
+    set(ANO_CRYPTO_BUILD_CONFIG "Release")
+endif()
 
 set(_package_dir "${ANO_CRYPTO_POC_SMOKE_DIR}/AnoCrypto-C-PoC-v0")
 set(_example_source "${_package_dir}/examples/core_poc")
@@ -31,7 +34,8 @@ function(ano_crypto_poc_run_logged log_file description)
         COMMAND ${ARGN}
         RESULT_VARIABLE _result
         OUTPUT_VARIABLE _stdout
-        ERROR_VARIABLE _stderr)
+        ERROR_VARIABLE _stderr
+        TIMEOUT 900)
     file(WRITE "${log_file}" "# ${description}\n")
     file(APPEND "${log_file}" "# Command:")
     foreach(_arg IN LISTS ARGN)
@@ -51,6 +55,7 @@ ano_crypto_poc_run_logged(
         -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
         -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
         -DANO_CRYPTO_POC_PACKAGE_DIR=${_package_dir}
+        -DANO_CRYPTO_POC_BUILD_CONFIG=${ANO_CRYPTO_BUILD_CONFIG}
         -P "${ANO_CRYPTO_SOURCE_DIR}/tools/create_poc_package.cmake")
 
 if(NOT EXISTS "${_example_source}/CMakeLists.txt")
@@ -125,14 +130,23 @@ endforeach()
 ano_crypto_poc_run_logged(
     "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_EXAMPLE_CONFIGURE.log"
     "Configure packaged core PoC example"
-    "${CMAKE_COMMAND}" -S "${_example_source}" -B "${_example_build}" -DCMAKE_PREFIX_PATH=${_sdk_prefix})
+    "${CMAKE_COMMAND}" -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
+    "${CMAKE_COMMAND}" -S "${_example_source}" -B "${_example_build}"
+        -DCMAKE_PREFIX_PATH=${_sdk_prefix}
+        -DCMAKE_BUILD_TYPE=${ANO_CRYPTO_BUILD_CONFIG})
 
 ano_crypto_poc_run_logged(
     "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_EXAMPLE_BUILD.log"
     "Build packaged core PoC example"
-    "${CMAKE_COMMAND}" --build "${_example_build}" --parallel)
+    "${CMAKE_COMMAND}" -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
+    "${CMAKE_COMMAND}" --build "${_example_build}"
+        --config "${ANO_CRYPTO_BUILD_CONFIG}" --parallel)
 
 set(_example_exe "${_example_build}/anocrypto_c_core_poc")
+if(NOT EXISTS "${_example_exe}")
+    set(_example_exe
+        "${_example_build}/${ANO_CRYPTO_BUILD_CONFIG}/anocrypto_c_core_poc.exe")
+endif()
 if(NOT EXISTS "${_example_exe}")
     set(_example_exe "${_example_build}/anocrypto_c_core_poc.exe")
 endif()
@@ -151,12 +165,22 @@ if(NOT EXISTS "${_example_exe}")
     message(FATAL_ERROR "Packaged core PoC example executable not found under ${_example_build}")
 endif()
 
+set(_runtime_path "$ENV{PATH}")
+if(WIN32)
+    set(_runtime_path "${_sdk_prefix}/bin;${_runtime_path}")
+endif()
+string(REPLACE ";" "\\;" _runtime_path_escaped "${_runtime_path}")
 execute_process(
-    COMMAND "${_example_exe}"
+    COMMAND "${CMAKE_COMMAND}" -E env
+        "PATH=${_runtime_path_escaped}"
+        "LD_LIBRARY_PATH=${_sdk_prefix}/lib:$ENV{LD_LIBRARY_PATH}"
+        "DYLD_LIBRARY_PATH=${_sdk_prefix}/lib:$ENV{DYLD_LIBRARY_PATH}"
+        "${_example_exe}"
     WORKING_DIRECTORY "${_example_build}"
     RESULT_VARIABLE _run_result
     OUTPUT_VARIABLE _run_stdout
-    ERROR_VARIABLE _run_stderr)
+    ERROR_VARIABLE _run_stderr
+    TIMEOUT 120)
 file(WRITE "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_EXAMPLE_RUN.log"
     "# Run packaged core PoC example\n"
     "# Executable: ${_example_exe}\n"

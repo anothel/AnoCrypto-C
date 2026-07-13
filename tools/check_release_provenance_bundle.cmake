@@ -1,7 +1,7 @@
 # Verify an unsigned AnoCrypto-C P1-32 engineering provenance bundle.
 # This checker validates path safety, complete hash coverage, release identity,
 # source-file hashes, source SBOM bindings, ABI/public-header inputs, and the
-# explicit unsigned/TODO release boundary. It does not verify a signature or
+# explicit unsigned/BLOCKED release boundary. It does not verify a signature or
 # authorize external release.
 cmake_minimum_required(VERSION 3.16)
 
@@ -17,6 +17,8 @@ get_filename_component(ANO_CRYPTO_SOURCE_DIR "${ANO_CRYPTO_SOURCE_DIR}" ABSOLUTE
 get_filename_component(ANO_CRYPTO_PROVENANCE_BUNDLE_DIR
     "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}" ABSOLUTE)
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_SIGNING_POLICY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/sensitive_signing_material_helpers.cmake")
 
 if(NOT IS_DIRECTORY "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}" OR
    IS_SYMLINK "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}")
@@ -424,7 +426,8 @@ execute_process(
     COMMAND "${CMAKE_COMMAND}" -E tar tf "${_source_archive}"
     RESULT_VARIABLE _archive_list_result
     OUTPUT_VARIABLE _archive_list_output
-    ERROR_VARIABLE _archive_list_error)
+    ERROR_VARIABLE _archive_list_error
+    TIMEOUT 120)
 if(NOT _archive_list_result EQUAL 0)
     message(FATAL_ERROR
         "Unable to list source archive members: ${_archive_list_error}")
@@ -433,7 +436,8 @@ execute_process(
     COMMAND "${CMAKE_COMMAND}" -E tar tvf "${_source_archive}"
     RESULT_VARIABLE _archive_verbose_result
     OUTPUT_VARIABLE _archive_verbose_output
-    ERROR_VARIABLE _archive_verbose_error)
+    ERROR_VARIABLE _archive_verbose_error
+    TIMEOUT 120)
 if(NOT _archive_verbose_result EQUAL 0)
     message(FATAL_ERROR
         "Unable to inspect source archive member types: ${_archive_verbose_error}")
@@ -481,6 +485,11 @@ foreach(_member IN LISTS _archive_members)
     if(_relative MATCHES "/$")
         continue()
     endif()
+    string(TOLOWER "${_relative}" _relative_lower)
+    if(_relative_lower MATCHES "\\.(sig|asc|pem|key|p12|pfx|jks|keystore|token|tsq|tsr|ed25519)$")
+        message(FATAL_ERROR
+            "Credential/signature-like file is forbidden in the source archive: ${_relative}")
+    endif()
     if(_relative IN_LIST _archive_file_paths)
         message(FATAL_ERROR "Duplicate source archive file member: ${_relative}")
     endif()
@@ -502,7 +511,8 @@ execute_process(
     WORKING_DIRECTORY "${_archive_extract_dir}"
     RESULT_VARIABLE _archive_extract_result
     OUTPUT_VARIABLE _archive_extract_output
-    ERROR_VARIABLE _archive_extract_error)
+    ERROR_VARIABLE _archive_extract_error
+    TIMEOUT 120)
 if(NOT _archive_extract_result EQUAL 0)
     file(REMOVE_RECURSE "${_archive_extract_dir}")
     message(FATAL_ERROR
@@ -529,6 +539,13 @@ foreach(_record IN LISTS _source_record_inputs)
         file(REMOVE_RECURSE "${_archive_extract_dir}")
         message(FATAL_ERROR
             "Source archive content differs from SOURCE_FILES.sha256: ${_relative}")
+    endif()
+    ano_crypto_detect_sensitive_signing_material_file(
+        "${_extracted}" ON _archive_sensitive_reason)
+    if(_archive_sensitive_reason)
+        file(REMOVE_RECURSE "${_archive_extract_dir}")
+        message(FATAL_ERROR
+            "Sensitive signing material found in source archive: ${_relative} (${_archive_sensitive_reason})")
     endif()
 endforeach()
 file(REMOVE_RECURSE "${_archive_extract_dir}")
@@ -579,6 +596,8 @@ foreach(_text IN ITEMS
         "Status: UNSIGNED"
         "Detached signature present: no"
         "Cryptographic verification performed: no"
+        "Signer identity approved: no (UNPROVISIONED)"
+        "Timestamp trust source approved: no (UNPROVISIONED)"
         "Private keys or signing tokens included: no"
         "External release authorization implied: no")
     string(FIND "${_signing_status}" "${_text}" _position)
@@ -586,11 +605,17 @@ foreach(_text IN ITEMS
         message(FATAL_ERROR "Signing status is missing boundary text: ${_text}")
     endif()
 endforeach()
-file(READ "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}/SIGNING_REQUEST.txt" _signing_request)
-foreach(_text IN ITEMS
-        "subject=RELEASE_ARTIFACTS.sha256"
-        "signature_format=TODO"
-        "verification_tool=TODO"
+    file(READ "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}/SIGNING_REQUEST.txt" _signing_request)
+    foreach(_text IN ITEMS
+        "subject=${ANO_CRYPTO_RELEASE_SIGNING_SUBJECT}"
+        "algorithm=${ANO_CRYPTO_RELEASE_SIGNING_ALGORITHM}"
+        "signature_format=${ANO_CRYPTO_RELEASE_SIGNING_SIGNATURE_ENCODING}"
+        "verification_tool=${ANO_CRYPTO_RELEASE_SIGNING_TOOL_FAMILY}"
+        "signer_policy_id=${ANO_CRYPTO_RELEASE_SIGNING_SIGNER_POLICY_ID}"
+        "timestamp_policy=${ANO_CRYPTO_RELEASE_SIGNING_TIMESTAMP_FORMAT}"
+        "production_signer=UNPROVISIONED"
+        "timestamp_trust_source=UNPROVISIONED"
+        "handoff_status=BLOCKED"
         "status=UNSIGNED")
     string(FIND "${_signing_request}" "${_text}" _position)
     if(_position EQUAL -1)
@@ -604,7 +629,7 @@ foreach(_text IN ITEMS
         "External release authorized: NO"
         "Reviewer: TODO"
         "Recorded worktree state: `${_prov_worktree_state}`"
-        "actual hosted review and signing remain TODO")
+        "actual hosted review, tag, production signer/timestamp provisioning, and signing remain TODO")
     string(FIND "${_authorization}" "${_text}" _position)
     if(_position EQUAL -1)
         message(FATAL_ERROR "Release authorization is missing boundary text: ${_text}")
@@ -646,35 +671,22 @@ endif()
 # verified release inputs.
 foreach(_relative IN LISTS _bundle_files)
     string(TOLOWER "${_relative}" _lower)
-    if(_lower MATCHES "\\.(sig|asc|pem|key|p12|pfx|jks|keystore|token)$")
+    if(_lower MATCHES "\\.(sig|asc|pem|key|p12|pfx|jks|keystore|token|tsq|tsr|ed25519)$")
         message(FATAL_ERROR "Unsupported signing or credential artifact in bundle: ${_relative}")
     endif()
 endforeach()
 
-string(CONCAT _private_key_marker "-----BEGIN " "PRIVATE KEY-----")
-string(CONCAT _entropy_marker "entropy" "_material=")
-string(CONCAT _seed_marker "seed" "_material=")
-string(CONCAT _drbg_marker "drbg" "_state=")
-string(CONCAT _signing_token_marker "signing" "_token=")
-string(CONCAT _private_key_assignment "private" "_key=")
-set(_sensitive_markers
-    "${_private_key_marker}"
-    "${_entropy_marker}"
-    "${_seed_marker}"
-    "${_drbg_marker}"
-    "${_signing_token_marker}"
-    "${_private_key_assignment}")
 foreach(_relative IN LISTS _bundle_files)
     if(_relative STREQUAL "anocrypto-c-source.tar.gz")
         continue()
     endif()
-    file(READ "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}/${_relative}" _content LIMIT 16777216)
-    foreach(_marker IN LISTS _sensitive_markers)
-        string(FIND "${_content}" "${_marker}" _position)
-        if(NOT _position EQUAL -1)
-            message(FATAL_ERROR "Sensitive marker found in provenance bundle: ${_relative}")
-        endif()
-    endforeach()
+    ano_crypto_detect_sensitive_signing_material_file(
+        "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}/${_relative}"
+        ON _bundle_sensitive_reason)
+    if(_bundle_sensitive_reason)
+        message(FATAL_ERROR
+            "Sensitive signing material found in provenance bundle: ${_relative} (${_bundle_sensitive_reason})")
+    endif()
 endforeach()
 
 list(LENGTH _manifest_paths _manifest_file_count)

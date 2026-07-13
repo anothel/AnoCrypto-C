@@ -1,15 +1,15 @@
 # C99 Priority TODO
 
-Status: P1-31 unsigned release provenance and source-SBOM gate completed as an engineering slice.
+Status: P1-32 offline release-signing handoff completed as an engineering slice.
 
-## Completed foundation through P1-31
+## Completed foundation through P1-32
 
 - C99 repository, clean-room records, stable-status API style, module lifecycle,
   self-test/error-state, build identity, and install/export package structure.
 - SHA-256/384/512, HMAC-SHA-2, HMAC_DRBG-SHA-256, entropy/provider seams,
   source-backed public random lifecycle, CSP key handles, and thread-safety seams.
-- Reproducible-build notes, CI/evidence/PoC workflows, SBOM/signing placeholders,
-  public-surface and clean Release exported-symbol checks.
+- Reproducible-build notes, CI/evidence/PoC workflows, source-SBOM/provenance and
+  offline signing-handoff records, public-surface and clean Release exported-symbol checks.
 - AES-128/192/256 and CBC without padding with KAT, negative, differential,
   lifecycle, concurrency, portability, and compiler-output review artifacts.
 - AES-CMAC with AES-128/192/256, full tags, dedicated CMAC-purpose handles,
@@ -21,6 +21,7 @@ Status: P1-31 unsigned release provenance and source-SBOM gate completed as an e
   and target-specific compiler-output capture.
 - P1-30 central release identity, retained P1-29 public-header/symbol baseline, old/current-header consumers, strict tag/commit/HEAD fixture checks, and hashed hosted-artifact manifests.
 - P1-31 exact-source archive/file hash binding, SPDX 2.3 JSON source inventory, unsigned signing boundary, authorization TODO record, provenance regression tests, hosted provenance lane, and PoC exclusion checks.
+- P1-32 key-free offline signing handoff and verifier policy for Ed25519 raw 64-byte signatures over `RELEASE_ARTIFACTS.sha256`, SHA-256 SPKI DER fingerprints, required RFC 3161 timestamps over the signature, distinct Security Reviewer/Product Release Owner identities, and optional secondary-only GitHub attestation.
 
 ## Immediate P1 candidates
 
@@ -28,7 +29,7 @@ Status: P1-31 unsigned release provenance and source-SBOM gate completed as an e
    artifacts instead of treating workflow presence as execution evidence.
 2. Perform target-specific human review of captured AES and CMAC compiler output
    and record the remaining timing/cache/fault backlog without overclaiming.
-3. Select and approve an actual detached-signature/verification mechanism, signer identity, key custody, timestamping, and release authorization process without storing credentials in the repository.
+3. Provision and approve the production signer identity/public-key fingerprint, offline key custody, RFC 3161 service/trust anchor, distinct release approvers, and external authorization process without storing credentials in the repository or CI.
 4. Expand source inventory into a reviewed dependency/component, license, and vulnerability scope only after tool, privacy, and legal requirements are selected.
 5. Strengthen automated ABI/source compatibility comparison across tagged releases, including public type size/alignment and semantic compatibility.
 6. Decide whether the next algorithm step is a no-implementation gate for a
@@ -42,7 +43,7 @@ Status: P1-31 unsigned release provenance and source-SBOM gate completed as an e
 - tag truncation, AES-CTR, GCM, GMAC, padding helpers, hardware dispatch;
 - key export, persistence, wrapping, multi-process CSP, platform keystore;
 - public-key algorithms and AnoPKI integration;
-- dependency/component SBOM scope, vulnerability/license review, actual signing/verification, signer authorization, timestamping, and customer evaluation/legal notices;
+- dependency/component SBOM scope, vulnerability/license review, production signing/timestamping, signer/TSA provisioning, external authorization, and customer evaluation/legal notices;
 - any official-validation or completed-review claim.
 
 
@@ -65,7 +66,7 @@ Remaining TODO:
 - review actual Linux 32-bit and s390x big-endian artifacts;
 - verify the expected tag and commit in a tagged Git workflow;
 - retain actual hosted artifact reviewer/date disposition;
-- approve an actual signing/verifier and external-release authorization procedure before distribution.
+- provision the approved production signer/TSA records and complete external-release authorization before distribution.
 
 ## P1-31 Release Provenance and Source SBOM Gate
 
@@ -86,6 +87,30 @@ Remaining TODO:
 - verify the real expected tag, commit, and checkout in the release workflow;
 - validate SPDX syntax with the selected downstream consumer where required;
 - select dependency, license, and vulnerability inventory scope;
-- approve detached-signature format/tool, signer identity, key custody, timestamping, revocation, and verification retention;
+- provision the P1-32-approved signer identity/public-key fingerprint, offline custody, RFC 3161 service/trust anchor, revocation handling, and verification retention;
 - record legal/product external-release authorization;
-- decide P1-32 only after the above gaps are ranked; no new public algorithm is implied.
+- rank the next engineering slice after the remaining release gaps; no new public algorithm is implied.
+
+## P1-32 Offline Release-Signing Handoff
+
+Completed engineering scope:
+
+- exact signature subject `RELEASE_ARTIFACTS.sha256` and Ed25519 raw 64-byte signature format;
+- approved public-key identity as SHA-256 over SPKI DER and OpenSSL 3 `pkeyutl` verification policy;
+- required RFC 3161 timestamp over `RELEASE_ARTIFACTS.sha256.ed25519` with bound TSA policy/trust-anchor metadata;
+- key-free handoff bundle creation, complete file-hash verification, and fail-closed readiness state;
+- distinct Security Reviewer and Product Release Owner identity records with same-identity rejection;
+- GitHub artifact attestation classified as optional secondary evidence only;
+- key-free negative regressions and Debug-only opt-in ephemeral signature/timestamp fixtures with cleanup;
+- unchanged 14-header, 69-symbol `ANOCRYPTO_C_0` public surface and customer PoC exclusion of internal handoff/credential/signature material.
+
+Remaining TODO:
+
+- provision and approve a production signer, public-key fingerprint, hardware-backed custody, and revocation procedure;
+- provision and approve the RFC 3161 service, policy OID, trust anchor, and revocation review;
+- record distinct Security Reviewer and Product Release Owner identities and approvals;
+- review actual hosted artifacts and bind the real expected tag/commit/checkout;
+- generate and verify the production detached signature and timestamp response;
+- record legal/product external-release authorization.
+
+Until those items are complete, signing remains `UNSIGNED`, external release remains `NO`, and handoff readiness remains `BLOCKED`.

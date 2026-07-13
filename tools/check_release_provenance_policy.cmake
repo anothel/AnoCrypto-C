@@ -17,6 +17,8 @@ get_filename_component(ANO_CRYPTO_BUILD_DIR "${ANO_CRYPTO_BUILD_DIR}" ABSOLUTE)
 get_filename_component(_output_dir "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}" DIRECTORY)
 file(MAKE_DIRECTORY "${_output_dir}")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_SIGNING_POLICY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/sensitive_signing_material_helpers.cmake")
 
 foreach(_required_field
         ANO_CRYPTO_RELEASE_PROVENANCE_SCHEMA
@@ -37,7 +39,16 @@ set(_required_files
     tools/create_release_provenance_bundle.cmake
     tools/check_release_provenance_bundle.cmake
     tools/check_release_provenance_policy.cmake
+    tools/assemble_release_evidence.cmake
+    tools/check_sensitive_release_artifacts.cmake
+    tools/sensitive_signing_material_helpers.cmake
+    tools/create_release_signing_handoff.cmake
+    tools/check_release_signing_handoff.cmake
+    tools/verify_release_detached_signature.cmake
     tests/cmake/release_provenance_tests.cmake
+    tests/cmake/release_signing_handoff_tests.cmake
+    tests/cmake/sensitive_release_artifact_tests.cmake
+    tests/cmake/release_signing_fixture_tests.cmake
     docs/release/RELEASE_PROVENANCE_AND_SIGNING_POLICY.md
     docs/ci/RELEASE_PROVENANCE_CI_CHECKLIST.md
     evidence/release-template/RELEASE_PROVENANCE_REVIEW.md)
@@ -65,11 +76,16 @@ _ano_require_text("release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake"
     "set(ANO_CRYPTO_RELEASE_SIGNING_MODE \"UNSIGNED\")")
 _ano_require_text("CMakeLists.txt" "ano_crypto_release_provenance_policy_check")
 _ano_require_text("CMakeLists.txt" "ano_crypto_release_provenance_tests")
+_ano_require_text("CMakeLists.txt" "ano_crypto_release_signing_handoff_tests")
+_ano_require_text("CMakeLists.txt" "ano_crypto_release_signing_handoff_evidence")
 _ano_require_text("CMakeLists.txt" "ANO_CRYPTO_RUN_RELEASE_PROVENANCE_CHECK=ON")
 _ano_require_text(".github/workflows/ci.yml" "release-provenance")
 _ano_require_text(".github/workflows/ci.yml" "SOURCE_SBOM.spdx.json")
 _ano_require_text("tools/create_release_provenance_bundle.cmake" "RELEASE_PROVENANCE.txt")
 _ano_require_text("tools/create_release_provenance_bundle.cmake" "worktree_state=")
+_ano_require_text("tools/create_release_signing_handoff.cmake" "READY_FOR_OFFLINE_SIGNING")
+_ano_require_text("tools/verify_release_detached_signature.cmake" "Raw Ed25519 detached signature must be exactly 64 bytes")
+_ano_require_text("tools/verify_release_detached_signature.cmake" "RFC3161 timestamp response verification failed")
 _ano_require_text("tools/collect_release_evidence.cmake" "release-provenance")
 _ano_require_text("tools/collect_release_evidence.cmake" "SOURCE_SBOM.spdx.json")
 _ano_require_text("tools/create_poc_package.cmake" "RELEASE_PROVENANCE_PACKAGE_NOTES.txt")
@@ -93,24 +109,54 @@ _ano_require_text("README.md" "unsigned release-provenance bundle")
 
 # A signing credential or detached signature must never be committed merely to
 # make the P1-32 engineering gate pass.
-file(GLOB_RECURSE _source_entries
-    LIST_DIRECTORIES false
-    RELATIVE "${ANO_CRYPTO_SOURCE_DIR}"
-    "${ANO_CRYPTO_SOURCE_DIR}/*")
+set(_source_entries "")
+find_program(_git_executable git)
+if(_git_executable)
+    execute_process(
+        COMMAND "${_git_executable}" -C "${ANO_CRYPTO_SOURCE_DIR}"
+            ls-files --cached --others --exclude-standard
+        RESULT_VARIABLE _git_files_result
+        OUTPUT_VARIABLE _git_files_output
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        TIMEOUT 60)
+    if("${_git_files_result}" STREQUAL "0")
+        string(REPLACE "\r\n" "\n" _git_files_output "${_git_files_output}")
+        string(REPLACE "\n" ";" _source_entries "${_git_files_output}")
+    endif()
+endif()
+if(NOT _source_entries)
+    file(GLOB_RECURSE _source_entries
+        LIST_DIRECTORIES false
+        RELATIVE "${ANO_CRYPTO_SOURCE_DIR}"
+        "${ANO_CRYPTO_SOURCE_DIR}/*")
+endif()
 set(_credential_like_files "")
+set(_sensitive_source_files "")
 foreach(_relative IN LISTS _source_entries)
     if(_relative MATCHES "(^|/)(\\.git|build|build-[^/]*|cmake-build-[^/]*)(/|$)")
         continue()
     endif()
     string(TOLOWER "${_relative}" _lower)
-    if(_lower MATCHES "\\.(sig|asc|pem|key|p12|pfx|jks|keystore|token)$")
+    if(_lower MATCHES "\\.(sig|asc|pem|key|p12|pfx|jks|keystore|token|tsq|tsr|ed25519)$")
         list(APPEND _credential_like_files "${_relative}")
+    endif()
+    set(_source_file "${ANO_CRYPTO_SOURCE_DIR}/${_relative}")
+    ano_crypto_detect_sensitive_signing_material_file(
+        "${_source_file}" ON _sensitive_reason)
+    if(_sensitive_reason)
+        list(APPEND _sensitive_source_files "${_relative} (${_sensitive_reason})")
     endif()
 endforeach()
 if(_credential_like_files)
     list(JOIN _credential_like_files ", " _credential_text)
     message(FATAL_ERROR
         "Credential/signature-like files are forbidden in the P1-32 source tree: ${_credential_text}")
+endif()
+if(_sensitive_source_files)
+    list(JOIN _sensitive_source_files ", " _sensitive_source_text)
+    message(FATAL_ERROR
+        "Sensitive signing material is forbidden in the P1-32 source tree: ${_sensitive_source_text}")
 endif()
 
 # If the full evidence target has already produced a provenance bundle, verify
@@ -119,7 +165,11 @@ endif()
 set(_generated_bundle
     "${ANO_CRYPTO_BUILD_DIR}/evidence/${ANO_CRYPTO_RELEASE_EVIDENCE_SLICE}/release-provenance")
 set(_generated_status "NOT_PRESENT")
-if(IS_DIRECTORY "${_generated_bundle}")
+if(NOT DEFINED ANO_CRYPTO_SKIP_GENERATED_PROVENANCE_CHECK)
+    set(ANO_CRYPTO_SKIP_GENERATED_PROVENANCE_CHECK OFF)
+endif()
+if(NOT ANO_CRYPTO_SKIP_GENERATED_PROVENANCE_CHECK AND
+   IS_DIRECTORY "${_generated_bundle}")
     execute_process(
         COMMAND "${CMAKE_COMMAND}"
             -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
@@ -128,7 +178,8 @@ if(IS_DIRECTORY "${_generated_bundle}")
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_release_provenance_bundle.cmake"
         RESULT_VARIABLE _generated_result
         OUTPUT_VARIABLE _generated_stdout
-        ERROR_VARIABLE _generated_stderr)
+        ERROR_VARIABLE _generated_stderr
+        TIMEOUT 120)
     if(NOT _generated_result EQUAL 0)
         message(FATAL_ERROR
             "Generated release provenance bundle failed verification:\n${_generated_stdout}${_generated_stderr}")
@@ -152,7 +203,13 @@ file(WRITE "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}"
     "Credential/signature-like source files: none\n"
     "Generated evidence bundle verification: ${_generated_status}\n"
     "Actual hosted artifact disposition: TODO unless separately supplied and reviewed\n"
-    "Cryptographic signature verification: not implemented in P1-32\n"
+    "Offline signature verifier: Ed25519 raw 64-byte over RELEASE_ARTIFACTS.sha256\n"
+    "Signer identity binding: SHA-256 of DER SubjectPublicKeyInfo\n"
+    "Timestamp verifier: RFC 3161 over detached signature\n"
+    "Production signer: UNPROVISIONED\n"
+    "Timestamp trust source: UNPROVISIONED\n"
+    "Repository signing status: UNSIGNED\n"
+    "Signing handoff readiness: BLOCKED\n"
     "External release authorization: NO\n"
     "Result: PASS\n")
 

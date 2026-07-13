@@ -23,6 +23,7 @@ get_filename_component(ANO_CRYPTO_PROVENANCE_SOURCE_ARCHIVE
 get_filename_component(ANO_CRYPTO_PROVENANCE_SOURCE_FILE_LIST
     "${ANO_CRYPTO_PROVENANCE_SOURCE_FILE_LIST}" ABSOLUTE)
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_SIGNING_POLICY.cmake")
 
 foreach(_input IN ITEMS
         "${ANO_CRYPTO_PROVENANCE_SOURCE_ARCHIVE}"
@@ -130,7 +131,8 @@ execute_process(
         -P "${ANO_CRYPTO_SOURCE_DIR}/tools/create_source_sbom_spdx.cmake"
     RESULT_VARIABLE _sbom_result
     OUTPUT_VARIABLE _sbom_stdout
-    ERROR_VARIABLE _sbom_stderr)
+    ERROR_VARIABLE _sbom_stderr
+    TIMEOUT 120)
 if(NOT _sbom_result EQUAL 0)
     message(FATAL_ERROR
         "Source SBOM generation failed:\n${_sbom_stdout}${_sbom_stderr}")
@@ -218,8 +220,8 @@ file(WRITE "${ANO_CRYPTO_PROVENANCE_OUTPUT_DIR}/SIGNING_STATUS.txt"
     "Signing subject: RELEASE_ARTIFACTS.sha256\n"
     "Detached signature present: no\n"
     "Cryptographic verification performed: no\n"
-    "Signer identity approved: TODO\n"
-    "Timestamping policy approved: TODO\n"
+    "Signer identity approved: no (UNPROVISIONED)\n"
+    "Timestamp trust source approved: no (UNPROVISIONED)\n"
     "Private keys or signing tokens included: no\n"
     "External release authorization implied: no\n")
 
@@ -227,11 +229,15 @@ file(WRITE "${ANO_CRYPTO_PROVENANCE_OUTPUT_DIR}/SIGNING_REQUEST.txt"
     "ANOCRYPTO_DETACHED_SIGNING_REQUEST_V1\n"
     "release_version=${ANO_CRYPTO_RELEASE_VERSION}\n"
     "expected_tag=${ANO_CRYPTO_RELEASE_TAG}\n"
-    "subject=RELEASE_ARTIFACTS.sha256\n"
-    "signature_format=TODO\n"
-    "verification_tool=TODO\n"
-    "signer_policy_id=TODO\n"
-    "timestamp_policy=TODO\n"
+    "subject=${ANO_CRYPTO_RELEASE_SIGNING_SUBJECT}\n"
+    "algorithm=${ANO_CRYPTO_RELEASE_SIGNING_ALGORITHM}\n"
+    "signature_format=${ANO_CRYPTO_RELEASE_SIGNING_SIGNATURE_ENCODING}\n"
+    "verification_tool=${ANO_CRYPTO_RELEASE_SIGNING_TOOL_FAMILY}\n"
+    "signer_policy_id=${ANO_CRYPTO_RELEASE_SIGNING_SIGNER_POLICY_ID}\n"
+    "timestamp_policy=${ANO_CRYPTO_RELEASE_SIGNING_TIMESTAMP_FORMAT}\n"
+    "production_signer=UNPROVISIONED\n"
+    "timestamp_trust_source=UNPROVISIONED\n"
+    "handoff_status=BLOCKED\n"
     "status=UNSIGNED\n"
     "note=Do not place private keys, tokens, or credentials in this bundle.\n")
 
@@ -246,13 +252,13 @@ file(WRITE "${ANO_CRYPTO_PROVENANCE_OUTPUT_DIR}/RELEASE_AUTHORIZATION.md"
     "- [ ] Tag, supplied commit, and checked-out HEAD resolve to one reviewed commit.\n"
     "- [ ] Required hosted artifacts have an explicit reviewer/date disposition.\n"
     "- [ ] Source SBOM scope and limitations have been reviewed.\n"
-    "- [ ] Detached-signature tool, signer identity, and timestamping policy are approved.\n"
-    "- [ ] The detached signature has been cryptographically verified outside this P1-32 unsigned generator.\n"
+    "- [ ] Production signer identity and timestamp trust source are provisioned and approved.\n"
+    "- [ ] The raw Ed25519 detached signature and RFC 3161 timestamp have been verified by the P1-32 offline verifier.\n"
     "- [ ] Legal/product approval and customer-sharing scope are recorded.\n\n"
     "External release authorized: NO\n"
     "Reviewer: TODO\n"
     "Reviewed UTC: TODO\n"
-    "Limitations: actual hosted review and signing remain TODO.\n")
+    "Limitations: actual hosted review, tag, production signer/timestamp provisioning, and signing remain TODO.\n")
 
 file(WRITE "${ANO_CRYPTO_PROVENANCE_OUTPUT_DIR}/RELEASE_PROVENANCE.txt"
     "ANOCRYPTO_RELEASE_PROVENANCE_V1\n"
@@ -328,7 +334,8 @@ if(ANO_CRYPTO_VERIFY_PROVENANCE_BUNDLE)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_release_provenance_bundle.cmake"
         RESULT_VARIABLE _check_result
         OUTPUT_VARIABLE _check_stdout
-        ERROR_VARIABLE _check_stderr)
+        ERROR_VARIABLE _check_stderr
+        TIMEOUT 300)
     if(NOT _check_result EQUAL 0)
         message(FATAL_ERROR
             "Release provenance verification failed:\n${_check_stdout}${_check_stderr}")

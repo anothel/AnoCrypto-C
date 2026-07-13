@@ -54,13 +54,15 @@ if(ANO_CRYPTO_OBJDUMP_STYLE STREQUAL "MSVC")
         COMMAND "${ANO_CRYPTO_OBJDUMP}" /DISASM "${ANO_CRYPTO_LIBRARY_FILE}"
         RESULT_VARIABLE _result
         OUTPUT_VARIABLE _output
-        ERROR_VARIABLE _error)
+        ERROR_VARIABLE _error
+        TIMEOUT 120)
 else()
     execute_process(
         COMMAND "${ANO_CRYPTO_OBJDUMP}" -d "${ANO_CRYPTO_LIBRARY_FILE}"
         RESULT_VARIABLE _result
         OUTPUT_VARIABLE _output
-        ERROR_VARIABLE _error)
+        ERROR_VARIABLE _error
+        TIMEOUT 120)
 endif()
 
 file(WRITE "${_disassembly}" "${_output}${_error}")

@@ -52,7 +52,8 @@ execute_process(
         -DCMAKE_BUILD_TYPE=${ANO_CRYPTO_POC_BUILD_CONFIG}
     RESULT_VARIABLE _configure_result
     OUTPUT_VARIABLE _configure_stdout
-    ERROR_VARIABLE _configure_stderr)
+    ERROR_VARIABLE _configure_stderr
+    TIMEOUT 180)
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/CLEAN_BUILD_CONFIGURE.log"
     "# Configure clean AnoCrypto-C PoC SDK build\n"
     "# Entropy test hooks: OFF\n"
@@ -73,7 +74,8 @@ execute_process(
         "${CMAKE_COMMAND}" --build "${_clean_build_dir}" --config "${ANO_CRYPTO_POC_BUILD_CONFIG}" --parallel
     RESULT_VARIABLE _build_result
     OUTPUT_VARIABLE _build_stdout
-    ERROR_VARIABLE _build_stderr)
+    ERROR_VARIABLE _build_stderr
+    TIMEOUT 600)
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/CLEAN_BUILD.log"
     "# Build clean AnoCrypto-C PoC SDK\n"
     "# Result: ${_build_result}\n\n"
@@ -88,7 +90,8 @@ execute_process(
         "${CMAKE_COMMAND}" --build "${_clean_build_dir}" --config "${ANO_CRYPTO_POC_BUILD_CONFIG}" --target ano_crypto_exported_symbol_baseline_check
     RESULT_VARIABLE _symbol_result
     OUTPUT_VARIABLE _symbol_stdout
-    ERROR_VARIABLE _symbol_stderr)
+    ERROR_VARIABLE _symbol_stderr
+    TIMEOUT 600)
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/CLEAN_RELEASE_SYMBOL_BASELINE.log"
     "# Compare clean PoC SDK exports with ABI-0 baseline\n"
     "# Expected public symbols: 69\n"
@@ -104,7 +107,8 @@ execute_process(
         "${CMAKE_COMMAND}" --build "${_clean_build_dir}" --config "${ANO_CRYPTO_POC_BUILD_CONFIG}" --target ano_crypto_release_compatibility_policy_check
     RESULT_VARIABLE _release_compat_result
     OUTPUT_VARIABLE _release_compat_stdout
-    ERROR_VARIABLE _release_compat_stderr)
+    ERROR_VARIABLE _release_compat_stderr
+    TIMEOUT 300)
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_COMPATIBILITY_CHECK.log"
     "# Check P1-32 release identity and P1-29 public compatibility baseline\n"
     "# Expected version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
@@ -121,7 +125,8 @@ execute_process(
         "${CMAKE_COMMAND}" --build "${_clean_build_dir}" --config "${ANO_CRYPTO_POC_BUILD_CONFIG}" --target ano_crypto_release_provenance_policy_check
     RESULT_VARIABLE _release_provenance_result
     OUTPUT_VARIABLE _release_provenance_stdout
-    ERROR_VARIABLE _release_provenance_stderr)
+    ERROR_VARIABLE _release_provenance_stderr
+    TIMEOUT 300)
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_PROVENANCE_POLICY_CHECK.log"
     "# Check P1-32 unsigned release provenance and source-SBOM policy boundary\n"
     "# Expected version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
@@ -136,7 +141,8 @@ execute_process(
     COMMAND "${CMAKE_COMMAND}" --install "${_clean_build_dir}" --config "${ANO_CRYPTO_POC_BUILD_CONFIG}" --prefix "${_sdk_dir}"
     RESULT_VARIABLE _install_result
     OUTPUT_VARIABLE _install_stdout
-    ERROR_VARIABLE _install_stderr)
+    ERROR_VARIABLE _install_stderr
+    TIMEOUT 300)
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/INSTALL_PACKAGE.log"
     "# Install clean AnoCrypto-C SDK into PoC package\n"
     "# Result: ${_install_result}\n\n"
@@ -162,17 +168,25 @@ foreach(_header IN LISTS _installed_headers)
 endforeach()
 
 find_program(_nm_exe nm)
+file(GLOB_RECURSE _installed_shared_libraries LIST_DIRECTORIES false
+    "${_sdk_dir}/*anocrypto_c*.so*"
+    "${_sdk_dir}/*anocrypto_c*.dylib")
+if(_installed_shared_libraries AND NOT _nm_exe)
+    message(FATAL_ERROR "PoC shared-library inspection requires nm")
+endif()
 if(_nm_exe)
-    file(GLOB_RECURSE _installed_shared_libraries LIST_DIRECTORIES false
-        "${_sdk_dir}/*anocrypto_c*.so*"
-        "${_sdk_dir}/*anocrypto_c*.dylib")
     foreach(_library IN LISTS _installed_shared_libraries)
         execute_process(
             COMMAND "${_nm_exe}" -D --defined-only "${_library}"
             RESULT_VARIABLE _nm_result
             OUTPUT_VARIABLE _nm_stdout
-            ERROR_VARIABLE _nm_stderr)
-        if(_nm_result EQUAL 0 AND _nm_stdout MATCHES "ano_crypto_internal_|entropy_test_hook|random_test_hook|test_set_reseed_counter|process_guard")
+            ERROR_VARIABLE _nm_stderr
+            TIMEOUT 60)
+        if(NOT _nm_result EQUAL 0)
+            message(FATAL_ERROR
+                "PoC shared-library exported-symbol inspection failed: ${_library}: ${_nm_stderr}")
+        endif()
+        if(_nm_stdout MATCHES "ano_crypto_internal_|entropy_test_hook|random_test_hook|test_set_reseed_counter|process_guard")
             message(FATAL_ERROR "PoC shared library exports internal entropy/test-hook symbols: ${_library}")
         endif()
     endforeach()
@@ -329,10 +343,17 @@ set(_forbidden_internal_package_paths
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_PROVENANCE.txt"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_ARTIFACTS.sha256"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/SIGNING_REQUEST.txt"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/SIGNING_POLICY.txt"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/SIGNING_HANDOFF_FILES.sha256"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/SIGNING_HANDOFF_STATUS.txt"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/APPROVED_RELEASE_SIGNERS.txt"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/APPROVED_TIMESTAMP_POLICY.txt"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_SIGNING_HANDOFF_CHECK.txt"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/release-signing-handoff"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_AUTHORIZATION.md")
 foreach(_forbidden_path IN LISTS _forbidden_internal_package_paths)
     if(EXISTS "${_forbidden_path}")
-        message(FATAL_ERROR "PoC package contains an internal entropy/test artifact: ${_forbidden_path}")
+        message(FATAL_ERROR "PoC package contains an internal entropy/test artifact or release artifact: ${_forbidden_path}")
     endif()
 endforeach()
 
@@ -350,7 +371,10 @@ foreach(_package_file IN LISTS _package_boundary_files)
        _package_file_lower MATCHES "cmac(_kat_tests|_api_negative_tests|_openssl_differential_tests)?\.c$" OR
        _package_file_lower MATCHES "p1_29_compatibility_probe\.c$" OR
        _package_file_lower MATCHES "hosted_artifact_manifest" OR
-       _package_file_lower MATCHES "(^|[/\\])(source_sbom\.spdx\.json|source_files\.sha256|release_provenance\.txt|release_artifacts\.sha256|signing_request\.txt|release_authorization\.md|anocrypto-c-source\.tar\.gz)$" OR
+       _package_file_lower MATCHES "(create_release_signing_handoff|check_release_signing_handoff|verify_release_detached_signature)\.cmake$" OR
+       _package_file_lower MATCHES "(^|[/\\])(source_sbom\.spdx\.json|source_files\.sha256|release_provenance\.txt|release_artifacts\.sha256|signing_request\.txt|signing_policy\.txt|signing_handoff_files\.sha256|signing_handoff_status\.txt|approved_release_signers\.txt|approved_timestamp_policy\.txt|release_signing_handoff_check\.txt|release_authorization\.md|anocrypto-c-source\.tar\.gz)$" OR
+       _package_file_lower MATCHES "(^|[/\\])release-signing-handoff([/\\]|$)" OR
+       _package_file_lower MATCHES "\.(ed25519|tsq|tsr|pem|key|p12|pfx|jks|keystore|sig|asc)$" OR
        _package_file_lower MATCHES "(^|[/\\])abi[/\\]baselines([/\\]|$)")
         message(FATAL_ERROR "PoC package contains a test-only differential/provider artifact: ${_package_file}")
     endif()
@@ -376,8 +400,12 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/SIGNING_STATUS.txt"
     "Detached signature present: no\n"
     "Cryptographic verification performed: no\n"
     "External release authorized: NO\n"
-    "No private signing key, signing token, or detached signature file is included.\n"
-    "Future detached-signature workflow remains TODO until signing tool, signer identity, timestamping, and verification policy are selected.\n")
+    "Signing handoff readiness: BLOCKED\n"
+    "P1-32 policy subject: RELEASE_ARTIFACTS.sha256\n"
+    "P1-32 policy: Ed25519 raw 64-byte signature, SHA-256 SPKI DER signer fingerprint, and required RFC3161 timestamp over the signature.\n"
+    "Security Reviewer and Product Release Owner identities must be distinct; GitHub artifact attestation is optional secondary evidence only.\n"
+    "No signing key, token, signer public-key record, detached signature, timestamp response, certificate, or trust anchor is included.\n"
+    "The production signer and timestamp authority remain unprovisioned.\n")
 
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_PROVENANCE_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package release provenance boundary\n"
@@ -386,10 +414,11 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_PROVENANCE_PACKAGE_NOTES.txt"
     "Expected tag metadata: ${ANO_CRYPTO_RELEASE_TAG}\n"
     "Signing mode: UNSIGNED\n"
     "External release authorized: NO\n"
+    "Signing handoff readiness: BLOCKED\n"
     "The internal source archive and source SBOM are not included in this customer package.\n"
-    "The package does not include RELEASE_PROVENANCE.txt, RELEASE_ARTIFACTS.sha256, SIGNING_REQUEST.txt, a detached signature, a signing key, or a signing token.\n"
+    "The package does not include RELEASE_PROVENANCE.txt, RELEASE_ARTIFACTS.sha256, the internal signing handoff, signer/TSA approval records, release authorization records, keys, tokens, signatures, timestamp responses, certificates, or trust anchors.\n"
     "PACKAGE_MANIFEST.md is a package-local hash inventory and is not a cryptographic attestation or release authorization.\n"
-    "Actual tag/commit binding, hosted artifact disposition, package-specific SBOM, signer approval, and external sharing approval remain TODO.\n")
+    "Actual tag/commit binding, hosted artifact disposition, package-specific SBOM, production signer/TSA provisioning, signature/timestamp verification, distinct role approvals, and external sharing approval remain TODO.\n")
 
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/THREAD_SAFETY_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package thread-safety notes\n"
@@ -537,7 +566,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/PACKAGE_REVIEW_MANIFEST.md"
     "- Confirm `PACKAGE_MANIFEST.md` lists only package-relative paths.\n"
     "- Confirm `SBOM_STATUS.txt` is still accurate for this package.\n"
     "- Confirm `SIGNING_STATUS.txt` is still accurate for this package.\n"
-    "- Confirm `RELEASE_PROVENANCE_PACKAGE_NOTES.txt` states that the internal source archive/SBOM and signing artifacts are excluded and external release remains unauthorized.\n"
+    "- Confirm `RELEASE_PROVENANCE_PACKAGE_NOTES.txt` states that the internal source archive/SBOM/handoff and all credential/signature/timestamp artifacts are excluded and external release remains unauthorized.\n"
     "- Confirm `THREAD_SAFETY_PACKAGE_NOTES.txt` matches the current support matrix.\n"
     "- Confirm `CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt` records clean sanitizer mode, hosted-review limits, and ABI-0 decision.\n"
     "- Confirm `SHA512_FAMILY_PACKAGE_NOTES.txt` matches the current SHA-384/SHA-512 implementation and KAT boundary.\n"
@@ -550,7 +579,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/PACKAGE_REVIEW_MANIFEST.md"
     "- Confirm `CLEAN_RELEASE_SYMBOL_BASELINE.log` reports the stored 69-symbol ABI-0 baseline match.\n"
     "- Confirm `RELEASE_COMPATIBILITY_CHECK.log` and `RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt` match the P1-32/P1-29 compatibility policy.\n"
     "- Confirm `RELEASE_PROVENANCE_POLICY_CHECK.log` records a passing unsigned/source-SBOM boundary check without asserting a signature or external approval.\n"
-    "- Confirm no retained baseline header tree, compatibility test source, hosted artifact manifest, source archive, source SBOM, signing request, release authorization record, or release-internal metadata directory is packaged.\n"
+    "- Confirm no retained baseline header tree, compatibility test source, hosted artifact manifest, source archive, source SBOM, signing handoff/policy/request, signer/TSA record, release authorization record, key, token, signature, timestamp response, certificate, trust anchor, or release-internal metadata directory is packaged.\n"
     "- Confirm `ENTROPY_HEALTH_PACKAGE_NOTES.txt` records test hooks OFF and internal symbol hiding ON.\n"
     "- Confirm `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt` records external OS-provider classification, private process guard, and implemented public random service.\n"
     "- Confirm installed headers and shared-library exports do not expose internal entropy, process-guard, reseed-limit, failure-injection test-hook, or internal AES context symbols.\n"
@@ -596,7 +625,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/README.md"
 "./build-core-poc/anocrypto_c_core_poc\n"
 "```\n\n"
 "## Boundary\n\n"
-"This package is not official validation evidence. Review local paths, compiler identifiers, binary provenance, source provenance, manifest files, package SBOM/signing status boundaries, thread-safety notes, random-service notes, and logs before sharing externally. Do not add secrets, entropy captures, generated secret bytes, private keys, tokens, signing keys, signing tokens, customer data, or customer deployment details to this package.\n")
+"This package is not official validation evidence. Review local paths, compiler identifiers, binary provenance, source provenance, manifest files, package SBOM/signing status boundaries, thread-safety notes, random-service notes, and logs before sharing externally. Do not add secrets, entropy captures, generated secret bytes, private keys, tokens, signing keys, signing tokens, signer/TSA records, signatures, timestamp responses, certificates, trust anchors, customer data, or customer deployment details to this package.\n")
 
 file(GLOB_RECURSE _package_files
     LIST_DIRECTORIES false

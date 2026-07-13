@@ -1,25 +1,33 @@
 # anocrypto-c Tools
 
-This directory contains engineering helper scripts for the private C99 codebase.
+This directory contains engineering helper scripts for the C99 codebase.
 
-## `collect_release_evidence.cmake`
+## P1-32 evidence preparation and assembly
 
-Creates a local release-evidence draft from a configured build tree:
+Creates a local P1-32 release-evidence draft from prepared prerequisite outputs:
 
 ```sh
-cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Debug
+cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DANO_CRYPTO_BUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release
 cmake --build build --parallel
 cmake --build build --target ano_crypto_collect_release_evidence
 ```
 
-Or run the script directly:
+The target serializes clean Release symbol/runtime-dependency inspection, install smoke, PoC smoke, tagged compatibility, compiler review, full CTest, provenance preparation, signing-handoff verification, and status-log preparation. `assemble_release_evidence.cmake` then verifies the complete evidence manifest and copies only the prepared tree. The final collector launches no configure, build, CTest, package, policy, or status-test subprocess.
+
+`collect_release_evidence.cmake` is the internal status-preparation script. Direct use requires those outputs already exist and should write a prepared directory:
 
 ```sh
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-32 \
-  -DANO_CRYPTO_RUN_CTEST=ON \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p1-32 \
+  -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=build/release-provenance-evidence \
+  -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=build/release-signing-handoff \
+  -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=build/release-signing-handoff-check.txt \
+  -DANO_CRYPTO_BUILD_CONFIG=Release \
+  -DANO_CRYPTO_MULTI_CONFIG_BUILD=OFF \
+  -DANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE=ON \
+  -DANO_CRYPTO_RUN_CTEST=OFF \
   -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
   -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
   -DANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON \
@@ -27,7 +35,17 @@ cmake \
   -P tools/collect_release_evidence.cmake
 ```
 
-P1-32 output retains the prior build/test/package records and adds `release-provenance/`: a bound source archive, source-file SHA-256 manifest, SPDX 2.3 JSON source inventory, public-header and ABI symbol inputs, unsigned signing/TODO authorization records, and `RELEASE_ARTIFACTS.sha256`. The source inventory does not perform dependency discovery, vulnerability analysis, or license conclusions, and no signature or external-release authorization is implied.
+The final assembly step consumes only that hash-bound tree:
+
+```sh
+cmake \
+  -DANO_CRYPTO_BUILD_DIR=build \
+  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p1-32 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-32 \
+  -P tools/assemble_release_evidence.cmake
+```
+
+P1-32 output retains prior build/test/package records and copies verified `release-provenance/` plus key-free `release-signing-handoff/`. The source inventory does not perform dependency discovery, vulnerability analysis, or license conclusions. Current state remains `UNSIGNED`, handoff `BLOCKED`, external authorization `NO`. `SENSITIVE_ARTIFACT_SCAN.txt` checks evidence, installed SDK, and PoC package for prohibited credential/signature artifacts.
 
 ## `check_public_surface.cmake`
 
@@ -168,17 +186,25 @@ cmake --build build --target ano_crypto_tagged_release_compatibility_smoke
 
 Expected tag metadata is not release provenance until a Git-backed check proves that the tag, supplied commit, and checked-out `HEAD` identify one commit.
 
-## P1-32 release provenance and source-SBOM tools
+## P1-32 release provenance and offline-signing handoff tools
 
 - `create_source_sbom_spdx.cmake` writes a deterministic SPDX 2.3 JSON source inventory for the exact source-archive file list.
-- `create_release_provenance_bundle.cmake` binds the source archive, source hashes, source SBOM, public-header manifest, ABI-0 symbol list, hosted disposition, unsigned signing status, and authorization TODO record.
+- `create_release_provenance_bundle.cmake` binds the source archive, source hashes, source SBOM, public-header manifest, ABI-0 symbol list, hosted disposition, unsigned signing status, fixed signing request, and blocked authorization record.
 - `check_release_provenance_bundle.cmake` verifies exact hash coverage, safe paths, release identity, source-tree hashes, source-SBOM bindings, public counts, hosted disposition, and the explicit unsigned/external-release-NO boundary.
-- `check_release_provenance_policy.cmake` checks repository/CI/evidence/PoC integration and rejects signature/key/token-like files.
-- `release_provenance_tests.cmake` covers tampering, unlisted files, false signed/approved claims, unsafe paths, wrong tag metadata, and hosted-disposition completeness.
+- `prepare_release_provenance_evidence.cmake` derives the tracked/unignored source list, creates and verifies provenance, and writes prepared artifacts consumed by final collection.
+- `create_release_signing_handoff.cmake` creates a key-free, manifest-bound offline-signing request/status/authorization handoff from verified provenance and source-owned production-policy records.
+- `check_release_signing_handoff.cmake` re-derives readiness, verifies hash/policy bindings, enforces role identity separation, and rejects private signing material.
+- `check_release_provenance_policy.cmake` checks repository/CI/evidence/PoC/signing integration and rejects signature/key/token-like source files.
+- `release_provenance_tests.cmake` covers provenance tampering, unlisted files, false signed/approved claims, unsafe paths, wrong tag metadata, and hosted-disposition completeness.
+- `release_signing_handoff_tests.cmake` covers key-free generation, tamper rejection, unprovisioned readiness, and distinct Security Reviewer/Product Release Owner identity enforcement.
+- `release_signing_fixture_tests.cmake` provides opt-in Debug-only ephemeral OpenSSL Ed25519/raw-64/SPKI-fingerprint/RFC-3161 positive and negative fixtures, then removes generated material.
+- `sensitive_release_artifact_tests.cmake` injects prohibited suffixes, generic private-key armor, token assignments, and timestamp fixtures into synthetic source-archive/install/PoC/evidence roots and requires the shared scanner to fail closed.
 
 ```sh
 cmake --build build --target ano_crypto_release_provenance_policy_check
-ctest --test-dir build -R ano_crypto_release_provenance_tests --output-on-failure
+ctest --test-dir build -R "ano_crypto_release_(provenance|signing_handoff)_tests" --output-on-failure
 ```
 
-P1-32 does not select a signing tool or store a credential. Actual hosted review, signature generation/verification, signer approval, timestamping, legal/product authorization, and external distribution remain TODO.
+Offline profile: sign `RELEASE_ARTIFACTS.sha256` with Ed25519; store raw 64-byte `RELEASE_ARTIFACTS.sha256.ed25519`; identify approved public key by SHA-256 of DER SubjectPublicKeyInfo; obtain RFC 3161 timestamp over the signature file. GitHub attestation is optional secondary evidence only.
+
+Production signer/TSA records and required role identities are `UNPROVISIONED`. Actual hosted review, tag authorization, production signature/timestamp generation and verification, Security Reviewer/Product Release Owner approval, legal/product authorization, and external distribution remain incomplete. No key, token, signature, timestamp request, or timestamp response belongs in source, evidence, installed SDK, or PoC package.

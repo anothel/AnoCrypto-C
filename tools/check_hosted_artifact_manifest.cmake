@@ -18,6 +18,7 @@ get_filename_component(ANO_CRYPTO_HOSTED_ARTIFACT_ROOT
 get_filename_component(ANO_CRYPTO_HOSTED_ARTIFACT_MANIFEST
     "${ANO_CRYPTO_HOSTED_ARTIFACT_MANIFEST}" ABSOLUTE)
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/sensitive_signing_material_helpers.cmake")
 file(RELATIVE_PATH _manifest_relative
     "${ANO_CRYPTO_HOSTED_ARTIFACT_ROOT}" "${ANO_CRYPTO_HOSTED_ARTIFACT_MANIFEST}")
 if(_manifest_relative MATCHES "(^|/)\\.\\.(/|$)" OR IS_ABSOLUTE "${_manifest_relative}")
@@ -46,11 +47,13 @@ endfunction()
 function(_ano_scan_sensitive_markers _path _relative)
     file(READ "${_path}" _content)
     string(TOLOWER "${_content}" _content_lower)
+    ano_crypto_detect_sensitive_signing_material_text(
+        "${_content}" ON _sensitive_reason)
+    if(_sensitive_reason)
+        message(FATAL_ERROR
+            "Hosted artifact contains forbidden signing material: ${_relative}")
+    endif()
     foreach(_forbidden IN ITEMS
-            "-----begin private key-----"
-            "-----begin rsa private key-----"
-            "-----begin ec private key-----"
-            "-----begin openssh private key-----"
             "ano_crypto_secret_value="
             "entropy_material="
             "seed_material="

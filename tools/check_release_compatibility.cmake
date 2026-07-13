@@ -387,17 +387,20 @@ if(ANO_CRYPTO_REQUIRE_ACTUAL_RELEASE_TAG)
     execute_process(
         COMMAND "${_git_executable}" -C "${ANO_CRYPTO_SOURCE_DIR}" rev-parse HEAD
         RESULT_VARIABLE _head_result OUTPUT_VARIABLE _head_commit
-        ERROR_VARIABLE _head_error OUTPUT_STRIP_TRAILING_WHITESPACE)
+        ERROR_VARIABLE _head_error OUTPUT_STRIP_TRAILING_WHITESPACE
+        TIMEOUT 60)
     execute_process(
         COMMAND "${_git_executable}" -C "${ANO_CRYPTO_SOURCE_DIR}"
             rev-parse "refs/tags/${ANO_CRYPTO_ACTUAL_RELEASE_TAG}^{commit}"
         RESULT_VARIABLE _tag_result OUTPUT_VARIABLE _tag_commit
-        ERROR_VARIABLE _tag_error OUTPUT_STRIP_TRAILING_WHITESPACE)
+        ERROR_VARIABLE _tag_error OUTPUT_STRIP_TRAILING_WHITESPACE
+        TIMEOUT 60)
     execute_process(
         COMMAND "${_git_executable}" -C "${ANO_CRYPTO_SOURCE_DIR}"
             rev-parse "${ANO_CRYPTO_ACTUAL_RELEASE_COMMIT}^{commit}"
         RESULT_VARIABLE _actual_commit_result OUTPUT_VARIABLE _actual_commit
-        ERROR_VARIABLE _actual_commit_error OUTPUT_STRIP_TRAILING_WHITESPACE)
+        ERROR_VARIABLE _actual_commit_error OUTPUT_STRIP_TRAILING_WHITESPACE
+        TIMEOUT 60)
     if(NOT _head_result EQUAL 0 OR NOT _tag_result EQUAL 0 OR
        NOT _actual_commit_result EQUAL 0)
         message(FATAL_ERROR

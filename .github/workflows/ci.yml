@@ -638,6 +638,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_STRICT_WARNINGS=ON
           -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=ON
           -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=ON
+          -DANO_CRYPTO_ENABLE_SIGNING_TEST_FIXTURES=ON
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
@@ -651,6 +652,21 @@ jobs:
 
       - name: Run entropy and random hardening tests
         run: ctest --test-dir build-random-hardening -L entropy-failure-injection --output-on-failure
+
+      - name: Run ephemeral release-signing fixture regression
+        run: ctest --test-dir build-random-hardening -R "^ano_crypto_release_signing_fixture_tests$" --output-on-failure
+
+      - name: Reject test hooks and signing fixtures outside tests-enabled Debug
+        shell: bash
+        run: |
+          for config in Release RelWithDebInfo MinSizeRel; do
+            if cmake -S . -B "build-signing-reject-${config}" -DANO_CRYPTO_BUILD_TESTS=ON -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=ON -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=ON -DANO_CRYPTO_ENABLE_SIGNING_TEST_FIXTURES=ON -DCMAKE_BUILD_TYPE="${config}"; then
+              exit 1
+            fi
+          done
+          if cmake -S . -B build-signing-reject-tests-off -DANO_CRYPTO_BUILD_TESTS=OFF -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=ON -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=ON -DANO_CRYPTO_ENABLE_SIGNING_TEST_FIXTURES=ON -DCMAKE_BUILD_TYPE=Debug; then
+            exit 1
+          fi
 
       - name: Entropy and health-test policy check
         run: cmake --build build-random-hardening --target ano_crypto_entropy_health_policy_check
@@ -691,6 +707,21 @@ jobs:
 
       - name: Run provider-disabled tests
         run: ctest --test-dir build-provider-disabled --output-on-failure
+
+      - name: Configure optional OpenSSL unavailable lane
+        run: >
+          cmake -S . -B build-openssl-unavailable
+          -DANO_CRYPTO_BUILD_TESTS=ON
+          -DANO_CRYPTO_BUILD_EXAMPLES=OFF
+          -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
+          -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=OFF
+          -DCMAKE_DISABLE_FIND_PACKAGE_OpenSSL=ON
+          -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build and test optional OpenSSL unavailable lane
+        run: |
+          cmake --build build-openssl-unavailable --parallel
+          ctest --test-dir build-openssl-unavailable --output-on-failure
 
       - name: Random-service policy check
         run: cmake --build build-provider-disabled --target ano_crypto_random_service_policy_check
@@ -854,9 +885,16 @@ jobs:
           if-no-files-found: error
 
   evidence-draft:
-    name: Linux evidence draft
+    name: Linux ${{ matrix.cc }} Release evidence draft
     runs-on: ubuntu-latest
     needs: [build-test-smoke, differential-validation, core-portability-32bit, aes-cmac-compiler-output-review, aes-big-endian-s390x, sanitizer, clean-release-symbol-baseline, tagged-release-compatibility]
+    strategy:
+      fail-fast: false
+      matrix:
+        cc: [gcc, clang]
+    env:
+      CC: ${{ matrix.cc }}
+      HOSTED_PROVENANCE_LANE: ${{ matrix.cc == 'gcc' && 'release-provenance' || 'release-provenance-clang' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -893,11 +931,11 @@ jobs:
           cmake
           -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
           -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-release-provenance-bundle
-          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=build/evidence/p1-32/RELEASE_PROVENANCE_CHECK.txt;build/evidence/p1-32/RELEASE_PROVENANCE_POLICY_CHECK.txt;build/evidence/p1-32/release-provenance/RELEASE_PROVENANCE.txt;build/evidence/p1-32/release-provenance/SOURCE_SBOM.spdx.json;build/evidence/p1-32/release-provenance/SOURCE_SBOM_SUMMARY.txt;build/evidence/p1-32/release-provenance/RELEASE_ARTIFACTS.sha256;build/evidence/p1-32/release-provenance/SBOM_STATUS.txt;build/evidence/p1-32/release-provenance/SIGNING_STATUS.txt;build/evidence/p1-32/release-provenance/SIGNING_REQUEST.txt;build/evidence/p1-32/release-provenance/RELEASE_AUTHORIZATION.md;build/evidence/p1-32/release-provenance/HOSTED_ARTIFACT_DISPOSITION.txt"
-          -DANO_CRYPTO_HOSTED_LANE=release-provenance
+          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=build/evidence/p1-32/RELEASE_PROVENANCE_CHECK.txt;build/evidence/p1-32/RELEASE_PROVENANCE_POLICY_CHECK.txt;build/evidence/p1-32/RELEASE_SIGNING_HANDOFF_CHECK.txt;build/evidence/p1-32/release-signing-handoff/SIGNING_HANDOFF_STATUS.txt;build/evidence/p1-32/release-signing-handoff/SIGNING_REQUEST.txt;build/evidence/p1-32/release-signing-handoff/SIGNING_POLICY.txt;build/evidence/p1-32/release-provenance/RELEASE_PROVENANCE.txt;build/evidence/p1-32/release-provenance/SOURCE_SBOM.spdx.json;build/evidence/p1-32/release-provenance/SOURCE_SBOM_SUMMARY.txt;build/evidence/p1-32/release-provenance/RELEASE_ARTIFACTS.sha256;build/evidence/p1-32/release-provenance/SBOM_STATUS.txt;build/evidence/p1-32/release-provenance/SIGNING_STATUS.txt;build/evidence/p1-32/release-provenance/RELEASE_AUTHORIZATION.md;build/evidence/p1-32/release-provenance/HOSTED_ARTIFACT_DISPOSITION.txt"
+          -DANO_CRYPTO_HOSTED_LANE=${{ env.HOSTED_PROVENANCE_LANE }}
           -DANO_CRYPTO_HOSTED_PLATFORM=Linux
           -DANO_CRYPTO_HOSTED_ARCH=x86_64
-          -DANO_CRYPTO_HOSTED_COMPILER=cmake-generated
+          -DANO_CRYPTO_HOSTED_COMPILER=${{ matrix.cc }}
           -DANO_CRYPTO_HOSTED_COMMIT=${{ github.sha }}
           -P tools/create_hosted_artifact_manifest.cmake
 
@@ -906,21 +944,21 @@ jobs:
           cmake
           -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
           -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-release-provenance-bundle
-          -DANO_CRYPTO_EXPECTED_HOSTED_LANE=release-provenance
+          -DANO_CRYPTO_EXPECTED_HOSTED_LANE=${{ env.HOSTED_PROVENANCE_LANE }}
           -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=Linux
           -P tools/check_hosted_artifact_manifest.cmake
 
       - name: Upload release provenance hosted bundle
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p1-32-signing-handoff-Linux
+          name: anocrypto-c-p1-32-signing-handoff-Linux-${{ matrix.cc }}
           path: hosted-release-provenance-bundle
           if-no-files-found: error
 
       - name: Upload evidence draft
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p1-32-evidence-draft
+          name: anocrypto-c-p1-32-evidence-draft-${{ matrix.cc }}
           path: build/evidence/p1-32
           if-no-files-found: error
 

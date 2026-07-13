@@ -24,7 +24,8 @@ execute_process(
     WORKING_DIRECTORY "${ANO_CRYPTO_TEST_WORK_DIR}/archive"
     RESULT_VARIABLE _archive_result
     OUTPUT_VARIABLE _archive_stdout
-    ERROR_VARIABLE _archive_stderr)
+    ERROR_VARIABLE _archive_stderr
+    TIMEOUT 60)
 if(NOT _archive_result EQUAL 0)
     message(FATAL_ERROR "Fixture archive creation failed: ${_archive_stdout}${_archive_stderr}")
 endif()
@@ -37,7 +38,8 @@ function(_run_expect _expected_success _description)
         COMMAND ${ARGN}
         RESULT_VARIABLE _result
         OUTPUT_VARIABLE _stdout
-        ERROR_VARIABLE _stderr)
+        ERROR_VARIABLE _stderr
+        TIMEOUT 120)
     if(_expected_success AND NOT _result EQUAL 0)
         message(FATAL_ERROR "${_description} failed unexpectedly:\n${_stdout}${_stderr}")
     elseif(NOT _expected_success AND _result EQUAL 0)
@@ -183,7 +185,8 @@ set(_content_mismatch_archive
 execute_process(
     COMMAND "${CMAKE_COMMAND}" -E tar cfz "${_content_mismatch_archive}" anocrypto-c
     WORKING_DIRECTORY "${_content_mismatch_root}"
-    RESULT_VARIABLE _content_mismatch_result)
+    RESULT_VARIABLE _content_mismatch_result
+    TIMEOUT 60)
 if(NOT _content_mismatch_result EQUAL 0)
     message(FATAL_ERROR "Content-mismatch archive fixture creation failed")
 endif()
@@ -205,7 +208,8 @@ set(_member_mismatch_archive
 execute_process(
     COMMAND "${CMAKE_COMMAND}" -E tar cfz "${_member_mismatch_archive}" anocrypto-c
     WORKING_DIRECTORY "${_member_mismatch_root}"
-    RESULT_VARIABLE _member_mismatch_result)
+    RESULT_VARIABLE _member_mismatch_result
+    TIMEOUT 60)
 if(NOT _member_mismatch_result EQUAL 0)
     message(FATAL_ERROR "Member-mismatch archive fixture creation failed")
 endif()

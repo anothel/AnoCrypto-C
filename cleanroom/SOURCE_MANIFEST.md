@@ -582,3 +582,26 @@ P1-30 hosted artifacts retain only status, counts, versions, target/compiler met
 - Public documentation is used to distinguish unsigned hash metadata from authenticated provenance; P1-31 does not claim an attestation level.
 - The rooted `.gitignore` is fresh project-owned build hygiene: it excludes generated build/hosted-review directories only, keeps ordinary untracked source visible, and avoids treating CI build output as a source change.
 - Actual hosted artifact review, signer authorization, cryptographic verification, timestamping, and external-release approval remain TODO.
+
+## P1-32 Offline Release-Signing Handoff Inputs
+
+| ID | Input | Classification | Use | Boundary |
+|---|---|---|---|---|
+| SRC-4001 | RFC 8032 public Ed25519 specification | Public standard | Select Ed25519 and its fixed 64-byte signature representation | Specification concepts only; no implementation or private test material copied. |
+| SRC-4002 | RFC 3161 public time-stamp protocol specification | Public standard | Define a timestamp response over the detached signature before external release | Protocol concepts only; no production TSA credential, response, or trust anchor included. |
+| SRC-4003 | OpenSSL 3 public `pkey`, `pkeyutl`, and `ts` command documentation | Public documentation | Public-key DER conversion, Ed25519 verification, and RFC 3161 fixture/verification command behavior | Public CLI concepts only; no OpenSSL source, sample key, or vendor workflow copied. OpenSSL is not linked into the product or PoC runtime. |
+| SRC-4004 | Public X.509 SubjectPublicKeyInfo/DER concepts, including RFC 5280 and RFC 8410 | Public standards | Define the approved public-key identity as SHA-256 over SPKI DER | Format concepts only; no certificate, key, or external fingerprint imported. |
+| SRC-3902-R1 | Public GitHub artifact-attestation documentation already reviewed in P1-31 | Public documentation | Classify hosted attestation as optional secondary evidence | GitHub attestation is not the signing trust root or a substitute for offline signature/timestamp verification. |
+| DER-4001 | Fresh P1-32 release-signing policy and unprovisioned signer/timestamp records | User-owned project material | Record exact subject, signature/fingerprint/timestamp formats, role separation, custody boundary, and fail-closed production state | Records contain policy identifiers and `TODO`/`UNPROVISIONED` values only. |
+| DER-4002 | Fresh CMake handoff creator, handoff checker, and detached-signature verifier | User-owned project tooling | Bind and verify provenance, signer/TSA policy, authorization roles, signature, and timestamp inputs | Tooling creates no production key, token, signature, or timestamp response. |
+| DER-4003 | Fresh key-free regressions and explicit opt-in Debug-only ephemeral OpenSSL fixtures | User-owned project tests | Exercise tamper, identity separation, Ed25519 signature, and RFC 3161 acceptance/rejection paths | Fixture keys, certificates, signatures, and timestamp files are generated only in the test build tree and removed after testing. |
+| DER-4004 | Fresh P1-32 CI, evidence, PoC, roadmap, and clean-room updates | User-owned project material | Keep handoff readiness, artifact exclusions, and remaining release operations explicit | No hosted run, tag, production signature, human approval, or external authorization is claimed. |
+| DER-4005 | Fresh prepared-status evidence assembler and sensitive-signing-material scanner | User-owned project tooling | Keep the final aggregate collector status-only, hash-bound, fail-closed, and free of key/token fixtures | The assembler launches no child build/test process; source/archive/install/PoC/evidence scans retain no sensitive values. |
+
+## P1-32 Clean-room Notes
+
+- The P1-32 policy and CMake tools were written for AnoCrypto-C from public format and command-interface concepts; no third-party signing implementation or proprietary release procedure was copied.
+- The approved subject is exactly `RELEASE_ARTIFACTS.sha256`; the detached signature format is Ed25519 raw 64-byte, and the public-key identity is SHA-256 over SPKI DER.
+- RFC 3161 timestamp verification covers `RELEASE_ARTIFACTS.sha256.ed25519`; production TSA policy and trust-anchor values remain unprovisioned.
+- Security Reviewer and Product Release Owner identities are separate project authorization roles. GitHub artifact attestation remains optional secondary evidence only.
+- Production keys, tokens, signatures, timestamp responses, certificates, trust anchors, approver identities, and credentials are not included. The repository remains unsigned and externally unauthorized.

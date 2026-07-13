@@ -54,10 +54,28 @@ set(_blocked_terms
     "${_claim_e}"
     "${_claim_f}")
 
-file(GLOB_RECURSE _repo_files
-    LIST_DIRECTORIES false
-    RELATIVE "${ANO_CRYPTO_SOURCE_DIR}"
-    "${ANO_CRYPTO_SOURCE_DIR}/*")
+set(_repo_files "")
+find_program(_git_executable git)
+if(_git_executable)
+    execute_process(
+        COMMAND "${_git_executable}" -C "${ANO_CRYPTO_SOURCE_DIR}"
+            ls-files --cached --others --exclude-standard
+        RESULT_VARIABLE _git_files_result
+        OUTPUT_VARIABLE _git_files_output
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        TIMEOUT 60)
+    if("${_git_files_result}" STREQUAL "0")
+        string(REPLACE "\r\n" "\n" _git_files_output "${_git_files_output}")
+        string(REPLACE "\n" ";" _repo_files "${_git_files_output}")
+    endif()
+endif()
+if(NOT _repo_files)
+    file(GLOB_RECURSE _repo_files
+        LIST_DIRECTORIES false
+        RELATIVE "${ANO_CRYPTO_SOURCE_DIR}"
+        "${ANO_CRYPTO_SOURCE_DIR}/*")
+endif()
 list(SORT _repo_files)
 
 foreach(_rel IN LISTS _repo_files)
@@ -140,7 +158,8 @@ if(EXISTS "${_shared_lib}")
             COMMAND "${_nm_exe}" -D --defined-only "${_shared_lib}"
             RESULT_VARIABLE _nm_result
             OUTPUT_VARIABLE _nm_stdout
-            ERROR_VARIABLE _nm_stderr)
+            ERROR_VARIABLE _nm_stderr
+            TIMEOUT 60)
         if(_nm_result EQUAL 0)
             string(REPLACE "\n" ";" _nm_lines "${_nm_stdout}")
             foreach(_line IN LISTS _nm_lines)
@@ -155,10 +174,11 @@ if(EXISTS "${_shared_lib}")
                 endif()
             endforeach()
         else()
-            list(APPEND _warnings "exported symbol scan skipped because nm could not read ${_shared_lib}")
+            message(FATAL_ERROR
+                "Exported-symbol scan failed for ${_shared_lib}: ${_nm_stderr}")
         endif()
     else()
-        list(APPEND _warnings "exported symbol scan skipped because nm was not found")
+        message(FATAL_ERROR "Exported-symbol scan requires nm when ${_shared_lib} exists")
     endif()
 endif()
 

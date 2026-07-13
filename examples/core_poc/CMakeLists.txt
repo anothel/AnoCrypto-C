@@ -15,3 +15,11 @@ endif()
 
 add_executable(anocrypto_c_core_poc main.c)
 target_link_libraries(anocrypto_c_core_poc PRIVATE AnoCryptoC::AnoCryptoC)
+
+if(WIN32 AND TARGET anocrypto_c)
+    add_custom_command(TARGET anocrypto_c_core_poc POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:anocrypto_c>
+            $<TARGET_FILE_DIR:anocrypto_c_core_poc>
+        VERBATIM)
+endif()

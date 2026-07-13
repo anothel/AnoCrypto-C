@@ -35,6 +35,54 @@ get_filename_component(ANO_CRYPTO_APPROVED_SIGNER_RECORD
 get_filename_component(ANO_CRYPTO_APPROVED_TIMESTAMP_POLICY
     "${ANO_CRYPTO_APPROVED_TIMESTAMP_POLICY}" ABSOLUTE)
 
+foreach(_role IN ITEMS SECURITY_REVIEWER PRODUCT_RELEASE_OWNER)
+    if(NOT DEFINED ANO_CRYPTO_${_role}_IDENTITY OR
+       ANO_CRYPTO_${_role}_IDENTITY STREQUAL "")
+        set(ANO_CRYPTO_${_role}_IDENTITY "UNPROVISIONED")
+    endif()
+    if(NOT ANO_CRYPTO_${_role}_IDENTITY MATCHES "^[A-Za-z0-9_.@:+-]+$")
+        message(FATAL_ERROR
+            "ANO_CRYPTO_${_role}_IDENTITY must be a stable identifier without whitespace or separators")
+    endif()
+endforeach()
+string(TOLOWER "${ANO_CRYPTO_SECURITY_REVIEWER_IDENTITY}" _security_reviewer_identity_normalized)
+string(TOLOWER "${ANO_CRYPTO_PRODUCT_RELEASE_OWNER_IDENTITY}" _product_release_owner_identity_normalized)
+foreach(_identity_normalized IN ITEMS
+        "${_security_reviewer_identity_normalized}"
+        "${_product_release_owner_identity_normalized}")
+    if(_identity_normalized MATCHES "^(todo|tbd|unknown|placeholder|none)$")
+        message(FATAL_ERROR "Approval identities must not use placeholder values")
+    endif()
+endforeach()
+if(_security_reviewer_identity_normalized STREQUAL "unprovisioned")
+    set(ANO_CRYPTO_SECURITY_REVIEWER_IDENTITY "UNPROVISIONED")
+endif()
+if(_product_release_owner_identity_normalized STREQUAL "unprovisioned")
+    set(ANO_CRYPTO_PRODUCT_RELEASE_OWNER_IDENTITY "UNPROVISIONED")
+endif()
+if(NOT ANO_CRYPTO_SECURITY_REVIEWER_IDENTITY STREQUAL "UNPROVISIONED" AND
+   NOT ANO_CRYPTO_PRODUCT_RELEASE_OWNER_IDENTITY STREQUAL "UNPROVISIONED" AND
+   _security_reviewer_identity_normalized STREQUAL _product_release_owner_identity_normalized)
+    message(FATAL_ERROR
+        "Security Reviewer and Product Release Owner identities must be different")
+endif()
+if(_security_reviewer_identity_normalized STREQUAL "unprovisioned")
+    set(_security_reviewer_identity_status "UNPROVISIONED")
+else()
+    set(_security_reviewer_identity_status "RECORDED")
+endif()
+if(_product_release_owner_identity_normalized STREQUAL "unprovisioned")
+    set(_product_release_owner_identity_status "UNPROVISIONED")
+else()
+    set(_product_release_owner_identity_status "RECORDED")
+endif()
+if(_security_reviewer_identity_status STREQUAL "RECORDED" AND
+   _product_release_owner_identity_status STREQUAL "RECORDED")
+    set(_role_separation_status "PASS")
+else()
+    set(_role_separation_status "UNPROVISIONED")
+endif()
+
 foreach(_input IN ITEMS
         "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}/RELEASE_ARTIFACTS.sha256"
         "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}/RELEASE_PROVENANCE.txt"
@@ -56,7 +104,8 @@ execute_process(
         -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_release_provenance_bundle.cmake"
     RESULT_VARIABLE _provenance_result
     OUTPUT_VARIABLE _provenance_stdout
-    ERROR_VARIABLE _provenance_stderr)
+    ERROR_VARIABLE _provenance_stderr
+    TIMEOUT 60)
 if(NOT _provenance_result EQUAL 0)
     message(FATAL_ERROR
         "Signing handoff requires a valid provenance bundle:\n${_provenance_stdout}${_provenance_stderr}")
@@ -116,6 +165,12 @@ if(NOT _prov_release_version STREQUAL ANO_CRYPTO_RELEASE_VERSION OR
 endif()
 
 set(_block_reasons "")
+if(_security_reviewer_identity_status STREQUAL "UNPROVISIONED")
+    _ano_append_block_reason("SECURITY_REVIEWER_IDENTITY_UNPROVISIONED")
+endif()
+if(_product_release_owner_identity_status STREQUAL "UNPROVISIONED")
+    _ano_append_block_reason("PRODUCT_RELEASE_OWNER_IDENTITY_UNPROVISIONED")
+endif()
 if(NOT _prov_worktree_state STREQUAL "CLEAN")
     _ano_append_block_reason("WORKTREE_NOT_CLEAN")
 endif()
@@ -234,6 +289,11 @@ file(WRITE "${ANO_CRYPTO_SIGNING_HANDOFF_OUTPUT_DIR}/SIGNING_REQUEST.txt"
     "signature_filename=${ANO_CRYPTO_RELEASE_SIGNING_SIGNATURE_FILENAME}\n"
     "signer_policy_id=${ANO_CRYPTO_RELEASE_SIGNING_SIGNER_POLICY_ID}\n"
     "timestamp_requirement=${ANO_CRYPTO_RELEASE_SIGNING_TIMESTAMP_REQUIREMENT}\n"
+    "security_reviewer_identity=${ANO_CRYPTO_SECURITY_REVIEWER_IDENTITY}\n"
+    "security_reviewer_identity_status=${_security_reviewer_identity_status}\n"
+    "product_release_owner_identity=${ANO_CRYPTO_PRODUCT_RELEASE_OWNER_IDENTITY}\n"
+    "product_release_owner_identity_status=${_product_release_owner_identity_status}\n"
+    "role_separation_status=${_role_separation_status}\n"
     "readiness=${_readiness}\n"
     "block_reasons=${_block_reasons}\n"
     "external_release_authorized=NO\n")
@@ -247,6 +307,11 @@ file(WRITE "${ANO_CRYPTO_SIGNING_HANDOFF_OUTPUT_DIR}/SIGNING_HANDOFF_STATUS.txt"
     "Detached signature present: no\n"
     "Cryptographic signature verification performed: no\n"
     "RFC3161 timestamp response present: no\n"
+    "Security Reviewer identity: ${ANO_CRYPTO_SECURITY_REVIEWER_IDENTITY}\n"
+    "Security Reviewer identity status: ${_security_reviewer_identity_status}\n"
+    "Product Release Owner identity: ${ANO_CRYPTO_PRODUCT_RELEASE_OWNER_IDENTITY}\n"
+    "Product Release Owner identity status: ${_product_release_owner_identity_status}\n"
+    "Role separation status: ${_role_separation_status}\n"
     "External release authorized: NO\n"
     "Private signing key accepted by this generator: no\n"
     "Result: PASS\n")
@@ -261,12 +326,17 @@ file(WRITE "${ANO_CRYPTO_SIGNING_HANDOFF_OUTPUT_DIR}/RELEASE_AUTHORIZATION.md"
     "- [ ] Record Security Reviewer approval.\n"
     "- [ ] Record Product Release Owner approval.\n"
     "- [ ] Reconfirm hosted artifacts, tag, commit, source SBOM scope, and known limitations.\n\n"
+    "Security Reviewer identity: ${ANO_CRYPTO_SECURITY_REVIEWER_IDENTITY}\n"
+    "Security Reviewer identity status: ${_security_reviewer_identity_status}\n"
+    "Product Release Owner identity: ${ANO_CRYPTO_PRODUCT_RELEASE_OWNER_IDENTITY}\n"
+    "Product Release Owner identity status: ${_product_release_owner_identity_status}\n"
+    "Role separation status: ${_role_separation_status}\n\n"
     "External release authorized: NO\n"
     "Signing credentials included: no\n")
 
 set(_handoff_manifest
     "${ANO_CRYPTO_SIGNING_HANDOFF_OUTPUT_DIR}/SIGNING_HANDOFF_FILES.sha256")
-file(GLOB _handoff_files LIST_DIRECTORIES false RELATIVE
+file(GLOB _handoff_files RELATIVE
     "${ANO_CRYPTO_SIGNING_HANDOFF_OUTPUT_DIR}"
     "${ANO_CRYPTO_SIGNING_HANDOFF_OUTPUT_DIR}/*")
 list(SORT _handoff_files)
@@ -275,8 +345,9 @@ foreach(_relative IN LISTS _handoff_files)
     if(_relative STREQUAL "SIGNING_HANDOFF_FILES.sha256")
         continue()
     endif()
-    if(IS_SYMLINK "${ANO_CRYPTO_SIGNING_HANDOFF_OUTPUT_DIR}/${_relative}")
-        message(FATAL_ERROR "Signing handoff rejects symlinks: ${_relative}")
+    if(IS_DIRECTORY "${ANO_CRYPTO_SIGNING_HANDOFF_OUTPUT_DIR}/${_relative}" OR
+       IS_SYMLINK "${ANO_CRYPTO_SIGNING_HANDOFF_OUTPUT_DIR}/${_relative}")
+        message(FATAL_ERROR "Signing handoff rejects directories and symlinks: ${_relative}")
     endif()
     file(SHA256 "${ANO_CRYPTO_SIGNING_HANDOFF_OUTPUT_DIR}/${_relative}" _hash)
     file(APPEND "${_handoff_manifest}" "${_hash}  ${_relative}\n")
@@ -300,7 +371,8 @@ if(ANO_CRYPTO_VERIFY_SIGNING_HANDOFF)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_release_signing_handoff.cmake"
         RESULT_VARIABLE _check_result
         OUTPUT_VARIABLE _check_stdout
-        ERROR_VARIABLE _check_stderr)
+        ERROR_VARIABLE _check_stderr
+        TIMEOUT 60)
     if(NOT _check_result EQUAL 0)
         message(FATAL_ERROR
             "Generated signing handoff failed verification:\n${_check_stdout}${_check_stderr}")

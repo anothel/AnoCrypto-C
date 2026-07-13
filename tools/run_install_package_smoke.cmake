@@ -16,10 +16,16 @@ endif()
 
 get_filename_component(ANO_CRYPTO_SOURCE_DIR "${ANO_CRYPTO_SOURCE_DIR}" ABSOLUTE)
 if(NOT CMAKE_CTEST_COMMAND)
-    find_program(CMAKE_CTEST_COMMAND NAMES ctest REQUIRED)
+    find_program(CMAKE_CTEST_COMMAND NAMES ctest)
+    if(NOT CMAKE_CTEST_COMMAND)
+        message(FATAL_ERROR "CTest executable is unavailable")
+    endif()
 endif()
 get_filename_component(ANO_CRYPTO_BUILD_DIR "${ANO_CRYPTO_BUILD_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR "${ANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR}" ABSOLUTE)
+if(NOT DEFINED ANO_CRYPTO_BUILD_CONFIG OR ANO_CRYPTO_BUILD_CONFIG STREQUAL "")
+    set(ANO_CRYPTO_BUILD_CONFIG "Release")
+endif()
 
 set(_install_prefix "${ANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR}/install-prefix")
 set(_consumer_source "${ANO_CRYPTO_SOURCE_DIR}/tests/install_smoke")
@@ -45,7 +51,8 @@ function(_ano_crypto_run_install_smoke_step _log_name _description)
         COMMAND ${ARGN}
         RESULT_VARIABLE _result
         OUTPUT_VARIABLE _stdout
-        ERROR_VARIABLE _stderr)
+        ERROR_VARIABLE _stderr
+        TIMEOUT 600)
     file(WRITE "${ANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR}/${_log_name}"
         "# ${_description}\n# Result: ${_result}\n\n${_stdout}${_stderr}")
     if(NOT _result EQUAL 0)
@@ -56,29 +63,29 @@ endfunction()
 _ano_crypto_run_install_smoke_step(
     INSTALL_SMOKE_INSTALL.log
     "Install AnoCrypto-C package prefix"
-    "${CMAKE_COMMAND}" --install "${ANO_CRYPTO_BUILD_DIR}" --prefix "${_install_prefix}")
+    "${CMAKE_COMMAND}" --install "${ANO_CRYPTO_BUILD_DIR}"
+        --config "${ANO_CRYPTO_BUILD_CONFIG}" --prefix "${_install_prefix}")
 
 _ano_crypto_run_install_smoke_step(
     INSTALL_SMOKE_CONFIGURE.log
     "Configure installed-package smoke consumer"
     "${CMAKE_COMMAND}" -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
-    "${CMAKE_COMMAND}" -S "${_consumer_source}" -B "${_consumer_build}" -DCMAKE_PREFIX_PATH=${_install_prefix})
+    "${CMAKE_COMMAND}" -S "${_consumer_source}" -B "${_consumer_build}"
+        -DCMAKE_PREFIX_PATH=${_install_prefix}
+        -DCMAKE_BUILD_TYPE=${ANO_CRYPTO_BUILD_CONFIG})
 
 _ano_crypto_run_install_smoke_step(
     INSTALL_SMOKE_BUILD.log
     "Build installed-package smoke consumer"
     "${CMAKE_COMMAND}" -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
-    "${CMAKE_COMMAND}" --build "${_consumer_build}" --parallel)
+    "${CMAKE_COMMAND}" --build "${_consumer_build}"
+        --config "${ANO_CRYPTO_BUILD_CONFIG}" --parallel)
 
 set(_smoke_candidates
     "${_consumer_build}/anocrypto_c_install_smoke"
     "${_consumer_build}/anocrypto_c_install_smoke.exe"
-    "${_consumer_build}/Debug/anocrypto_c_install_smoke"
-    "${_consumer_build}/Debug/anocrypto_c_install_smoke.exe"
-    "${_consumer_build}/Release/anocrypto_c_install_smoke"
-    "${_consumer_build}/Release/anocrypto_c_install_smoke.exe"
-    "${_consumer_build}/RelWithDebInfo/anocrypto_c_install_smoke"
-    "${_consumer_build}/RelWithDebInfo/anocrypto_c_install_smoke.exe")
+    "${_consumer_build}/${ANO_CRYPTO_BUILD_CONFIG}/anocrypto_c_install_smoke"
+    "${_consumer_build}/${ANO_CRYPTO_BUILD_CONFIG}/anocrypto_c_install_smoke.exe")
 set(_smoke_exe "")
 foreach(_candidate IN LISTS _smoke_candidates)
     if(EXISTS "${_candidate}" AND NOT IS_DIRECTORY "${_candidate}")
@@ -106,7 +113,8 @@ execute_process(
     WORKING_DIRECTORY "${_consumer_build}"
     RESULT_VARIABLE _run_result
     OUTPUT_VARIABLE _run_stdout
-    ERROR_VARIABLE _run_stderr)
+    ERROR_VARIABLE _run_stderr
+    TIMEOUT 120)
 file(WRITE "${ANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR}/INSTALL_SMOKE_RUN.log"
     "# Run installed-package smoke consumer\n# Result: ${_run_result}\n\n${_run_stdout}${_run_stderr}")
 if(NOT _run_result EQUAL 0)
@@ -119,13 +127,15 @@ _ano_crypto_run_install_smoke_step(
     "${CMAKE_COMMAND}" -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
     "${CMAKE_COMMAND}" -S "${_compat_consumer_source}" -B "${_compat_consumer_build}"
     -DCMAKE_PREFIX_PATH=${_install_prefix}
+    -DCMAKE_BUILD_TYPE=${ANO_CRYPTO_BUILD_CONFIG}
     -DANO_CRYPTO_P129_BASELINE_INCLUDE_DIR=${_compat_baseline_include})
 
 _ano_crypto_run_install_smoke_step(
     P1_29_COMPAT_BUILD.log
     "Build current-header and P1-29-header compatibility consumers"
     "${CMAKE_COMMAND}" -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
-    "${CMAKE_COMMAND}" --build "${_compat_consumer_build}" --parallel)
+    "${CMAKE_COMMAND}" --build "${_compat_consumer_build}"
+        --config "${ANO_CRYPTO_BUILD_CONFIG}" --parallel)
 
 _ano_crypto_run_install_smoke_step(
     P1_29_COMPAT_CTEST.log
@@ -136,7 +146,7 @@ _ano_crypto_run_install_smoke_step(
         "DYLD_LIBRARY_PATH=${_dyld_path}"
         --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
     "${CMAKE_CTEST_COMMAND}" --test-dir "${_compat_consumer_build}"
-        --verbose --output-on-failure)
+        --build-config "${ANO_CRYPTO_BUILD_CONFIG}" --verbose --output-on-failure)
 set(_compat_run_result 0)
 
 file(WRITE "${ANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR}/INSTALL_SMOKE_SUMMARY.txt"

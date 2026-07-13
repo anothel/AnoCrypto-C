@@ -23,8 +23,10 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - Clean-room source manifest snapshot
 - Exclusion log snapshot
 - Source SBOM status and scope
-- Unsigned signing status and release authorization state
+- Unsigned signing status, key-free handoff readiness, and release authorization state
 - Release provenance bundle/check result
+- Offline-signing handoff/check result
+- Sensitive-artifact scan across evidence, installed SDK, and PoC package
 - Reproducible build notes
 - Public surface check result
 - Thread-safety policy check result
@@ -61,14 +63,14 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - `docs/design/BLOCK_CIPHER_MODE_SELECTION.md` records the block-cipher implementation gate.
 - `docs/security/SIDE_CHANNEL_REVIEW_CHECKLIST.md` records key-dependent code path review questions.
 - `docs/business/CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md` records non-secret customer intake questions.
-- `docs/kcmvp/SBOM_SIGNING_PLAN.md` records the P1-31 source-inventory, unsigned-signing, and authorization boundaries.
+- `docs/kcmvp/SBOM_SIGNING_PLAN.md` records the P1-32 source-inventory, Ed25519/RFC-3161 offline-signing profile, unsigned/BLOCKED state, and authorization boundary.
 - `docs/kcmvp/EVIDENCE_MANIFEST_POLICY.md` records manifest generation rules.
 - `docs/business/POC_PACKAGE_REVIEW_MANIFEST.md` records customer package review fields.
 - `docs/design/THREAD_SAFETY_SUPPORT_MATRIX.md` records the P1-14 public thread-safety support boundary.
 - `docs/ci/THREAD_SAFETY_CI_CHECKLIST.md` records the P1-14 thread-safety CI lanes and log-review rules.
 - `tools/check_thread_safety_policy.cmake` checks thread-safety policy/evidence wiring.
 - `tools/check_sha512_family_policy.cmake` checks SHA-384/SHA-512 implemented-scope wiring.
-- `tools/collect_release_evidence.cmake` writes `release-provenance/`, `RELEASE_PROVENANCE_CHECK.txt`, `RELEASE_PROVENANCE_POLICY_CHECK.txt`, `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, `THREAD_SAFETY_CHECK.txt`, `SHA512_FAMILY_CHECK.txt`, AES/CBC hardening/compiler-review records, and related review notes plus AES-CMAC implementation and P1-29 hardening records.
+- `tools/collect_release_evidence.cmake` consumes prepared prerequisites and writes `release-provenance/`, `release-signing-handoff/`, their check records, `SENSITIVE_ARTIFACT_SCAN.txt`, `SBOM_STATUS.txt`, `SIGNING_STATUS.txt`, `EVIDENCE_MANIFEST_README.txt`, `EVIDENCE_MANIFEST.sha256`, and retained algorithm/platform review records.
 
 ## Commands
 
@@ -81,8 +83,8 @@ ctest --test-dir build --output-on-failure
 Install smoke:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-26
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-26
+cmake --install build --prefix /tmp/anocrypto-c-p1-32
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-32
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -103,7 +105,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 - Add KAT vector local-copy hash policy when vectors are stored as separate data files.
 - Add CI-produced evidence bundle layout after workflow review.
-- Retain the P1-31 source-inventory scope and unsigned boundary until dependency tooling, signer/key-custody policy, timestamping, verification, and release authorization are reviewed.
+- Retain the P1-32 source-inventory scope, fixed signing profile, and unsigned/BLOCKED boundary until production signer/TSA provisioning, distinct role approvals, cryptographic verification, and release authorization complete.
 - Add customer PoC legal/evaluation notice after legal review.
 - Add reviewed platform CI evidence for Linux, Windows, and Apple entropy provider branches.
 - Review actual Windows and POSIX concurrent CSP HMAC/AES artifacts.
@@ -128,7 +130,7 @@ If present, review entropy/thread/helper test logs for:
 - reproducibility gaps remain marked as TODO
 - PoC package manifests and logs do not include secrets, customer data, or internal deployment details
 - scope-review notes do not expand the implemented algorithm boundary by implication
-- `SBOM_STATUS.txt` describes the generated source-only inventory and its limitations; `SIGNING_STATUS.txt` remains explicitly `UNSIGNED`
+- `SBOM_STATUS.txt` describes the generated source-only inventory and its limitations; `SIGNING_STATUS.txt` remains explicitly `UNSIGNED`; handoff readiness remains `BLOCKED`
 - thread-safety check output matches the support matrix and current build option
 - evidence and package manifests use intended file paths only
 
@@ -282,3 +284,19 @@ Review `RELEASE_PROVENANCE_REVIEW.md` together with:
 - `RELEASE_PROVENANCE_CHECK.txt` and `RELEASE_PROVENANCE_POLICY_CHECK.txt`.
 
 The records are unsigned engineering evidence. Do not infer dependency completeness, vulnerability analysis, license conclusions, authenticated attestation, completed hosted review, or external-release authorization.
+
+## P1-32 offline-signing handoff review
+
+Review together:
+
+- `release-signing-handoff/SIGNING_POLICY.txt`;
+- `release-signing-handoff/SIGNING_REQUEST.txt`;
+- `release-signing-handoff/SIGNING_HANDOFF_STATUS.txt`;
+- `release-signing-handoff/SIGNING_HANDOFF_FILES.sha256`;
+- `release-signing-handoff/RELEASE_AUTHORIZATION.md`;
+- `RELEASE_SIGNING_HANDOFF_CHECK.txt`;
+- `SENSITIVE_ARTIFACT_SCAN.txt`.
+
+Confirm `RELEASE_ARTIFACTS.sha256` is the only subject; signature profile is Ed25519/raw 64 bytes; approved-key fingerprint is SHA-256 over DER SubjectPublicKeyInfo; RFC 3161 timestamp subject is the detached-signature file; required Security Reviewer and Product Release Owner identities are non-placeholder and different once provisioned; GitHub attestation is secondary only. Current production signer/TSA/role state remains unprovisioned, so repository state is `UNSIGNED`, readiness `BLOCKED`, and external authorization `NO`.
+
+Debug-only OpenSSL fixtures are test-path evidence only. Do not retain fixture key, certificate, signature, timestamp request, or timestamp response files in release evidence.

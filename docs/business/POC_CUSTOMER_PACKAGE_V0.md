@@ -99,6 +99,7 @@ Out of scope for v0:
 - prediction-resistance, VM snapshot/restore detection, suspend/resume detection, or final validation-boundary commitment
 - binary reproducibility commitment across hosts
 - concurrent mutation support for a single caller-owned hash, HMAC, or DRBG context
+- production release signing, RFC 3161 timestamping, hosted disposition, tag execution, or external-release authorization
 
 ## Packaging commands
 
@@ -143,13 +144,13 @@ Before sharing a package externally, review:
 - test-vector provenance notes
 - whether any customer or internal deployment details were accidentally included
 
-Do not add or retain secrets, entropy captures, generated secret bytes, private keys, signing keys, signing tokens, tokens, customer certificate bundles, customer data, or internal deployment details in the package.
+Do not add or retain secrets, entropy captures, generated secret bytes, private keys, signing keys, signing tokens, tokens, signer public-key records, detached signatures, timestamp requests/responses, TSA certificates/trust anchors, customer certificate bundles, customer data, or internal deployment details in the package.
 
 ## TODO before broader PoC use
 
 - Decide binary SDK versus source-available evaluation terms.
 - Add license/evaluation notice text after legal review.
-- Generate a package-specific SBOM only after dependency/license/vulnerability scope is reviewed; keep the package unsigned until signer/key-custody/timestamp/verification and external-release authorization policies are approved.
+- Generate a package-specific SBOM only after dependency/license/vulnerability scope is reviewed; keep the package unsigned until the P1-32 policy has a provisioned production signer, approved RFC 3161 service/trust anchor, verified signature/timestamp, distinct role approvals, and external-release authorization.
 - Customer questionnaire for OS, CPU, compiler, linker, deployment model, and required algorithm scope is available as `CUSTOMER_POC_INTAKE_QUESTIONNAIRE.md`.
 - Add a support boundary document for error reports and evidence requests.
 
@@ -170,7 +171,7 @@ The package includes `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt` and the public poli
 
 ## P1-20 random lifecycle and clean-export package boundary
 
-The generated SDK is configured with both test-hook options disabled and internal symbol hiding enabled. Package creation then runs the clean Release exported-symbol target and stores `CLEAN_RELEASE_SYMBOL_BASELINE.log`; the current expected name baseline contains 53 public `ano_crypto_*` symbols.
+The generated SDK is configured with both test-hook options disabled and internal symbol hiding enabled. Package creation then runs the clean Release exported-symbol target and stores `CLEAN_RELEASE_SYMBOL_BASELINE.log`; the current expected name baseline contains 69 public `ano_crypto_*` symbols.
 
 `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt` records these customer-facing limits:
 
@@ -227,3 +228,11 @@ layout is exposed.
 ## P1-31 release provenance package boundary
 
 The customer PoC includes only package-local hash/status notes. It does not include the internal source archive, source SBOM, source-file manifest, `RELEASE_PROVENANCE.txt`, `RELEASE_ARTIFACTS.sha256`, signing request, authorization record, compatibility baseline, or hosted review tooling. `PACKAGE_MANIFEST.md` is not a signature or attestation. External release remains unauthorized until a separate reviewed process records tag/commit identity, hosted disposition, signing verification, and legal/product approval.
+
+## P1-32 offline signing-handoff package boundary
+
+P1-32 defines the internal release handoff and verifier policy: the exact subject is `RELEASE_ARTIFACTS.sha256`, the signature is Ed25519 raw 64-byte, the signer identity is a SHA-256 SPKI DER fingerprint, and an RFC 3161 timestamp over the signature is required before external release. Security Reviewer and Product Release Owner identities must be distinct; GitHub artifact attestation is optional secondary evidence only.
+
+The customer PoC does not carry the handoff directory, `SIGNING_POLICY.txt`, `SIGNING_REQUEST.txt`, signer/TSA approval records, `SIGNING_HANDOFF_FILES.sha256`, `SIGNING_HANDOFF_STATUS.txt`, release authorization records, private/public signing keys, tokens, detached signatures, timestamp requests/responses, certificates, or trust anchors. It carries only package-local `UNSIGNED`/external-`NO` status and policy-boundary notes. Debug-only ephemeral signing fixtures are never part of the clean PoC SDK or package.
+
+The production signer and timestamp authority remain unprovisioned. No hosted run, release tag, production signature/timestamp verification, role approval, or external-release authorization has been performed; handoff remains `BLOCKED`.

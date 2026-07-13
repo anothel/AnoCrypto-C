@@ -3,7 +3,7 @@
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
 #         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-32 \
-#         -DANO_CRYPTO_RUN_CTEST=ON \
+#         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
 #         -DANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON \
@@ -117,11 +117,28 @@ endif()
 if(NOT DEFINED ANO_CRYPTO_RUN_TAGGED_COMPATIBILITY_CHECK)
     set(ANO_CRYPTO_RUN_TAGGED_COMPATIBILITY_CHECK ON)
 endif()
+if(NOT DEFINED ANO_CRYPTO_BUILD_CONFIG)
+    set(ANO_CRYPTO_BUILD_CONFIG "")
+endif()
+if(NOT DEFINED ANO_CRYPTO_MULTI_CONFIG_BUILD)
+    set(ANO_CRYPTO_MULTI_CONFIG_BUILD OFF)
+endif()
+if(NOT DEFINED ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE)
+    set(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE OFF)
+endif()
+if(ANO_CRYPTO_MULTI_CONFIG_BUILD AND ANO_CRYPTO_BUILD_CONFIG STREQUAL "")
+    message(FATAL_ERROR "A multi-config evidence build requires ANO_CRYPTO_BUILD_CONFIG")
+endif()
 
 get_filename_component(ANO_CRYPTO_SOURCE_DIR "${ANO_CRYPTO_SOURCE_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_BUILD_DIR "${ANO_CRYPTO_BUILD_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_EVIDENCE_DIR}" ABSOLUTE)
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+file(RELATIVE_PATH _evidence_relative "${ANO_CRYPTO_BUILD_DIR}" "${ANO_CRYPTO_EVIDENCE_DIR}")
+if(_evidence_relative STREQUAL "" OR _evidence_relative STREQUAL "." OR
+   _evidence_relative MATCHES "^([.][.]|[/\\])")
+    message(FATAL_ERROR "ANO_CRYPTO_EVIDENCE_DIR must be a child of ANO_CRYPTO_BUILD_DIR")
+endif()
 
 if(NOT DEFINED ANO_CRYPTO_INSTALL_PREFIX)
     set(ANO_CRYPTO_INSTALL_PREFIX "${ANO_CRYPTO_EVIDENCE_DIR}/install-prefix")
@@ -141,6 +158,7 @@ get_filename_component(ANO_CRYPTO_INSTALL_SMOKE_BUILD_DIR "${ANO_CRYPTO_INSTALL_
 get_filename_component(ANO_CRYPTO_INSTALL_SMOKE_SOURCE_DIR "${ANO_CRYPTO_INSTALL_SMOKE_SOURCE_DIR}" ABSOLUTE)
 get_filename_component(ANO_CRYPTO_POC_SMOKE_DIR "${ANO_CRYPTO_POC_SMOKE_DIR}" ABSOLUTE)
 
+file(REMOVE_RECURSE "${ANO_CRYPTO_EVIDENCE_DIR}")
 file(MAKE_DIRECTORY "${ANO_CRYPTO_EVIDENCE_DIR}")
 
 function(ano_crypto_run_logged log_file description)
@@ -148,7 +166,8 @@ function(ano_crypto_run_logged log_file description)
         COMMAND ${ARGN}
         RESULT_VARIABLE _cmd_result
         OUTPUT_VARIABLE _cmd_stdout
-        ERROR_VARIABLE _cmd_stderr)
+        ERROR_VARIABLE _cmd_stderr
+        TIMEOUT 600)
     file(WRITE "${log_file}" "# ${description}\n")
     file(APPEND "${log_file}" "# Command:")
     foreach(_arg IN LISTS ARGN)
@@ -159,6 +178,64 @@ function(ano_crypto_run_logged log_file description)
     if(NOT _cmd_result EQUAL 0)
         message(FATAL_ERROR "${description} failed; see ${log_file}")
     endif()
+endfunction()
+
+# CMake's recursive glob is unusually slow on WSL-mounted Windows trees.
+# Prefer one native directory walk where POSIX find is available; retain the
+# CMake fallback for Windows and extracted-source environments.
+function(_ano_crypto_list_tree_files _root _output)
+    set(_files "")
+    set(_allow_symlinks OFF)
+    if(ARGC GREATER 2 AND ARGV2)
+        set(_allow_symlinks ON)
+    endif()
+    if(UNIX)
+        find_program(_ano_crypto_find_executable NAMES find)
+        if(_ano_crypto_find_executable)
+            execute_process(
+                COMMAND "${_ano_crypto_find_executable}" "${_root}"
+                    -type l -print
+                RESULT_VARIABLE _symlink_find_result
+                OUTPUT_VARIABLE _symlink_find_output
+                ERROR_VARIABLE _symlink_find_error
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                TIMEOUT 60)
+            if(NOT "${_symlink_find_result}" STREQUAL "0")
+                message(FATAL_ERROR "Artifact symlink enumeration failed: ${_symlink_find_error}")
+            elseif(NOT _allow_symlinks AND NOT _symlink_find_output STREQUAL "")
+                message(FATAL_ERROR "Artifact tree rejects symlinks: ${_symlink_find_output}")
+            endif()
+            if(_allow_symlinks)
+                set(_find_type_arguments "(" -type f -o -type l ")")
+            else()
+                set(_find_type_arguments -type f)
+            endif()
+            execute_process(
+                COMMAND "${_ano_crypto_find_executable}" "${_root}"
+                    ${_find_type_arguments} -print
+                RESULT_VARIABLE _find_result
+                OUTPUT_VARIABLE _find_output
+                ERROR_VARIABLE _find_error
+                OUTPUT_STRIP_TRAILING_WHITESPACE
+                TIMEOUT 60)
+            if("${_find_result}" STREQUAL "0" AND NOT _find_output STREQUAL "")
+                string(REPLACE "\r\n" "\n" _find_output "${_find_output}")
+                string(REPLACE "\n" ";" _files "${_find_output}")
+            elseif(NOT "${_find_result}" STREQUAL "0")
+                message(FATAL_ERROR "Artifact file enumeration failed: ${_find_error}")
+            endif()
+        endif()
+    endif()
+    if(NOT _files)
+        file(GLOB_RECURSE _files LIST_DIRECTORIES false "${_root}/*")
+        foreach(_file IN LISTS _files)
+            if(NOT _allow_symlinks AND IS_SYMLINK "${_file}")
+                message(FATAL_ERROR "Artifact tree rejects symlinks: ${_file}")
+            endif()
+        endforeach()
+    endif()
+    list(SORT _files)
+    set(${_output} "${_files}" PARENT_SCOPE)
 endfunction()
 
 string(TIMESTAMP ANO_CRYPTO_EVIDENCE_UTC "%Y-%m-%dT%H:%M:%SZ" UTC)
@@ -173,7 +250,8 @@ if(_git_exe)
         RESULT_VARIABLE _git_commit_result
         OUTPUT_VARIABLE _git_commit_output
         ERROR_QUIET
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        TIMEOUT 30)
     if(_git_commit_result EQUAL 0)
         set(_git_commit "${_git_commit_output}")
     endif()
@@ -183,7 +261,8 @@ if(_git_exe)
         RESULT_VARIABLE _git_status_result
         OUTPUT_VARIABLE _git_status_output
         ERROR_QUIET
-        OUTPUT_STRIP_TRAILING_WHITESPACE)
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        TIMEOUT 30)
     if(_git_status_result EQUAL 0)
         if(_git_status_output STREQUAL "")
             set(_git_status "clean")
@@ -212,173 +291,113 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
 "Evidence status: engineering draft only\n"
 "Claims boundary: not official validation evidence\n")
 
-file(GLOB_RECURSE _source_files
-    LIST_DIRECTORIES false
-    RELATIVE "${ANO_CRYPTO_SOURCE_DIR}"
-    "${ANO_CRYPTO_SOURCE_DIR}/*")
-list(SORT _source_files)
-
-set(_included_source_files "")
-file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SOURCE_FILES.sha256" "")
-foreach(_rel IN LISTS _source_files)
-    set(_skip OFF)
-    if(_rel MATCHES "(^|/)(\\.git|build|build-[^/]*|cmake-build-[^/]*|\\.cache)(/|$)")
-        set(_skip ON)
+foreach(_required_prepared_var
+        ANO_CRYPTO_PREPARED_PROVENANCE_DIR
+        ANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR
+        ANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK)
+    if(NOT DEFINED ${_required_prepared_var} OR
+       "${${_required_prepared_var}}" STREQUAL "")
+        message(FATAL_ERROR
+            "${_required_prepared_var} is required; evidence assembly is status-only")
     endif()
-    if(_rel MATCHES "^evidence/(generated|out|p1-[0-9][^/]*|release-[^/]*)/")
-        set(_skip ON)
-    endif()
-    if(_rel MATCHES "\\.(zip|patch|tar|tgz|gz)$")
-        set(_skip ON)
-    endif()
-
-    if(NOT _skip)
-        list(APPEND _included_source_files "${_rel}")
-        file(SHA256 "${ANO_CRYPTO_SOURCE_DIR}/${_rel}" _hash)
-        file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/SOURCE_FILES.sha256" "${_hash}  ${_rel}\n")
-    endif()
+    get_filename_component(${_required_prepared_var}
+        "${${_required_prepared_var}}" ABSOLUTE)
 endforeach()
 
-file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SOURCE_ARCHIVE_CONTENTS.txt" "")
-foreach(_rel IN LISTS _included_source_files)
-    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/SOURCE_ARCHIVE_CONTENTS.txt" "${_rel}\n")
+set(_prepared_provenance_files
+    SOURCE_FILES.sha256
+    SOURCE_ARCHIVE_CONTENTS.txt
+    SOURCE_ARCHIVE.log
+    SOURCE_ARCHIVE.sha256
+    anocrypto-c-source.tar.gz
+    RELEASE_PROVENANCE.log
+    RELEASE_PROVENANCE_CHECK.txt
+    RELEASE_PROVENANCE_POLICY_CHECK.txt
+    RELEASE_PROVENANCE_POLICY_CHECK.log
+    SBOM_STATUS.txt
+    SIGNING_STATUS.txt
+    PREPARED_RELEASE_PROVENANCE_SUMMARY.txt)
+foreach(_artifact IN LISTS _prepared_provenance_files)
+    set(_prepared "${ANO_CRYPTO_PREPARED_PROVENANCE_DIR}/${_artifact}")
+    if(NOT EXISTS "${_prepared}" OR IS_DIRECTORY "${_prepared}" OR
+       IS_SYMLINK "${_prepared}")
+        message(FATAL_ERROR "Prepared release provenance artifact is missing or unsafe: ${_artifact}")
+    endif()
+    configure_file("${_prepared}" "${ANO_CRYPTO_EVIDENCE_DIR}/${_artifact}" COPYONLY)
 endforeach()
+if(NOT IS_DIRECTORY "${ANO_CRYPTO_PREPARED_PROVENANCE_DIR}/release-provenance" OR
+   IS_SYMLINK "${ANO_CRYPTO_PREPARED_PROVENANCE_DIR}/release-provenance")
+    message(FATAL_ERROR "Prepared release provenance bundle is missing or unsafe")
+endif()
+file(COPY "${ANO_CRYPTO_PREPARED_PROVENANCE_DIR}/release-provenance"
+    DESTINATION "${ANO_CRYPTO_EVIDENCE_DIR}")
 
-if(ANO_CRYPTO_CREATE_SOURCE_ARCHIVE)
-    set(_archive_root "${ANO_CRYPTO_EVIDENCE_DIR}/source-archive-work")
-    set(_archive_tree "${_archive_root}/anocrypto-c")
-    set(_archive_path "${ANO_CRYPTO_EVIDENCE_DIR}/anocrypto-c-source.tar.gz")
-    file(REMOVE_RECURSE "${_archive_root}")
-    file(MAKE_DIRECTORY "${_archive_tree}")
+if(NOT IS_DIRECTORY "${ANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR}" OR
+   IS_SYMLINK "${ANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR}" OR
+   NOT EXISTS "${ANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK}" OR
+   IS_DIRECTORY "${ANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK}" OR
+   IS_SYMLINK "${ANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK}")
+    message(FATAL_ERROR "Prepared release signing handoff is missing or unsafe")
+endif()
+file(COPY "${ANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR}"
+    DESTINATION "${ANO_CRYPTO_EVIDENCE_DIR}")
+configure_file("${ANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK}"
+    "${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_SIGNING_HANDOFF_CHECK.txt" COPYONLY)
 
-    foreach(_rel IN LISTS _included_source_files)
-        get_filename_component(_rel_dir "${_rel}" DIRECTORY)
-        if(_rel_dir STREQUAL "" OR _rel_dir STREQUAL ".")
-            set(_dest_dir "${_archive_tree}")
-        else()
-            set(_dest_dir "${_archive_tree}/${_rel_dir}")
-        endif()
-        file(MAKE_DIRECTORY "${_dest_dir}")
-        file(COPY "${ANO_CRYPTO_SOURCE_DIR}/${_rel}" DESTINATION "${_dest_dir}")
-    endforeach()
-
-    execute_process(
-        COMMAND "${CMAKE_COMMAND}" -E tar cfz "${_archive_path}" "anocrypto-c"
-        WORKING_DIRECTORY "${_archive_root}"
-        RESULT_VARIABLE _archive_result
-        OUTPUT_VARIABLE _archive_stdout
-        ERROR_VARIABLE _archive_stderr)
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SOURCE_ARCHIVE.log"
-        "# Create source archive\n# Result: ${_archive_result}\n\n${_archive_stdout}${_archive_stderr}")
-    if(NOT _archive_result EQUAL 0)
-        message(FATAL_ERROR "source archive creation failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/SOURCE_ARCHIVE.log")
+foreach(_passed_artifact IN ITEMS
+        PREPARED_RELEASE_PROVENANCE_SUMMARY.txt
+        RELEASE_PROVENANCE_CHECK.txt
+        RELEASE_PROVENANCE_POLICY_CHECK.txt
+        RELEASE_SIGNING_HANDOFF_CHECK.txt)
+    file(READ "${ANO_CRYPTO_EVIDENCE_DIR}/${_passed_artifact}" _passed_text)
+    if(NOT _passed_text MATCHES "Result: PASS")
+        message(FATAL_ERROR "Prepared release artifact did not pass: ${_passed_artifact}")
     endif()
-
-    file(SHA256 "${_archive_path}" _archive_hash)
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SOURCE_ARCHIVE.sha256"
-        "${_archive_hash}  anocrypto-c-source.tar.gz\n")
-    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-        "Source archive: anocrypto-c-source.tar.gz\n"
-        "Source archive SHA-256: ${_archive_hash}\n")
-    file(REMOVE_RECURSE "${_archive_root}")
-else()
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SOURCE_ARCHIVE.sha256"
-        "Source archive creation was not requested. Set ANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON.\n")
+endforeach()
+file(READ "${ANO_CRYPTO_EVIDENCE_DIR}/release-signing-handoff/SIGNING_HANDOFF_STATUS.txt"
+    _handoff_status)
+if(NOT _handoff_status MATCHES "Readiness: BLOCKED" OR
+   NOT _handoff_status MATCHES "External release authorized: NO")
+    message(FATAL_ERROR "Prepared signing handoff does not preserve the blocked release boundary")
 endif()
 
-if(ANO_CRYPTO_RUN_RELEASE_PROVENANCE_CHECK)
-    if(NOT ANO_CRYPTO_CREATE_SOURCE_ARCHIVE OR NOT EXISTS "${_archive_path}")
-        message(FATAL_ERROR
-            "release provenance generation requires ANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON")
-    endif()
-    set(_release_provenance_dir
-        "${ANO_CRYPTO_EVIDENCE_DIR}/release-provenance")
-    set(_release_provenance_check
-        "${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_PROVENANCE_CHECK.txt")
-    set(_release_provenance_args
-        "${CMAKE_COMMAND}"
-        "-DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}"
-        "-DANO_CRYPTO_PROVENANCE_OUTPUT_DIR=${_release_provenance_dir}"
-        "-DANO_CRYPTO_PROVENANCE_SOURCE_ARCHIVE=${_archive_path}"
-        "-DANO_CRYPTO_PROVENANCE_SOURCE_FILE_LIST=${ANO_CRYPTO_EVIDENCE_DIR}/SOURCE_ARCHIVE_CONTENTS.txt"
-        "-DANO_CRYPTO_PROVENANCE_CREATED_UTC=${ANO_CRYPTO_EVIDENCE_UTC}"
-        "-DANO_CRYPTO_PROVENANCE_COMMIT=${_git_commit}"
-        "-DANO_CRYPTO_PROVENANCE_WORKTREE_STATE=${_git_worktree_state}"
-        "-DANO_CRYPTO_PROVENANCE_CHECK_OUTPUT=${_release_provenance_check}")
-    if(DEFINED ANO_CRYPTO_ACTUAL_RELEASE_TAG AND
-       NOT ANO_CRYPTO_ACTUAL_RELEASE_TAG STREQUAL "")
-        list(APPEND _release_provenance_args
-            "-DANO_CRYPTO_PROVENANCE_ACTUAL_TAG=${ANO_CRYPTO_ACTUAL_RELEASE_TAG}")
-    endif()
-    list(APPEND _release_provenance_args
-        "-P" "${ANO_CRYPTO_SOURCE_DIR}/tools/create_release_provenance_bundle.cmake")
-    execute_process(
-        COMMAND ${_release_provenance_args}
-        RESULT_VARIABLE _release_provenance_result
-        OUTPUT_VARIABLE _release_provenance_stdout
-        ERROR_VARIABLE _release_provenance_stderr)
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_PROVENANCE.log"
-        "# Create and verify unsigned P1-32 release provenance bundle\n"
-        "# Result: ${_release_provenance_result}\n\n"
-        "${_release_provenance_stdout}${_release_provenance_stderr}")
-    if(NOT _release_provenance_result EQUAL 0)
-        message(FATAL_ERROR
-            "release provenance generation failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_PROVENANCE.log")
-    endif()
-    configure_file(
-        "${_release_provenance_dir}/SBOM_STATUS.txt"
-        "${ANO_CRYPTO_EVIDENCE_DIR}/SBOM_STATUS.txt" COPYONLY)
-    configure_file(
-        "${_release_provenance_dir}/SIGNING_STATUS.txt"
-        "${ANO_CRYPTO_EVIDENCE_DIR}/SIGNING_STATUS.txt" COPYONLY)
-
-    execute_process(
-        COMMAND "${CMAKE_COMMAND}"
-            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
-            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
-            -DANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT=${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_PROVENANCE_POLICY_CHECK.txt
-            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_release_provenance_policy.cmake"
-        RESULT_VARIABLE _release_provenance_policy_result
-        OUTPUT_VARIABLE _release_provenance_policy_stdout
-        ERROR_VARIABLE _release_provenance_policy_stderr)
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_PROVENANCE_POLICY_CHECK.log"
-        "# P1-32 release provenance policy check\n"
-        "# Result: ${_release_provenance_policy_result}\n\n"
-        "${_release_provenance_policy_stdout}${_release_provenance_policy_stderr}")
-    if(NOT _release_provenance_policy_result EQUAL 0)
-        message(FATAL_ERROR
-            "release provenance policy check failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_PROVENANCE_POLICY_CHECK.log")
-    endif()
-
-    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-        "Release provenance bundle: release-provenance/\n"
-        "Release provenance check: RELEASE_PROVENANCE_CHECK.txt\n"
-        "Release provenance policy check: RELEASE_PROVENANCE_POLICY_CHECK.txt\n"
-        "Source SBOM: release-provenance/SOURCE_SBOM.spdx.json\n"
-        "Signing mode: ${ANO_CRYPTO_RELEASE_SIGNING_MODE}\n"
-        "External release authorized: NO\n")
-else()
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SBOM_STATUS.txt"
-        "AnoCrypto-C SBOM status\n"
-        "Status: not generated because ANO_CRYPTO_RUN_RELEASE_PROVENANCE_CHECK=OFF.\n")
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SIGNING_STATUS.txt"
-        "AnoCrypto-C signing status\n"
-        "Status: UNSIGNED\n"
-        "External release authorization implied: no\n")
+if(NOT ANO_CRYPTO_CREATE_SOURCE_ARCHIVE)
+    message(FATAL_ERROR "Prepared source archive is required for release evidence")
 endif()
+set(_archive_path "${ANO_CRYPTO_EVIDENCE_DIR}/anocrypto-c-source.tar.gz")
+file(SHA256 "${_archive_path}" _archive_hash)
+file(READ "${ANO_CRYPTO_EVIDENCE_DIR}/SOURCE_ARCHIVE.sha256" _archive_hash_record)
+if(NOT _archive_hash_record STREQUAL
+   "${_archive_hash}  anocrypto-c-source.tar.gz\n")
+    message(FATAL_ERROR "Prepared source archive checksum mismatch")
+endif()
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "Source archive: anocrypto-c-source.tar.gz\n"
+    "Source archive SHA-256: ${_archive_hash}\n")
+
+if(NOT ANO_CRYPTO_RUN_RELEASE_PROVENANCE_CHECK)
+    message(FATAL_ERROR "Prepared release provenance verification is required")
+endif()
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "Release provenance bundle: release-provenance/\n"
+    "Release provenance check: RELEASE_PROVENANCE_CHECK.txt\n"
+    "Release provenance policy check: RELEASE_PROVENANCE_POLICY_CHECK.txt\n"
+    "Source SBOM: release-provenance/SOURCE_SBOM.spdx.json\n"
+    "Signing handoff: release-signing-handoff/\n"
+    "Signing handoff check: RELEASE_SIGNING_HANDOFF_CHECK.txt\n"
+    "Signing mode: ${ANO_CRYPTO_RELEASE_SIGNING_MODE}\n"
+    "Signing handoff readiness: BLOCKED\n"
+    "External release authorized: NO\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/BINARY_FILES.sha256" "")
 if(EXISTS "${ANO_CRYPTO_BUILD_DIR}")
-    file(GLOB_RECURSE _binary_files
-        LIST_DIRECTORIES false
-        RELATIVE "${ANO_CRYPTO_BUILD_DIR}"
-        "${ANO_CRYPTO_BUILD_DIR}/libanocrypto_c*"
-        "${ANO_CRYPTO_BUILD_DIR}/anocrypto_c*"
-        "${ANO_CRYPTO_BUILD_DIR}/ano_crypto_*")
-    list(SORT _binary_files)
-    foreach(_rel IN LISTS _binary_files)
-        if(NOT _rel MATCHES "CMakeFiles/" AND NOT _rel MATCHES "^evidence/")
-            file(SHA256 "${ANO_CRYPTO_BUILD_DIR}/${_rel}" _hash)
+    _ano_crypto_list_tree_files("${ANO_CRYPTO_BUILD_DIR}" _build_files TRUE)
+    foreach(_binary_file IN LISTS _build_files)
+        file(RELATIVE_PATH _rel "${ANO_CRYPTO_BUILD_DIR}" "${_binary_file}")
+        get_filename_component(_binary_name "${_binary_file}" NAME)
+        if(_binary_name MATCHES "^(libanocrypto_c|anocrypto_c|ano_crypto_)" AND
+           NOT _rel MATCHES "CMakeFiles/" AND NOT _rel MATCHES "^evidence/")
+            file(SHA256 "${_binary_file}" _hash)
             file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BINARY_FILES.sha256" "${_hash}  ${_rel}\n")
         endif()
     endforeach()
@@ -394,7 +413,8 @@ if(ANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_public_surface.cmake"
         RESULT_VARIABLE _policy_result
         OUTPUT_VARIABLE _policy_stdout
-        ERROR_VARIABLE _policy_stderr)
+        ERROR_VARIABLE _policy_stderr
+        TIMEOUT 300)
     file(APPEND "${_policy_check_output}" "\nCommand output:\n${_policy_stdout}${_policy_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Public surface check result: ${_policy_result}\n")
     if(NOT _policy_result EQUAL 0)
@@ -416,7 +436,8 @@ if(ANO_CRYPTO_RUN_RELEASE_COMPATIBILITY_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_release_compatibility.cmake"
         RESULT_VARIABLE _release_compatibility_result
         OUTPUT_VARIABLE _release_compatibility_stdout
-        ERROR_VARIABLE _release_compatibility_stderr)
+        ERROR_VARIABLE _release_compatibility_stderr
+        TIMEOUT 300)
     file(APPEND "${_release_compatibility_output}"
         "\nCommand output:\n${_release_compatibility_stdout}${_release_compatibility_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
@@ -467,7 +488,8 @@ if(ANO_CRYPTO_RUN_THREAD_SAFETY_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_thread_safety_policy.cmake"
         RESULT_VARIABLE _thread_check_result
         OUTPUT_VARIABLE _thread_check_stdout
-        ERROR_VARIABLE _thread_check_stderr)
+        ERROR_VARIABLE _thread_check_stderr
+        TIMEOUT 300)
     file(APPEND "${_thread_check_output}" "\nCommand output:\n${_thread_check_stdout}${_thread_check_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Thread-safety policy check result: ${_thread_check_result}\n")
     if(NOT _thread_check_result EQUAL 0)
@@ -488,7 +510,8 @@ if(ANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_concurrency_sanitizer_policy.cmake"
         RESULT_VARIABLE _concurrency_sanitizer_result
         OUTPUT_VARIABLE _concurrency_sanitizer_stdout
-        ERROR_VARIABLE _concurrency_sanitizer_stderr)
+        ERROR_VARIABLE _concurrency_sanitizer_stderr
+        TIMEOUT 300)
     file(APPEND "${_concurrency_sanitizer_output}" "\nCommand output:\n${_concurrency_sanitizer_stdout}${_concurrency_sanitizer_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Concurrency/sanitizer policy check result: ${_concurrency_sanitizer_result}\n")
     if(NOT _concurrency_sanitizer_result EQUAL 0)
@@ -509,7 +532,8 @@ if(ANO_CRYPTO_RUN_DIFFERENTIAL_PORTABILITY_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_differential_portability_policy.cmake"
         RESULT_VARIABLE _differential_portability_result
         OUTPUT_VARIABLE _differential_portability_stdout
-        ERROR_VARIABLE _differential_portability_stderr)
+        ERROR_VARIABLE _differential_portability_stderr
+        TIMEOUT 300)
     file(APPEND "${_differential_portability_output}" "\nCommand output:\n${_differential_portability_stdout}${_differential_portability_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Differential/portability policy check result: ${_differential_portability_result}\n")
     if(NOT _differential_portability_result EQUAL 0)
@@ -530,7 +554,8 @@ if(ANO_CRYPTO_RUN_SHA512_FAMILY_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_sha512_family_policy.cmake"
         RESULT_VARIABLE _sha512_family_check_result
         OUTPUT_VARIABLE _sha512_family_check_stdout
-        ERROR_VARIABLE _sha512_family_check_stderr)
+        ERROR_VARIABLE _sha512_family_check_stderr
+        TIMEOUT 300)
     file(APPEND "${_sha512_family_check_output}" "\nCommand output:\n${_sha512_family_check_stdout}${_sha512_family_check_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "SHA-512-family implementation check result: ${_sha512_family_check_result}\n")
     if(NOT _sha512_family_check_result EQUAL 0)
@@ -551,7 +576,8 @@ if(ANO_CRYPTO_RUN_AES_CBC_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_aes_cbc_policy.cmake"
         RESULT_VARIABLE _aes_cbc_check_result
         OUTPUT_VARIABLE _aes_cbc_check_stdout
-        ERROR_VARIABLE _aes_cbc_check_stderr)
+        ERROR_VARIABLE _aes_cbc_check_stderr
+        TIMEOUT 300)
     file(APPEND "${_aes_cbc_check_output}" "\nCommand output:\n${_aes_cbc_check_stdout}${_aes_cbc_check_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "AES/CBC implementation policy check result: ${_aes_cbc_check_result}
 ")
@@ -573,7 +599,8 @@ if(ANO_CRYPTO_RUN_AES_HARDENING_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_aes_hardening_policy.cmake"
         RESULT_VARIABLE _aes_hardening_check_result
         OUTPUT_VARIABLE _aes_hardening_check_stdout
-        ERROR_VARIABLE _aes_hardening_check_stderr)
+        ERROR_VARIABLE _aes_hardening_check_stderr
+        TIMEOUT 300)
     file(APPEND "${_aes_hardening_check_output}" "\nCommand output:\n${_aes_hardening_check_stdout}${_aes_hardening_check_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "AES/CBC hardening policy check result: ${_aes_hardening_check_result}\n")
     if(NOT _aes_hardening_check_result EQUAL 0)
@@ -594,7 +621,8 @@ if(ANO_CRYPTO_RUN_CMAC_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_cmac_policy.cmake"
         RESULT_VARIABLE _cmac_check_result
         OUTPUT_VARIABLE _cmac_check_stdout
-        ERROR_VARIABLE _cmac_check_stderr)
+        ERROR_VARIABLE _cmac_check_stderr
+        TIMEOUT 300)
     file(APPEND "${_cmac_check_output}" "
 Command output:
 ${_cmac_check_stdout}${_cmac_check_stderr}
@@ -621,7 +649,8 @@ if(ANO_CRYPTO_RUN_CMAC_HARDENING_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_cmac_hardening_policy.cmake"
         RESULT_VARIABLE _cmac_hardening_check_result
         OUTPUT_VARIABLE _cmac_hardening_check_stdout
-        ERROR_VARIABLE _cmac_hardening_check_stderr)
+        ERROR_VARIABLE _cmac_hardening_check_stderr
+        TIMEOUT 300)
     file(APPEND "${_cmac_hardening_check_output}"
         "\nCommand output:\n${_cmac_hardening_check_stdout}${_cmac_hardening_check_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
@@ -649,37 +678,15 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES_CMAC_REVIEW_NOTES.txt"
 
 if(ANO_CRYPTO_RUN_AES_COMPILER_REVIEW)
     set(_aes_compiler_review_source "${ANO_CRYPTO_BUILD_DIR}/policy-check/aes-compiler-review")
-    set(_aes_compiler_review_result 0)
-    set(_aes_compiler_review_stdout "Reused compiler-output artifacts built by the evidence target dependency.\n")
-    set(_aes_compiler_review_stderr "")
-
-    # The normal evidence target already depends on ano_crypto_aes_compiler_review.
-    # Avoid recursively building a target in the same build tree because Make/Ninja
-    # jobserver ownership can deadlock the outer evidence build.  Keep a fallback
-    # for direct script invocation when the artifacts have not been prepared.
     if(NOT EXISTS "${_aes_compiler_review_source}/AES_COMPILER_OUTPUT_REVIEW.txt" OR
        NOT EXISTS "${_aes_compiler_review_source}/AES_COMPILER_OUTPUT_DISASSEMBLY.txt")
-        execute_process(
-            COMMAND "${CMAKE_COMMAND}" --build "${ANO_CRYPTO_BUILD_DIR}" --target ano_crypto_aes_compiler_review
-            RESULT_VARIABLE _aes_compiler_review_result
-            OUTPUT_VARIABLE _aes_compiler_review_stdout
-            ERROR_VARIABLE _aes_compiler_review_stderr)
-    endif()
-
-    if(NOT _aes_compiler_review_result EQUAL 0 OR
-       NOT EXISTS "${_aes_compiler_review_source}/AES_COMPILER_OUTPUT_REVIEW.txt" OR
-       NOT EXISTS "${_aes_compiler_review_source}/AES_COMPILER_OUTPUT_DISASSEMBLY.txt")
-        file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES_COMPILER_OUTPUT_REVIEW.txt"
-            "AES compiler-output capture failed.\n${_aes_compiler_review_stdout}${_aes_compiler_review_stderr}")
-        message(FATAL_ERROR "AES compiler-output review capture failed")
+        message(FATAL_ERROR "Prepared AES compiler-output review artifact is incomplete")
     endif()
     file(COPY "${_aes_compiler_review_source}/AES_COMPILER_OUTPUT_REVIEW.txt"
               "${_aes_compiler_review_source}/AES_COMPILER_OUTPUT_DISASSEMBLY.txt"
          DESTINATION "${ANO_CRYPTO_EVIDENCE_DIR}")
-    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/AES_COMPILER_OUTPUT_REVIEW.txt"
-        "\nCapture command output:\n${_aes_compiler_review_stdout}${_aes_compiler_review_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-        "AES compiler-output review capture result: ${_aes_compiler_review_result}\n")
+        "AES compiler-output review capture result: 0 (prepared predecessor artifact)\n")
 else()
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES_COMPILER_OUTPUT_REVIEW.txt"
         "AES compiler-output review was not requested. Set ANO_CRYPTO_RUN_AES_COMPILER_REVIEW=ON.\n")
@@ -689,31 +696,15 @@ endif()
 
 if(ANO_CRYPTO_RUN_CMAC_COMPILER_REVIEW)
     set(_cmac_compiler_review_source "${ANO_CRYPTO_BUILD_DIR}/policy-check/cmac-compiler-review")
-    set(_cmac_compiler_review_result 0)
-    set(_cmac_compiler_review_stdout "Reused CMAC compiler-output artifacts built by the evidence target dependency.\n")
-    set(_cmac_compiler_review_stderr "")
     if(NOT EXISTS "${_cmac_compiler_review_source}/CMAC_COMPILER_OUTPUT_REVIEW.txt" OR
        NOT EXISTS "${_cmac_compiler_review_source}/CMAC_COMPILER_OUTPUT_DISASSEMBLY.txt")
-        execute_process(
-            COMMAND "${CMAKE_COMMAND}" --build "${ANO_CRYPTO_BUILD_DIR}" --target ano_crypto_cmac_compiler_review
-            RESULT_VARIABLE _cmac_compiler_review_result
-            OUTPUT_VARIABLE _cmac_compiler_review_stdout
-            ERROR_VARIABLE _cmac_compiler_review_stderr)
-    endif()
-    if(NOT _cmac_compiler_review_result EQUAL 0 OR
-       NOT EXISTS "${_cmac_compiler_review_source}/CMAC_COMPILER_OUTPUT_REVIEW.txt" OR
-       NOT EXISTS "${_cmac_compiler_review_source}/CMAC_COMPILER_OUTPUT_DISASSEMBLY.txt")
-        file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CMAC_COMPILER_OUTPUT_REVIEW.txt"
-            "CMAC compiler-output capture failed.\n${_cmac_compiler_review_stdout}${_cmac_compiler_review_stderr}")
-        message(FATAL_ERROR "CMAC compiler-output review capture failed")
+        message(FATAL_ERROR "Prepared CMAC compiler-output review artifact is incomplete")
     endif()
     file(COPY "${_cmac_compiler_review_source}/CMAC_COMPILER_OUTPUT_REVIEW.txt"
               "${_cmac_compiler_review_source}/CMAC_COMPILER_OUTPUT_DISASSEMBLY.txt"
          DESTINATION "${ANO_CRYPTO_EVIDENCE_DIR}")
-    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/CMAC_COMPILER_OUTPUT_REVIEW.txt"
-        "\nCapture command output:\n${_cmac_compiler_review_stdout}${_cmac_compiler_review_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-        "CMAC compiler-output review capture result: ${_cmac_compiler_review_result}\n")
+        "CMAC compiler-output review capture result: 0 (prepared predecessor artifact)\n")
 else()
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CMAC_COMPILER_OUTPUT_REVIEW.txt"
         "CMAC compiler-output review was not requested. Set ANO_CRYPTO_RUN_CMAC_COMPILER_REVIEW=ON.\n")
@@ -731,7 +722,8 @@ if(ANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_random_service_policy.cmake"
         RESULT_VARIABLE _random_service_check_result
         OUTPUT_VARIABLE _random_service_check_stdout
-        ERROR_VARIABLE _random_service_check_stderr)
+        ERROR_VARIABLE _random_service_check_stderr
+        TIMEOUT 300)
     file(APPEND "${_random_service_check_output}" "\nCommand output:\n${_random_service_check_stdout}${_random_service_check_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Random-service implementation policy check result: ${_random_service_check_result}\n")
     if(NOT _random_service_check_result EQUAL 0)
@@ -752,7 +744,8 @@ if(ANO_CRYPTO_RUN_RANDOM_LIFECYCLE_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_random_lifecycle_policy.cmake"
         RESULT_VARIABLE _random_lifecycle_check_result
         OUTPUT_VARIABLE _random_lifecycle_check_stdout
-        ERROR_VARIABLE _random_lifecycle_check_stderr)
+        ERROR_VARIABLE _random_lifecycle_check_stderr
+        TIMEOUT 300)
     file(APPEND "${_random_lifecycle_check_output}" "\nCommand output:\n${_random_lifecycle_check_stdout}${_random_lifecycle_check_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Random lifecycle hardening policy check result: ${_random_lifecycle_check_result}\n")
     if(NOT _random_lifecycle_check_result EQUAL 0)
@@ -764,23 +757,20 @@ else()
 endif()
 
 if(ANO_CRYPTO_RUN_EXPORTED_SYMBOL_CHECK)
-    set(_symbol_check_work_dir "${ANO_CRYPTO_EVIDENCE_DIR}/clean-release-symbol-work")
     set(_symbol_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/EXPORTED_SYMBOL_BASELINE_CHECK.txt")
-    execute_process(
-        COMMAND "${CMAKE_COMMAND}"
-            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
-            -DANO_CRYPTO_SYMBOL_WORK_DIR=${_symbol_check_work_dir}
-            -DANO_CRYPTO_SYMBOL_REPORT=${_symbol_check_output}
-            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_clean_release_symbols.cmake"
-        RESULT_VARIABLE _symbol_check_result
-        OUTPUT_VARIABLE _symbol_check_stdout
-        ERROR_VARIABLE _symbol_check_stderr)
-    file(APPEND "${_symbol_check_output}" "\nCommand output:\n${_symbol_check_stdout}${_symbol_check_stderr}\n")
-    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Clean Release exported-symbol baseline result: ${_symbol_check_result}\n")
-    file(REMOVE_RECURSE "${_symbol_check_work_dir}")
-    if(NOT _symbol_check_result EQUAL 0)
-        message(FATAL_ERROR "clean Release exported-symbol baseline check failed; see ${_symbol_check_output}")
+    set(_prepared_symbol_check
+        "${ANO_CRYPTO_BUILD_DIR}/policy-check/CLEAN_RELEASE_EXPORTED_SYMBOL_BASELINE_CHECK.txt")
+    if(NOT EXISTS "${_prepared_symbol_check}" OR IS_DIRECTORY "${_prepared_symbol_check}" OR
+       IS_SYMLINK "${_prepared_symbol_check}")
+        message(FATAL_ERROR "Prepared clean Release symbol report is unavailable")
     endif()
+    file(READ "${_prepared_symbol_check}" _prepared_symbol_text)
+    if(NOT _prepared_symbol_text MATCHES "Result: PASS")
+        message(FATAL_ERROR "Prepared clean Release symbol report did not pass")
+    endif()
+    configure_file("${_prepared_symbol_check}" "${_symbol_check_output}" COPYONLY)
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "Clean Release exported-symbol baseline result: 0 (prepared predecessor artifact)\n")
 else()
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/EXPORTED_SYMBOL_BASELINE_CHECK.txt"
         "Clean Release exported-symbol baseline check was not requested. Set ANO_CRYPTO_RUN_EXPORTED_SYMBOL_CHECK=ON.\n")
@@ -796,7 +786,8 @@ if(ANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_entropy_health_policy.cmake"
         RESULT_VARIABLE _entropy_health_check_result
         OUTPUT_VARIABLE _entropy_health_check_stdout
-        ERROR_VARIABLE _entropy_health_check_stderr)
+        ERROR_VARIABLE _entropy_health_check_stderr
+        TIMEOUT 300)
     file(APPEND "${_entropy_health_check_output}" "\nCommand output:\n${_entropy_health_check_stdout}${_entropy_health_check_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Entropy/health policy check result: ${_entropy_health_check_result}\n")
     if(NOT _entropy_health_check_result EQUAL 0)
@@ -817,7 +808,8 @@ if(ANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_entropy_operational_policy.cmake"
         RESULT_VARIABLE _entropy_operational_check_result
         OUTPUT_VARIABLE _entropy_operational_check_stdout
-        ERROR_VARIABLE _entropy_operational_check_stderr)
+        ERROR_VARIABLE _entropy_operational_check_stderr
+        TIMEOUT 300)
     file(APPEND "${_entropy_operational_check_output}" "\nCommand output:\n${_entropy_operational_check_stdout}${_entropy_operational_check_stderr}\n")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Entropy operational policy check result: ${_entropy_operational_check_result}\n")
     if(NOT _entropy_operational_check_result EQUAL 0)
@@ -1016,50 +1008,38 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
     "Signing status: SIGNING_STATUS.txt\n")
 
 if(ANO_CRYPTO_RUN_CTEST)
-    find_program(_ctest_exe ctest)
-    if(NOT _ctest_exe)
-        message(FATAL_ERROR "ctest executable not found")
-    endif()
-    if(NOT EXISTS "${ANO_CRYPTO_BUILD_DIR}/CTestTestfile.cmake")
-        message(FATAL_ERROR "CTestTestfile.cmake not found in ANO_CRYPTO_BUILD_DIR")
-    endif()
-
-    execute_process(
-        COMMAND "${_ctest_exe}" --output-on-failure
-        WORKING_DIRECTORY "${ANO_CRYPTO_BUILD_DIR}"
-        RESULT_VARIABLE _ctest_result
-        OUTPUT_VARIABLE _ctest_stdout
-        ERROR_VARIABLE _ctest_stderr)
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ctest.log" "${_ctest_stdout}${_ctest_stderr}")
-    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "CTest result: ${_ctest_result}\n")
-    if(NOT _ctest_result EQUAL 0)
-        message(FATAL_ERROR "ctest failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/ctest.log")
-    endif()
-else()
-    set(_prepared_ctest_evidence_dir "${ANO_CRYPTO_BUILD_DIR}/ctest-evidence")
-    set(_prepared_ctest_log "${_prepared_ctest_evidence_dir}/ctest.log")
-    set(_prepared_ctest_summary "${_prepared_ctest_evidence_dir}/CTEST_EVIDENCE_SUMMARY.txt")
-    if(EXISTS "${_prepared_ctest_log}" AND EXISTS "${_prepared_ctest_summary}")
-        configure_file("${_prepared_ctest_log}" "${ANO_CRYPTO_EVIDENCE_DIR}/ctest.log" COPYONLY)
-        configure_file("${_prepared_ctest_summary}" "${ANO_CRYPTO_EVIDENCE_DIR}/CTEST_EVIDENCE_SUMMARY.txt" COPYONLY)
-        file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "CTest result: 0 (reused standalone evidence capture)\n")
-    else()
-        file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ctest.log" "CTest was not requested. Set ANO_CRYPTO_RUN_CTEST=ON to capture test output.\n")
-    endif()
+    message(FATAL_ERROR
+        "Release evidence assembly does not run nested CTest; use ano_crypto_ctest_evidence first")
 endif()
+set(_prepared_ctest_evidence_dir "${ANO_CRYPTO_BUILD_DIR}/ctest-evidence")
+set(_prepared_ctest_log "${_prepared_ctest_evidence_dir}/ctest.log")
+set(_prepared_ctest_summary "${_prepared_ctest_evidence_dir}/CTEST_EVIDENCE_SUMMARY.txt")
+if(NOT EXISTS "${_prepared_ctest_log}" OR IS_DIRECTORY "${_prepared_ctest_log}" OR
+   IS_SYMLINK "${_prepared_ctest_log}" OR
+   NOT EXISTS "${_prepared_ctest_summary}" OR IS_DIRECTORY "${_prepared_ctest_summary}" OR
+   IS_SYMLINK "${_prepared_ctest_summary}")
+    message(FATAL_ERROR "Prepared CTest evidence is missing or unsafe")
+endif()
+file(READ "${_prepared_ctest_summary}" _prepared_ctest_text)
+if(NOT _prepared_ctest_text MATCHES "CTest result: 0")
+    message(FATAL_ERROR "Prepared CTest evidence did not pass")
+endif()
+configure_file("${_prepared_ctest_log}" "${ANO_CRYPTO_EVIDENCE_DIR}/ctest.log" COPYONLY)
+configure_file("${_prepared_ctest_summary}"
+    "${ANO_CRYPTO_EVIDENCE_DIR}/CTEST_EVIDENCE_SUMMARY.txt" COPYONLY)
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "CTest result: 0 (prepared predecessor artifact)\n")
 
 function(_ano_crypto_find_evidence_test_executable _test_name _out_var)
-    set(_candidates
-        "${ANO_CRYPTO_BUILD_DIR}/${_test_name}"
-        "${ANO_CRYPTO_BUILD_DIR}/${_test_name}.exe"
-        "${ANO_CRYPTO_BUILD_DIR}/Debug/${_test_name}"
-        "${ANO_CRYPTO_BUILD_DIR}/Debug/${_test_name}.exe"
-        "${ANO_CRYPTO_BUILD_DIR}/Release/${_test_name}"
-        "${ANO_CRYPTO_BUILD_DIR}/Release/${_test_name}.exe"
-        "${ANO_CRYPTO_BUILD_DIR}/RelWithDebInfo/${_test_name}"
-        "${ANO_CRYPTO_BUILD_DIR}/RelWithDebInfo/${_test_name}.exe"
-        "${ANO_CRYPTO_BUILD_DIR}/MinSizeRel/${_test_name}"
-        "${ANO_CRYPTO_BUILD_DIR}/MinSizeRel/${_test_name}.exe")
+    if(ANO_CRYPTO_MULTI_CONFIG_BUILD)
+        set(_candidates
+            "${ANO_CRYPTO_BUILD_DIR}/${ANO_CRYPTO_BUILD_CONFIG}/${_test_name}"
+            "${ANO_CRYPTO_BUILD_DIR}/${ANO_CRYPTO_BUILD_CONFIG}/${_test_name}.exe")
+    else()
+        set(_candidates
+            "${ANO_CRYPTO_BUILD_DIR}/${_test_name}"
+            "${ANO_CRYPTO_BUILD_DIR}/${_test_name}.exe")
+    endif()
     foreach(_candidate IN LISTS _candidates)
         if(EXISTS "${_candidate}" AND NOT IS_DIRECTORY "${_candidate}")
             set(${_out_var} "${_candidate}" PARENT_SCOPE)
@@ -1091,29 +1071,54 @@ endfunction()
 # filtered CTest process from an outer build target.  This avoids nested CTest /
 # build-runner jobserver interactions while preserving independent exit-status
 # and output validation for each evidence artifact.
-_ano_crypto_run_evidence_test(
-    ano_crypto_sha2_hmac_openssl_differential_tests
-    _sha2_diff_result _sha2_diff_stdout _sha2_diff_stderr)
-_ano_crypto_run_evidence_test(
-    ano_crypto_aes_cbc_openssl_differential_tests
-    _aes_cbc_diff_result _aes_cbc_diff_stdout _aes_cbc_diff_stderr)
-_ano_crypto_run_evidence_test(
-    ano_crypto_aes_cmac_openssl_differential_tests
-    _aes_cmac_diff_result _aes_cmac_diff_stdout _aes_cmac_diff_stderr)
+_ano_crypto_find_evidence_test_executable(
+    ano_crypto_sha2_hmac_openssl_differential_tests _sha2_diff_executable)
+_ano_crypto_find_evidence_test_executable(
+    ano_crypto_aes_cbc_openssl_differential_tests _aes_cbc_diff_executable)
+_ano_crypto_find_evidence_test_executable(
+    ano_crypto_aes_cmac_openssl_differential_tests _aes_cmac_diff_executable)
 
-file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log"
-    "${_sha2_diff_stdout}${_sha2_diff_stderr}"
-    "${_aes_cbc_diff_stdout}${_aes_cbc_diff_stderr}"
-    "${_aes_cmac_diff_stdout}${_aes_cmac_diff_stderr}")
-file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-    "OpenSSL differential validation results: sha2-hmac=${_sha2_diff_result}; aes-cbc=${_aes_cbc_diff_result}; aes-cmac=${_aes_cmac_diff_result}\n")
-if(NOT _sha2_diff_result EQUAL 0 OR
-   NOT _aes_cbc_diff_result EQUAL 0 OR
-   NOT _aes_cmac_diff_result EQUAL 0 OR
-   NOT _sha2_diff_stdout MATCHES "sha2-hmac-differential status=pass" OR
-   NOT _aes_cbc_diff_stdout MATCHES "AES-CBC OpenSSL differential comparisons passed" OR
-   NOT _aes_cmac_diff_stdout MATCHES "OpenSSL 3.x AES-CMAC differential validation passed")
-    message(FATAL_ERROR "OpenSSL differential validation failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log")
+if(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE)
+    if(NOT (_sha2_diff_executable AND
+            _aes_cbc_diff_executable AND
+            _aes_cmac_diff_executable))
+        message(FATAL_ERROR
+            "Configured OpenSSL differential validation executables are incomplete")
+    endif()
+    _ano_crypto_run_evidence_test(
+        ano_crypto_sha2_hmac_openssl_differential_tests
+        _sha2_diff_result _sha2_diff_stdout _sha2_diff_stderr)
+    _ano_crypto_run_evidence_test(
+        ano_crypto_aes_cbc_openssl_differential_tests
+        _aes_cbc_diff_result _aes_cbc_diff_stdout _aes_cbc_diff_stderr)
+    _ano_crypto_run_evidence_test(
+        ano_crypto_aes_cmac_openssl_differential_tests
+        _aes_cmac_diff_result _aes_cmac_diff_stdout _aes_cmac_diff_stderr)
+
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log"
+        "${_sha2_diff_stdout}${_sha2_diff_stderr}"
+        "${_aes_cbc_diff_stdout}${_aes_cbc_diff_stderr}"
+        "${_aes_cmac_diff_stdout}${_aes_cmac_diff_stderr}")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "OpenSSL differential validation results: sha2-hmac=${_sha2_diff_result}; aes-cbc=${_aes_cbc_diff_result}; aes-cmac=${_aes_cmac_diff_result}\n")
+    if(NOT _sha2_diff_result EQUAL 0 OR
+       NOT _aes_cbc_diff_result EQUAL 0 OR
+       NOT _aes_cmac_diff_result EQUAL 0 OR
+       NOT _sha2_diff_stdout MATCHES "sha2-hmac-differential status=pass" OR
+       NOT _aes_cbc_diff_stdout MATCHES "AES-CBC OpenSSL differential comparisons passed" OR
+       NOT _aes_cmac_diff_stdout MATCHES "OpenSSL 3.x AES-CMAC differential validation passed")
+        message(FATAL_ERROR "OpenSSL differential validation failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log")
+    endif()
+else()
+    if(_sha2_diff_executable OR _aes_cbc_diff_executable OR _aes_cmac_diff_executable)
+        message(FATAL_ERROR
+            "Stale OpenSSL differential executables are present although the provider is not configured")
+    endif()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log"
+        "OpenSSL differential validation status=unavailable\n"
+        "Reason: optional OpenSSL differential provider was not configured.\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "OpenSSL differential validation results: unavailable (optional provider not configured)\n")
 endif()
 
 _ano_crypto_run_evidence_test(
@@ -1190,55 +1195,31 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CONCURRENCY_SANITIZER_REVIEW_NOTES.txt"
 if(ANO_CRYPTO_RUN_INSTALL_SMOKE)
     set(_prepared_install_smoke_dir "${ANO_CRYPTO_BUILD_DIR}/install-package-smoke")
     set(_prepared_install_smoke_summary "${_prepared_install_smoke_dir}/INSTALL_SMOKE_SUMMARY.txt")
-    if(EXISTS "${_prepared_install_smoke_summary}")
-        foreach(_artifact IN ITEMS
-            INSTALL_SMOKE_INSTALL.log
-            INSTALL_SMOKE_CONFIGURE.log
-            INSTALL_SMOKE_BUILD.log
-            INSTALL_SMOKE_RUN.log
-            INSTALL_SMOKE_SUMMARY.txt)
-            if(NOT EXISTS "${_prepared_install_smoke_dir}/${_artifact}")
-                message(FATAL_ERROR "prepared install-package smoke artifact is incomplete: ${_artifact}")
-            endif()
-            configure_file(
-                "${_prepared_install_smoke_dir}/${_artifact}"
-                "${ANO_CRYPTO_EVIDENCE_DIR}/${_artifact}"
-                COPYONLY)
-        endforeach()
-        set(_smoke_result 0)
-    else()
-        if(NOT EXISTS "${ANO_CRYPTO_SOURCE_DIR}/tools/run_install_package_smoke.cmake")
-            message(FATAL_ERROR "install-package smoke script is missing")
+    foreach(_artifact IN ITEMS
+        INSTALL_SMOKE_INSTALL.log
+        INSTALL_SMOKE_CONFIGURE.log
+        INSTALL_SMOKE_BUILD.log
+        INSTALL_SMOKE_RUN.log
+        P1_29_COMPAT_CONFIGURE.log
+        P1_29_COMPAT_BUILD.log
+        P1_29_COMPAT_CTEST.log
+        INSTALL_SMOKE_SUMMARY.txt)
+        if(NOT EXISTS "${_prepared_install_smoke_dir}/${_artifact}" OR
+           IS_DIRECTORY "${_prepared_install_smoke_dir}/${_artifact}" OR
+           IS_SYMLINK "${_prepared_install_smoke_dir}/${_artifact}")
+            message(FATAL_ERROR "Prepared install-package smoke artifact is incomplete: ${_artifact}")
         endif()
-        execute_process(
-            COMMAND "${CMAKE_COMMAND}" -E env
-                --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
-                "${CMAKE_COMMAND}"
-                -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
-                -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
-                -DANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR=${_prepared_install_smoke_dir}
-                -P "${ANO_CRYPTO_SOURCE_DIR}/tools/run_install_package_smoke.cmake"
-            RESULT_VARIABLE _smoke_prepare_result
-            OUTPUT_VARIABLE _smoke_prepare_stdout
-            ERROR_VARIABLE _smoke_prepare_stderr)
-        if(NOT _smoke_prepare_result EQUAL 0 OR NOT EXISTS "${_prepared_install_smoke_summary}")
-            file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/INSTALL_SMOKE_RUN.log"
-                "${_smoke_prepare_stdout}${_smoke_prepare_stderr}")
-            message(FATAL_ERROR "install-package smoke preparation failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/INSTALL_SMOKE_RUN.log")
-        endif()
-        foreach(_artifact IN ITEMS
-            INSTALL_SMOKE_INSTALL.log
-            INSTALL_SMOKE_CONFIGURE.log
-            INSTALL_SMOKE_BUILD.log
-            INSTALL_SMOKE_RUN.log
-            INSTALL_SMOKE_SUMMARY.txt)
-            configure_file(
-                "${_prepared_install_smoke_dir}/${_artifact}"
-                "${ANO_CRYPTO_EVIDENCE_DIR}/${_artifact}"
-                COPYONLY)
-        endforeach()
-        set(_smoke_result 0)
+        configure_file(
+            "${_prepared_install_smoke_dir}/${_artifact}"
+            "${ANO_CRYPTO_EVIDENCE_DIR}/${_artifact}"
+            COPYONLY)
+    endforeach()
+    file(READ "${_prepared_install_smoke_summary}" _install_smoke_summary_text)
+    if(NOT _install_smoke_summary_text MATCHES "Install smoke result: 0" OR
+       NOT _install_smoke_summary_text MATCHES "Current/P1-29 header compatibility CTest result: 0")
+        message(FATAL_ERROR "Prepared install-package smoke did not pass")
     endif()
+    set(_smoke_result 0)
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Install smoke result: ${_smoke_result}\n")
 else()
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/INSTALL_SMOKE_RUN.log"
@@ -1248,27 +1229,38 @@ endif()
 if(ANO_CRYPTO_RUN_POC_PACKAGE_SMOKE)
     set(_prepared_poc_smoke_dir "${ANO_CRYPTO_BUILD_DIR}/poc-package-smoke")
     set(_prepared_poc_summary "${_prepared_poc_smoke_dir}/POC_PACKAGE_SMOKE_SUMMARY.txt")
-    if(EXISTS "${_prepared_poc_summary}")
-        file(REMOVE_RECURSE "${ANO_CRYPTO_POC_SMOKE_DIR}")
-        file(MAKE_DIRECTORY "${ANO_CRYPTO_POC_SMOKE_DIR}")
-        file(COPY "${_prepared_poc_smoke_dir}/" DESTINATION "${ANO_CRYPTO_POC_SMOKE_DIR}")
-        set(_poc_smoke_result 0)
-        set(_poc_smoke_stdout "Reused prebuilt ano_crypto_poc_package_smoke artifact: ${_prepared_poc_smoke_dir}\n")
-        set(_poc_smoke_stderr "")
-    else()
-        if(NOT EXISTS "${ANO_CRYPTO_SOURCE_DIR}/tools/run_poc_package_smoke.cmake")
-            message(FATAL_ERROR "PoC package smoke script is missing: ${ANO_CRYPTO_SOURCE_DIR}/tools/run_poc_package_smoke.cmake")
-        endif()
-        execute_process(
-            COMMAND "${CMAKE_COMMAND}"
-                -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
-                -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
-                -DANO_CRYPTO_POC_SMOKE_DIR=${ANO_CRYPTO_POC_SMOKE_DIR}
-                -P "${ANO_CRYPTO_SOURCE_DIR}/tools/run_poc_package_smoke.cmake"
-            RESULT_VARIABLE _poc_smoke_result
-            OUTPUT_VARIABLE _poc_smoke_stdout
-            ERROR_VARIABLE _poc_smoke_stderr)
+    if(NOT EXISTS "${_prepared_poc_summary}" OR IS_DIRECTORY "${_prepared_poc_summary}" OR
+       IS_SYMLINK "${_prepared_poc_summary}")
+        message(FATAL_ERROR "Prepared PoC package smoke artifact is missing or unsafe")
     endif()
+    file(READ "${_prepared_poc_summary}" _poc_smoke_summary_text)
+    if(NOT _poc_smoke_summary_text MATCHES "PoC package smoke result: 0")
+        message(FATAL_ERROR "Prepared PoC package smoke did not pass")
+    endif()
+    set(_prepared_poc_package "${_prepared_poc_smoke_dir}/AnoCrypto-C-PoC-v0")
+    if(NOT IS_DIRECTORY "${_prepared_poc_package}" OR IS_SYMLINK "${_prepared_poc_package}")
+        message(FATAL_ERROR "Prepared PoC package is missing or unsafe")
+    endif()
+    file(REMOVE_RECURSE "${ANO_CRYPTO_POC_SMOKE_DIR}")
+    file(MAKE_DIRECTORY "${ANO_CRYPTO_POC_SMOKE_DIR}")
+    file(COPY "${_prepared_poc_package}" DESTINATION "${ANO_CRYPTO_POC_SMOKE_DIR}")
+    foreach(_artifact IN ITEMS
+            POC_EXAMPLE_BUILD.log
+            POC_EXAMPLE_CONFIGURE.log
+            POC_EXAMPLE_RUN.log
+            POC_PACKAGE_CREATE.log
+            POC_PACKAGE_SMOKE_SUMMARY.txt)
+        if(NOT EXISTS "${_prepared_poc_smoke_dir}/${_artifact}" OR
+           IS_DIRECTORY "${_prepared_poc_smoke_dir}/${_artifact}" OR
+           IS_SYMLINK "${_prepared_poc_smoke_dir}/${_artifact}")
+            message(FATAL_ERROR "Prepared PoC smoke artifact is incomplete: ${_artifact}")
+        endif()
+        configure_file("${_prepared_poc_smoke_dir}/${_artifact}"
+            "${ANO_CRYPTO_POC_SMOKE_DIR}/${_artifact}" COPYONLY)
+    endforeach()
+    set(_poc_smoke_result 0)
+    set(_poc_smoke_stdout "Reused prepared ano_crypto_poc_package_smoke artifact: ${_prepared_poc_smoke_dir}\n")
+    set(_poc_smoke_stderr "")
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/POC_PACKAGE_SMOKE.log"
         "# Run customer PoC package smoke\n"
         "# Result: ${_poc_smoke_result}\n\n"
@@ -1280,6 +1272,25 @@ if(ANO_CRYPTO_RUN_POC_PACKAGE_SMOKE)
 else()
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/POC_PACKAGE_SMOKE.log"
         "PoC package smoke was not requested. Set ANO_CRYPTO_RUN_POC_PACKAGE_SMOKE=ON to capture customer PoC package smoke output.\n")
+endif()
+
+set(_artifact_scan_roots
+    "${ANO_CRYPTO_EVIDENCE_DIR}"
+    "${ANO_CRYPTO_BUILD_DIR}/install-package-smoke/install-prefix"
+    "${ANO_CRYPTO_POC_SMOKE_DIR}/AnoCrypto-C-PoC-v0")
+execute_process(
+    COMMAND "${CMAKE_COMMAND}"
+        "-DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}"
+        "-DANO_CRYPTO_SENSITIVE_ARTIFACT_ROOTS=${_artifact_scan_roots}"
+        "-DANO_CRYPTO_SENSITIVE_ARTIFACT_SCAN_OUTPUT=${ANO_CRYPTO_EVIDENCE_DIR}/SENSITIVE_ARTIFACT_SCAN.txt"
+        -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_sensitive_release_artifacts.cmake"
+    RESULT_VARIABLE _artifact_scan_result
+    OUTPUT_VARIABLE _artifact_scan_stdout
+    ERROR_VARIABLE _artifact_scan_stderr
+    TIMEOUT 120)
+if(NOT "${_artifact_scan_result}" STREQUAL "0")
+    message(FATAL_ERROR
+        "Sensitive release-artifact scan failed:\n${_artifact_scan_stdout}${_artifact_scan_stderr}")
 endif()
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
@@ -1339,8 +1350,11 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `release-provenance/`: unsigned source archive, source-file hashes, SPDX 2.3 JSON source inventory, ABI/public-header inputs, signing request placeholder, and authorization TODO bound by `RELEASE_ARTIFACTS.sha256`.\n"
 "- `RELEASE_PROVENANCE_CHECK.txt`: generated bundle hash/path/identity/SBOM/signing-boundary verification.\n"
 "- `RELEASE_PROVENANCE_POLICY_CHECK.txt`: static P1-32 integration and unsigned-release policy verification.\n"
+"- `release-signing-handoff/`: key-free Ed25519/RFC 3161 offline-signing request and BLOCKED readiness metadata.\n"
+"- `RELEASE_SIGNING_HANDOFF_CHECK.txt`: manifest, policy, role-separation, and sensitive-material verification.\n"
 "- `SBOM_STATUS.txt`: source-inventory SBOM scope and limitation status.\n"
 "- `SIGNING_STATUS.txt`: explicit unsigned signing and authorization boundary.\n"
+"- `SENSITIVE_ARTIFACT_SCAN.txt`: evidence, installed SDK, and PoC credential/signature leakage scan.\n"
 "- `EVIDENCE_MANIFEST_README.txt`: notes for the generated evidence manifest.\n"
 "- `EVIDENCE_MANIFEST.sha256`: SHA-256 manifest of generated evidence files.\n"
 "- Platform entropy provider status appears in `ctest.log` when the provider test output is shown by CTest.\n"
@@ -1387,13 +1401,10 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/EVIDENCE_MANIFEST_README.txt"
 
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Evidence manifest: EVIDENCE_MANIFEST.sha256\n")
 
-file(GLOB_RECURSE _evidence_files
-    LIST_DIRECTORIES false
-    RELATIVE "${ANO_CRYPTO_EVIDENCE_DIR}"
-    "${ANO_CRYPTO_EVIDENCE_DIR}/*")
-list(SORT _evidence_files)
+_ano_crypto_list_tree_files("${ANO_CRYPTO_EVIDENCE_DIR}" _evidence_files_absolute TRUE)
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/EVIDENCE_MANIFEST.sha256" "")
-foreach(_rel IN LISTS _evidence_files)
+foreach(_evidence_file IN LISTS _evidence_files_absolute)
+    file(RELATIVE_PATH _rel "${ANO_CRYPTO_EVIDENCE_DIR}" "${_evidence_file}")
     set(_manifest_skip OFF)
     if(_rel STREQUAL "EVIDENCE_MANIFEST.sha256")
         set(_manifest_skip ON)
@@ -1408,7 +1419,7 @@ foreach(_rel IN LISTS _evidence_files)
         set(_manifest_skip ON)
     endif()
     if(NOT _manifest_skip)
-        file(SHA256 "${ANO_CRYPTO_EVIDENCE_DIR}/${_rel}" _evidence_hash)
+        file(SHA256 "${_evidence_file}" _evidence_hash)
         file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/EVIDENCE_MANIFEST.sha256" "${_evidence_hash}  ${_rel}\n")
     endif()
 endforeach()

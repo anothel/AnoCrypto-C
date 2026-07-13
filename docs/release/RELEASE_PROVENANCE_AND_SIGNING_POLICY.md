@@ -1,20 +1,21 @@
 # Release Provenance and Signing Policy
 
-Status: P1-31 unsigned engineering policy. This policy does not authorize external release and does not assert that a cryptographic signature, hosted review, or official validation exists.
+Status: P1-32 unsigned engineering policy. External release authorized: NO. The repository is `UNSIGNED`; the offline-signing handoff is `BLOCKED` because the production signer, RFC 3161 timestamp policy, required role identities, actual tag/hosted review, and product release authorization are not provisioned or completed.
 
 ## Purpose
 
-P1-31 binds the reviewed source archive and public compatibility inputs into one self-contained provenance bundle before another public cryptographic API is considered. The bundle is designed to make missing, stale, or tampered release metadata visible without storing signing credentials in the repository.
+P1-32 binds the reviewed source archive and public compatibility inputs into a self-contained provenance bundle, then creates a key-free offline-signing handoff. The generator and verifier make missing, stale, or tampered metadata visible. They do not sign a release or authorize distribution.
 
-The generated bundle is an engineering record. It is not a substitute for:
+The generated records are engineering evidence. They are not substitutes for:
 
-- tag and commit authorization;
-- actual hosted platform artifact review;
-- cryptographic signature generation and verification;
+- tag, commit, and hosted-artifact authorization;
+- production key provisioning or offline signature generation;
+- RFC 3161 timestamp issuance and verification;
+- Security Reviewer and Product Release Owner approval;
 - legal/product release approval;
 - official validation evidence.
 
-## Bundle contents
+## Provenance bundle
 
 `tools/create_release_provenance_bundle.cmake` produces:
 
@@ -35,19 +36,18 @@ release-provenance/
   RELEASE_ARTIFACTS.sha256
 ```
 
-`RELEASE_ARTIFACTS.sha256` covers every other file in the bundle and is the only proposed detached-signature subject. The signature format, verifier, signer policy, and timestamp policy remain TODO. The P1-31 generator rejects a signed claim and does not accept key or credential files.
+`RELEASE_ARTIFACTS.sha256` covers every other file in the provenance bundle. It is the only detached-signature subject. The provenance checker requires complete manifest coverage, safe relative paths, current release identity, source-archive/SBOM agreement, 14 public headers, 69 ABI-0 symbols, `UNSIGNED` signing state, and external authorization `NO`.
 
 ## Source SBOM boundary
 
-P1-31 generates an SPDX 2.3 JSON source inventory for the exact file list used to create `anocrypto-c-source.tar.gz`.
+P1-32 generates an SPDX 2.3 JSON source inventory for the exact regular-file list used to create `anocrypto-c-source.tar.gz`.
 
 Included:
 
 - repository-relative file paths;
-- SHA-256 and SHA-1 file checksums bound to the same SPDX file record;
-- SPDX file identifiers;
-- one AnoCrypto-C package record;
-- SPDX package verification code computed from the sorted per-file SHA-1 values;
+- SHA-256 and SHA-1 checksums bound to each SPDX file record;
+- one AnoCrypto-C source-package record;
+- SPDX package verification code computed from sorted per-file SHA-1 values;
 - release version and generation time.
 
 Not performed:
@@ -55,72 +55,82 @@ Not performed:
 - package-manager or transitive dependency discovery;
 - license conclusions beyond `NOASSERTION`;
 - vulnerability analysis;
-- customer binary inventory;
-- supplier or distribution authorization assertions.
+- customer binary or runtime inventory;
+- supplier, distribution, or official-validation assertions.
 
-The verifier also compares archive member names and extracted regular-file hashes with `SOURCE_FILES.sha256`; symlink or other non-regular archive members are rejected. The file therefore documents source-archive contents; it must not be described as a complete dependency or vulnerability SBOM without a later reviewed generator and scope decision.
+The verifier compares archive member names and extracted regular-file hashes with `SOURCE_FILES.sha256`. Symlinks and other non-regular members are rejected. Do not describe this source inventory as a complete dependency or vulnerability SBOM.
 
-## Provenance identity
+## Provenance identity and hosted disposition
 
-`RELEASE_PROVENANCE.txt` records and binds:
+`RELEASE_PROVENANCE.txt` binds the release identity, expected and recorded tag, source commit, `CLEAN`/`DIRTY`/`UNKNOWN` worktree state, source archive and inventory, public-header manifest, exported-symbol list, hosted disposition, signing status, and authorization state.
 
-- release and package version;
-- expected tag metadata;
-- recorded actual tag string, when supplied;
-- source commit string and explicit `CLEAN`, `DIRTY`, or `UNKNOWN` worktree state;
-- ABI line, public-header count, and public-symbol count;
-- source archive, source hash manifest, SPDX source inventory, public-header manifest, exported-symbol list, and hosted disposition hashes;
-- unsigned signing status;
-- release authorization TODO state.
+A tag or commit string is not an attestation. A recorded release tag or completed hosted disposition requires a known commit and `CLEAN` worktree. Strict Git checks must prove that expected tag, supplied commit, and checked-out `HEAD` resolve to one reviewed commit.
 
-A recorded tag string or commit string is not an attestation. An untagged engineering bundle may record a dirty worktree, but a recorded actual release tag or completed hosted disposition requires a known commit and `CLEAN` worktree state. Existing strict Git checks remain responsible for proving that expected tag, supplied commit, and checked-out HEAD resolve to one commit in a real Git work tree.
+The default hosted disposition is `TODO`. A `PASS` record is accepted only when release/tag identity, non-placeholder reviewer, UTC timestamp, workflow commit, clean provenance commit, and result fields agree. Mechanical verification does not perform human platform, compiler-output, ABI, side-channel, or product review.
 
-The root `.gitignore` excludes only generated build and hosted-review work directories using anchored patterns. This prevents an in-tree CI build directory from making an otherwise committed checkout appear dirty, while ordinary untracked source paths remain visible to Git. Files intentionally placed under an excluded generated directory are outside the reviewed source-archive scope.
+## Offline-signing profile
 
-## Hosted artifact disposition
+Source-owned policy: `release/ANOCRYPTO_C_RELEASE_SIGNING_POLICY.cmake`.
 
-The default bundle contains an explicit `TODO` hosted-artifact disposition. A completed `PASS` record is accepted only when it includes:
+| Field | Required value |
+|---|---|
+| Signature subject | `RELEASE_ARTIFACTS.sha256` |
+| Signature algorithm | Ed25519 |
+| Detached-signature encoding | raw 64 bytes |
+| Signature file | `RELEASE_ARTIFACTS.sha256.ed25519` |
+| Public-key distribution form | PEM SubjectPublicKeyInfo |
+| Approved-key fingerprint | SHA-256 over DER-encoded SubjectPublicKeyInfo |
+| Verification tool family | OpenSSL 3 `pkeyutl` |
+| Timestamp | RFC 3161 over `RELEASE_ARTIFACTS.sha256.ed25519` |
+| Required approvers | Security Reviewer and Product Release Owner |
+| GitHub attestation | optional secondary evidence; never trust root or replacement for detached-signature verification |
 
-- the same release version and expected tag;
-- a non-placeholder reviewer;
-- a UTC review timestamp;
-- a workflow commit matching the provenance commit;
-- a provenance worktree state of `CLEAN`;
-- `PASS` result fields.
+The two approver identities must be stable, non-placeholder, and different after provisioning. Recording the same identity for both roles is rejected. Role records do not authorize release by themselves.
 
-This mechanical check does not perform the human platform, compiler-output, ABI, or side-channel review itself.
+## Key-free handoff
 
-## Signing boundary
+`tools/create_release_signing_handoff.cmake` copies only verified provenance and policy records into a hash-bound handoff. `tools/check_release_signing_handoff.cmake` re-derives readiness, checks manifest coverage and hash bindings, enforces role separation, and rejects private-key or credential material.
 
-P1-31 signing mode is `UNSIGNED`.
+Current production state:
 
-Rules:
+- approved production signer record: `UNPROVISIONED`;
+- approved signer SPKI fingerprint: unavailable;
+- RFC 3161 TSA policy and trust anchor: `UNPROVISIONED`;
+- Security Reviewer identity: `UNPROVISIONED`;
+- Product Release Owner identity: `UNPROVISIONED`;
+- detached signature: absent;
+- timestamp response: absent;
+- handoff readiness: `BLOCKED`;
+- external release authorization: `NO`.
 
-- No private key, signing token, certificate private key, keystore, or credential is stored in source, evidence, or the PoC package.
-- No signature file is accepted merely because it exists.
-- No `SIGNED`, `VERIFIED`, or external-release authorization status is accepted by the P1-31 unsigned checker.
-- A future signing step must use an approved detached-signature tool and independently verify the signature over `RELEASE_ARTIFACTS.sha256`.
-- Signer identity, authorization, key custody, timestamping, revocation, and verification retention require separate product/legal/infrastructure decisions.
+No private key, signing token, keystore, detached signature, timestamp request/response, or credential may be committed, placed in evidence, or copied into the PoC package. Production signing must remain offline and hardware-backed under the approved signer policy.
+
+## Test-fixture boundary
+
+`ANO_CRYPTO_ENABLE_SIGNING_TEST_FIXTURES=ON` enables ephemeral OpenSSL signing and RFC 3161 fixtures only in a tests-enabled Debug build. The fixture exercises positive and negative verifier paths and removes generated key/signature/timestamp material after the test. Release, RelWithDebInfo, MinSizeRel, and tests-disabled configurations reject the option.
+
+Fixture success proves only test-path behavior. Fixture keys, certificates, signatures, timestamp requests, and timestamp responses are not production artifacts, approval records, or release evidence.
 
 ## External release gate
 
-The generated authorization file intentionally contains:
+The generated handoff authorization file, `release-signing-handoff/RELEASE_AUTHORIZATION.md`, remains:
 
 ```text
-Status: TODO
+Status: BLOCKED
 External release authorized: NO
 ```
 
-Changing those lines is not sufficient. A later release procedure must require all of the following:
+External release requires all of the following outside this repository state:
 
-1. strict tag/commit/HEAD identity verification and a clean reviewed worktree;
-2. completed hosted artifact disposition;
-3. reviewed source SBOM scope and limitations;
-4. approved signer and timestamp policy;
-5. cryptographic verification of the detached signature;
-6. legal/product authorization and customer-sharing scope;
-7. a regenerated hash manifest after every approved metadata change.
+1. strict tag/commit/`HEAD` identity verification and a clean reviewed worktree;
+2. completed hosted-artifact disposition;
+3. reviewed source-SBOM scope and limitations;
+4. provisioned approved production signer and RFC 3161 policy/trust anchor;
+5. verified raw Ed25519 detached signature and verified timestamp response;
+6. distinct, non-placeholder Security Reviewer and Product Release Owner approvals;
+7. legal/product authorization and approved customer-sharing scope;
+8. regenerated hash manifests after every authorized metadata change.
 
 ## Claims boundary
 
-P1-31 supports the phrases “unsigned engineering provenance bundle,” “source inventory,” and “release preparation gate.” It does not support wording that implies completed signing, completed hosted review, completed supply-chain attestation, universal ABI compatibility, official validation, or external-release approval.
+P1-32 supports the phrases `unsigned engineering provenance bundle`, `source inventory`, `key-free offline-signing handoff`, and `release preparation gate`. It does not support wording that implies completed signing, completed hosted review, authenticated production attestation, external-release approval, universal ABI compatibility, side-channel assurance, or official validation.

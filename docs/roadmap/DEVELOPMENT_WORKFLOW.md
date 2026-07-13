@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P1-29 engineering draft.
+Status: P1-32 engineering draft.
 
 ## Purpose
 
@@ -13,7 +13,7 @@ This document explains the working flow used for AnoCrypto-C after the C99 reboo
 | P0 Foundation | Repository, clean-room records, C ABI skeleton, module lifecycle, self-test, build identity, install smoke | A consumer can build, install, link, initialize, self-test, and shut down the module. |
 | P1 Core slice | Small algorithm slice, KATs, negative tests, entropy/DRBG/CSP seams, CI/reproducibility notes, API/ABI review, customer PoC package | The SHA-256/SHA-384/SHA-512 hash and HMAC slice, HMAC_DRBG-SHA-256, random service, CSP lifecycle, and supporting evidence have repeatable tests and explicit scope records. |
 | P1 Scope lock | Decide the next validation-target candidate scope before expanding code | Algorithm scope, service matrix, differential-validation strategy, side-channel review checklist, and customer intake inputs are recorded. |
-| P1 Evidence/package hardening | SBOM/signing placeholders, package manifest review, and evidence manifest generation | Evidence and PoC packages have explicit status files and hash manifests without storing secrets or signing material. |
+| P1 Evidence/package hardening | Source provenance, package manifest review, evidence generation, and offline signing handoff | Evidence and PoC packages have explicit status/hash records; the key-free handoff is verified without storing credentials or claiming production signing. |
 | P2 Productization | Customer PoC hardening, toolchain support matrix, SecureKit/PKI boundary planning | A customer-specific PoC package can be reviewed without mixing core, SecureKit, and PKI scope. |
 | P3 Validation readiness | Gap review with selected platform/toolchain/scope and external preparation | Submission-facing artifacts are prepared from reviewed evidence, not from ad-hoc logs. |
 
@@ -45,6 +45,7 @@ Each task should follow this loop:
    - Entropy operational policy check when source classification, provider probe, restart/fork behavior, or process-boundary handling changes.
    - Random-service policy check when public random lifecycle, provider availability, source-backed ownership, output clearing, or reseed behavior changes.
    - Differential/portability policy check when a reference provider, C representation assumption, endian/alignment handling, or hosted architecture lane changes.
+   - Release-signing handoff and verifier regressions when signature subject/encoding, signer identity, timestamp, role separation, or authorization policy changes.
 
 4. Update clean-room and claims records.
    - Record public standards and user-owned documents used as inputs.
@@ -248,7 +249,8 @@ P1-23 deliverables:
 | P1-29 | AES-CMAC hardening | Completed with private-state/failure/cleanup/alias hardening, lifecycle/concurrency regression, 1,728 differential paths, and compiler-output capture. |
 | P1-30 | Release compatibility baseline and hosted artifact manifests | Completed by freezing the P1-29 public contract, testing old/current headers against the P1-30 package, and requiring manifest-backed hosted review without adding public services. |
 | P1-31 | Unsigned release provenance and source SBOM gate | Completed with exact-source SPDX 2.3 JSON inventory, hash-bound unsigned provenance, signing/authorization TODO records, hosted provenance lane, negative regressions, and no public API growth. |
-| P1-32 candidate | Hosted disposition and signing-tool decision | Review real hosted artifacts and choose the detached-signature/verifier, signer, custody, timestamping, and external-authorization policy before any public algorithm expansion. |
+| P1-32 | Offline release-signing handoff | Completed with an Ed25519/RFC 3161 verifier policy, key-free handoff bundle, role separation, opt-in ephemeral Debug fixtures, and fail-closed unprovisioned production state. |
+| Next candidate | Production release provisioning and hosted disposition | Provision approved signer/TSA/approver identities and review real hosted/tag evidence before any signed or externally authorized release claim. |
 
 ## Stop conditions
 
@@ -290,4 +292,22 @@ P1-31 deliverables:
 - explicit PoC exclusion of internal source/SBOM/signing artifacts;
 - unchanged P1-29 public contract and 69-symbol ABI-0 line.
 
-P1-32 remains a decision step for actual hosted artifact disposition and signing/verification policy. It must not infer that a tag string, checksum, source SBOM, or uploaded artifact is authenticated or externally approved.
+P1-31 does not infer that a tag string, checksum, source SBOM, or uploaded artifact is authenticated or externally approved.
+
+## P1-32 placement
+
+P1-32 is the offline release-signing handoff step after the P1-31 unsigned provenance gate. It adds no cryptographic service, public function, header, or symbol. It defines and verifies release-signing metadata while keeping all production credentials and outputs outside the repository and CI.
+
+P1-32 deliverables:
+
+- exact `RELEASE_ARTIFACTS.sha256` signing subject;
+- Ed25519 raw 64-byte detached-signature and SHA-256 SPKI DER fingerprint policy;
+- required RFC 3161 timestamp over the detached signature;
+- key-free handoff bundle creation and complete manifest/policy verification;
+- distinct Security Reviewer and Product Release Owner identity records and same-identity rejection;
+- optional secondary-only GitHub artifact attestation classification;
+- key-free negative tests plus explicit opt-in Debug-only ephemeral OpenSSL fixtures that remove generated signing/timestamp material;
+- production signer/TSA state recorded as unprovisioned, signing as `UNSIGNED`, external release as `NO`, and handoff readiness as `BLOCKED`;
+- PoC exclusion of internal provenance/handoff records, keys, tokens, signatures, and timestamp responses.
+
+Actual hosted disposition, tag execution, production signer/TSA provisioning, detached signature/timestamp generation and verification, distinct human approvals, and external-release authorization remain future release operations.

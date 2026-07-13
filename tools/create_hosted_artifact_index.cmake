@@ -72,7 +72,8 @@ foreach(_manifest IN LISTS _manifests)
             -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_hosted_artifact_manifest.cmake"
         RESULT_VARIABLE _verify_result
         OUTPUT_VARIABLE _verify_stdout
-        ERROR_VARIABLE _verify_stderr)
+        ERROR_VARIABLE _verify_stderr
+        TIMEOUT 120)
     if(NOT _verify_result EQUAL 0)
         message(FATAL_ERROR
             "Hosted bundle verification failed for ${_manifest}:\n${_verify_stdout}${_verify_stderr}")

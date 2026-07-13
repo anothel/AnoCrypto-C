@@ -24,6 +24,7 @@ option(ANO_CRYPTO_ENABLE_THREAD_SAFETY "Enable internal locks for module/self-te
 option(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER "Enable reviewed internal platform entropy provider where supported" ON)
 option(ANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS "Build test-only SHA-2/HMAC, AES-CBC, and AES-CMAC differential checks against OpenSSL 3.x when available" ON)
 option(ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER "Fail configuration when the test-only OpenSSL 3.x differential provider is unavailable" OFF)
+option(ANO_CRYPTO_ENABLE_SIGNING_TEST_FIXTURES "Enable ephemeral OpenSSL signing/timestamp fixtures in a Debug-only test build" OFF)
 set(ANO_CRYPTO_SANITIZER_MODE "none" CACHE STRING "Sanitizer mode: none or address-undefined")
 set(ANO_CRYPTO_ACTUAL_RELEASE_TAG "" CACHE STRING "Actual Git tag supplied by a tagged CI/release build")
 set(ANO_CRYPTO_ACTUAL_RELEASE_COMMIT "" CACHE STRING "Actual commit supplied by a tagged CI/release build")
@@ -78,6 +79,16 @@ if((ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS OR ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS)
    _ano_crypto_release_like_configuration)
     message(FATAL_ERROR
         "Internal test hooks are forbidden in Release-like configurations; use a tests-enabled Debug-only build")
+endif()
+if(ANO_CRYPTO_ENABLE_SIGNING_TEST_FIXTURES AND NOT ANO_CRYPTO_BUILD_TESTS)
+    message(FATAL_ERROR
+        "ANO_CRYPTO_ENABLE_SIGNING_TEST_FIXTURES requires ANO_CRYPTO_BUILD_TESTS=ON")
+endif()
+if(ANO_CRYPTO_ENABLE_SIGNING_TEST_FIXTURES AND
+   (_ano_crypto_release_like_configuration OR
+    (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")))
+    message(FATAL_ERROR
+        "Signing test fixtures are allowed only in an explicit tests-enabled Debug-only build")
 endif()
 if(ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER AND NOT ANO_CRYPTO_BUILD_TESTS)
     message(FATAL_ERROR "ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER requires ANO_CRYPTO_BUILD_TESTS=ON")
@@ -254,19 +265,20 @@ if(ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS AND NOT MSVC)
     target_compile_options(anocrypto_c PRIVATE -fvisibility=hidden)
 endif()
 
-set(ANO_CRYPTO_SYMBOL_TOOL "")
+unset(ANO_CRYPTO_SYMBOL_TOOL)
+unset(ANO_CRYPTO_SYMBOL_TOOL CACHE)
 set(ANO_CRYPTO_SYMBOL_STYLE "")
-if(BUILD_SHARED_LIBS)
-    if(MSVC)
-        find_program(ANO_CRYPTO_SYMBOL_TOOL NAMES dumpbin)
-        set(ANO_CRYPTO_SYMBOL_STYLE "MSVC")
-    elseif(APPLE)
-        set(ANO_CRYPTO_SYMBOL_TOOL "${CMAKE_NM}")
-        set(ANO_CRYPTO_SYMBOL_STYLE "APPLE")
-    else()
-        set(ANO_CRYPTO_SYMBOL_TOOL "${CMAKE_NM}")
-        set(ANO_CRYPTO_SYMBOL_STYLE "GNU")
-    endif()
+if(MSVC)
+    get_filename_component(_ano_crypto_msvc_bin_dir "${CMAKE_LINKER}" DIRECTORY)
+    find_program(ANO_CRYPTO_SYMBOL_TOOL NAMES dumpbin
+        HINTS "${_ano_crypto_msvc_bin_dir}")
+    set(ANO_CRYPTO_SYMBOL_STYLE "MSVC")
+elseif(APPLE)
+    set(ANO_CRYPTO_SYMBOL_TOOL "${CMAKE_NM}")
+    set(ANO_CRYPTO_SYMBOL_STYLE "APPLE")
+else()
+    set(ANO_CRYPTO_SYMBOL_TOOL "${CMAKE_NM}")
+    set(ANO_CRYPTO_SYMBOL_STYLE "GNU")
 endif()
 
 set(ANO_CRYPTO_AES_OBJDUMP "${CMAKE_OBJDUMP}")
@@ -340,13 +352,19 @@ else()
 endif()
 
 add_custom_target(ano_crypto_clean_release_symbol_baseline_check
-    COMMAND ${CMAKE_COMMAND}
+    COMMAND ${CMAKE_COMMAND} -E env
+        --unset=MAKEFLAGS
+        --unset=MFLAGS
+        --unset=MAKELEVEL
+        ${CMAKE_COMMAND}
         -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -DANO_CRYPTO_SYMBOL_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/clean-release-symbol-check
         -DANO_CRYPTO_SYMBOL_REPORT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/CLEAN_RELEASE_EXPORTED_SYMBOL_BASELINE_CHECK.txt
         -DANO_CRYPTO_CMAKE_GENERATOR=${CMAKE_GENERATOR}
         -DANO_CRYPTO_CMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
         -DANO_CRYPTO_CMAKE_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
+        -DANO_CRYPTO_DEPENDENCY_TOOL=${ANO_CRYPTO_SYMBOL_TOOL}
+        -DANO_CRYPTO_DEPENDENCY_STYLE=${ANO_CRYPTO_SYMBOL_STYLE}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_clean_release_symbols.cmake
     USES_TERMINAL
     COMMENT "Building a clean Release library and checking the stored export baseline")
@@ -525,10 +543,15 @@ add_custom_target(ano_crypto_create_poc_package
     COMMENT "Creating AnoCrypto-C customer PoC package v0 draft")
 
 add_custom_target(ano_crypto_poc_package_smoke
-    COMMAND ${CMAKE_COMMAND}
+    COMMAND ${CMAKE_COMMAND} -E env
+        --unset=MAKEFLAGS
+        --unset=MFLAGS
+        --unset=MAKELEVEL
+        ${CMAKE_COMMAND}
         -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
         -DANO_CRYPTO_POC_SMOKE_DIR=${CMAKE_CURRENT_BINARY_DIR}/poc-package-smoke
+        -DANO_CRYPTO_BUILD_CONFIG=$<CONFIG>
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_poc_package_smoke.cmake
     DEPENDS anocrypto_c
     USES_TERMINAL
@@ -543,6 +566,7 @@ add_custom_target(ano_crypto_install_package_smoke
         -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
         -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
         -DANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR=${CMAKE_CURRENT_BINARY_DIR}/install-package-smoke
+        -DANO_CRYPTO_BUILD_CONFIG=$<CONFIG>
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_install_package_smoke.cmake
     DEPENDS anocrypto_c
     COMMENT "Running AnoCrypto-C installed-package consumer smoke")
@@ -946,6 +970,41 @@ if(ANO_CRYPTO_BUILD_TESTS)
     set_tests_properties(ano_crypto_release_provenance_tests PROPERTIES
         LABELS "ci-artifact;release-provenance;sbom;signing-boundary")
 
+    add_test(NAME ano_crypto_release_signing_handoff_tests
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DANO_CRYPTO_TEST_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff-test
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/release_signing_handoff_tests.cmake)
+    set_tests_properties(ano_crypto_release_signing_handoff_tests PROPERTIES
+        LABELS "ci-artifact;release-signing;signing-boundary")
+
+    add_test(NAME ano_crypto_sensitive_release_artifact_tests
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DANO_CRYPTO_TEST_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/sensitive-release-artifact-test
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/sensitive_release_artifact_tests.cmake)
+    set_tests_properties(ano_crypto_sensitive_release_artifact_tests PROPERTIES
+        LABELS "ci-artifact;release-provenance;release-signing;signing-boundary")
+
+    if(ANO_CRYPTO_ENABLE_SIGNING_TEST_FIXTURES)
+        find_program(ANO_CRYPTO_OPENSSL_EXECUTABLE NAMES openssl)
+        if(NOT ANO_CRYPTO_OPENSSL_EXECUTABLE)
+            message(FATAL_ERROR "Signing test fixtures require an OpenSSL executable")
+        endif()
+        add_test(NAME ano_crypto_release_signing_fixture_tests
+            COMMAND ${CMAKE_COMMAND}
+                -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+                -DANO_CRYPTO_TEST_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-signing-fixture-test
+                -DANO_CRYPTO_OPENSSL_EXECUTABLE=${ANO_CRYPTO_OPENSSL_EXECUTABLE}
+                -DANO_CRYPTO_BUILD_TESTS=ON
+                -DANO_CRYPTO_ENABLE_SIGNING_TEST_FIXTURES=ON
+                -DANO_CRYPTO_TEST_CONFIGURATION=Debug
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/release_signing_fixture_tests.cmake)
+        set_tests_properties(ano_crypto_release_signing_fixture_tests PROPERTIES
+            LABELS "release-signing;test-fixture;openssl"
+            CONFIGURATIONS Debug)
+    endif()
+
     add_executable(ano_crypto_build_identity_abi_tests
         tests/unit/build_identity_abi_tests.c)
     target_link_libraries(ano_crypto_build_identity_abi_tests PRIVATE anocrypto_c)
@@ -1029,29 +1088,26 @@ if(ANO_CRYPTO_BUILD_TESTS)
             ${CMAKE_COMMAND}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
             -DANO_CRYPTO_CTEST_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/ctest-evidence
+            -DANO_CRYPTO_BUILD_CONFIG=$<CONFIG>
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_ctest_evidence.cmake
         USES_TERMINAL
         COMMENT "Capturing AnoCrypto-C P1-32 CTest evidence")
     add_dependencies(ano_crypto_ctest_evidence ${_ano_crypto_evidence_test_targets})
 
-    # Package and tagged-release smoke targets create independent nested build
-    # trees.  Complete them before launching the full CTest evidence process so
-    # the outer build never runs several nested CMake/CTest trees concurrently.
-    # This keeps the evidence target deterministic on constrained CI runners.
+    # Serialize nested build trees before CTest. Direct sibling dependencies can
+    # otherwise run concurrently when the outer build uses --parallel.
+    add_dependencies(ano_crypto_install_package_smoke
+        ano_crypto_clean_release_symbol_baseline_check)
+    add_dependencies(ano_crypto_poc_package_smoke
+        ano_crypto_install_package_smoke)
+    add_dependencies(ano_crypto_tagged_release_compatibility_smoke
+        ano_crypto_poc_package_smoke)
     add_dependencies(ano_crypto_ctest_evidence
         ano_crypto_aes_compiler_review
         ano_crypto_cmac_compiler_review
         ano_crypto_tagged_release_compatibility_smoke)
-    if(TARGET ano_crypto_install_package_smoke)
-        add_dependencies(ano_crypto_ctest_evidence ano_crypto_install_package_smoke)
-    endif()
-    if(TARGET ano_crypto_poc_package_smoke)
-        add_dependencies(ano_crypto_ctest_evidence ano_crypto_poc_package_smoke)
-    endif()
 
-    add_custom_target(ano_crypto_collect_release_evidence
-        # The evidence assembler consumes prepared install/PoC/CTest artifacts.
-        # Remove outer build-runner variables for any standalone fallback path.
+    add_custom_target(ano_crypto_release_provenance_evidence
         COMMAND ${CMAKE_COMMAND} -E env
             --unset=MAKEFLAGS
             --unset=MFLAGS
@@ -1059,7 +1115,56 @@ if(ANO_CRYPTO_BUILD_TESTS)
             ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-32
+            -DANO_CRYPTO_PROVENANCE_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-provenance-evidence
+            -DANO_CRYPTO_ACTUAL_RELEASE_TAG=${ANO_CRYPTO_ACTUAL_RELEASE_TAG}
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/prepare_release_provenance_evidence.cmake
+        USES_TERMINAL
+        VERBATIM
+        COMMENT "Preparing verified unsigned P1-32 release provenance evidence")
+    add_dependencies(ano_crypto_release_provenance_evidence
+        ano_crypto_ctest_evidence)
+
+    add_custom_target(ano_crypto_release_signing_handoff_evidence
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DANO_CRYPTO_PROVENANCE_BUNDLE_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-provenance-evidence/release-provenance
+            -DANO_CRYPTO_SIGNING_HANDOFF_OUTPUT_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff
+            -DANO_CRYPTO_SIGNING_HANDOFF_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff-check.txt
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/create_release_signing_handoff.cmake
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DANO_CRYPTO_SIGNING_HANDOFF_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff
+            -DANO_CRYPTO_SIGNING_HANDOFF_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff-check.txt
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_signing_handoff.cmake
+        USES_TERMINAL
+        VERBATIM
+        COMMENT "Creating and checking the key-free P1-32 offline-signing handoff")
+    add_dependencies(ano_crypto_release_signing_handoff_evidence
+        ano_crypto_release_provenance_evidence)
+
+    if(CMAKE_CONFIGURATION_TYPES)
+        set(_ano_crypto_multi_config_build ON)
+    else()
+        set(_ano_crypto_multi_config_build OFF)
+    endif()
+
+    # Run status-producing policy/test programs once in a predecessor. The final
+    # collector below only verifies and copies this hash-bound artifact tree.
+    add_custom_target(ano_crypto_prepare_release_status_evidence
+        COMMAND ${CMAKE_COMMAND} -E env
+            --unset=MAKEFLAGS
+            --unset=MFLAGS
+            --unset=MAKELEVEL
+            ${CMAKE_COMMAND}
+            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p1-32
+            -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-provenance-evidence
+            -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff
+            -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff-check.txt
+            -DANO_CRYPTO_BUILD_CONFIG=$<CONFIG>
+            -DANO_CRYPTO_MULTI_CONFIG_BUILD=${_ano_crypto_multi_config_build}
+            -DANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE=${ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE}
             -DANO_CRYPTO_RUN_CTEST=OFF
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
@@ -1083,7 +1188,21 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK=ON
             -DANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
-        COMMENT "Collecting AnoCrypto-C P1-32 release evidence draft")
+        USES_TERMINAL
+        VERBATIM
+        COMMENT "Preparing hash-bound P1-32 status evidence")
+    add_dependencies(ano_crypto_prepare_release_status_evidence
+        ano_crypto_release_signing_handoff_evidence)
+
+    add_custom_target(ano_crypto_collect_release_evidence
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+            -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p1-32
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p1-32
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/assemble_release_evidence.cmake
+        USES_TERMINAL
+        VERBATIM
+        COMMENT "Assembling AnoCrypto-C P1-32 evidence from prepared artifacts")
     add_dependencies(ano_crypto_collect_release_evidence
-        ano_crypto_ctest_evidence)
+        ano_crypto_prepare_release_status_evidence)
 endif()

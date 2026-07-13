@@ -17,7 +17,8 @@ set(_bundle "${ANO_CRYPTO_TEST_WORK_DIR}/bundle")
 
 function(_run_expect _expected_success _description)
     execute_process(COMMAND ${ARGN}
-        RESULT_VARIABLE _result OUTPUT_VARIABLE _stdout ERROR_VARIABLE _stderr)
+        RESULT_VARIABLE _result OUTPUT_VARIABLE _stdout ERROR_VARIABLE _stderr
+        TIMEOUT 120)
     if(_expected_success AND NOT _result EQUAL 0)
         message(FATAL_ERROR "${_description} failed unexpectedly:\n${_stdout}${_stderr}")
     elseif(NOT _expected_success AND _result EQUAL 0)
