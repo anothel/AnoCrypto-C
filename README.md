@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: `0.1.0-p1-33-release-rehearsal`, an engineering slice that retains the P1-29 cryptographic processing scope, reviewed 69-symbol ABI-0 surface, P1-31 unsigned provenance, and P1-32 key-free offline signing handoff. P1-33 adds a clean-checkout synthetic tagged-release rehearsal and a fail-closed hosted-artifact review model. Synthetic/local artifacts are never recorded as hosted results; absent GitHub-hosted results remain `NOT_RUN` or `UNREVIEWED`. The production signer and timestamp authority remain `UNPROVISIONED`, the repository remains `UNSIGNED`, external release remains `NO`, and handoff readiness remains `BLOCKED`. No actual tag, tag signature, production signature, timestamp response, completed hosted review, or external-release approval is included.
+Current status: `0.1.0-p2-01-readiness-gap`, a documentation and readiness-consolidation slice built on the P1-33 cryptographic and release-engineering baseline. P2-01 adds a complete implementation/test/evidence inventory, requirement traceability, readiness-gap classifications, pre-consultation questions, submission-document inventory, P2-02 through P2-08 roadmap, and a durable P1-34 external-blocker record. The public boundary remains 14 headers and 69 exported symbols on `ANOCRYPTO_C_0`. P1-34 actual hosted artifact review is still `BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING`; actual hosted lanes remain `NOT_RUN`, actual review remains `UNREVIEWED`, the repository remains `UNSIGNED`, signing handoff remains `BLOCKED`, and external release authorization remains `NO`.
 
 Implemented processing scope:
 
@@ -59,6 +59,20 @@ Skeleton-only / TODO scope:
 - PoC package legal/evaluation notice and customer-specific support boundary
 - Human review of captured AES compiler output and target-specific side-channel behavior; CMAC target-specific review, CTR counter policy, AEAD, padding helpers, GMAC, and domestic-algorithm decisions
 
+
+## P2-01 readiness consolidation
+
+P2-01 introduces no cryptographic service, public function, public type, header, enum value, or exported symbol. Its controlled documents are:
+
+- `docs/kcmvp/KCMVP_READINESS_GAP_P2.md`
+- `docs/kcmvp/KCMVP_PRECONSULTATION_QUESTIONS.md`
+- `docs/kcmvp/KCMVP_EVIDENCE_TRACEABILITY_MATRIX.md`
+- `docs/kcmvp/KCMVP_SUBMISSION_DOCUMENT_INVENTORY.md`
+- `docs/roadmap/P2_VALIDATION_READINESS_ROADMAP.md`
+- `docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md`
+
+The CMake package template filename is normalized to `cmake/AnoCryptoCConfig.cmake.in` so the repository matches its existing case-sensitive CMake and policy references. This packaging-source correction does not change public ABI.
+
 ## Build
 
 ```sh
@@ -70,8 +84,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-33
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-33
+cmake --install build --prefix /tmp/anocrypto-c-p2-01
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-01
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -89,8 +103,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p1-33
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p1-33
+cmake --install build --prefix /tmp/anocrypto-c-p2-01
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-01
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -121,7 +135,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p1-33/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-01/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 

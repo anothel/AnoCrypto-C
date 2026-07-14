@@ -1,4 +1,4 @@
-# Verify an unsigned AnoCrypto-C P1-33 engineering provenance bundle.
+# Verify an unsigned AnoCrypto-C P2-01 bundle retaining the P1-33 provenance policy.
 # This checker validates path safety, complete hash coverage, release identity,
 # source-file hashes, source SBOM bindings, ABI/public-header inputs, and the
 # explicit unsigned/BLOCKED release boundary. It does not verify a signature or
@@ -170,7 +170,7 @@ if(NOT _prov_signing_status STREQUAL "UNSIGNED" OR
    NOT _prov_external_release_authorized STREQUAL "NO" OR
    NOT _prov_result STREQUAL "PASS")
     message(FATAL_ERROR
-        "P1-33 provenance must remain unsigned and not externally authorized")
+        "P2-01 provenance must remain unsigned and not externally authorized")
 endif()
 if(NOT _prov_generated_utc MATCHES
    "^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9]Z$")
@@ -748,7 +748,7 @@ if(NOT (_disposition_review_status STREQUAL "UNREVIEWED" AND
         _disposition_review_date STREQUAL "UNREVIEWED" AND
         _disposition_value STREQUAL "UNREVIEWED"))
     message(FATAL_ERROR
-        "P1-33 provenance accepts only an explicit UNREVIEWED hosted disposition")
+        "P2-01 provenance accepts only an explicit UNREVIEWED hosted disposition")
 endif()
 if(NOT _disposition_commit STREQUAL "unknown" AND
    NOT _disposition_commit STREQUAL _prov_source_commit)
@@ -804,7 +804,7 @@ elseif(_disposition_security_reviewer STREQUAL _disposition_product_owner OR
     message(FATAL_ERROR "Hosted disposition approval roles are not separated")
 endif()
 
-# This P1-33 bundle generator does not support signature artifacts. Reject
+# This P2-01 retained bundle generator does not support signature artifacts. Reject
 # signature/key/credential-looking files rather than silently treating them as
 # verified release inputs.
 foreach(_relative IN LISTS _bundle_files)
@@ -830,7 +830,7 @@ endforeach()
 list(LENGTH _manifest_paths _manifest_file_count)
 string(TIMESTAMP _checked_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_PROVENANCE_CHECK_OUTPUT}"
-    "AnoCrypto-C P1-33 release provenance check\n"
+    "AnoCrypto-C P2-01 release provenance check\n"
     "Checked UTC: ${_checked_utc}\n"
     "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Expected tag: ${ANO_CRYPTO_RELEASE_TAG}\n"

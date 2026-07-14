@@ -1,6 +1,6 @@
 # Service Scope Matrix
 
-Status: P1-29 engineering draft.
+Status: P2-01 current engineering service inventory.
 
 | Service | Public surface | Status | Key boundary |
 |---|---|---|---|
@@ -27,3 +27,8 @@ AES-CMAC service availability is unchanged. P1-29 adds fail-closed context
 validation, cleanup and aliasing rules, lifecycle/concurrency regression, and
 manual compiler-review inputs. No service identifier or public operation was
 added.
+
+
+## P2-01 readiness note
+
+The service inventory remains 14 public headers and 69 exports on `ANOCRYPTO_C_0`. P2-01 reorganizes traceability and readiness evidence only. Module integrity, final conditional-test classification, entropy-provider responsibility, formal CSP inventory, and target-specific side-channel review remain open P2 items.

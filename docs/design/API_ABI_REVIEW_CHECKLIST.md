@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P1-33 engineering draft.
+Status: P2-01 ABI no-change review.
 
 ## Identity
 
@@ -91,9 +91,19 @@ These checks are toolchain-specific guardrails. Calling convention, loader behav
 
 ## P1-33 release rehearsal ABI review
 
-- Release version/prerelease metadata advances to `0.1.0-p1-33-release-rehearsal`; package version remains `0.1.0`.
+- Historical P1-33 release metadata advanced to `0.1.0-p1-33-release-rehearsal`; package version remains `0.1.0`.
 - No public header, function, enum value, non-version macro contract, type, or exported symbol is added or removed.
 - Public header count remains 14; clean Release export count remains 69 on `ANOCRYPTO_C_0`.
 - Normalized declarations, public types, non-version constants, and the stored symbol list remain equal to the P1-29 baseline.
 - Current-header/P1-33-library and retained-P1-29-header/P1-33-library consumers bind the same 69 functions.
 - Clean tag rehearsal, hosted review metadata, provenance, and signing-handoff changes remain build/test/evidence tooling, not public ABI.
+
+
+## P2-01 readiness-gap ABI review
+
+- Runtime/version metadata advances to `0.1.0-p2-01-readiness-gap`; package version remains `0.1.0`.
+- No public function, header, public type layout, enum value, non-version macro contract, or exported symbol is added or removed.
+- Public header count remains 14 and the clean Release symbol baseline remains 69 on `ANOCRYPTO_C_0`.
+- Normalized declarations, public types, non-version constants, retained P1-29-header consumption, and stored exported names remain compatibility inputs.
+- `cmake/AnoCryptoCConfig.cmake.in` is a case-sensitive source filename correction matching the pre-existing CMake/policy reference; installed package names and ABI are unchanged.
+- P1-34 actual hosted review remains blocked and is not replaced by local P2-01 checks.

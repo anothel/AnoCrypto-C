@@ -1,8 +1,13 @@
 # Hosted Platform Artifact Review
 
-Status: P1-33 review model. Actual hosted results are `NOT_RUN` or `UNREVIEWED` unless a referenced workflow artifact has been downloaded, verified, and dispositioned by a named reviewer.
+Status: P2-01 retained review model. Actual hosted results are `NOT_RUN` or `UNREVIEWED` unless a referenced workflow artifact has been downloaded, verified, and dispositioned by a named reviewer.
 
 Use this table only after the corresponding workflow run has completed, its `HOSTED_ARTIFACT_MANIFEST.txt` has been verified after download, and the final hosted artifact index has been generated. Workflow YAML or artifact presence alone is not a completed review.
+
+
+## Current external blocker
+
+P1-34 run `29256531912` at `cf0f3c425dd265c7509fb64a6123db97f71055dd` reached zero runners and produced zero artifacts because GitHub Actions billing/spending-limit status blocked execution. This document therefore retains every required hosted lane as `NOT_RUN`. See `HOSTED_CI_EXTERNAL_BLOCKER.md`.
 
 ## Required lane/platform model
 

@@ -1,130 +1,56 @@
 # C99 Priority TODO
 
-Status: P1-33 clean tagged-release rehearsal and hosted artifact review completed as an engineering slice.
+Status: P2-01 readiness-gap consolidation current view.
 
-## Completed foundation through P1-33
+## Completed Through P1-33
 
-- C99 repository, clean-room records, stable-status API style, module lifecycle,
-  self-test/error-state, build identity, and install/export package structure.
-- SHA-256/384/512, HMAC-SHA-2, HMAC_DRBG-SHA-256, entropy/provider seams,
-  source-backed public random lifecycle, CSP key handles, and thread-safety seams.
-- Reproducible-build notes, CI/evidence/PoC workflows, source-SBOM/provenance and
-  offline signing-handoff records, public-surface and clean Release exported-symbol checks.
-- AES-128/192/256 and CBC without padding with KAT, negative, differential,
-  lifecycle, concurrency, portability, and compiler-output review artifacts.
-- AES-CMAC with AES-128/192/256, full tags, dedicated CMAC-purpose handles,
-  startup/extended KATs, install/PoC/evidence integration, and a 69-symbol ABI-0
-  baseline.
-- P1-29 CMAC private-state integrity guards, fail-closed reinitialization,
-  bounded cleanup and alias rules, 128-iteration lifecycle stress, expanded
-  1,728-comparison differential coverage, shared-handle concurrency regression,
-  and target-specific compiler-output capture.
-- P1-30 central release identity, retained P1-29 public-header/symbol baseline, old/current-header consumers, strict tag/commit/HEAD fixture checks, and hashed hosted-artifact manifests.
-- P1-31 exact-source archive/file hash binding, SPDX 2.3 JSON source inventory, unsigned signing boundary, authorization TODO record, provenance regression tests, hosted provenance lane, and PoC exclusion checks.
-- P1-32 key-free offline signing handoff and verifier policy for Ed25519 raw 64-byte signatures over `RELEASE_ARTIFACTS.sha256`, SHA-256 SPKI DER fingerprints, required RFC 3161 timestamps over the signature, distinct Security Reviewer/Product Release Owner identities, and optional secondary-only GitHub attestation.
-- P1-33 isolated clean-checkout synthetic tag rehearsal, dirty/moved identity rejection, explicit required hosted lane model, actual/synthetic status separation, and fail-closed hosted review metadata checks.
+- C99 repository, clean-room records, stable status/API conventions, module lifecycle, startup self-test/error-state, build identity, install/export package, and customer PoC.
+- SHA-256/384/512, HMAC-SHA-2, HMAC_DRBG-SHA-256, platform-backed random service, AES-128/192/256 CBC without padding, AES-CMAC full tag, and purpose-separated in-memory CSP handles.
+- KAT, negative, lifecycle, concurrency, sanitizer, differential, portability, install, compatibility, source-provenance, source-SPDX, signing-handoff, and clean rehearsal engineering assets.
+- Public boundary frozen at 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
 
-## Immediate P1 candidates
+## P1-34 External Blocker — Still Incomplete
 
-1. Review and retain actual hosted Windows/macOS, Linux 32-bit, and big-endian
-   artifacts instead of treating workflow presence as execution evidence.
-2. Perform target-specific human review of captured AES and CMAC compiler output
-   and record the remaining timing/cache/fault backlog without overclaiming.
-3. Provision and approve the production signer identity/public-key fingerprint, offline key custody, RFC 3161 service/trust anchor, distinct release approvers, and external authorization process without storing credentials in the repository or CI.
-4. Expand source inventory into a reviewed dependency/component, license, and vulnerability scope only after tool, privacy, and legal requirements are selected.
-5. Strengthen automated ABI/source compatibility comparison across tagged releases, including public type size/alignment and semantic compatibility.
-6. Decide whether the next algorithm step is a no-implementation gate for a
-   narrowly scoped KDF, AES-CTR, or a pause for packaging/legal/evidence
-   maturity. CTR must not proceed without a counter-ownership policy.
-7. Finalize direct-noise-source health-test ownership only after a concrete
-   source and operating environment are selected.
+```text
+Status: BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING
+Run: 29256531912
+Commit: cf0f3c425dd265c7509fb64a6123db97f71055dd
+Jobs reaching runner: 0
+Artifacts: 0
+Actual hosted lanes: NOT_RUN
+Actual hosted review: UNREVIEWED
+```
 
-## Deferred
+Do not substitute local or synthetic evidence. Resume only after billing is resolved and actual artifacts are independently reviewed. See `docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md`.
 
-- tag truncation, AES-CTR, GCM, GMAC, padding helpers, hardware dispatch;
-- key export, persistence, wrapping, multi-process CSP, platform keystore;
-- public-key algorithms and AnoPKI integration;
-- dependency/component SBOM scope, vulnerability/license review, production signing/timestamping, signer/TSA provisioning, external authorization, and customer evaluation/legal notices;
-- any official-validation or completed-review claim.
+## Completed P2-01
 
+- consolidated current implementation, tests, evidence, packaging, and release-state inventory;
+- created requirement-to-code-to-test-to-evidence traceability;
+- classified readiness gaps with explicit external-confirmation and blocked states;
+- prepared prioritized pre-consultation questions;
+- inventoried submission documents by existing/update/new/after-consultation state;
+- defined P2-02 through P2-08 completion criteria and dependencies;
+- retained P1-34 blocker and release/signing boundaries;
+- preserved public ABI with no algorithm or public API addition.
 
-## P1-30 Release Compatibility Baseline
+## Next Sequence
 
-Completed engineering scope:
+1. **P2-02 — Module boundary and operating environment freeze**
+2. **P2-03 — Self-test, integrity, finite-state, and recovery specification**
+3. **P2-04 — Entropy/provider/DRBG responsibility and evidence closure**
+4. **P2-05 — CSP inventory and zeroization evidence closure**
+5. **P2-06 — Secure coding and target-specific side-channel review**
+6. **P2-07 — Controlled submission-document skeleton**
+7. **P2-08 — Pre-consultation rehearsal and decision capture**
 
-- central release identity and expected-tag metadata;
-- exact P1-29 public-header and 69-symbol baseline;
-- normalized public source-surface comparison;
-- current-header and P1-29-header consumers against P1-30;
-- installed CMake package exact/incompatible version probes;
-- hosted artifact manifest create/verify/tamper tests;
-- status-only hosted bundle index/review workflow;
-- evidence and PoC compatibility boundaries with no public ABI growth.
+Detailed deliverables and exit criteria are in `docs/roadmap/P2_VALIDATION_READINESS_ROADMAP.md`.
 
-Remaining TODO:
+## Deferred Until Explicit Scope Gate
 
-- review actual Linux/macOS/Windows hosted compatibility artifacts;
-- review actual Linux 32-bit and s390x big-endian artifacts;
-- verify the expected tag and commit in a tagged Git workflow;
-- retain actual hosted artifact reviewer/date disposition;
-- provision the approved production signer/TSA records and complete external-release authorization before distribution.
-
-## P1-31 Release Provenance and Source SBOM Gate
-
-Completed engineering scope:
-
-- deterministic SPDX 2.3 JSON source inventory for the exact source-archive file list;
-- SHA-256 binding of the source archive, source files, public-header manifest, ABI-0 symbol list, source SBOM, and hosted disposition;
-- exact bundle-manifest coverage, path-safety, source-tree, file-count, and package-verification-code checks;
-- explicit `UNSIGNED`, authorization `TODO`, and `External release authorized: NO` records;
-- negative regression for tampering, unlisted artifacts, unsafe paths, false signed/approved claims, wrong tag metadata, and incomplete hosted disposition;
-- hosted `release-provenance|Linux` bundle/index wiring;
-- customer PoC exclusion of the internal source archive, source SBOM, signing request, authorization record, and release tooling;
-- unchanged 14-header, 69-symbol `ANOCRYPTO_C_0` public surface.
-
-Remaining TODO:
-
-- review real hosted Windows/macOS/Linux 32-bit/s390x/differential/compiler/compatibility artifacts and record reviewer/date disposition;
-- verify the real expected tag, commit, and checkout in the release workflow;
-- validate SPDX syntax with the selected downstream consumer where required;
-- select dependency, license, and vulnerability inventory scope;
-- provision the P1-32-approved signer identity/public-key fingerprint, offline custody, RFC 3161 service/trust anchor, revocation handling, and verification retention;
-- record legal/product external-release authorization;
-- rank the next engineering slice after the remaining release gaps; no new public algorithm is implied.
-
-## P1-32 Offline Release-Signing Handoff
-
-Completed engineering scope:
-
-- exact signature subject `RELEASE_ARTIFACTS.sha256` and Ed25519 raw 64-byte signature format;
-- approved public-key identity as SHA-256 over SPKI DER and OpenSSL 3 `pkeyutl` verification policy;
-- required RFC 3161 timestamp over `RELEASE_ARTIFACTS.sha256.ed25519` with bound TSA policy/trust-anchor metadata;
-- key-free handoff bundle creation, complete file-hash verification, and fail-closed readiness state;
-- distinct Security Reviewer and Product Release Owner identity records with same-identity rejection;
-- GitHub artifact attestation classified as optional secondary evidence only;
-- key-free negative regressions and Debug-only opt-in ephemeral signature/timestamp fixtures with cleanup;
-- unchanged 14-header, 69-symbol `ANOCRYPTO_C_0` public surface and customer PoC exclusion of internal handoff/credential/signature material.
-
-Remaining TODO:
-
-- provision and approve a production signer, public-key fingerprint, hardware-backed custody, and revocation procedure;
-- provision and approve the RFC 3161 service, policy OID, trust anchor, and revocation review;
-- record distinct Security Reviewer and Product Release Owner identities and approvals;
-- review actual hosted artifacts and bind the real expected tag/commit/checkout;
-- generate and verify the production detached signature and timestamp response;
-- record legal/product external-release authorization.
-
-Until those items are complete, signing remains `UNSIGNED`, external release remains `NO`, and handoff readiness remains `BLOCKED`.
-
-## P1-33 Clean Tagged-Release Rehearsal and Hosted Artifact Review
-
-Completed engineering scope:
-
-- isolated clean checkout with a synthetic local tag; no tag is created in the user repository;
-- expected tag, supplied commit, tag-resolved commit, and checked-out `HEAD` identity checks;
-- dirty worktree, moved tag, moved `HEAD`, commit/ref mismatch, and false approval rejection;
-- explicit required Linux, Windows, macOS, Linux 32-bit, s390x big-endian, GCC/Clang compiler-output, OpenSSL differential, provenance, and signing-handoff review categories;
-- artifact hash, workflow commit/ref, platform, compiler, architecture, reviewer, review date, disposition, and actual-versus-synthetic origin records;
-- unchanged 14-header, 69-symbol `ANOCRYPTO_C_0` public surface.
-
-Actual hosted results remain `NOT_RUN` or `UNREVIEWED` until downloaded artifacts are independently reviewed. Production signer/TSA remain `UNPROVISIONED`; no actual tag, production signature, timestamp, or external release is created or authorized.
+- AES-CTR/GCM/GMAC, generic AEAD, padding helpers, and tag truncation;
+- KDF public APIs and public-key algorithms;
+- key export, persistence, wrapping, multi-process CSP, and platform keystore;
+- hardware acceleration/dispatch and C++ convenience wrapper priority;
+- production signer/TSA provisioning, actual tag/signature/timestamp, and external release;
+- any statement that formal validation or institution review is complete.

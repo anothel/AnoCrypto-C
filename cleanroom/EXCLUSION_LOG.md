@@ -397,3 +397,16 @@ If excluded material is discovered:
 | EX-4105 | Recording hosted `PASS`/`APPROVED` without artifact/workflow identity, reviewer, UTC review date, disposition, and limitations | False review claim | Rejected | Downloaded but undispositioned artifacts remain `UNREVIEWED`. |
 | EX-4106 | Assigning the same identity to conflicting Security Reviewer and Product Release Owner approvals | Authorization separation risk | Rejected | Distinct stable non-placeholder identities remain required before release authorization. |
 | EX-4107 | Adding actual signatures, timestamp responses, signing credentials, entropy/seed/DRBG state, AES values, CMAC tags, tokens, or customer data to rehearsal/hosted artifacts | Sensitive-material and false-release risk | Excluded | P1-33 retains status/hash metadata only and performs no production signing or timestamping. |
+
+
+## P2-01 Readiness Consolidation Exclusions
+
+| ID | Excluded material or behavior | Risk | Disposition | Note |
+|---|---|---|---|---|
+| EX-4201 | Treating the P2-01 gap matrix or consultation pack as an institution decision or completed validation result | Claims risk | Excluded | All interpretation-dependent items remain `EXTERNAL_CONFIRMATION_REQUIRED`. |
+| EX-4202 | Marking P1-34 or any hosted lane successful based on local CTest, policy, PoC, evidence generation, workflow YAML, or synthetic fixtures | Evidence overstatement | Rejected | Run `29256531912` reached zero runners and produced zero artifacts. |
+| EX-4203 | Adding a new algorithm, mode, public header, function, enum value, or exported symbol during readiness documentation | Scope/ABI risk | Excluded | P2-01 retains 14 headers, 69 exports, and `ANOCRYPTO_C_0`. |
+| EX-4204 | Copying official submission templates, normative standard text, third-party review content, or proprietary consultation material without confirmed rights | Provenance risk | Excluded | P2-01 uses only high-level public category/process checkpoints and fresh project-owned text. |
+| EX-4205 | Recording keys, entropy, seed, DRBG state, random bytes, plaintext/ciphertext, tags, private signing material, tokens, or customer data in traceability/evidence documents | Sensitive-material disclosure | Excluded | Documents remain status/path/count/hash/decision oriented. |
+| EX-4206 | Rewriting or squashing already-pushed P1 history to make P2 documentation appear contiguous | Repository integrity risk | Excluded | P2-01 is one forward commit from the supplied P1-33 source snapshot. |
+| EX-4207 | Performing push, tag creation, production signing, timestamping, or external release as part of P2-01 | Release integrity risk | Excluded | Repository remains unsigned, handoff blocked, external authorization no. |

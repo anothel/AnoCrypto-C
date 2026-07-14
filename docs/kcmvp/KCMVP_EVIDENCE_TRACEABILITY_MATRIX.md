@@ -1,0 +1,72 @@
+# KCMVP Evidence Traceability Matrix
+
+Status: P2-01 engineering traceability baseline. Requirement interpretations remain provisional unless explicitly marked otherwise.
+
+## Matrix Rules
+
+- `Code` names the implementation or build-policy location.
+- `Tests` names executable/CTest or policy checks; workflow definition is not execution evidence.
+- `Evidence/docs` names retained engineering inputs, not institution results.
+- Actual hosted status remains `NOT_RUN`/`UNREVIEWED` under `BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING`.
+- A row marked `READY_FOR_INTERNAL_REVIEW` may still require external confirmation.
+
+## Requirement → Code → Test → Evidence
+
+| ID | Requirement candidate | Code / configuration | Tests / checks | Evidence / controlling docs | Status | Open gap / next action |
+|---|---|---|---|---|---|---|
+| TR-MOD-001 | Module has explicit initialization and startup gate. | `src/core/module_state.c`; `include/anocrypto/ac_module.h` | `ano_crypto_module_state_tests`; `ano_crypto_service_gate_negative_tests` | `docs/design/C99_SELF_TEST_DESIGN.md`; this gap report | `READY_FOR_INTERNAL_REVIEW` | Normative service-availability table in P2-03. |
+| TR-MOD-002 | Cryptographic services are unavailable before successful self-test. | `ano_crypto_module_require_operational()` call sites in hash/MAC/DRBG/random/cipher/CSP paths | service-gate and algorithm negative tests | `docs/kcmvp/SERVICE_SCOPE_MATRIX.md` | `READY_FOR_INTERNAL_REVIEW` | Confirm allowed non-cryptographic queries. |
+| TR-MOD-003 | Fatal failure enters sticky error state. | `ano_crypto_internal_module_mark_error()`; `src/core/module_state.c` | `ano_crypto_entropy_health_error_state_tests`; module-state tests | `docs/design/C99_ENTROPY_FAILURE_INJECTION_AND_HEALTH_TEST.md` | `PARTIAL` | Final fatal/recoverable/restart matrix in P2-03. |
+| TR-MOD-004 | Shutdown and recovery behavior are explicit. | `ano_crypto_module_shutdown()` | module-state tests | `docs/design/C99_SELF_TEST_DESIGN.md` | `PARTIAL` | Confirm in-process recovery prohibition and operator action. |
+| TR-ST-001 | Startup self-tests cover submitted algorithm families. | `src/selftest/selftest.c`; `src/selftest/kat_manifest.c` | startup path through module tests; KAT executables | `tests/kat/README.md`; algorithm KAT plans | `READY_FOR_INTERNAL_REVIEW` | Map accepted startup/conditional classification after consultation. |
+| TR-ST-002 | Self-test status/flags are queryable without exposing values. | `include/anocrypto/ac_selftest.h`; `src/selftest/selftest.c` | module/self-test paths in CTest | `docs/design/C99_SELF_TEST_DESIGN.md` | `READY_FOR_INTERNAL_REVIEW` | Specify availability in fatal state. |
+| TR-ST-003 | Module integrity is checked before operation. | Current build identity/KAT-manifest checks only; integrity flag placeholder | module init tests | `docs/design/C99_SELF_TEST_DESIGN.md` | `NOT_IMPLEMENTED` | Select accepted integrity mechanism in P2-03. |
+| TR-ST-004 | Conditional tests are triggered where required. | DRBG/CSP/key-purpose/failure checks exist across implementation | DRBG, key lifecycle, stale handle, negative tests | design documents per service | `PARTIAL` | Institution-confirmed conditional-test list and triggers. |
+| TR-ALG-001 | SHA-256/384/512 implement one-shot and streaming services. | `src/hash/hash.c`; `src/hash/sha256.c`; `src/hash/sha512.c`; `ac_hash.h` | SHA-256/HMAC KATs, SHA-512 family KAT/negative/portability, differential | `SHA2_384_512_KAT_PLAN.md`; `KCMVP_ALGORITHM_SCOPE.md` | `READY_FOR_INTERNAL_REVIEW` | Confirm submitted algorithm set and official conformance path. |
+| TR-ALG-002 | HMAC-SHA-2 raw-key and streaming services are implemented. | `src/mac/hmac.c`; `ac_hmac.h` | SHA/HMAC KATs, extended KATs, negative, differential | hash/HMAC API and KAT docs | `READY_FOR_INTERNAL_REVIEW` | Confirm startup/conditional coverage. |
+| TR-ALG-003 | HMAC key-handle service enforces purpose/type. | `src/csp/key.c`; `src/csp/csp_handle.c`; HMAC handle path | `ano_crypto_hmac_key_handle_kat_tests`; key lifecycle/stale tests | `docs/design/C99_CSP_LIFECYCLE.md` | `PARTIAL` | Add formal CSP inventory in P2-05. |
+| TR-DRBG-001 | HMAC_DRBG-SHA-256 deterministic core follows explicit state transitions. | `src/drbg/drbg.c`; `ac_drbg.h` | DRBG KAT, boundary, negative, entropy-helper tests | `docs/design/C99_DRBG_DESIGN.md`; `DRBG_ENTROPY_BOUNDARY_EVIDENCE.md` | `READY_FOR_INTERNAL_REVIEW` | Consolidate exact limits and accepted test mapping. |
+| TR-DRBG-002 | Prediction-resistance requests fail closed unless selected. | DRBG/random parameter checks | DRBG boundary/negative tests | DRBG design and random API decision | `READY_FOR_INTERNAL_REVIEW` | Confirm that unsupported policy is acceptable. |
+| TR-RNG-001 | Public random service is seeded/reseeded from reviewed provider seam. | `src/drbg/random.c`; `src/drbg/entropy_adapter.c`; `ac_random.h` | random service/lifecycle/platform/provider-disabled/failure tests | random API and entropy adapter docs | `PARTIAL` | Freeze target providers and external health responsibility. |
+| TR-RNG-002 | Entropy output and random bytes are not logged/evidenced. | status-only probes and test output policy | sensitive artifact tests; policy checks | `docs/design/C99_ENTROPY_SOURCE_OPERATIONAL_POLICY.md`; clean-room rules | `READY_FOR_INTERNAL_REVIEW` | Retain review for submitted artifacts. |
+| TR-RNG-003 | Entropy acquisition failure clears output and propagates status. | entropy adapter/provider/random failure paths | entropy source negative and failure-injection tests | entropy failure CI checklist | `READY_FOR_INTERNAL_REVIEW` | Target-specific provider evidence. |
+| TR-RNG-004 | Source health-test failure supports local/fatal policy. | `src/drbg/entropy_health.c`; random/DRBG integration | entropy health and error-state tests | health-test design and checklist | `PARTIAL` | Direct source, tests, thresholds, and accepted ownership unresolved. |
+| TR-RNG-005 | Process change requires reseed before generation. | `src/drbg/process_guard.c`; `src/drbg/random.c` | process-guard and random lifecycle tests | random portability policy | `PARTIAL` | Actual target evidence and unsupported-marker declaration. |
+| TR-RNG-006 | VM/suspend/clone behavior is controlled. | No automatic mechanism | none | operational policy cautions | `NOT_IMPLEMENTED` | Define environment support or operator action. |
+| TR-AES-001 | AES-128/192/256 primitive is available only through reviewed services. | `src/cipher/aes.c`; internal headers | AES KAT/hardening/differential | AES implementation/hardening policies | `READY_FOR_INTERNAL_REVIEW` | Target-specific compiler/CPU review. |
+| TR-CBC-001 | CBC uses complete blocks, no padding, caller IV, and explicit alias rules. | `src/cipher/cipher.c`; `ac_cipher.h` | CBC KAT, negative, hardening, lifecycle, differential | AES-CBC implementation/hardening policies | `READY_FOR_INTERNAL_REVIEW` | Confirm service scope and operator IV responsibility. |
+| TR-CMAC-001 | CMAC supports AES-128/192/256 and full tag only. | `src/mac/cmac.c`; `ac_cmac.h` | CMAC KAT, negative, hardening, lifecycle, differential | CMAC selection/KAT/hardening docs | `READY_FOR_INTERNAL_REVIEW` | Confirm accepted submitted variant and conditional tests. |
+| TR-CMAC-002 | Authentication mismatch has distinct failure semantics and constant-work comparison candidate. | CMAC verify path | CMAC negative/hardening/differential tests | side-channel checklist | `PARTIAL` | Target-specific compiler/timing review; no universal claim. |
+| TR-CSP-001 | Keys are purpose-separated and non-exportable in current scope. | `src/csp/key.c`; `src/csp/csp_handle.c`; `ac_key.h` | key lifecycle, cross-purpose, stale/exhaustion tests | CSP lifecycle and service matrix | `PARTIAL` | Formal CSP/type/permission inventory in P2-05. |
+| TR-CSP-002 | Destroyed/stale handles cannot be reused. | generation/state checks in CSP handle table | stale/exhaustion and lifecycle tests | CSP lifecycle doc | `READY_FOR_INTERNAL_REVIEW` | Long-running capacity/process policy review. |
+| TR-CSP-003 | Secret buffers/key schedules are zeroized on destruction/failure. | `src/csp/zeroize.c`; service cleanup paths | lifecycle/hardening/negative tests | side-channel checklist; P2 gap report | `PARTIAL` | Compiler/target evidence and boundary statement. |
+| TR-CSP-004 | Persistence, export, wrapping, and platform keystore are excluded. | unsupported flags/absent APIs | key negative tests; public-surface check | product-layer boundaries; CSP lifecycle | `OUT_OF_SCOPE` | Reopen only through explicit scope/API gate. |
+| TR-THR-001 | Global module/CSP state has optional reviewed locking. | `src/core/thread_lock.c`; build option | thread-lock, CSP thread-safety, thread-platform review | thread-safety policy/support matrix | `PARTIAL` | Freeze supported platforms and caller serialization. |
+| TR-ABI-001 | C99 public surface remains controlled. | 14 headers; CMake C99 requirements | `ano_crypto_public_surface_check`; build tests | API/ABI checklist | `READY_FOR_INTERNAL_REVIEW` | Selected toolchain/loader review. |
+| TR-ABI-002 | Exported symbol set remains 69 on ABI line 0. | `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt`; visibility settings | clean Release symbol baseline check | ABI baseline files | `READY_FOR_INTERNAL_REVIEW` | Actual hosted clean Release review blocked. |
+| TR-ABI-003 | Retained P1-29 headers consume current library. | compatibility project and retained headers | current and P1-29 compatibility tests; installed compatibility smoke | tagged release compatibility policy/evidence | `READY_FOR_INTERNAL_REVIEW` | Semantic/loader scope remains limited. |
+| TR-ABI-004 | Version metadata may advance without ABI growth. | `ac_version.h`; release identity | exact package-version and compatibility tests | API/ABI checklist | `READY_FOR_INTERNAL_REVIEW` | P2-01 confirms declarations/symbols unchanged. |
+| TR-BLD-001 | Build representation assumptions fail at configure time. | CMake type-width and endian checks | configure/build; SHA-512 portability test | SHA-512 portability policy | `READY_FOR_INTERNAL_REVIEW` | Actual 32-bit/big-endian target evidence blocked/unselected. |
+| TR-BLD-002 | Installed CMake package builds a clean consumer. | install/export rules; package config | install smoke build-tree and package-smoke targets | SDK integration guide; PoC package manifest | `READY_FOR_INTERNAL_REVIEW` | Target environment/legal packaging review. |
+| TR-BLD-003 | Customer PoC excludes internal hooks/providers/evidence secrets. | `tools/create_poc_package.cmake` | PoC package smoke and policy checks | PoC package/review manifest | `READY_FOR_INTERNAL_REVIEW` | Approved evaluation notice and customer scope. |
+| TR-TST-001 | KAT/negative/differential tests are separated by evidence meaning. | CMake test groups; OpenSSL test-only option | 49 ordinary CTest cases when provider is available | differential strategy; KAT plans | `READY_FOR_INTERNAL_REVIEW` | Institution test results remain separate. |
+| TR-TST-002 | OpenSSL is test-only and absent from runtime/PoC. | differential-only CMake targets | install/PoC/policy checks | OpenSSL provider decision | `READY_FOR_INTERNAL_REVIEW` | Retain dependency scan for selected packages. |
+| TR-TST-003 | Sanitizer and compiler-output evidence are diagnostic only. | sanitizer option and capture targets | concurrency/sanitizer policy; compiler review targets | side-channel checklist and compiler plans | `PARTIAL` | Human target-specific disposition required. |
+| TR-EVD-001 | Evidence binds source archive, file hashes, public headers, and symbols. | provenance/evidence CMake tools | provenance regression and policy checks | release evidence workflow | `READY_FOR_INTERNAL_REVIEW` | Actual candidate tag/reviewer/retention process. |
+| TR-EVD-002 | Source inventory is explicitly source-only. | SPDX source inventory generator | provenance tests/policy | SBOM/signing plan | `PARTIAL` | Select component/runtime/license/vulnerability scope. |
+| TR-EVD-003 | Synthetic/local and actual hosted results are separated. | hosted artifact manifest/index tools | hosted artifact manifest and tagged rehearsal tests | hosted review doc; blocker record | `READY_FOR_INTERNAL_REVIEW` | Actual hosted execution remains blocked. |
+| TR-EVD-004 | Actual hosted artifacts are reviewed before support claims. | workflow/review model | no completed actual run | `docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md` | `BLOCKED_EXTERNAL` | Resolve billing, execute, hash, and review. |
+| TR-REL-001 | Release signing remains key-free in repository/CI. | signing policy/handoff tools | signing-handoff and sensitive-artifact tests | release signing policy | `READY_FOR_INTERNAL_REVIEW` | Production signer/TSA/roles not provisioned. |
+| TR-REL-002 | External release requires separate authorization. | authorization records and fail-closed checks | provenance/signing negative tests | release policy and handoff docs | `BLOCKED_EXTERNAL` | Hosted review, tag, signer, TSA, roles, legal/product approval. |
+| TR-CM-001 | Sources and exclusions are traceable. | `cleanroom/SOURCE_MANIFEST.md`; `EXCLUSION_LOG.md` | public-surface and sensitive-artifact scans | clean-room policy | `READY_FOR_INTERNAL_REVIEW` | Add controlled reviewer/approval workflow in P2-07. |
+| TR-CM-002 | Configuration/change/release baselines are controlled. | release identity, ABI baseline, hashes, Git/CMake metadata | compatibility/provenance/rehearsal tests | development workflow | `PARTIAL` | Formal configuration-management document and retention rules. |
+| TR-DOC-001 | Submission document set maps to implementation/evidence. | P2-01 documents | document review only | submission inventory and P2 roadmap | `PARTIAL` | Create controlled submission skeleton in P2-07. |
+
+## P2-01 ABI Trace Result
+
+- Public header file count: 14.
+- Stored exported symbol count: 69.
+- ABI line: `ANOCRYPTO_C_0`.
+- No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01.
+- Version/prerelease metadata changed to `0.1.0-p2-01-readiness-gap`; this is intentionally excluded from normalized non-version API equality.
+- The CMake package template filename was normalized to the case-sensitive path already referenced by CMake and the policy checker; this is a package-source filename correction, not an ABI change.

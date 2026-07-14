@@ -378,7 +378,7 @@ if(DEFINED ANO_CRYPTO_SIGNING_HANDOFF_CHECK_OUTPUT AND
     get_filename_component(_check_parent "${ANO_CRYPTO_SIGNING_HANDOFF_CHECK_OUTPUT}" DIRECTORY)
     file(MAKE_DIRECTORY "${_check_parent}")
     file(WRITE "${ANO_CRYPTO_SIGNING_HANDOFF_CHECK_OUTPUT}"
-        "AnoCrypto-C P1-33 release signing handoff check\n"
+        "AnoCrypto-C P2-01 retained release signing handoff check\n"
         "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
         "Signing policy: ${ANO_CRYPTO_RELEASE_SIGNING_POLICY_ID}\n"
         "Readiness: ${_recomputed_readiness}\n"

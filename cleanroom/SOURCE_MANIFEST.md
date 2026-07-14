@@ -1,7 +1,7 @@
 # AnoCrypto-C Source Manifest
 
-Status: P1-23 draft
-Date: 2026-07-11
+Status: P2-01 current manifest
+Date: 2026-07-14
 
 ## Purpose
 
@@ -623,3 +623,21 @@ P1-30 hosted artifacts retain only status, counts, versions, target/compiler met
 - Actual hosted records require artifact hash, workflow commit/ref, platform, compiler, architecture, reviewer, UTC review date, disposition, and `HOSTED_RUNNER` origin.
 - Synthetic fixtures remain `SYNTHETIC_LOCAL`; unavailable hosted execution remains `NOT_RUN`; downloaded but undispositioned output remains `UNREVIEWED`.
 - Production signer/TSA remain `UNPROVISIONED`; signing remains `UNSIGNED`, handoff `BLOCKED`, and external release `NO`.
+
+
+## P2-01 Readiness Consolidation Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| SRC-4201 | User-provided AnoCrypto-C P2 transition prompt and CURRENT ONLY source pack | User-owned project instruction/material | Current identity, P1-34 blocker, ABI constraints, P2-01 deliverables, status taxonomy, and roadmap direction | Requirements and project facts only; no external implementation imported. |
+| SRC-4202 | KISA public “암호모듈 검증” process overview, checked 2026-07-14 | Public official information | High-level process, testing/validation role separation, and referenced standards checkpoint | No normative standard text or acceptance conclusion copied; exact applicability remains external confirmation. |
+| SRC-4203 | KISA public announcement for the “암호모듈 제출물 작성 안내서”, checked 2026-07-14 | Public official information | Basic design, detailed design, configuration-management, and test document category checkpoint | Current templates/revisions and contents remain external confirmation. |
+| DER-4204 | P2-01 readiness, traceability, consultation, submission-inventory, roadmap, and blocker documents written in this repository | User-owned generated project artifacts | Validation-readiness consolidation and future work control | Engineering planning only; no institution result or formal approval implied. |
+| DER-4205 | Case-sensitive CMake package-template filename normalization | User-owned repository correction | Make the existing `cmake/AnoCryptoCConfig.cmake.in` reference valid on case-sensitive filesystems | No installed package identity, public header, symbol, or ABI change. |
+
+## P2-01 Clean-room Notes
+
+- No algorithm implementation, KAT value, public API, third-party source, or official submission template was copied into the repository.
+- Official-source checkpoints are used only to categorize questions and documents; unresolved interpretation is marked `EXTERNAL_CONFIRMATION_REQUIRED`.
+- The P1-34 billing failure is retained as an external blocker, not converted into a code defect or successful hosted result.
+- P2-01 documents contain status, path, count, hash/commit metadata, and planning information only; no key, entropy, seed, random output, private signing material, token, or customer data is added.

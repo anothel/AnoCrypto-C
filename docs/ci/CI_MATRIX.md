@@ -1,6 +1,6 @@
 # CI Matrix
 
-Status: P1-29 engineering draft.
+Status: P2-01 engineering matrix; actual hosted lanes remain NOT_RUN.
 
 | Lane | Linux | macOS | Windows | Notes |
 |---|---:|---:|---:|---|
@@ -35,3 +35,8 @@ CMAC comparison paths. Release-style compiler lanes capture CMAC disassembly
 metadata where supported. All lanes run the CMAC hardening policy and retain
 the 69-symbol clean Release baseline. Hosted workflow definitions do not count
 as reviewed run evidence.
+
+
+## P2-01 hosted blocker
+
+GitHub Actions run `29256531912` at baseline commit `cf0f3c425dd265c7509fb64a6123db97f71055dd` reached no runner because of account billing/spending-limit status. Actual hosted lanes remain `NOT_RUN`, review remains `UNREVIEWED`, and no artifact was produced. See `HOSTED_CI_EXTERNAL_BLOCKER.md`.

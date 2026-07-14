@@ -19,13 +19,13 @@ static const ano_crypto_internal_kat_manifest_entry_t g_kat_manifest[] = {
         "mac.aes-cmac.aes128.nist-example2",
         "AES-128-CMAC",
         "SRC-1501: NIST AES-CMAC Example 2 associated with SP 800-38B",
-        "p1-33-retained-startup"
+        "p2-01-retained-startup"
     },
     {
         "mac.aes-cmac.aes128-192-256.nist-examples",
         "AES-CMAC",
         "SRC-1501: NIST AES-CMAC examples for AES-128, AES-192, and AES-256",
-        "p1-33-retained-extended-kat-test"
+        "p2-01-retained-extended-kat-test"
     },
     {
         "cipher.aes128.fips197",

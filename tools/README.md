@@ -2,9 +2,9 @@
 
 This directory contains engineering helper scripts for the C99 codebase.
 
-## P1-33 evidence preparation and assembly
+## P2-01 evidence preparation and assembly
 
-Creates a local P1-33 release-evidence draft from prepared prerequisite outputs:
+Creates a local P2-01 release-evidence draft while retaining the reviewed P1-33 release-engineering boundary:
 
 ```sh
 cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DANO_CRYPTO_BUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release
@@ -20,7 +20,7 @@ The target serializes clean Release symbol/runtime-dependency inspection, instal
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p1-33 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p2-01 \
   -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=build/release-provenance-evidence \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=build/release-signing-handoff \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=build/release-signing-handoff-check.txt \
@@ -40,12 +40,12 @@ The final assembly step consumes only that hash-bound tree:
 ```sh
 cmake \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p1-33 \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-33 \
+  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p2-01 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-01 \
   -P tools/assemble_release_evidence.cmake
 ```
 
-P1-33 output retains prior build/test/package records and copies verified `release-provenance/` plus key-free `release-signing-handoff/`. The source inventory does not perform dependency discovery, vulnerability analysis, or license conclusions. Current state remains `UNSIGNED`, hosted review `UNREVIEWED`, handoff `BLOCKED`, external authorization `NO`. `SENSITIVE_ARTIFACT_SCAN.txt` checks evidence, installed SDK, and PoC package for prohibited credential/signature artifacts.
+P2-01 output retains the P1-33 build/test/package records and copies verified `release-provenance/` plus key-free `release-signing-handoff/`. The source inventory does not perform dependency discovery, vulnerability analysis, or license conclusions. Current state remains `UNSIGNED`, hosted review `UNREVIEWED`, handoff `BLOCKED`, external authorization `NO`. `SENSITIVE_ARTIFACT_SCAN.txt` checks evidence, installed SDK, and PoC package for prohibited credential/signature artifacts.
 
 ## `check_public_surface.cmake`
 
@@ -171,7 +171,7 @@ the customer PoC package. Status logs must not print key, message, tag, subkey,
 AES schedule, or chaining-state values.
 
 
-## P1-33 release compatibility, rehearsal, and hosted artifact tools
+## P2-01 retained release compatibility, rehearsal, and hosted artifact tools
 
 - `check_release_compatibility.cmake` validates central release identity, 14 baseline/current canonical-LF public-header hashes, normalized public declarations/types/constants, and the unchanged 69-symbol ABI line.
 - `run_tagged_release_compatibility_smoke.cmake` builds a clean installed package and runs current-header, P1-29-header, exact-version, and incompatible-version consumers.
@@ -188,7 +188,7 @@ cmake --build build --target ano_crypto_tagged_release_compatibility_smoke
 
 Expected tag metadata is not release provenance until a Git-backed check proves that the tag, supplied commit, and checked-out `HEAD` identify one commit.
 
-## P1-33 release provenance and offline-signing handoff tools
+## P2-01 retained release provenance and offline-signing handoff tools
 
 - `create_source_sbom_spdx.cmake` writes a deterministic SPDX 2.3 JSON source inventory for the exact source-archive file list.
 - `create_release_provenance_bundle.cmake` binds the source archive, source hashes, source SBOM, public-header manifest, ABI-0 symbol list, hosted disposition, unsigned signing status, fixed signing request, and blocked authorization record.

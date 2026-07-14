@@ -187,7 +187,7 @@ execute_process(
     ERROR_VARIABLE _bundle_stderr
     TIMEOUT 300)
 file(WRITE "${ANO_CRYPTO_PROVENANCE_EVIDENCE_DIR}/RELEASE_PROVENANCE.log"
-    "# Create and verify unsigned P1-33 release provenance bundle\n"
+    "# Create and verify unsigned P2-01 release provenance bundle\n"
     "# Result: ${_bundle_result}\n\n${_bundle_stdout}${_bundle_stderr}")
 if(NOT "${_bundle_result}" STREQUAL "0")
     message(FATAL_ERROR "Release provenance generation failed; see ${ANO_CRYPTO_PROVENANCE_EVIDENCE_DIR}/RELEASE_PROVENANCE.log")
@@ -205,7 +205,7 @@ execute_process(
     ERROR_VARIABLE _policy_stderr
     TIMEOUT 180)
 file(WRITE "${ANO_CRYPTO_PROVENANCE_EVIDENCE_DIR}/RELEASE_PROVENANCE_POLICY_CHECK.log"
-    "# P1-33 release provenance policy check\n# Result: ${_policy_result}\n\n"
+    "# P2-01 release provenance policy check\n# Result: ${_policy_result}\n\n"
     "${_policy_stdout}${_policy_stderr}")
 if(NOT "${_policy_result}" STREQUAL "0")
     message(FATAL_ERROR "Release provenance policy check failed; see ${ANO_CRYPTO_PROVENANCE_EVIDENCE_DIR}/RELEASE_PROVENANCE_POLICY_CHECK.log")
@@ -216,7 +216,7 @@ foreach(_status IN ITEMS SBOM_STATUS.txt SIGNING_STATUS.txt)
         "${ANO_CRYPTO_PROVENANCE_EVIDENCE_DIR}/${_status}" COPYONLY)
 endforeach()
 file(WRITE "${ANO_CRYPTO_PROVENANCE_EVIDENCE_DIR}/PREPARED_RELEASE_PROVENANCE_SUMMARY.txt"
-    "AnoCrypto-C P1-33 prepared release provenance evidence\n"
+    "AnoCrypto-C P2-01 prepared release provenance evidence\n"
     "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Git commit: ${_git_commit}\n"
     "Git status: ${_git_status}\n"

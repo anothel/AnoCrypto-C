@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P1-33 engineering draft.
+Status: P2-01 validation-readiness workflow.
 
 ## Purpose
 
@@ -14,8 +14,8 @@ This document explains the working flow used for AnoCrypto-C after the C99 reboo
 | P1 Core slice | Small algorithm slice, KATs, negative tests, entropy/DRBG/CSP seams, CI/reproducibility notes, API/ABI review, customer PoC package | The SHA-256/SHA-384/SHA-512 hash and HMAC slice, HMAC_DRBG-SHA-256, random service, CSP lifecycle, and supporting evidence have repeatable tests and explicit scope records. |
 | P1 Scope lock | Decide the next validation-target candidate scope before expanding code | Algorithm scope, service matrix, differential-validation strategy, side-channel review checklist, and customer intake inputs are recorded. |
 | P1 Evidence/package hardening | Source provenance, package manifest review, evidence generation, offline signing handoff, and clean release rehearsal | Evidence and PoC packages have explicit status/hash records; synthetic/local rehearsal is separated from actual hosted review without storing credentials or claiming production signing. |
-| P2 Productization | Customer PoC hardening, toolchain support matrix, SecureKit/PKI boundary planning | A customer-specific PoC package can be reviewed without mixing core, SecureKit, and PKI scope. |
-| P3 Validation readiness | Gap review with selected platform/toolchain/scope and external preparation | Submission-facing artifacts are prepared from reviewed evidence, not from ad-hoc logs. |
+| Parallel commercial preparation | Customer PoC hardening, toolchain support matrix, and SecureKit/PKI boundary planning | Customer-facing work remains separate from the validation-readiness sequence and cannot authorize release. |
+| P2 Validation readiness | Gap consolidation, boundary/environment freeze, mechanism closure, secure review, submission skeleton, and pre-consultation rehearsal | Submission-facing artifacts are prepared from reviewed evidence and retained external decisions, not ad-hoc logs. |
 
 ## Default task loop
 
@@ -251,7 +251,8 @@ P1-23 deliverables:
 | P1-31 | Unsigned release provenance and source SBOM gate | Completed with exact-source SPDX 2.3 JSON inventory, hash-bound unsigned provenance, signing/authorization TODO records, hosted provenance lane, negative regressions, and no public API growth. |
 | P1-32 | Offline release-signing handoff | Completed with an Ed25519/RFC 3161 verifier policy, key-free handoff bundle, role separation, opt-in ephemeral Debug fixtures, and fail-closed unprovisioned production state. |
 | P1-33 | Clean tagged-release rehearsal and hosted artifact review | Completed with an isolated synthetic tag rehearsal, clean/moved identity checks, explicit hosted lane records, actual/synthetic separation, and fail-closed review regressions. |
-| Next candidate | Production release provisioning and actual hosted disposition | Provision approved signer/TSA/approver identities and review real hosted/tag evidence before any signed or externally authorized release claim. |
+| P2-01 | Readiness gap consolidation and pre-consultation pack | Completed with traceability, gap status, document inventory, blocker record, and P2-02 through P2-08 roadmap; no public ABI change. |
+| P2-02 | Module boundary and operating environment freeze | Select one candidate boundary and exact supported configurations before mechanism/document closure. |
 
 ## Stop conditions
 
@@ -328,3 +329,20 @@ P1-33 deliverables:
 - unchanged 14-header, 69-symbol `ANOCRYPTO_C_0` boundary.
 
 Actual hosted review, user-repository tag creation, tag signing, production signing/timestamping, and external release remain blocked operations.
+
+
+## P2-01 placement
+
+P2-01 follows the P1-33 engineering rehearsal while P1-34 remains externally blocked. It adds no cryptographic algorithm or public API. It consolidates the current state into submission-oriented planning without representing local or synthetic records as actual hosted execution.
+
+P2-01 deliverables:
+
+- current implementation/test/evidence inventory and gap classification;
+- requirement-to-code-to-test-to-evidence matrix;
+- pre-consultation question pack;
+- submission-document inventory;
+- P2-02 through P2-08 roadmap and completion gates;
+- durable P1-34 billing-blocker record;
+- unchanged 14-header, 69-symbol `ANOCRYPTO_C_0` public boundary.
+
+P2-02 is the next codebase work item. P1-34 resumes only after GitHub billing is resolved and remains a separate actual-hosted-evidence lane.

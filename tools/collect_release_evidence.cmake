@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p1-33 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-01 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p1-33")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-01")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -421,7 +421,7 @@ if(NOT _collected_request_release_version STREQUAL ANO_CRYPTO_RELEASE_VERSION OR
    NOT _collected_request_readiness STREQUAL "BLOCKED" OR
    NOT _collected_request_external_release_authorized STREQUAL "NO")
     message(FATAL_ERROR
-        "Prepared signing request does not match the current P1-33 provenance boundary")
+        "Prepared signing request does not match the current P2-01 provenance boundary")
 endif()
 
 set(_collected_handoff_disposition
@@ -1354,13 +1354,26 @@ function(_ano_crypto_run_evidence_test _test_name _result_var _stdout_var _stder
     if(NOT _test_executable)
         message(FATAL_ERROR "required evidence test executable is unavailable: ${_test_name}")
     endif()
+    set(_test_output_dir "${ANO_CRYPTO_BUILD_DIR}/evidence-test-output")
+    file(MAKE_DIRECTORY "${_test_output_dir}")
+    set(_test_stdout_file "${_test_output_dir}/${_test_name}.stdout")
+    set(_test_stderr_file "${_test_output_dir}/${_test_name}.stderr")
+    file(REMOVE "${_test_stdout_file}" "${_test_stderr_file}")
     execute_process(
         COMMAND "${_test_executable}"
         WORKING_DIRECTORY "${ANO_CRYPTO_BUILD_DIR}"
         RESULT_VARIABLE _test_result
-        OUTPUT_VARIABLE _test_stdout
-        ERROR_VARIABLE _test_stderr
+        OUTPUT_FILE "${_test_stdout_file}"
+        ERROR_FILE "${_test_stderr_file}"
         TIMEOUT 120)
+    set(_test_stdout "")
+    set(_test_stderr "")
+    if(EXISTS "${_test_stdout_file}")
+        file(READ "${_test_stdout_file}" _test_stdout)
+    endif()
+    if(EXISTS "${_test_stderr_file}")
+        file(READ "${_test_stderr_file}" _test_stderr)
+    endif()
     set(${_result_var} "${_test_result}" PARENT_SCOPE)
     set(${_stdout_var} "${_test_stdout}" PARENT_SCOPE)
     set(${_stderr_var} "${_test_stderr}" PARENT_SCOPE)

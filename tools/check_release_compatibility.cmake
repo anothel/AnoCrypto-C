@@ -1,4 +1,4 @@
-# AnoCrypto-C P1-33 release identity and P1-29 source/ABI compatibility check.
+# AnoCrypto-C P2-01 release identity and retained P1-29 source/ABI compatibility check.
 # Engineering guardrail only; universal ABI compatibility is not established.
 cmake_minimum_required(VERSION 3.16)
 
@@ -58,12 +58,12 @@ if(NOT ANO_CRYPTO_RELEASE_POLICY_SCHEMA STREQUAL "1")
     message(FATAL_ERROR "Unsupported release identity policy schema")
 endif()
 if(NOT ANO_CRYPTO_RELEASE_PACKAGE_COMPATIBILITY STREQUAL "SameMinorVersion")
-    message(FATAL_ERROR "P1-33 package compatibility policy must be SameMinorVersion")
+    message(FATAL_ERROR "P2-01 package compatibility policy must be SameMinorVersion")
 endif()
 if(NOT ANO_CRYPTO_RELEASE_PROVENANCE_SCHEMA STREQUAL "1" OR
    NOT ANO_CRYPTO_RELEASE_SBOM_FORMAT STREQUAL "SPDX-2.3-JSON" OR
    NOT ANO_CRYPTO_RELEASE_SIGNING_MODE STREQUAL "UNSIGNED")
-    message(FATAL_ERROR "P1-33 provenance/SBOM/signing identity policy is inconsistent")
+    message(FATAL_ERROR "P2-01 retained provenance/SBOM/signing identity policy is inconsistent")
 endif()
 foreach(_metadata IN ITEMS
         "${ANO_CRYPTO_ACTUAL_RELEASE_TAG}"
@@ -354,7 +354,7 @@ _ano_require_text("CMakeLists.txt"
     "include(\"\${CMAKE_CURRENT_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake\")")
 _ano_require_text("CMakeLists.txt"
     "COMPATIBILITY \${ANO_CRYPTO_RELEASE_PACKAGE_COMPATIBILITY}")
-_ano_require_text("src/core/build_identity.c" "P1-33 C99 engineering slice")
+_ano_require_text("src/core/build_identity.c" "P2-01 validation-readiness consolidation")
 _ano_require_text("README.md" "${ANO_CRYPTO_RELEASE_VERSION}")
 _ano_require_text(".github/workflows/ci.yml" "${ANO_CRYPTO_RELEASE_FINGERPRINT}")
 _ano_require_text(".github/workflows/ci.yml"
@@ -473,7 +473,7 @@ endif()
 
 string(TIMESTAMP _checked_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_RELEASE_COMPATIBILITY_CHECK_OUTPUT}"
-    "AnoCrypto-C P1-33 release compatibility check\n"
+    "AnoCrypto-C P2-01 release compatibility check\n"
     "Checked UTC: ${_checked_utc}\n"
     "Policy schema: ${ANO_CRYPTO_RELEASE_POLICY_SCHEMA}\n"
     "Current version: ${ANO_CRYPTO_RELEASE_VERSION}\n"

@@ -1,0 +1,114 @@
+# KCMVP Submission Document Inventory
+
+Status: P2-01 inventory. Exact current templates and required contents remain `EXTERNAL_CONFIRMATION_REQUIRED`.
+
+## Inventory Categories
+
+| Category | Meaning |
+|---|---|
+| `EXISTING_ENGINEERING_INPUT` | Useful current repository material, not yet a controlled submission document. |
+| `UPDATE_AND_CONSOLIDATE` | Existing content must be reconciled into one controlled submission-facing document. |
+| `CREATE_NEW` | No adequate controlled document currently exists. |
+| `AFTER_CONSULTATION` | Content/template depends on institution response or selected environment. |
+| `NOT_IN_SUBMISSION_PACKAGE` | Internal/test/customer artifact that should remain outside unless specifically requested through a protected channel. |
+
+KISA public guidance identifies basic design, detailed design, configuration-management, and test documents as core submission-document categories for software modules. Exact current forms, versions, security-level requirements, and package staging must be confirmed before P2-07 finalization.
+
+## A. Basic Design / Module Specification
+
+| ID | Proposed controlled document | Current source inputs | State | P2 owner/action |
+|---|---|---|---|---|
+| DOC-BD-001 | Module overview and product boundary | `README.md`; product-layer boundaries; `SERVICE_SCOPE_MATRIX.md` | `UPDATE_AND_CONSOLIDATE` | P2-07 basic design skeleton. |
+| DOC-BD-002 | Physical/logical cryptographic boundary | current module architecture; package/install rules | `AFTER_CONSULTATION` | Freeze in P2-02, then include diagrams and excluded components. |
+| DOC-BD-003 | Security level and requirement applicability | none accepted | `AFTER_CONSULTATION` | Record institution-confirmed level and applicability table. |
+| DOC-BD-004 | Operating environment and configuration variants | thread/random portability docs; CI matrix | `UPDATE_AND_CONSOLIDATE` | P2-02 environment matrix and support exclusions. |
+| DOC-BD-005 | Roles, services, and service availability by state | public headers; module state; service matrix | `UPDATE_AND_CONSOLIDATE` | P2-03 normative role/service/state table. |
+| DOC-BD-006 | Approved algorithm/service scope | `KCMVP_ALGORITHM_SCOPE.md` | `AFTER_CONSULTATION` | Confirm target algorithms/configuration; retain unsupported placeholders separately. |
+| DOC-BD-007 | Ports and interfaces | 14 public headers; install/package docs | `UPDATE_AND_CONSOLIDATE` | Classify data/control/status interfaces and caller responsibilities. |
+| DOC-BD-008 | Finite-state model | `module_state.c`; self-test design | `UPDATE_AND_CONSOLIDATE` | P2-03 transition diagram, preconditions, failure/recovery. |
+| DOC-BD-009 | Cryptographic key/CSP overview | CSP lifecycle; key/CSP headers | `UPDATE_AND_CONSOLIDATE` | P2-05 formal CSP summary. |
+| DOC-BD-010 | Self-test and integrity overview | self-test design and KAT plans | `UPDATE_AND_CONSOLIDATE` | P2-03 after accepted integrity mechanism is selected. |
+
+## B. Detailed Design
+
+| ID | Proposed controlled document | Current source inputs | State | P2 owner/action |
+|---|---|---|---|---|
+| DOC-DD-001 | Module architecture and component decomposition | `src/*` layout; architecture docs | `UPDATE_AND_CONSOLIDATE` | P2-07 detailed design skeleton. |
+| DOC-DD-002 | Module lifecycle/error-state design | `module_state.c`; module tests | `UPDATE_AND_CONSOLIDATE` | P2-03 normative specification. |
+| DOC-DD-003 | Self-test, conditional-test, and integrity design | `selftest.c`; KAT manifest; self-test design | `UPDATE_AND_CONSOLIDATE` | P2-03; integrity section depends on consultation. |
+| DOC-DD-004 | SHA-2/HMAC design and API behavior | hash/HMAC source and API docs | `UPDATE_AND_CONSOLIDATE` | Map algorithm operations, buffers, state, and failure cleanup. |
+| DOC-DD-005 | HMAC_DRBG and random-service design | DRBG/random/entropy docs | `UPDATE_AND_CONSOLIDATE` | P2-04 consolidated design. |
+| DOC-DD-006 | Entropy source/provider and health-test design | entropy adapter/operational/health docs | `AFTER_CONSULTATION` | Final ownership/tests only after source/environment confirmation. |
+| DOC-DD-007 | AES/CBC/CMAC design and API behavior | AES/CBC/CMAC design/hardening docs | `UPDATE_AND_CONSOLIDATE` | Consolidate without expanding service scope. |
+| DOC-DD-008 | CSP lifecycle and zeroization design | CSP lifecycle; zeroize source; side-channel checklist | `UPDATE_AND_CONSOLIDATE` | P2-05 formal inventory and path matrix. |
+| DOC-DD-009 | Thread/process model | thread-safety and random portability docs | `UPDATE_AND_CONSOLIDATE` | Freeze target behavior in P2-02/P2-04. |
+| DOC-DD-010 | Secure coding and side-channel analysis | security checklist; compiler capture plans | `CREATE_NEW` | P2-06 findings register and retained review dispositions. |
+| DOC-DD-011 | Build/package/runtime dependency design | CMake, install, PoC, provenance docs | `UPDATE_AND_CONSOLIDATE` | Separate runtime dependencies from test/tool dependencies. |
+
+## C. Configuration Management
+
+| ID | Proposed controlled document | Current source inputs | State | P2 owner/action |
+|---|---|---|---|---|
+| DOC-CM-001 | Configuration identification and baselines | release identity; ABI baseline; source hashes | `UPDATE_AND_CONSOLIDATE` | P2-07 controlled baseline table. |
+| DOC-CM-002 | Source/change control workflow | development workflow; clean-room records | `UPDATE_AND_CONSOLIDATE` | Define roles, approvals, issue/change classification, and branch/tag rules. |
+| DOC-CM-003 | Build environment and reproducibility procedure | CMake options; reproducible-build notes | `UPDATE_AND_CONSOLIDATE` | Freeze toolchain/environment and retained command logs. |
+| DOC-CM-004 | Release creation, signing, timestamp, and authorization | release provenance/signing policies | `AFTER_CONSULTATION` | Integrate institution needs; production provisioning remains blocked. |
+| DOC-CM-005 | Problem reporting and corrective action | no controlled process | `CREATE_NEW` | Define security issue intake, triage, fix, regression, and retest decision. |
+| DOC-CM-006 | Document control and review history | fragmented Markdown history | `CREATE_NEW` | Add document IDs, versions, owners, reviewers, approvals, and change summaries. |
+| DOC-CM-007 | Evidence/artifact retention and access control | evidence manifest policy | `UPDATE_AND_CONSOLIDATE` | Define retention, protected storage, hash verification, and disposal. |
+| DOC-CM-008 | Third-party/component/license/vulnerability inventory policy | source-only SPDX and clean-room records | `AFTER_CONSULTATION` | Select scope with legal and institution input. |
+| DOC-CM-009 | Maintenance/change-impact and retest policy | compatibility policy | `AFTER_CONSULTATION` | Define impact classes for source, compiler, OS, API, and security fixes. |
+
+## D. Test Document
+
+| ID | Proposed controlled document | Current source inputs | State | P2 owner/action |
+|---|---|---|---|---|
+| DOC-TS-001 | Master test strategy and environment matrix | CI matrix; differential strategy; release evidence workflow | `UPDATE_AND_CONSOLIDATE` | P2-07 test document skeleton. |
+| DOC-TS-002 | Requirement-to-test traceability | P2 evidence traceability matrix | `UPDATE_AND_CONSOLIDATE` | Convert institution-confirmed requirements into test IDs. |
+| DOC-TS-003 | Startup/conditional/integrity test procedure | self-test design and KAT plans | `AFTER_CONSULTATION` | Complete after P2-03 mechanism decisions. |
+| DOC-TS-004 | Algorithm KAT/conformance procedure | KAT tests/plans and public vector sources | `UPDATE_AND_CONSOLIDATE` | Separate vendor engineering tests from institution results. |
+| DOC-TS-005 | Negative, state, misuse, and failure-injection procedure | negative/unit/stress tests | `UPDATE_AND_CONSOLIDATE` | Define expected statuses and cleanup without sensitive values. |
+| DOC-TS-006 | Entropy/DRBG test procedure | entropy/DRBG tests and policies | `AFTER_CONSULTATION` | Finalize provider/direct-source responsibilities and limits. |
+| DOC-TS-007 | CSP/zeroization test procedure | lifecycle/hardening tests | `UPDATE_AND_CONSOLIDATE` | Add target/compiler-specific review evidence in P2-05. |
+| DOC-TS-008 | Portability/concurrency/sanitizer procedure | current operational/stress tests | `UPDATE_AND_CONSOLIDATE` | Limit conclusions to selected environments. |
+| DOC-TS-009 | Install/package/public-boundary procedure | install/PoC/public-surface tests | `UPDATE_AND_CONSOLIDATE` | Retain clean installed-package and exclusion results. |
+| DOC-TS-010 | Test result and review disposition template | evidence templates and hosted review fields | `UPDATE_AND_CONSOLIDATE` | Add reviewer, date, commit, environment, hash, disposition, limitations. |
+| DOC-TS-011 | Institution test result integration record | none | `AFTER_CONSULTATION` | Do not pre-fill or simulate institution results. |
+
+## E. Operator, Installation, and Supporting Documents
+
+| ID | Proposed controlled document | Current source inputs | State | P2 owner/action |
+|---|---|---|---|---|
+| DOC-OP-001 | Installation and build guide for submitted configuration | SDK integration guide; install smoke | `UPDATE_AND_CONSOLIDATE` | Freeze exact commands/options and artifact hashes. |
+| DOC-OP-002 | Crypto officer/operator guidance | README/state/error notes | `CREATE_NEW` | Startup, status, fatal state, restart, key lifecycle, supported environment. |
+| DOC-OP-003 | Developer API/service guide | public headers; PoC example | `UPDATE_AND_CONSOLIDATE` | Include buffer/alias/state/status rules without internal details. |
+| DOC-OP-004 | Secure operation/environment assumptions | entropy/thread/process/VM notes | `UPDATE_AND_CONSOLIDATE` | P2-02/P2-04 output. |
+| DOC-OP-005 | Vulnerability/security reporting guide | none controlled | `CREATE_NEW` | Define contact, supported branches, embargo and patch/retest handling. |
+| DOC-SUP-001 | Algorithm and public-vector source register | clean-room source manifest | `EXISTING_ENGINEERING_INPUT` | Review and extract controlled references. |
+| DOC-SUP-002 | Public ABI/symbol/header baseline | `abi/*`; `release/PUBLIC_HEADERS.sha256` | `EXISTING_ENGINEERING_INPUT` | Retain as supporting configuration evidence. |
+| DOC-SUP-003 | Source/provenance/SBOM package | release evidence tooling | `EXISTING_ENGINEERING_INPUT` | Provide only if requested and through approved channel. |
+| DOC-SUP-004 | Hosted platform review package | hosted manifest/index model | `AFTER_CONSULTATION` | Currently blocked; no actual artifacts exist. |
+| DOC-SUP-005 | Signing/timestamp/authorization package | key-free handoff policy | `AFTER_CONSULTATION` | Production values and approvals remain unprovisioned. |
+
+## F. Explicitly Excluded From Routine Submission/Customer Packages
+
+| Item | Classification | Reason |
+|---|---|---|
+| OpenSSL differential provider and source | `NOT_IN_SUBMISSION_PACKAGE` | Test-only reference provider; not runtime dependency. |
+| Internal entropy/random failure hooks | `NOT_IN_SUBMISSION_PACKAGE` | Dedicated tests only; disabled in Release/PoC. |
+| Private source context layouts and internal headers | `NOT_IN_SUBMISSION_PACKAGE` | Not public ABI; disclose only if formally requested through protected process. |
+| Compiler disassembly | `NOT_IN_SUBMISSION_PACKAGE` | Internal review input unless institution specifically requests it. |
+| Synthetic hosted/tag fixtures | `NOT_IN_SUBMISSION_PACKAGE` | Policy regression only; not actual hosted or release evidence. |
+| Production keys, tokens, signatures, timestamp requests/responses | `NOT_IN_SUBMISSION_PACKAGE` | Must remain outside source, CI, ordinary evidence, and PoC. |
+| Customer data or internal deployment details | `NOT_IN_SUBMISSION_PACKAGE` | Outside validation evidence and prohibited by project policy. |
+
+## P2-07 Entry Gate
+
+Do not finalize the submission skeleton until P2-02 through P2-06 have produced reviewed inputs and pre-consultation has confirmed:
+
+- current document templates/revisions;
+- target security level and module form;
+- selected operating environments;
+- integrity and entropy responsibilities;
+- expected source/binary/test artifact package;
+- confidentiality and delivery channel.
