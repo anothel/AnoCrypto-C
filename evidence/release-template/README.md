@@ -31,6 +31,7 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - Sensitive-artifact scan across evidence, installed SDK, and PoC package
 - Reproducible build notes
 - Public surface check result
+- P2-02 validation-candidate boundary/configuration policy result
 - Thread-safety policy check result
 - SHA-384/SHA-512 scope check result
 - SHA-384/SHA-512 scope review notes
@@ -85,8 +86,8 @@ ctest --test-dir build --output-on-failure
 Install smoke:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p2-01
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-01
+cmake --install build --prefix /tmp/anocrypto-c-p2-02
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-02
 cmake --build build-install-smoke --parallel
 ./build-install-smoke/anocrypto_c_install_smoke
 ```

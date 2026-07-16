@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-01 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-02 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-01")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-02")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -40,6 +40,10 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK)
     set(ANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_VALIDATION_CANDIDATE_CHECK)
+    set(ANO_CRYPTO_RUN_VALIDATION_CANDIDATE_CHECK ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_POC_PACKAGE_SMOKE)
@@ -421,7 +425,7 @@ if(NOT _collected_request_release_version STREQUAL ANO_CRYPTO_RELEASE_VERSION OR
    NOT _collected_request_readiness STREQUAL "BLOCKED" OR
    NOT _collected_request_external_release_authorized STREQUAL "NO")
     message(FATAL_ERROR
-        "Prepared signing request does not match the current P2-01 provenance boundary")
+        "Prepared signing request does not match the current P2-02 provenance boundary")
 endif()
 
 set(_collected_handoff_disposition
@@ -588,6 +592,32 @@ if(ANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK)
 else()
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/PUBLIC_SURFACE_CHECK.txt"
         "Public surface check was not requested. Set ANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON.\n")
+endif()
+
+if(ANO_CRYPTO_RUN_VALIDATION_CANDIDATE_CHECK)
+    set(_validation_candidate_output
+        "${ANO_CRYPTO_EVIDENCE_DIR}/VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+            -DANO_CRYPTO_VALIDATION_CANDIDATE_CHECK_OUTPUT=${_validation_candidate_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_validation_candidate_policy.cmake"
+        RESULT_VARIABLE _validation_candidate_result
+        OUTPUT_VARIABLE _validation_candidate_stdout
+        ERROR_VARIABLE _validation_candidate_stderr
+        TIMEOUT 300)
+    file(APPEND "${_validation_candidate_output}"
+        "\nCommand output:\n${_validation_candidate_stdout}${_validation_candidate_stderr}\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "Validation candidate policy result: ${_validation_candidate_result}\n")
+    if(NOT _validation_candidate_result EQUAL 0)
+        message(FATAL_ERROR
+            "validation candidate policy check failed; see ${_validation_candidate_output}")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt"
+        "Validation candidate policy check was not requested. Set ANO_CRYPTO_RUN_VALIDATION_CANDIDATE_CHECK=ON.\n")
 endif()
 
 if(ANO_CRYPTO_RUN_RELEASE_COMPATIBILITY_CHECK)

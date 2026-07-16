@@ -1,6 +1,6 @@
 # Service Scope Matrix
 
-Status: P2-01 current engineering service inventory.
+Status: P2-02 current engineering service inventory bound to the internal OE-01 candidate.
 
 | Service | Public surface | Status | Key boundary |
 |---|---|---|---|
@@ -29,6 +29,6 @@ manual compiler-review inputs. No service identifier or public operation was
 added.
 
 
-## P2-01 readiness note
+## P2-02 boundary note
 
-The service inventory remains 14 public headers and 69 exports on `ANOCRYPTO_C_0`. P2-01 reorganizes traceability and readiness evidence only. Module integrity, final conditional-test classification, entropy-provider responsibility, formal CSP inventory, and target-specific side-channel review remain open P2 items.
+The service inventory remains 14 public headers and 69 exports on `ANOCRYPTO_C_0`. P2-02 binds the unchanged services to `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` without adding runtime services or public API. Module integrity, final conditional-test classification, entropy-provider responsibility, formal CSP inventory, and target-specific side-channel review remain open P2 items.

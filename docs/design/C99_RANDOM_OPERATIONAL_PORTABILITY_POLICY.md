@@ -1,10 +1,12 @@
 # C99 Random Operational Portability Policy
 
-Status: P1-21 engineering policy draft.
+Status: P2-02 target-bound engineering policy. OE-01 selects the Linux `getrandom` adapter; entropy responsibility and final evidence remain P2-04/`EXTERNAL_CONFIRMATION_REQUIRED`.
 
 ## Purpose
 
 This document fixes the current operational boundary for source-backed `ano_crypto_random_*` contexts. It does not claim automatic protection against every execution-environment duplication event and is not official validation evidence.
+
+For candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`, the public random service is built with the internal Linux `getrandom` adapter enabled. The Linux kernel RNG remains an external operating-environment provider, not a project-owned direct noise source. Windows and Apple provider branches remain outside the initial candidate.
 
 ## Current service prerequisites
 
@@ -17,13 +19,13 @@ If the process marker is unavailable, `ano_crypto_random_is_available()` reports
 
 ## Process creation and inheritance
 
-On reviewed Linux, Windows, and Apple branches, source-backed contexts record a private process marker. A process-marker change blocks generation with `ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED`; requested output is cleared. A successful source-backed reseed refreshes the marker.
+On the selected Linux branch, and on separately implemented Windows and Apple engineering branches, source-backed contexts record a private process marker. A process-marker change blocks generation with `ANO_CRYPTO_ERR_DRBG_RESEED_REQUIRED`; requested output is cleared. A successful source-backed reseed refreshes the marker.
 
 This detects ordinary process identity changes such as POSIX `fork()`. It is not a general VM, container, checkpoint, or suspend detector.
 
 ## VM snapshot, restore, and clone
 
-AnoCrypto-C does not detect VM snapshot/restore or clone events. When an application or orchestrator knows that execution state has been restored or duplicated, it must discard and reinitialize every inherited public random context before further generation. For a clone, independent reinitialization in each clone is required by this project policy; merely continuing from duplicated DRBG state is not accepted.
+OE-01 does not claim automatic VM snapshot/restore, clone, container-checkpoint, or hypervisor migration detection. AnoCrypto-C does not detect those events. When an application or orchestrator knows that execution state has been restored or duplicated, it must discard and reinitialize every inherited public random context before further generation. For a clone, independent reinitialization in each clone is required by this project policy; merely continuing from duplicated DRBG state is not accepted.
 
 A successful call to `ano_crypto_random_reseed()` can refresh a context only when the application can establish that the context was not duplicated into another concurrently usable instance. When duplication is possible or uncertain, uninitialize and create a new context instead.
 

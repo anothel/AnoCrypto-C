@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P2-01 current manifest
+Status: P2-02 current manifest
 Date: 2026-07-14
 
 ## Purpose
@@ -641,3 +641,20 @@ P1-30 hosted artifacts retain only status, counts, versions, target/compiler met
 - Official-source checkpoints are used only to categorize questions and documents; unresolved interpretation is marked `EXTERNAL_CONFIRMATION_REQUIRED`.
 - The P1-34 billing failure is retained as an external blocker, not converted into a code defect or successful hosted result.
 - P2-01 documents contain status, path, count, hash/commit metadata, and planning information only; no key, entropy, seed, random output, private signing material, token, or customer data is added.
+
+## P2-02 Boundary and Operating-Environment Freeze Inputs
+
+| ID | Source | Classification | Use | Boundary |
+|---|---|---|---|---|
+| SRC-4301 | KISA public KCMVP overview and current public notice for the revised submission guide, checked 2026-07-14 | Public official metadata | Confirm current standards/process checkpoint and consultation need | No normative standard or attached guide text copied; exact applicability remains external confirmation. |
+| SRC-4302 | Ubuntu official 24.04.4 LTS release metadata and Ubuntu package metadata for GCC 13, CMake, and glibc, checked 2026-07-14 | Public official distribution metadata | Select and identify one reproducible initial operating-environment family | Package/source code not copied; exact installed package hashes are TODO for the candidate run. |
+| DER-4303 | Existing AnoCrypto-C CMake, runtime source layout, ABI baseline, portability policies, and P2-01 gap/traceability records | User-owned project artifacts | Derive the candidate module boundary, exclusions, interfaces, and configuration | No public API or cryptographic implementation change. |
+| DER-4304 | `KCMVP_MODULE_BOUNDARY_SPEC.md`, `KCMVP_OPERATING_ENVIRONMENT_MATRIX.md`, candidate CMake record, and validation-candidate policy checker | Fresh project-owned artifacts | P2-02 internal freeze and fail-closed configuration control | Engineering planning/evidence only; no formal validation acceptance implied. |
+
+## P2-02 Clean-room Notes
+
+- No official submission template, proprietary consultation answer, standard text, third-party implementation, or environment image was copied into the repository.
+- Public OS/toolchain metadata is used only to identify an internal candidate; exact image, CPU, kernel, package, and binary evidence must be captured from a future controlled run.
+- The selected environment does not expand runtime dependencies to OpenSSL, C++, test providers, or signing infrastructure.
+- P2-02 adds no algorithm, public header, function, enum, exported symbol, KAT value, or sensitive material.
+- The P1-34 billing blocker remains unchanged and no local result is represented as hosted execution.

@@ -1,6 +1,6 @@
 # C99 Priority TODO
 
-Status: P2-01 readiness-gap consolidation current view.
+Status: P2-02 module-boundary and operating-environment freeze completed; P2-03 is next.
 
 ## Completed Through P1-33
 
@@ -34,15 +34,24 @@ Do not substitute local or synthetic evidence. Resume only after billing is reso
 - retained P1-34 blocker and release/signing boundaries;
 - preserved public ABI with no algorithm or public API addition.
 
+## Completed P2-02
+
+- froze `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` as one internal shared-library candidate;
+- documented physical/logical boundary, runtime source areas, data flows, exclusions, dependencies, and operator assumptions;
+- selected Ubuntu Server 24.04.4 LTS x86_64, GCC 13.3.0, CMake 3.28.3, Release/Unix Makefiles;
+- froze thread safety and Linux OS entropy ON with tests/examples/hooks/OpenSSL/signing fixtures/sanitizers/LTO OFF;
+- classified all other environments as deferred, unsupported for the initial candidate, or externally blocked;
+- added machine-readable candidate metadata, fail-closed CMake enforcement, policy/evidence checks, and unchanged-ABI verification;
+- retained formal boundary/environment acceptance, immutable candidate execution, and P1-34 hosted review as unresolved.
+
 ## Next Sequence
 
-1. **P2-02 — Module boundary and operating environment freeze**
-2. **P2-03 — Self-test, integrity, finite-state, and recovery specification**
-3. **P2-04 — Entropy/provider/DRBG responsibility and evidence closure**
-4. **P2-05 — CSP inventory and zeroization evidence closure**
-5. **P2-06 — Secure coding and target-specific side-channel review**
-6. **P2-07 — Controlled submission-document skeleton**
-7. **P2-08 — Pre-consultation rehearsal and decision capture**
+1. **P2-03 — Self-test, integrity, finite-state, and recovery specification**
+2. **P2-04 — Entropy/provider/DRBG responsibility and evidence closure**
+3. **P2-05 — CSP inventory and zeroization evidence closure**
+4. **P2-06 — Secure coding and target-specific side-channel review**
+5. **P2-07 — Controlled submission-document skeleton**
+6. **P2-08 — Pre-consultation rehearsal and decision capture**
 
 Detailed deliverables and exit criteria are in `docs/roadmap/P2_VALIDATION_READINESS_ROADMAP.md`.
 

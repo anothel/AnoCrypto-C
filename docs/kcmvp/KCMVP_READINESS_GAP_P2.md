@@ -1,13 +1,13 @@
-# KCMVP Readiness Gap — P2 Entry Consolidation
+# KCMVP Readiness Gap — P2 Consolidated Register
 
-Status: P2-01 engineering readiness consolidation. Formal validation and external review remain pending.
+Status: P2-02 internal module-boundary and operating-environment freeze. Formal validation and external review remain pending.
 
 ## Baseline and Claims Boundary
 
 | Item | Current value |
 |---|---|
 | Product | `AnoCrypto-C` |
-| Work-product version | `0.1.0-p2-01-readiness-gap` |
+| Work-product version | `0.1.0-p2-02-boundary-freeze` |
 | Input baseline declared by project owner | `0.1.0-p1-33-release-rehearsal` at `cf0f3c425dd265c7509fb64a6123db97f71055dd` |
 | Public headers | 14 |
 | Exported public symbols | 69 |
@@ -85,9 +85,9 @@ Existing engineering evidence assets include source/archive hashes, SPDX 2.3 sou
 
 | ID | Area | Current status | Existing basis | Primary gap / closure condition |
 |---|---|---|---|---|
-| GAP-001 | Candidate physical/logical boundary | `PARTIAL` | Shared-library architecture and installed-header boundary are documented. | Freeze exact binaries, configuration variants, excluded tooling, and operator boundary in P2-02. |
+| GAP-001 | Candidate physical/logical boundary | `READY_FOR_INTERNAL_REVIEW` | `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` freezes one shared-object runtime boundary, source areas, state, interfaces, data flows, external dependencies, exclusions, and operator assumptions. | Obtain institution confirmation of the dynamic-library boundary and treatment of caller-owned contexts/OS dependencies. |
 | GAP-002 | Security level and validation target | `EXTERNAL_CONFIRMATION_REQUIRED` | Software-module candidate assumptions exist. | Confirm target security level, accepted module form, and applicable requirement interpretation before submission drafting. |
-| GAP-003 | Operating environments | `PARTIAL` | POSIX, Win32, compiler, representation, and package seams exist. | Select exact OS/CPU/compiler/build variants and define whether each is one module or separate variant. |
+| GAP-003 | Operating environments | `PARTIAL` | Initial OE-01 is frozen to Ubuntu Server 24.04.4 LTS x86_64, GCC 13.3.0, CMake 3.28.3, Release shared library; all other environments are deferred or unsupported for the initial candidate. | Capture immutable image/CPU/kernel/package identifiers, execute on the selected candidate, and confirm variant/retest treatment externally. |
 | GAP-004 | Algorithm/service target scope | `EXTERNAL_CONFIRMATION_REQUIRED` | Implemented scope is narrow and recorded. | Confirm which implemented services are in the initial validation target and whether any identifiers/placeholders must be excluded from the submitted configuration. |
 | GAP-005 | Public API/ABI control | `READY_FOR_INTERNAL_REVIEW` | 14 headers, 69 symbols, retained P1-29 headers, normalized compatibility checks. | Institution acceptance and selected-platform ABI review remain external. |
 | GAP-006 | Finite-state model | `PARTIAL` | State gate and sticky fatal state are implemented and tested. | Produce a normative state/transition/service-availability specification and recovery/operator-action matrix in P2-03. |
@@ -99,11 +99,11 @@ Existing engineering evidence assets include source/archive hashes, SPDX 2.3 sou
 | GAP-012 | Health-test interpretation | `PARTIAL` | Duplicate-block engineering skeleton and fatal/local policy wiring exist. | Select source-specific tests, thresholds, startup/continuous placement, and recovery rules only for an owned direct noise source, if required. |
 | GAP-013 | DRBG limits and lifecycle | `PARTIAL` | Instantiate/reseed/generate limits and reseed-required tests exist. | Consolidate exact limits, prediction-resistance policy, process-change behavior, and operator guidance in P2-04. |
 | GAP-014 | Fork/process behavior | `PARTIAL` | Process marker and reseed-required behavior are implemented. | Retain actual target results and confirm unsupported-marker policy. |
-| GAP-015 | VM clone/snapshot and suspend/resume | `NOT_IMPLEMENTED` | Integration cautions exist. | Decide supported/unsupported behavior and consuming-product obligations in P2-04/P2-02. |
+| GAP-015 | VM clone/snapshot and suspend/resume | `NOT_IMPLEMENTED` | P2-02 explicitly excludes automatic detection and treats cloned/restored contexts as unsupported unless discarded and reinitialized by the consuming environment. | Confirm operator guidance and evidence expectations in P2-04; do not claim automatic protection. |
 | GAP-016 | CSP inventory and lifecycle | `PARTIAL` | Purpose-separated in-memory handles and destruction paths exist. | Create a formal CSP inventory, state/ownership table, and service-by-service lifecycle in P2-05. |
 | GAP-017 | Zeroization evidence | `PARTIAL` | Explicit zeroize paths and negative/lifecycle tests exist. | Retain target/compiler-specific evidence and define what is guaranteed at module/process/OS boundaries. |
 | GAP-018 | Persistent/exported keys | `OUT_OF_SCOPE` | Public export/persistence/wrapping are rejected or absent. | Keep excluded unless a separate product and validation scope gate approves them. |
-| GAP-019 | Thread-safety model | `PARTIAL` | Global lock seam and cross-platform tests exist. | Freeze supported thread model, caller serialization duties, and target results. |
+| GAP-019 | Thread-safety model | `PARTIAL` | OE-01 freezes thread safety ON with the POSIX/pthread-compatible branch; module/global state is serialized while caller-owned mutable contexts require caller serialization. | Retain OE-01 target results and formalize role/service concurrency wording. |
 | GAP-020 | Secure coding review | `PARTIAL` | Warnings, sanitizers, negative tests, policy scripts, and clean-room records exist. | Establish review checklist completion, findings register, and disposition process in P2-06. |
 | GAP-021 | Side-channel review | `PARTIAL` | Table-free AES and compiler-output captures exist. | Complete target/compiler/CPU-specific human review and define external-assessment backlog. |
 | GAP-022 | Local test evidence | `READY_FOR_INTERNAL_REVIEW` | Repeatable CTest, policy, install, PoC, compatibility, and evidence tooling exist. | Retain reviewer/date/disposition for the selected release candidate. |
@@ -118,17 +118,19 @@ Existing engineering evidence assets include source/archive hashes, SPDX 2.3 sou
 | GAP-031 | Customer evaluation terms | `NOT_IMPLEMENTED` | PoC technical boundary is documented. | Legal review and approved evaluation/support terms are required before broader distribution. |
 | GAP-032 | Product-layer separation | `READY_FOR_INTERNAL_REVIEW` | AnoCrypto-C, AnoSecureKit, AnoPKI, and optional wrapper boundaries are documented. | Reconfirm during consultation so application/PKI workflow is not pulled into the module scope unintentionally. |
 
-## P2-01 Disposition
+## P2-01 and P2-02 Disposition
 
-P2-01 is complete when the traceability matrix, consultation questions, submission-document inventory, P2-02 through P2-08 roadmap, blocker record, ABI check, and local regression records are reviewed together.
+P2-01 consolidated the implementation/test/evidence inventory, traceability, consultation questions, submission inventory, roadmap, blocker record, ABI check, and local regression records.
 
-P2-01 does not close the external-confirmation items above. Those remain `EXTERNAL_CONFIRMATION_REQUIRED` until a named institution or qualified reviewer supplies a retained response.
+P2-02 freezes the internal candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` and its shared-library boundary/configuration. This closes the internal selection action for GAP-001 and narrows GAP-003, GAP-015, and GAP-019, but it does not establish formal boundary or environment acceptance. Immutable selected-environment evidence is still incomplete, and P1-34 remains `BLOCKED_EXTERNAL`.
+
+All institution-dependent items remain `EXTERNAL_CONFIRMATION_REQUIRED` until a named institution or qualified reviewer supplies a retained response.
 
 ## External Reference Checkpoint
 
 The following official-source checkpoints informed document categorization only:
 
 - KISA, “암호모듈 검증” process overview and references to KS X ISO/IEC 19790 and KS X ISO/IEC 24759, checked 2026-07-14.
-- KISA, “암호모듈 제출물 작성 안내서” announcement, which identifies basic design, detailed design, configuration-management, and test documents for software-module submission guidance, checked 2026-07-14.
+- KISA, public announcement for the revised “암호모듈 제출물 작성 안내서 (2025.9.)”, checked 2026-07-14; exact attachment contents and applicability remain subject to controlled review.
 
 Exact current templates, accepted interpretations, security level, test methods, and submission package requirements remain `EXTERNAL_CONFIRMATION_REQUIRED`.

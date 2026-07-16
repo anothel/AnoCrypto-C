@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p2-01-readiness-gap"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p2-02-boundary-freeze"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P2-01 validation-readiness consolidation; implemented services remain SHA-256/384/512, matching HMAC variants, HMAC_DRBG-SHA-256, the source-backed random lifecycle, CSP-backed HMAC, AES encryption and dedicated CMAC keys, AES-128/192/256 CBC without padding, and full-tag AES-CMAC. P2-01 retains the P1-29 public headers, reviewed 69-symbol ABI-0 surface, P1-33 clean synthetic tagged-release rehearsal, and fail-closed hosted-artifact review model. P1-34 actual hosted review remains BLOCKED_EXTERNAL with hosted lanes NOT_RUN and review UNREVIEWED. Module-boundary freeze, accepted integrity design, entropy responsibility, target-specific zeroization and side-channel review, production signing/timestamping, and external release authorization remain TODO or EXTERNAL_CONFIRMATION_REQUIRED";
+    out_identity->notes = "P2-02 module-boundary and operating-environment freeze; implemented services remain SHA-256/384/512, matching HMAC variants, HMAC_DRBG-SHA-256, the source-backed random lifecycle, CSP-backed HMAC, AES encryption and dedicated CMAC keys, AES-128/192/256 CBC without padding, and full-tag AES-CMAC. P2-02 freezes AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1 while retaining the P1-29 public headers, reviewed 69-symbol ABI-0 surface, P1-33 clean synthetic tagged-release rehearsal, and fail-closed hosted-artifact review model. P1-34 actual hosted review remains BLOCKED_EXTERNAL with hosted lanes NOT_RUN and review UNREVIEWED. Formal boundary acceptance, selected-environment retained execution, accepted integrity design, entropy responsibility, target-specific zeroization and side-channel review, production signing/timestamping, and external release authorization remain TODO or EXTERNAL_CONFIRMATION_REQUIRED";
 
     return ANO_CRYPTO_OK;
 }

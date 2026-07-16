@@ -1,6 +1,6 @@
 # KCMVP Evidence Traceability Matrix
 
-Status: P2-01 engineering traceability baseline. Requirement interpretations remain provisional unless explicitly marked otherwise.
+Status: P2-02 traceability baseline with one internally frozen boundary/environment candidate. Requirement interpretations remain provisional unless explicitly marked otherwise.
 
 ## Matrix Rules
 
@@ -14,6 +14,13 @@ Status: P2-01 engineering traceability baseline. Requirement interpretations rem
 
 | ID | Requirement candidate | Code / configuration | Tests / checks | Evidence / controlling docs | Status | Open gap / next action |
 |---|---|---|---|---|---|---|
+| TR-BND-001 | Candidate cryptographic boundary is explicit and configuration-identified. | `release/ANOCRYPTO_C_VALIDATION_CANDIDATE.cmake`; runtime source lists; shared-library build | `ano_crypto_validation_candidate_policy_check` | `KCMVP_MODULE_BOUNDARY_SPEC.md` | `READY_FOR_INTERNAL_REVIEW` | Dynamic-library boundary and caller-owned context treatment require institution confirmation. |
+| TR-BND-002 | Tests, OpenSSL, hooks, PoC, evidence, signing, PKI, and application layers are outside runtime boundary. | candidate CMake options and excluded-dependency record | validation-candidate, public-surface, PoC, provenance, and sensitive-artifact checks | boundary spec; product-layer and clean-room records | `READY_FOR_INTERNAL_REVIEW` | Reconfirm protected disclosure/package expectations. |
+| TR-BND-003 | External runtime/provider dependencies are identified without being claimed as module code. | Linux entropy adapter; libc/loader/syscall dependency record | provider/platform tests; candidate policy check | boundary and OE matrix | `PARTIAL` | OS `getrandom`, kernel/libc, and trusted-environment treatment require P2-04 and external confirmation. |
+| TR-OE-001 | One initial operating environment and build configuration is selected. | candidate record; `ANO_CRYPTO_ENFORCE_VALIDATION_CANDIDATE` | validation-candidate static policy check | `KCMVP_OPERATING_ENVIRONMENT_MATRIX.md` | `READY_FOR_INTERNAL_REVIEW` | Formal environment granularity remains external. |
+| TR-OE-002 | Candidate configuration fails closed on toolchain/option drift. | CMake enforcement for OS, arch, compiler, CMake, generator, Release/shared/options/flags | positive static policy; negative local mismatch configure | candidate CMake record and OE matrix | `READY_FOR_INTERNAL_REVIEW` | Re-run on exact Ubuntu/GCC/CMake environment. |
+| TR-OE-003 | Selected candidate execution is reproducibly bound to immutable environment and binary identifiers. | provenance/build identity/evidence tooling | no retained OE-01 candidate run yet | OE evidence plan | `PARTIAL` | Capture image SHA, CPU, kernel/packages, command, binary hash/imports/SONAME and named review. |
+| TR-OE-004 | Non-selected operating environments are not overclaimed. | deferred/unsupported matrix; hosted blocker record | policy/document review only | OE matrix; `HOSTED_CI_EXTERNAL_BLOCKER.md` | `BLOCKED_EXTERNAL` | Windows/macOS/32-bit/big-endian hosted evidence remains `NOT_RUN`/`UNREVIEWED`; static/other OEs require new candidate review. |
 | TR-MOD-001 | Module has explicit initialization and startup gate. | `src/core/module_state.c`; `include/anocrypto/ac_module.h` | `ano_crypto_module_state_tests`; `ano_crypto_service_gate_negative_tests` | `docs/design/C99_SELF_TEST_DESIGN.md`; this gap report | `READY_FOR_INTERNAL_REVIEW` | Normative service-availability table in P2-03. |
 | TR-MOD-002 | Cryptographic services are unavailable before successful self-test. | `ano_crypto_module_require_operational()` call sites in hash/MAC/DRBG/random/cipher/CSP paths | service-gate and algorithm negative tests | `docs/kcmvp/SERVICE_SCOPE_MATRIX.md` | `READY_FOR_INTERNAL_REVIEW` | Confirm allowed non-cryptographic queries. |
 | TR-MOD-003 | Fatal failure enters sticky error state. | `ano_crypto_internal_module_mark_error()`; `src/core/module_state.c` | `ano_crypto_entropy_health_error_state_tests`; module-state tests | `docs/design/C99_ENTROPY_FAILURE_INJECTION_AND_HEALTH_TEST.md` | `PARTIAL` | Final fatal/recoverable/restart matrix in P2-03. |
@@ -45,7 +52,7 @@ Status: P2-01 engineering traceability baseline. Requirement interpretations rem
 | TR-ABI-001 | C99 public surface remains controlled. | 14 headers; CMake C99 requirements | `ano_crypto_public_surface_check`; build tests | API/ABI checklist | `READY_FOR_INTERNAL_REVIEW` | Selected toolchain/loader review. |
 | TR-ABI-002 | Exported symbol set remains 69 on ABI line 0. | `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt`; visibility settings | clean Release symbol baseline check | ABI baseline files | `READY_FOR_INTERNAL_REVIEW` | Actual hosted clean Release review blocked. |
 | TR-ABI-003 | Retained P1-29 headers consume current library. | compatibility project and retained headers | current and P1-29 compatibility tests; installed compatibility smoke | tagged release compatibility policy/evidence | `READY_FOR_INTERNAL_REVIEW` | Semantic/loader scope remains limited. |
-| TR-ABI-004 | Version metadata may advance without ABI growth. | `ac_version.h`; release identity | exact package-version and compatibility tests | API/ABI checklist | `READY_FOR_INTERNAL_REVIEW` | P2-01 confirms declarations/symbols unchanged. |
+| TR-ABI-004 | Version metadata may advance without ABI growth. | `ac_version.h`; release identity | exact package-version and compatibility tests | API/ABI checklist | `READY_FOR_INTERNAL_REVIEW` | P2-02 confirms declarations/symbols unchanged while adding only non-public configuration and documentation. |
 | TR-BLD-001 | Build representation assumptions fail at configure time. | CMake type-width and endian checks | configure/build; SHA-512 portability test | SHA-512 portability policy | `READY_FOR_INTERNAL_REVIEW` | Actual 32-bit/big-endian target evidence blocked/unselected. |
 | TR-BLD-002 | Installed CMake package builds a clean consumer. | install/export rules; package config | install smoke build-tree and package-smoke targets | SDK integration guide; PoC package manifest | `READY_FOR_INTERNAL_REVIEW` | Target environment/legal packaging review. |
 | TR-BLD-003 | Customer PoC excludes internal hooks/providers/evidence secrets. | `tools/create_poc_package.cmake` | PoC package smoke and policy checks | PoC package/review manifest | `READY_FOR_INTERNAL_REVIEW` | Approved evaluation notice and customer scope. |
@@ -60,13 +67,13 @@ Status: P2-01 engineering traceability baseline. Requirement interpretations rem
 | TR-REL-002 | External release requires separate authorization. | authorization records and fail-closed checks | provenance/signing negative tests | release policy and handoff docs | `BLOCKED_EXTERNAL` | Hosted review, tag, signer, TSA, roles, legal/product approval. |
 | TR-CM-001 | Sources and exclusions are traceable. | `cleanroom/SOURCE_MANIFEST.md`; `EXCLUSION_LOG.md` | public-surface and sensitive-artifact scans | clean-room policy | `READY_FOR_INTERNAL_REVIEW` | Add controlled reviewer/approval workflow in P2-07. |
 | TR-CM-002 | Configuration/change/release baselines are controlled. | release identity, ABI baseline, hashes, Git/CMake metadata | compatibility/provenance/rehearsal tests | development workflow | `PARTIAL` | Formal configuration-management document and retention rules. |
-| TR-DOC-001 | Submission document set maps to implementation/evidence. | P2-01 documents | document review only | submission inventory and P2 roadmap | `PARTIAL` | Create controlled submission skeleton in P2-07. |
+| TR-DOC-001 | Submission document set maps to implementation/evidence. | P2-01 documents plus P2-02 boundary/OE records | document and validation-candidate policy review | submission inventory and P2 roadmap | `PARTIAL` | Create controlled submission skeleton in P2-07. |
 
-## P2-01 ABI Trace Result
+## P2-02 ABI Trace Result
 
 - Public header file count: 14.
 - Stored exported symbol count: 69.
 - ABI line: `ANOCRYPTO_C_0`.
-- No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01.
-- Version/prerelease metadata changed to `0.1.0-p2-01-readiness-gap`; this is intentionally excluded from normalized non-version API equality.
+- No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01 or P2-02.
+- Version/prerelease metadata changed to `0.1.0-p2-02-boundary-freeze`; this is intentionally excluded from normalized non-version API equality.
 - The CMake package template filename was normalized to the case-sensitive path already referenced by CMake and the policy checker; this is a package-source filename correction, not an ABI change.

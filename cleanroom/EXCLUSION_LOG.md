@@ -410,3 +410,15 @@ If excluded material is discovered:
 | EX-4205 | Recording keys, entropy, seed, DRBG state, random bytes, plaintext/ciphertext, tags, private signing material, tokens, or customer data in traceability/evidence documents | Sensitive-material disclosure | Excluded | Documents remain status/path/count/hash/decision oriented. |
 | EX-4206 | Rewriting or squashing already-pushed P1 history to make P2 documentation appear contiguous | Repository integrity risk | Excluded | P2-01 is one forward commit from the supplied P1-33 source snapshot. |
 | EX-4207 | Performing push, tag creation, production signing, timestamping, or external release as part of P2-01 | Release integrity risk | Excluded | Repository remains unsigned, handoff blocked, external authorization no. |
+
+## P2-02 Boundary and Operating-Environment Freeze Exclusions
+
+| ID | Excluded material or behavior | Risk | Disposition | Note |
+|---|---|---|---|---|
+| EX-4301 | Treating the internally frozen candidate boundary or Ubuntu/GCC configuration as institution-approved, validated, or production-authorized | Claims risk | Excluded | Candidate status remains `FROZEN_INTERNAL_CANDIDATE`; formal acceptance is `EXTERNAL_CONFIRMATION_REQUIRED`. |
+| EX-4302 | Claiming Windows, macOS, static linkage, 32-bit, big-endian, musl, mobile, embedded, ARM, RISC-V, VM clone, or suspend/resume support as part of the initial candidate | Scope/evidence overstatement | Rejected | These are explicitly deferred or `UNSUPPORTED_INITIAL_CANDIDATE`; hosted lanes remain `NOT_RUN`/`UNREVIEWED`. |
+| EX-4303 | Building the candidate with tests, examples, internal hooks, OpenSSL differential code, signing fixtures, sanitizers, LTO, `-march=native`, or hidden-symbol protection disabled | Boundary/configuration drift | Rejected | `ANO_CRYPTO_ENFORCE_VALIDATION_CANDIDATE=ON` fails closed on the frozen option set. |
+| EX-4304 | Treating the local Debian/GCC engineering environment as OE-01 selected-candidate evidence | Evidence substitution | Rejected | Local regression verifies code/policy only; exact Ubuntu 24.04/GCC13 evidence is pending. |
+| EX-4305 | Copying official submission guide attachments, proprietary test-institution guidance, third-party system images, package contents, or vendor source into project documents/code | Provenance and rights risk | Excluded | Only public high-level metadata and fresh project-owned descriptions are retained. |
+| EX-4306 | Adding or logging keys, entropy/provider bytes, seed, DRBG state, random output, plaintext/ciphertext, MAC/tag values, private signing material, tokens, or customer data in boundary/OE evidence | Sensitive-material disclosure | Excluded | Candidate evidence is limited to identifiers, options, statuses, counts, hashes, dependencies, and review metadata. |
+| EX-4307 | Push, tag, production signing, timestamping, or external release during P2-02 | Release-integrity risk | Excluded | Repository remains `UNSIGNED`, handoff `BLOCKED`, external authorization `NO`. |

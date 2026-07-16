@@ -1,6 +1,6 @@
 # P2 Validation Readiness Roadmap
 
-Status: P2-01 current roadmap. P2 is validation-readiness work, not automatic feature expansion.
+Status: P2-02 internal boundary/environment freeze completed; P2-03 is next. P2 remains validation-readiness work, not automatic feature expansion.
 
 ## Fixed P2 Constraints
 
@@ -14,16 +14,16 @@ Status: P2-01 current roadmap. P2 is validation-readiness work, not automatic fe
 
 ## Sequence Overview
 
-| Step | Goal | Primary output | ABI expectation |
-|---|---|---|---|
-| P2-01 | Consolidate gaps, traceability, consultation, submission inventory, and roadmap. | Current P2 pack and blocker record. | No change. |
-| P2-02 | Freeze candidate module boundary and operating environments. | Boundary/environment specification and configuration matrix. | No change. |
-| P2-03 | Finalize self-test, integrity, state, and recovery specification. | Normative self-test/integrity/error-state design. | No change by default; implementation only after accepted design. |
-| P2-04 | Close entropy/provider/DRBG responsibility and evidence plan. | Entropy/DRBG specification, limits, environment policy, evidence mapping. | No change by default. |
-| P2-05 | Close CSP inventory, lifecycle, and zeroization evidence. | Formal CSP and zeroization register. | No change. |
-| P2-06 | Perform secure-coding and target side-channel review. | Findings register, compiler/CPU dispositions, remediation plan. | No change unless a separately approved fix requires it. |
-| P2-07 | Build controlled submission-document skeleton. | Basic design, detailed design, configuration-management, test, and operator-document skeletons. | No change. |
-| P2-08 | Rehearse pre-consultation evidence walkthrough and decision capture. | Mock walkthrough, prioritized questions, unresolved decision register, feedback process. | No change. |
+| Step | Status | Goal | Primary output | ABI expectation |
+|---|---|---|---|---|
+| P2-01 | `COMPLETE_LOCAL` | Consolidate gaps, traceability, consultation, submission inventory, and roadmap. | Current P2 pack and blocker record. | No change. |
+| P2-02 | `FROZEN_INTERNAL_CANDIDATE` | Freeze candidate module boundary and one operating environment. | Boundary/environment specification, machine-readable candidate record, and fail-closed CMake/policy checks. | No change. |
+| P2-03 | `NEXT` | Finalize self-test, integrity, state, and recovery specification. | Normative self-test/integrity/error-state design. | No change by default; implementation only after accepted design. |
+| P2-04 | `PLANNED` | Close entropy/provider/DRBG responsibility and evidence plan. | Entropy/DRBG specification, limits, environment policy, evidence mapping. | No change by default. |
+| P2-05 | `PLANNED` | Close CSP inventory, lifecycle, and zeroization evidence. | Formal CSP and zeroization register. | No change. |
+| P2-06 | `PLANNED` | Perform secure-coding and target side-channel review. | Findings register, compiler/CPU dispositions, remediation plan. | No change unless a separately approved fix requires it. |
+| P2-07 | `PLANNED` | Build controlled submission-document skeleton. | Basic design, detailed design, configuration-management, test, and operator-document skeletons. | No change. |
+| P2-08 | `PLANNED` | Rehearse pre-consultation evidence walkthrough and decision capture. | Mock walkthrough, prioritized questions, unresolved decision register, feedback process. | No change. |
 
 ## P2-01 — Readiness Gap Consolidation
 
@@ -46,34 +46,47 @@ Status: P2-01 current roadmap. P2 is validation-readiness work, not automatic fe
 - local CTest, policy, install, PoC, compatibility, and evidence targets pass;
 - patch/ZIP/hash artifacts reproduce the reviewed tree.
 
+Completion record: P2-01 local engineering checks and artifacts were completed without changing public ABI. P1-34 remained blocked and was not substituted.
+
 ## P2-02 — Module Boundary and Operating Environment Freeze
 
-### Objectives
+Status: `FROZEN_INTERNAL_CANDIDATE`; formal acceptability remains `EXTERNAL_CONFIRMATION_REQUIRED`.
 
-- select one initial physical/logical module boundary;
-- define included/excluded files, processes, dependencies, and interfaces;
-- select exact OS, CPU, compiler, build type, linkage form, and configuration variants;
-- define operator, loader, process, thread, and deployment assumptions.
+### Frozen decision
 
-### Required documents
+- candidate ID: `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`;
+- one software shared object: `libanocrypto_c.so.0.1.0`, SONAME `libanocrypto_c.so.0`;
+- Ubuntu Server 24.04.4 LTS, x86_64 little-endian, ELF/System V AMD64 ABI;
+- GCC 13.3.0, CMake 3.28.3, Unix Makefiles, Release;
+- generic x86-64, LTO OFF, `-march=native` forbidden;
+- thread safety and Linux OS entropy provider ON;
+- tests, examples, internal hooks, OpenSSL differential code, signing fixtures, and sanitizers OFF;
+- static linkage and all other OS/architecture/compiler configurations deferred or unsupported for the initial candidate.
+
+### Deliverables
 
 - `docs/kcmvp/KCMVP_MODULE_BOUNDARY_SPEC.md`;
 - `docs/kcmvp/KCMVP_OPERATING_ENVIRONMENT_MATRIX.md`;
-- boundary diagram and interface/data-flow inventory;
-- configuration identifier scheme and unsupported-environment list.
+- `release/ANOCRYPTO_C_VALIDATION_CANDIDATE.cmake`;
+- `tools/check_validation_candidate_policy.cmake`;
+- CMake fail-closed enforcement option `ANO_CRYPTO_ENFORCE_VALIDATION_CANDIDATE`;
+- evidence integration through `VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt`.
 
-### Completion criteria
+### Completion criteria and disposition
 
-- shared versus static linkage is decided for the initial candidate;
-- every selected environment has an owner and evidence plan;
-- non-selected environments are explicitly unsupported or deferred;
-- test-only OpenSSL, hooks, evidence/provenance/signing tools, and customer PoC remain outside runtime boundary;
-- consultation-dependent items are retained as answered records or `EXTERNAL_CONFIRMATION_REQUIRED`.
+- shared linkage is fixed for the initial candidate;
+- included code/state, excluded tooling/product layers, external OS dependencies, interfaces, data flows, and operator assumptions are identified;
+- one exact OS/CPU/compiler/build family has an owner and evidence plan;
+- non-selected environments are explicitly `DEFERRED`, `UNSUPPORTED_INITIAL_CANDIDATE`, or `BLOCKED_EXTERNAL`;
+- OpenSSL, test hooks, evidence/provenance/signing tools, and customer PoC remain outside runtime boundary;
+- 14 public headers, 69 exported symbols, and `ANOCRYPTO_C_0` remain unchanged;
+- candidate policy and ordinary local regressions pass;
+- immutable image hash, exact CPU/kernel/package capture, selected-candidate retained execution, and institution acceptance remain open.
 
 ### External dependencies
 
-- confirmation of module form, level, and environment-variant treatment;
-- actual hosted evidence remains separately blocked by P1-34.
+- confirmation of shared-library boundary treatment, intended security level, environment-variant granularity, OS entropy-provider responsibility, and integrity-mechanism expectations;
+- actual hosted evidence remains separately blocked by P1-34 and is not closed by the P2-02 local run.
 
 ## P2-03 — Self-test, Integrity, and Error-state Specification
 

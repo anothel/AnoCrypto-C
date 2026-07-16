@@ -1,6 +1,6 @@
 # Thread-Safety Support Matrix
 
-Status: P1-29 retained and extended draft.
+Status: P2-02 target-bound engineering matrix. OE-01 freezes thread safety ON; other platform support remains engineering-only or deferred.
 
 ## Purpose
 
@@ -15,6 +15,7 @@ This matrix turns the earlier internal locking note into a public support-bounda
 | CMake `Threads` unavailable | Unsupported fallback for concurrency | The source can still build, but the no-op fallback is not a thread-safety support commitment. |
 | Internal test hooks enabled | Test configuration only | Internal symbols may be visible for unit tests. Do not use this as the release-style symbol surface. |
 | Release-style no-test build with symbol hiding | Preferred public-symbol check lane | Should be paired with `ANO_CRYPTO_ENABLE_THREAD_SAFETY=ON` before any customer PoC binary handoff. |
+| P2-02 OE-01 validation candidate | Frozen internal candidate | Ubuntu 24.04 x86_64 shared Release build with `ANO_CRYPTO_ENABLE_THREAD_SAFETY=ON`; caller-owned mutable contexts still require caller serialization. |
 
 ## Public API support matrix
 
@@ -40,9 +41,9 @@ This matrix turns the earlier internal locking note into a public support-bounda
 
 | Platform branch | Current implementation | Current CI intent | Notes |
 |---|---|---|---|
-| Linux / POSIX-like | `pthread_mutex_t` branch | Required build/test lane plus cross-platform CSP/HMAC/AES/CMAC concurrency test | Local GCC normal and ASan/UBSan engineering lanes pass; hosted artifact review remains required. |
-| Apple | `pthread_mutex_t` branch | Required build/test/install-smoke and concurrency test when pthread is available | Actual hosted artifact review remains TODO. |
-| Windows | `INIT_ONCE` and `CRITICAL_SECTION` branch | Required build/test/install-smoke and native `CreateThread` CSP/HMAC/AES/CMAC concurrency test | Test source and workflow are present; actual hosted artifact review remains TODO before widening support wording. |
+| Linux / POSIX-like | `pthread_mutex_t` branch | OE-01 selected; ordinary/concurrency engineering tests plus selected-candidate evidence plan | Local GCC engineering lanes are regression evidence only. Exact Ubuntu/GCC13 candidate execution and review remain pending. |
+| Apple | `pthread_mutex_t` branch | Deferred engineering portability lane | Outside initial candidate; actual hosted artifact review remains `NOT_RUN`/`UNREVIEWED`. |
+| Windows | `INIT_ONCE` and `CRITICAL_SECTION` branch | Deferred engineering portability lane | Outside initial candidate; workflow exists but actual hosted review remains `NOT_RUN`/`UNREVIEWED`. |
 | Other platforms | No-op fallback | Build-only until reviewed | Must be listed as unsupported for thread-safety unless a real lock branch is added and tested. |
 
 ## Review rules

@@ -1,6 +1,6 @@
 # KCMVP Pre-consultation Questions
 
-Status: P2-01 question pack. All proposed answers are provisional until retained external confirmation is received.
+Status: P2-02 question pack against internally frozen candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`. All proposed answers remain provisional until retained external confirmation is received.
 
 ## Use and Recording Rule
 
@@ -14,13 +14,15 @@ For every consultation response, retain:
 
 Do not record keys, entropy samples, customer data, private infrastructure details, signing credentials, or unpublished exploit material.
 
-## Priority A — Scope and Boundary Before P2-02/P2-03
+## Priority A — Confirm the Frozen Boundary and Environment Before P2-03
 
 | ID | Recipient | Question | Why it matters | Current project option / decision impact |
 |---|---|---|---|---|
-| PCQ-001 | Testing institution | For a security-level-1 software candidate, is a shared library plus installed public headers an acceptable initial module boundary, and what additional wrapper/loader files must be included or excluded? | Freezes the physical/logical boundary. | Current candidate is the shared `anocrypto_c` library; tests, OpenSSL provider, evidence tools, and PoC are outside. |
+| PCQ-001 | Testing institution | For the software candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`, is the code and module-owned state in `libanocrypto_c.so.0.1.0` an acceptable logical/physical boundary, with headers, loader, libc, kernel, applications, tests, tools, and PoC outside? | Freezes the physical/logical boundary. | The internal candidate is shared-library only; tests, OpenSSL, hooks, tools, PoC, AnoSecureKit, AnoPKI, and signing infrastructure are outside. Formal acceptance is pending. |
 | PCQ-002 | Testing/validation institution | Should static and shared builds be treated as separate module variants, and should the initial scope exclude static linkage? | Avoids ambiguous binaries and duplicated evidence. | Prefer one shared-library configuration first; static remains deferred. |
-| PCQ-003 | Testing institution | What exact OS, CPU, compiler, compiler-version, and build-option combinations must be declared as separate operating environments or module variants? | Defines P2-02 evidence targets and cost. | Candidate set is not frozen; only environments with actual retained evidence should be claimed. |
+| PCQ-003 | Testing institution | What exact OS, CPU, compiler, compiler-version, and build-option combinations must be declared as separate operating environments or module variants? | Defines P2-02 evidence targets and cost. | OE-01 is internally frozen to Ubuntu Server 24.04.4 LTS x86_64, GCC 13.3.0, CMake 3.28.3, Release shared build. Immutable image/CPU/kernel/package capture and actual candidate execution are pending. |
+| PCQ-003A | Testing institution | For Ubuntu 24.04 LTS, which kernel patch level, glibc package, CPU model/microcode, VM/container/hypervisor, and OS image identifiers must be separately declared or retested? | Determines the immutable evidence boundary and future maintenance cost. | Current plan captures all values per run but treats the 24.04/GCC13 family as one internal candidate until advised otherwise. |
+| PCQ-003B | Testing institution | Is GCC 13.3.0 plus generic x86-64, LTO OFF, and no `-march=native` sufficiently specific, and which compiler/linker/package updates require a new candidate or change-impact review? | Freezes compiler-output and maintenance policy. | Any compiler or optimization drift currently requires reviewed candidate revision. |
 | PCQ-004 | Testing institution | Can the initial scope be limited to SHA-256/384/512, HMAC-SHA-2, HMAC_DRBG-SHA-256, AES-128/192/256 CBC without padding, and AES-CMAC full tag? | Prevents feature expansion before scope acceptance. | Prefer the implemented narrow scope; no new algorithm/API in P2. |
 | PCQ-005 | Testing institution | Must a reserved but unimplemented algorithm identifier such as Hash_DRBG be removed from the submitted configuration, or may it remain as an unsupported enum value? | Affects submitted API description without requiring an ABI break. | Keep public ABI unchanged and describe it as unsupported unless the institution requires a configuration-specific exclusion. |
 | PCQ-006 | Testing/validation institution | Which target security level and assurance interpretation are appropriate for this software module and commercial plan? | Drives all document and mechanism requirements. | No level is treated as accepted until confirmed. |
@@ -41,7 +43,7 @@ Do not record keys, entropy samples, customer data, private infrastructure detai
 
 | ID | Recipient | Question | Why it matters | Current project option / decision impact |
 |---|---|---|---|---|
-| PCQ-014 | Testing institution / entropy specialist | When using OS cryptographic random providers, may provider-internal noise-source health tests remain outside this module, and what provider evidence is expected per OS? | Determines whether a direct noise source is required. | Current adapter treats OS output as externally conditioned provider output and does not apply the internal raw-noise duplicate-block skeleton. |
+| PCQ-014 | Testing institution / entropy specialist | For OE-01, may Linux `getrandom()` be treated as an external conditioned OS provider whose noise-source health tests remain outside AnoCrypto-C, and what kernel/provider evidence is required? | Determines whether a direct noise source is required. | OE-01 uses the internal `linux-getrandom` adapter; AnoCrypto-C does not claim ownership of kernel noise sources or apply its raw-noise engineering skeleton to OS output. |
 | PCQ-015 | Testing institution | Is a status-only operational provider probe acceptable, and what failure, retry, and zeroization evidence is required? | Finalizes provider startup/operation policy. | Status-only probe exists; no provider bytes are logged. |
 | PCQ-016 | Testing institution / entropy specialist | If a direct noise source becomes necessary, which startup/continuous tests, thresholds, sample sizes, failure policy, and recovery behavior are expected? | Avoids inventing unsupported thresholds. | No direct source has been selected; remain `EXTERNAL_CONFIRMATION_REQUIRED`. |
 | PCQ-017 | Testing institution | Are current HMAC_DRBG instantiate/reseed/generate limits and explicit reseed-required behavior suitable, and which exact limits must be documented/tested? | Closes P2-04 lifecycle evidence. | Consolidate after accepted limits are confirmed. |
@@ -88,7 +90,7 @@ Do not record keys, entropy samples, customer data, private infrastructure detai
 
 Pre-consultation is complete only when the project has retained answers sufficient to:
 
-1. freeze one candidate module boundary and one initial environment set;
+1. obtain a retained acceptance, revision, or rejection of the internally frozen shared-library boundary and OE-01 environment;
 2. select a self-test/integrity/error-state design;
 3. assign entropy-source and health-test responsibility;
 4. define CSP/zeroization and side-channel evidence expectations;

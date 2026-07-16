@@ -1,0 +1,124 @@
+cmake_minimum_required(VERSION 3.16)
+
+if(NOT DEFINED ANO_CRYPTO_SOURCE_DIR OR ANO_CRYPTO_SOURCE_DIR STREQUAL "")
+    message(FATAL_ERROR "ANO_CRYPTO_SOURCE_DIR is required")
+endif()
+get_filename_component(ANO_CRYPTO_SOURCE_DIR "${ANO_CRYPTO_SOURCE_DIR}" ABSOLUTE)
+if(NOT DEFINED ANO_CRYPTO_VALIDATION_CANDIDATE_CHECK_OUTPUT OR
+   ANO_CRYPTO_VALIDATION_CANDIDATE_CHECK_OUTPUT STREQUAL "")
+    set(ANO_CRYPTO_VALIDATION_CANDIDATE_CHECK_OUTPUT
+        "${CMAKE_CURRENT_BINARY_DIR}/VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt")
+endif()
+get_filename_component(_output
+    "${ANO_CRYPTO_VALIDATION_CANDIDATE_CHECK_OUTPUT}" ABSOLUTE)
+get_filename_component(_output_dir "${_output}" DIRECTORY)
+file(MAKE_DIRECTORY "${_output_dir}")
+
+function(require_file _relative)
+    if(NOT EXISTS "${ANO_CRYPTO_SOURCE_DIR}/${_relative}" OR
+       IS_DIRECTORY "${ANO_CRYPTO_SOURCE_DIR}/${_relative}")
+        message(FATAL_ERROR "Required P2-02 file is missing: ${_relative}")
+    endif()
+endfunction()
+
+function(require_text _relative _needle)
+    require_file("${_relative}")
+    file(READ "${ANO_CRYPTO_SOURCE_DIR}/${_relative}" _text)
+    string(FIND "${_text}" "${_needle}" _position)
+    if(_position EQUAL -1)
+        message(FATAL_ERROR
+            "P2-02 policy text is missing from ${_relative}: ${_needle}")
+    endif()
+endfunction()
+
+include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_VALIDATION_CANDIDATE.cmake")
+
+foreach(_required_var IN ITEMS
+        ANO_CRYPTO_VALIDATION_CANDIDATE_ID
+        ANO_CRYPTO_VALIDATION_CANDIDATE_STATUS
+        ANO_CRYPTO_VALIDATION_FORMAL_ACCEPTANCE
+        ANO_CRYPTO_VALIDATION_MODULE_FORM
+        ANO_CRYPTO_VALIDATION_OS
+        ANO_CRYPTO_VALIDATION_OS_ARCH
+        ANO_CRYPTO_VALIDATION_COMPILER_VERSION
+        ANO_CRYPTO_VALIDATION_RUNTIME_ARTIFACT)
+    if(NOT DEFINED ${_required_var} OR "${${_required_var}}" STREQUAL "")
+        message(FATAL_ERROR "Validation candidate variable is missing: ${_required_var}")
+    endif()
+endforeach()
+
+if(NOT ANO_CRYPTO_VALIDATION_CANDIDATE_ID STREQUAL
+       "AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1" OR
+   NOT ANO_CRYPTO_VALIDATION_CANDIDATE_STATUS STREQUAL
+       "FROZEN_INTERNAL_CANDIDATE" OR
+   NOT ANO_CRYPTO_VALIDATION_FORMAL_ACCEPTANCE STREQUAL
+       "EXTERNAL_CONFIRMATION_REQUIRED" OR
+   NOT ANO_CRYPTO_VALIDATION_MODULE_FORM STREQUAL "SHARED_LIBRARY" OR
+   NOT ANO_CRYPTO_VALIDATION_OS_ARCH STREQUAL "x86_64" OR
+   NOT ANO_CRYPTO_VALIDATION_COMPILER_VERSION STREQUAL "13.3.0" OR
+   NOT ANO_CRYPTO_VALIDATION_BUILD_TYPE STREQUAL "Release" OR
+   NOT ANO_CRYPTO_VALIDATION_BUILD_SHARED_LIBS STREQUAL "ON" OR
+   NOT ANO_CRYPTO_VALIDATION_BUILD_TESTS STREQUAL "OFF" OR
+   NOT ANO_CRYPTO_VALIDATION_BUILD_EXAMPLES STREQUAL "OFF" OR
+   NOT ANO_CRYPTO_VALIDATION_THREAD_SAFETY STREQUAL "ON" OR
+   NOT ANO_CRYPTO_VALIDATION_OS_ENTROPY_PROVIDER STREQUAL "ON" OR
+   NOT ANO_CRYPTO_VALIDATION_ENTROPY_TEST_HOOKS STREQUAL "OFF" OR
+   NOT ANO_CRYPTO_VALIDATION_RANDOM_TEST_HOOKS STREQUAL "OFF" OR
+   NOT ANO_CRYPTO_VALIDATION_OPENSSL_DIFFERENTIAL STREQUAL "OFF" OR
+   NOT ANO_CRYPTO_VALIDATION_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER STREQUAL "OFF" OR
+   NOT ANO_CRYPTO_VALIDATION_SIGNING_TEST_FIXTURES STREQUAL "OFF" OR
+   NOT ANO_CRYPTO_VALIDATION_LTO STREQUAL "OFF")
+    message(FATAL_ERROR "Frozen P2-02 candidate values have drifted")
+endif()
+
+if(NOT ANO_CRYPTO_VALIDATION_ABI_LINE STREQUAL ANO_CRYPTO_RELEASE_ABI_LINE OR
+   NOT ANO_CRYPTO_VALIDATION_SYMBOL_COUNT STREQUAL ANO_CRYPTO_RELEASE_SYMBOL_COUNT OR
+   NOT ANO_CRYPTO_VALIDATION_PUBLIC_HEADER_COUNT STREQUAL ANO_CRYPTO_RELEASE_PUBLIC_HEADER_COUNT)
+    message(FATAL_ERROR "Validation candidate and release ABI baselines disagree")
+endif()
+
+file(GLOB _public_headers
+    "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/*.h")
+list(LENGTH _public_headers _public_header_count)
+file(STRINGS
+    "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt"
+    _symbol_lines REGEX "^[A-Za-z_][A-Za-z0-9_]*$")
+list(LENGTH _symbol_lines _symbol_count)
+if(NOT _public_header_count EQUAL 14 OR NOT _symbol_count EQUAL 69)
+    message(FATAL_ERROR
+        "P2-02 public ABI changed: headers=${_public_header_count}, symbols=${_symbol_count}")
+endif()
+
+require_text("docs/kcmvp/KCMVP_MODULE_BOUNDARY_SPEC.md"
+    "AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1")
+require_text("docs/kcmvp/KCMVP_MODULE_BOUNDARY_SPEC.md"
+    "libanocrypto_c.so.0.1.0")
+require_text("docs/kcmvp/KCMVP_MODULE_BOUNDARY_SPEC.md"
+    "OpenSSL")
+require_text("docs/kcmvp/KCMVP_OPERATING_ENVIRONMENT_MATRIX.md"
+    "Ubuntu Server 24.04.4 LTS")
+require_text("docs/kcmvp/KCMVP_OPERATING_ENVIRONMENT_MATRIX.md"
+    "BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING")
+require_text("docs/kcmvp/KCMVP_OPERATING_ENVIRONMENT_MATRIX.md"
+    "UNSUPPORTED_INITIAL_CANDIDATE")
+require_text("docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md" "| Actual hosted lanes | `NOT_RUN` |")
+require_text("CMakeLists.txt" "ANO_CRYPTO_ENFORCE_VALIDATION_CANDIDATE")
+require_text("CMakeLists.txt" "-march=native and LTO are forbidden")
+
+file(WRITE "${_output}"
+"AnoCrypto-C P2-02 Validation Candidate Policy Check\n"
+"Candidate ID: ${ANO_CRYPTO_VALIDATION_CANDIDATE_ID}\n"
+"Candidate status: ${ANO_CRYPTO_VALIDATION_CANDIDATE_STATUS}\n"
+"Formal acceptance: ${ANO_CRYPTO_VALIDATION_FORMAL_ACCEPTANCE}\n"
+"Module form: ${ANO_CRYPTO_VALIDATION_MODULE_FORM}\n"
+"Operating system: ${ANO_CRYPTO_VALIDATION_OS}\n"
+"Architecture: ${ANO_CRYPTO_VALIDATION_OS_ARCH}\n"
+"Compiler: ${ANO_CRYPTO_VALIDATION_COMPILER_ID} ${ANO_CRYPTO_VALIDATION_COMPILER_VERSION}\n"
+"Runtime artifact: ${ANO_CRYPTO_VALIDATION_RUNTIME_ARTIFACT}\n"
+"ABI: ${ANO_CRYPTO_VALIDATION_ABI_LINE} / ${_public_header_count} headers / ${_symbol_count} symbols\n"
+"Hosted evidence: ${ANO_CRYPTO_VALIDATION_HOSTED_EVIDENCE_STATUS}\n"
+"Result: PASS\n")
+
+message(STATUS
+    "P2-02 validation candidate policy check passed: ${_output}")

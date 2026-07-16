@@ -1,6 +1,6 @@
 # KCMVP Candidate Algorithm Scope
 
-Status: P2-01 current engineering scope; accepted validation scope remains pending.
+Status: P2-02 current engineering scope; accepted validation scope remains pending.
 
 | Family | Service | Status and boundary |
 |---|---|---|
@@ -28,6 +28,6 @@ baseline remains 69 symbols. This does not establish a final validation scope
 or target-specific side-channel conclusion.
 
 
-## P2-01 scope confirmation
+## P2-02 scope confirmation
 
-P2-01 adds no algorithm, mode, key purpose, header, or public function. The implemented scope remains unchanged. Selection of the initial submitted algorithm set is `EXTERNAL_CONFIRMATION_REQUIRED`; unimplemented and deferred services remain outside the candidate configuration unless a separate gate approves them.
+P2-02 adds no algorithm, mode, key purpose, header, or public function. The implemented scope remains unchanged and is bound to the internally frozen OE-01 shared-library candidate. Selection of the initial submitted algorithm set is `EXTERNAL_CONFIRMATION_REQUIRED`; unimplemented and deferred services remain outside the candidate configuration unless a separate gate approves them.

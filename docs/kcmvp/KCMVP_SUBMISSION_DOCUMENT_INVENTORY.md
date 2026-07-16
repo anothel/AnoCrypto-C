@@ -1,6 +1,6 @@
 # KCMVP Submission Document Inventory
 
-Status: P2-01 inventory. Exact current templates and required contents remain `EXTERNAL_CONFIRMATION_REQUIRED`.
+Status: P2-02 inventory. Boundary and one operating environment are available as engineering inputs; exact current templates and accepted contents remain `EXTERNAL_CONFIRMATION_REQUIRED`.
 
 ## Inventory Categories
 
@@ -19,9 +19,9 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 | ID | Proposed controlled document | Current source inputs | State | P2 owner/action |
 |---|---|---|---|---|
 | DOC-BD-001 | Module overview and product boundary | `README.md`; product-layer boundaries; `SERVICE_SCOPE_MATRIX.md` | `UPDATE_AND_CONSOLIDATE` | P2-07 basic design skeleton. |
-| DOC-BD-002 | Physical/logical cryptographic boundary | current module architecture; package/install rules | `AFTER_CONSULTATION` | Freeze in P2-02, then include diagrams and excluded components. |
+| DOC-BD-002 | Physical/logical cryptographic boundary | `KCMVP_MODULE_BOUNDARY_SPEC.md`; candidate configuration record | `EXISTING_ENGINEERING_INPUT` | Reconcile into controlled basic design after institution confirmation. |
 | DOC-BD-003 | Security level and requirement applicability | none accepted | `AFTER_CONSULTATION` | Record institution-confirmed level and applicability table. |
-| DOC-BD-004 | Operating environment and configuration variants | thread/random portability docs; CI matrix | `UPDATE_AND_CONSOLIDATE` | P2-02 environment matrix and support exclusions. |
+| DOC-BD-004 | Operating environment and configuration variants | `KCMVP_OPERATING_ENVIRONMENT_MATRIX.md`; candidate configuration record; portability/CI docs | `EXISTING_ENGINEERING_INPUT` | Add immutable OE-01 execution records and institution-confirmed variant rules. |
 | DOC-BD-005 | Roles, services, and service availability by state | public headers; module state; service matrix | `UPDATE_AND_CONSOLIDATE` | P2-03 normative role/service/state table. |
 | DOC-BD-006 | Approved algorithm/service scope | `KCMVP_ALGORITHM_SCOPE.md` | `AFTER_CONSULTATION` | Confirm target algorithms/configuration; retain unsupported placeholders separately. |
 | DOC-BD-007 | Ports and interfaces | 14 public headers; install/package docs | `UPDATE_AND_CONSOLIDATE` | Classify data/control/status interfaces and caller responsibilities. |
@@ -41,9 +41,9 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 | DOC-DD-006 | Entropy source/provider and health-test design | entropy adapter/operational/health docs | `AFTER_CONSULTATION` | Final ownership/tests only after source/environment confirmation. |
 | DOC-DD-007 | AES/CBC/CMAC design and API behavior | AES/CBC/CMAC design/hardening docs | `UPDATE_AND_CONSOLIDATE` | Consolidate without expanding service scope. |
 | DOC-DD-008 | CSP lifecycle and zeroization design | CSP lifecycle; zeroize source; side-channel checklist | `UPDATE_AND_CONSOLIDATE` | P2-05 formal inventory and path matrix. |
-| DOC-DD-009 | Thread/process model | thread-safety and random portability docs | `UPDATE_AND_CONSOLIDATE` | Freeze target behavior in P2-02/P2-04. |
+| DOC-DD-009 | Thread/process model | P2-02 boundary/OE matrix; thread-safety and random portability docs | `UPDATE_AND_CONSOLIDATE` | OE-01 thread/process assumptions frozen; entropy/VM/suspend closure remains P2-04. |
 | DOC-DD-010 | Secure coding and side-channel analysis | security checklist; compiler capture plans | `CREATE_NEW` | P2-06 findings register and retained review dispositions. |
-| DOC-DD-011 | Build/package/runtime dependency design | CMake, install, PoC, provenance docs | `UPDATE_AND_CONSOLIDATE` | Separate runtime dependencies from test/tool dependencies. |
+| DOC-DD-011 | Build/package/runtime dependency design | candidate record, CMake enforcement, boundary/OE matrix, install/PoC/provenance docs | `UPDATE_AND_CONSOLIDATE` | Convert P2-02 dependency/exclusion record into controlled detailed design. |
 
 ## C. Configuration Management
 
@@ -51,7 +51,7 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 |---|---|---|---|---|
 | DOC-CM-001 | Configuration identification and baselines | release identity; ABI baseline; source hashes | `UPDATE_AND_CONSOLIDATE` | P2-07 controlled baseline table. |
 | DOC-CM-002 | Source/change control workflow | development workflow; clean-room records | `UPDATE_AND_CONSOLIDATE` | Define roles, approvals, issue/change classification, and branch/tag rules. |
-| DOC-CM-003 | Build environment and reproducibility procedure | CMake options; reproducible-build notes | `UPDATE_AND_CONSOLIDATE` | Freeze toolchain/environment and retained command logs. |
+| DOC-CM-003 | Build environment and reproducibility procedure | P2-02 candidate record/CMake enforcement; reproducible-build notes | `UPDATE_AND_CONSOLIDATE` | Capture immutable OE-01 image/tool packages/commands/binary hashes and retained review. |
 | DOC-CM-004 | Release creation, signing, timestamp, and authorization | release provenance/signing policies | `AFTER_CONSULTATION` | Integrate institution needs; production provisioning remains blocked. |
 | DOC-CM-005 | Problem reporting and corrective action | no controlled process | `CREATE_NEW` | Define security issue intake, triage, fix, regression, and retest decision. |
 | DOC-CM-006 | Document control and review history | fragmented Markdown history | `CREATE_NEW` | Add document IDs, versions, owners, reviewers, approvals, and change summaries. |
@@ -79,10 +79,10 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 
 | ID | Proposed controlled document | Current source inputs | State | P2 owner/action |
 |---|---|---|---|---|
-| DOC-OP-001 | Installation and build guide for submitted configuration | SDK integration guide; install smoke | `UPDATE_AND_CONSOLIDATE` | Freeze exact commands/options and artifact hashes. |
+| DOC-OP-001 | Installation and build guide for submitted configuration | P2-02 OE command; SDK integration guide; install smoke | `UPDATE_AND_CONSOLIDATE` | Execute and retain exact OE-01 commands, artifact hashes, SONAME/imports, and install paths. |
 | DOC-OP-002 | Crypto officer/operator guidance | README/state/error notes | `CREATE_NEW` | Startup, status, fatal state, restart, key lifecycle, supported environment. |
 | DOC-OP-003 | Developer API/service guide | public headers; PoC example | `UPDATE_AND_CONSOLIDATE` | Include buffer/alias/state/status rules without internal details. |
-| DOC-OP-004 | Secure operation/environment assumptions | entropy/thread/process/VM notes | `UPDATE_AND_CONSOLIDATE` | P2-02/P2-04 output. |
+| DOC-OP-004 | Secure operation/environment assumptions | P2-02 boundary/OE matrix; entropy/thread/process/VM notes | `UPDATE_AND_CONSOLIDATE` | Boundary/thread/deployment assumptions exist; finalize entropy and lifecycle wording in P2-04. |
 | DOC-OP-005 | Vulnerability/security reporting guide | none controlled | `CREATE_NEW` | Define contact, supported branches, embargo and patch/retest handling. |
 | DOC-SUP-001 | Algorithm and public-vector source register | clean-room source manifest | `EXISTING_ENGINEERING_INPUT` | Review and extract controlled references. |
 | DOC-SUP-002 | Public ABI/symbol/header baseline | `abi/*`; `release/PUBLIC_HEADERS.sha256` | `EXISTING_ENGINEERING_INPUT` | Retain as supporting configuration evidence. |
@@ -108,7 +108,7 @@ Do not finalize the submission skeleton until P2-02 through P2-06 have produced 
 
 - current document templates/revisions;
 - target security level and module form;
-- selected operating environments;
+- external acceptance or required revision of OE-01 and its environment-variant granularity;
 - integrity and entropy responsibilities;
 - expected source/binary/test artifact package;
 - confidentiality and delivery channel.

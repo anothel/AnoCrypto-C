@@ -1,4 +1,4 @@
-# Assemble the final P1-33 evidence directory from one complete, hash-bound
+# Assemble the final P2-02 evidence directory from one complete, hash-bound
 # predecessor artifact. This script intentionally launches no child process.
 cmake_minimum_required(VERSION 3.16)
 
@@ -71,6 +71,7 @@ file(SHA256 "${_manifest}" _validated_manifest_hash)
 
 foreach(_status_check IN ITEMS
         "CTEST_EVIDENCE_SUMMARY.txt|CTest result: 0"
+        "VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt|Result: PASS"
         "SENSITIVE_ARTIFACT_SCAN.txt|Result: PASS"
         "RELEASE_PROVENANCE_CHECK.txt|Result: PASS"
         "RELEASE_PROVENANCE_POLICY_CHECK.txt|Result: PASS"

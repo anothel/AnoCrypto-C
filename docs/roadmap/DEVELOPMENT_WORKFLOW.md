@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P2-01 validation-readiness workflow.
+Status: P2-02 validation-readiness workflow; P2-03 is next.
 
 ## Purpose
 
@@ -252,7 +252,7 @@ P1-23 deliverables:
 | P1-32 | Offline release-signing handoff | Completed with an Ed25519/RFC 3161 verifier policy, key-free handoff bundle, role separation, opt-in ephemeral Debug fixtures, and fail-closed unprovisioned production state. |
 | P1-33 | Clean tagged-release rehearsal and hosted artifact review | Completed with an isolated synthetic tag rehearsal, clean/moved identity checks, explicit hosted lane records, actual/synthetic separation, and fail-closed review regressions. |
 | P2-01 | Readiness gap consolidation and pre-consultation pack | Completed with traceability, gap status, document inventory, blocker record, and P2-02 through P2-08 roadmap; no public ABI change. |
-| P2-02 | Module boundary and operating environment freeze | Select one candidate boundary and exact supported configurations before mechanism/document closure. |
+| P2-02 | Module boundary and operating environment freeze | Completed with one shared-library candidate, OE-01 configuration record, explicit exclusions, fail-closed CMake enforcement, and no public ABI change. |
 
 ## Stop conditions
 
@@ -345,4 +345,16 @@ P2-01 deliverables:
 - durable P1-34 billing-blocker record;
 - unchanged 14-header, 69-symbol `ANOCRYPTO_C_0` public boundary.
 
-P2-02 is the next codebase work item. P1-34 resumes only after GitHub billing is resolved and remains a separate actual-hosted-evidence lane.
+P2-02 is completed as an internal freeze. P2-03 is the next codebase work item. P1-34 resumes only after GitHub billing is resolved and remains a separate actual-hosted-evidence lane.
+
+## P2-02 placement
+
+P2-02 converts the broad P2-01 boundary/environment gaps into one controlled internal candidate:
+
+- `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`;
+- Ubuntu Server 24.04.4 LTS x86_64, GCC 13.3.0, CMake 3.28.3;
+- Release shared library with thread safety and Linux OS entropy enabled;
+- tests, examples, hooks, OpenSSL differential code, signing fixtures, sanitizers, LTO, and native CPU tuning excluded;
+- static linkage and all non-selected operating environments deferred or unsupported for the initial candidate.
+
+The candidate is a configuration-management decision, not a validation result. Exact selected-environment execution, immutable image/CPU/kernel/package evidence, institution confirmation, integrity design, and hosted artifact review remain open. P2-03 must now define self-test, module integrity, finite-state, service availability, failure classification, and recovery/operator actions against this boundary.

@@ -10,12 +10,14 @@ include(CMakePackageConfigHelpers)
 include(CheckCSourceCompiles)
 include(TestBigEndian)
 include("${CMAKE_CURRENT_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/release/ANOCRYPTO_C_VALIDATION_CANDIDATE.cmake")
 
 if(NOT PROJECT_VERSION STREQUAL ANO_CRYPTO_RELEASE_PACKAGE_VERSION)
     message(FATAL_ERROR "project() version and release package version must match")
 endif()
 
 option(ANO_CRYPTO_BUILD_TESTS "Build AnoCrypto-C unit and smoke tests" ON)
+option(ANO_CRYPTO_ENFORCE_VALIDATION_CANDIDATE "Require the frozen P2-02 Linux/GCC/shared-library candidate environment and options" OFF)
 option(ANO_CRYPTO_BUILD_EXAMPLES "Build AnoCrypto-C example programs" ON)
 option(ANO_CRYPTO_ENABLE_STRICT_WARNINGS "Enable strict compiler warnings" ON)
 option(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS "Enable internal entropy failure-injection hooks for dedicated test builds" OFF)
@@ -53,6 +55,85 @@ endif()
 
 if(NOT DEFINED BUILD_SHARED_LIBS)
     set(BUILD_SHARED_LIBS ON)
+endif()
+
+if(ANO_CRYPTO_ENFORCE_VALIDATION_CANDIDATE)
+    set(_ano_crypto_candidate_errors "")
+    if(NOT CMAKE_SYSTEM_NAME STREQUAL "Linux")
+        list(APPEND _ano_crypto_candidate_errors "CMAKE_SYSTEM_NAME must be Linux")
+    endif()
+    string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" _ano_crypto_candidate_processor)
+    if(NOT _ano_crypto_candidate_processor MATCHES "^(x86_64|amd64)$")
+        list(APPEND _ano_crypto_candidate_errors "CMAKE_SYSTEM_PROCESSOR must be x86_64/amd64")
+    endif()
+    if(NOT CMAKE_C_COMPILER_ID STREQUAL ANO_CRYPTO_VALIDATION_COMPILER_ID OR
+       NOT CMAKE_C_COMPILER_VERSION VERSION_EQUAL ANO_CRYPTO_VALIDATION_COMPILER_VERSION)
+        list(APPEND _ano_crypto_candidate_errors
+            "compiler must be GNU ${ANO_CRYPTO_VALIDATION_COMPILER_VERSION}")
+    endif()
+    if(NOT CMAKE_VERSION VERSION_EQUAL ANO_CRYPTO_VALIDATION_CMAKE_VERSION)
+        list(APPEND _ano_crypto_candidate_errors
+            "CMake must be ${ANO_CRYPTO_VALIDATION_CMAKE_VERSION}")
+    endif()
+    if(NOT CMAKE_GENERATOR STREQUAL ANO_CRYPTO_VALIDATION_GENERATOR)
+        list(APPEND _ano_crypto_candidate_errors
+            "generator must be ${ANO_CRYPTO_VALIDATION_GENERATOR}")
+    endif()
+    if(NOT CMAKE_BUILD_TYPE STREQUAL ANO_CRYPTO_VALIDATION_BUILD_TYPE)
+        list(APPEND _ano_crypto_candidate_errors "CMAKE_BUILD_TYPE must be Release")
+    endif()
+    if(NOT BUILD_SHARED_LIBS)
+        list(APPEND _ano_crypto_candidate_errors "BUILD_SHARED_LIBS must be ON")
+    endif()
+    if(ANO_CRYPTO_BUILD_TESTS OR ANO_CRYPTO_BUILD_EXAMPLES)
+        list(APPEND _ano_crypto_candidate_errors "tests and examples must be OFF")
+    endif()
+    if(NOT ANO_CRYPTO_ENABLE_STRICT_WARNINGS OR
+       NOT ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS OR
+       NOT ANO_CRYPTO_ENABLE_THREAD_SAFETY OR
+       NOT ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER)
+        list(APPEND _ano_crypto_candidate_errors
+            "strict warnings, hidden internals, thread safety, and OS entropy must be ON")
+    endif()
+    if(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS OR
+       ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS OR
+       ANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS OR
+       ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER OR
+       ANO_CRYPTO_ENABLE_SIGNING_TEST_FIXTURES OR
+       NOT ANO_CRYPTO_SANITIZER_MODE STREQUAL "none")
+        list(APPEND _ano_crypto_candidate_errors
+            "test hooks, OpenSSL differential/require-provider, signing fixtures, and sanitizers must be OFF")
+    endif()
+    if(CMAKE_C_FLAGS MATCHES "(^|[ ;])(-march=native|-flto)([ =;]|$)" OR
+       CMAKE_C_FLAGS_RELEASE MATCHES "(^|[ ;])(-march=native|-flto)([ =;]|$)")
+        list(APPEND _ano_crypto_candidate_errors "-march=native and LTO are forbidden")
+    endif()
+
+    set(_ano_crypto_os_id "")
+    set(_ano_crypto_os_version_id "")
+    if(EXISTS "/etc/os-release")
+        file(STRINGS "/etc/os-release" _ano_crypto_os_release_lines)
+        foreach(_ano_crypto_os_line IN LISTS _ano_crypto_os_release_lines)
+            if(_ano_crypto_os_line MATCHES "^ID=\"?([^\"]+)\"?$")
+                set(_ano_crypto_os_id "${CMAKE_MATCH_1}")
+            elseif(_ano_crypto_os_line MATCHES "^VERSION_ID=\"?([^\"]+)\"?$")
+                set(_ano_crypto_os_version_id "${CMAKE_MATCH_1}")
+            endif()
+        endforeach()
+    endif()
+    if(NOT _ano_crypto_os_id STREQUAL "ubuntu" OR
+       NOT _ano_crypto_os_version_id STREQUAL "24.04")
+        list(APPEND _ano_crypto_candidate_errors
+            "operating system must identify as Ubuntu 24.04")
+    endif()
+
+    if(_ano_crypto_candidate_errors)
+        list(JOIN _ano_crypto_candidate_errors "\n - " _ano_crypto_candidate_error_text)
+        message(FATAL_ERROR
+            "P2-02 validation candidate configuration mismatch (${ANO_CRYPTO_VALIDATION_CANDIDATE_ID}):\n - ${_ano_crypto_candidate_error_text}")
+    endif()
+    message(STATUS
+        "Enforcing P2-02 validation candidate ${ANO_CRYPTO_VALIDATION_CANDIDATE_ID}")
 endif()
 
 if(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS AND NOT ANO_CRYPTO_BUILD_TESTS)
@@ -380,7 +461,7 @@ add_custom_target(ano_crypto_release_compatibility_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_compatibility.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Checking P2-01 release identity and retained P1-29 public source/ABI compatibility")
+    COMMENT "Checking P2-02 release identity and retained P1-29 public source/ABI compatibility")
 
 add_custom_target(ano_crypto_release_provenance_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -390,7 +471,7 @@ add_custom_target(ano_crypto_release_provenance_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_provenance_policy.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Checking P2-01 retained unsigned release provenance, source SBOM, and signing boundary")
+    COMMENT "Checking P2-02 retained unsigned release provenance, source SBOM, and signing boundary")
 
 add_custom_target(ano_crypto_tagged_release_compatibility_smoke
     COMMAND ${CMAKE_COMMAND} -E env
@@ -407,7 +488,7 @@ add_custom_target(ano_crypto_tagged_release_compatibility_smoke
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_tagged_release_compatibility_smoke.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Building installed P2-01 package and running current/P1-29 header compatibility consumers")
+    COMMENT "Building installed P2-02 package and running current/P1-29 header compatibility consumers")
 
 add_custom_target(ano_crypto_public_surface_check
     COMMAND ${CMAKE_COMMAND}
@@ -417,6 +498,16 @@ add_custom_target(ano_crypto_public_surface_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_public_surface.cmake
     USES_TERMINAL
     COMMENT "Checking AnoCrypto-C public surface and repository policy")
+
+add_custom_target(ano_crypto_validation_candidate_policy_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_VALIDATION_CANDIDATE_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_validation_candidate_policy.cmake
+    USES_TERMINAL
+    VERBATIM
+    COMMENT "Checking P2-02 module-boundary and operating-environment freeze")
 
 add_custom_target(ano_crypto_thread_safety_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -931,7 +1022,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
     add_executable(ano_crypto_current_header_compatibility_tests
         tests/compat/p1_29_compatibility_probe.c)
     target_compile_definitions(ano_crypto_current_header_compatibility_tests PRIVATE
-        ANO_CRYPTO_COMPAT_HEADER_MODE="current-p2-01"
+        ANO_CRYPTO_COMPAT_HEADER_MODE="current-p2-02"
         ANO_CRYPTO_EXPECT_CURRENT_HEADER=1
         ANO_CRYPTO_EXPECT_RUNTIME_VERSION="${ANO_CRYPTO_RELEASE_VERSION}")
     target_link_libraries(ano_crypto_current_header_compatibility_tests PRIVATE anocrypto_c)
@@ -1100,7 +1191,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_BUILD_CONFIG=$<CONFIG>
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_ctest_evidence.cmake
         USES_TERMINAL
-        COMMENT "Capturing AnoCrypto-C P2-01 CTest evidence")
+        COMMENT "Capturing AnoCrypto-C P2-02 CTest evidence")
     add_dependencies(ano_crypto_ctest_evidence ${_ano_crypto_evidence_test_targets})
 
     # Serialize nested build trees before CTest. Direct sibling dependencies can
@@ -1129,7 +1220,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/prepare_release_provenance_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Preparing verified unsigned P2-01 release provenance evidence")
+        COMMENT "Preparing verified unsigned P2-02 release provenance evidence")
     add_dependencies(ano_crypto_release_provenance_evidence
         ano_crypto_ctest_evidence)
 
@@ -1147,7 +1238,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_signing_handoff.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Creating and checking the key-free P2-01 retained offline-signing handoff")
+        COMMENT "Creating and checking the key-free P2-02 retained offline-signing handoff")
     add_dependencies(ano_crypto_release_signing_handoff_evidence
         ano_crypto_release_provenance_evidence)
 
@@ -1167,7 +1258,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-01
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-02
             -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-provenance-evidence
             -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff
             -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff-check.txt
@@ -1199,19 +1290,19 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Preparing hash-bound P2-01 status evidence")
+        COMMENT "Preparing hash-bound P2-02 status evidence")
     add_dependencies(ano_crypto_prepare_release_status_evidence
         ano_crypto_release_signing_handoff_evidence)
 
     add_custom_target(ano_crypto_collect_release_evidence
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-01
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p2-01
+            -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-02
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p2-02
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/assemble_release_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Assembling AnoCrypto-C P2-01 evidence from prepared artifacts")
+        COMMENT "Assembling AnoCrypto-C P2-02 evidence from prepared artifacts")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_prepare_release_status_evidence)
 endif()

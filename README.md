@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: `0.1.0-p2-01-readiness-gap`, a documentation and readiness-consolidation slice built on the P1-33 cryptographic and release-engineering baseline. P2-01 adds a complete implementation/test/evidence inventory, requirement traceability, readiness-gap classifications, pre-consultation questions, submission-document inventory, P2-02 through P2-08 roadmap, and a durable P1-34 external-blocker record. The public boundary remains 14 headers and 69 exported symbols on `ANOCRYPTO_C_0`. P1-34 actual hosted artifact review is still `BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING`; actual hosted lanes remain `NOT_RUN`, actual review remains `UNREVIEWED`, the repository remains `UNSIGNED`, signing handoff remains `BLOCKED`, and external release authorization remains `NO`.
+Current status: `0.1.0-p2-02-boundary-freeze`, the P2-02 module-boundary and operating-environment freeze built on the completed P2-01 readiness consolidation. The internal validation candidate is `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`: one Release shared library for Ubuntu Server 24.04.4 LTS x86_64, GCC 13.3.0, thread safety and the Linux OS entropy provider enabled, and all tests, examples, internal hooks, OpenSSL differential code, signing fixtures, sanitizers, and LTO excluded from the runtime build. Formal acceptability remains `EXTERNAL_CONFIRMATION_REQUIRED`. The public boundary remains 14 headers and 69 exported symbols on `ANOCRYPTO_C_0`. P1-34 actual hosted artifact review is still `BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING`; actual hosted lanes remain `NOT_RUN`, actual review remains `UNREVIEWED`, the repository remains `UNSIGNED`, signing handoff remains `BLOCKED`, and external release authorization remains `NO`.
 
 Implemented processing scope:
 
@@ -73,6 +73,19 @@ P2-01 introduces no cryptographic service, public function, public type, header,
 
 The CMake package template filename is normalized to `cmake/AnoCryptoCConfig.cmake.in` so the repository matches its existing case-sensitive CMake and policy references. This packaging-source correction does not change public ABI.
 
+## P2-02 boundary and operating-environment freeze
+
+P2-02 freezes one internal candidate for design, test planning, and pre-consultation. It does not claim institution acceptance or actual hosted execution. Controlled outputs are:
+
+- `docs/kcmvp/KCMVP_MODULE_BOUNDARY_SPEC.md`;
+- `docs/kcmvp/KCMVP_OPERATING_ENVIRONMENT_MATRIX.md`;
+- `release/ANOCRYPTO_C_VALIDATION_CANDIDATE.cmake`;
+- `tools/check_validation_candidate_policy.cmake`;
+- CMake option `ANO_CRYPTO_ENFORCE_VALIDATION_CANDIDATE=ON`;
+- evidence record `VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt`.
+
+The selected candidate is shared-library only. Static linkage, Windows, macOS, non-x86-64 architectures, 32-bit, big-endian, musl, mobile/embedded environments, hardware dispatch, VM-clone guarantees, and suspend/resume detection are deferred or unsupported for the initial candidate. P2-03 is the next work item and must select the self-test, integrity, finite-state, and recovery specification without expanding the public ABI.
+
 ## Build
 
 ```sh
@@ -84,8 +97,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p2-01
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-01
+cmake --install build --prefix /tmp/anocrypto-c-p2-02
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-02
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -103,8 +116,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p2-01
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-01
+cmake --install build --prefix /tmp/anocrypto-c-p2-02
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-02
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -135,7 +148,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-01/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-02/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 

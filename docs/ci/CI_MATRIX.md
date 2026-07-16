@@ -1,6 +1,6 @@
 # CI Matrix
 
-Status: P2-01 engineering matrix; actual hosted lanes remain NOT_RUN.
+Status: P2-02 engineering matrix; OE-01 is internally frozen, while actual hosted lanes remain `NOT_RUN`/`UNREVIEWED`.
 
 | Lane | Linux | macOS | Windows | Notes |
 |---|---:|---:|---:|---|
@@ -18,6 +18,19 @@ Status: P2-01 engineering matrix; actual hosted lanes remain NOT_RUN.
 | 32-bit representation | Hosted Linux candidate | — | — | Result not yet reviewed. |
 | Big-endian candidate | s390x/QEMU workflow | — | — | Result not yet reviewed. |
 | Compiler-output capture | GCC/Clang candidate | Apple Clang candidate | MSVC/clang-cl candidate | Human review required. |
+
+## P2-02 selected-candidate lane
+
+The initial validation candidate is not equivalent to the broad engineering matrix above.
+Its clean runtime build is exactly:
+
+| Candidate lane | Frozen value | Current execution state |
+|---|---|---|
+| `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` | Ubuntu Server 24.04.4 LTS, x86_64, GCC 13.3.0, CMake 3.28.3, Unix Makefiles, Release shared library | `NOT_RUN_ON_SELECTED_OE` |
+| Runtime options | tests/examples/hooks/OpenSSL/signing fixtures/sanitizers OFF; hidden symbols/thread safety/OS entropy ON; generic x86-64; LTO OFF | Static policy and local mismatch-negative check available |
+| Evidence plan | immutable OS image, CPU/kernel/packages, build command, source/commit, binary hash, SONAME/imports/exports, install smoke and named human review | `PARTIAL` |
+
+The broad Linux/macOS/Windows workflows remain engineering portability lanes. They do not expand the initial candidate and do not constitute execution evidence until runners execute and artifacts receive retained human review.
 
 ## P1-28 AES-CMAC addition
 
@@ -37,6 +50,6 @@ the 69-symbol clean Release baseline. Hosted workflow definitions do not count
 as reviewed run evidence.
 
 
-## P2-01 hosted blocker
+## P2-02 / P1-34 hosted blocker
 
 GitHub Actions run `29256531912` at baseline commit `cf0f3c425dd265c7509fb64a6123db97f71055dd` reached no runner because of account billing/spending-limit status. Actual hosted lanes remain `NOT_RUN`, review remains `UNREVIEWED`, and no artifact was produced. See `HOSTED_CI_EXTERNAL_BLOCKER.md`.

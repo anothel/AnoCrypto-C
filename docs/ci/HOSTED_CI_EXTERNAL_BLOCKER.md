@@ -36,6 +36,8 @@ The following do not close P1-34:
 
 Those records may verify local policy behavior only. Actual hosted status must remain `NOT_RUN`, and review status must remain `UNREVIEWED`.
 
+P2-02 selection of `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`, its CMake enforcement rule, or a local failure/success of that rule does not create hosted execution evidence and does not alter this blocker.
+
 ## Impact
 
 The blocker does not prevent local P2 readiness documentation, local tests, package smoke, PoC smoke, ABI checks, or evidence tooling. It continues to block:
