@@ -32,6 +32,7 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - Reproducible build notes
 - Public surface check result
 - P2-02 validation-candidate boundary/configuration policy result
+- P2-03 self-test/integrity/state/recovery policy result (`SELF_TEST_INTEGRITY_POLICY_CHECK.txt`)
 - Thread-safety policy check result
 - SHA-384/SHA-512 scope check result
 - SHA-384/SHA-512 scope review notes
@@ -315,3 +316,7 @@ Review together:
 - hosted negative-test result for missing/duplicate lanes, unsafe or unlisted files, hash mismatch, oversized/binary-like files, sensitive markers, incomplete reviewer data, conflicting roles, and false approval state.
 
 Confirm the rehearsal tag exists only in an isolated temporary repository. Mark synthetic/local artifacts `SYNTHETIC_LOCAL`, actual hosted-runner artifacts `HOSTED_RUNNER`, absent hosted execution `NOT_RUN`, and downloaded-but-unreviewed output `UNREVIEWED`. No synthetic result may be represented as hosted `PASS` or `APPROVED`. Signing remains `UNSIGNED`, handoff `BLOCKED`, and external authorization `NO`.
+
+## P2-03 self-test/integrity review
+
+Review `SELF_TEST_INTEGRITY_POLICY_CHECK.txt` and confirm that it does not claim runtime module authentication. The selected candidate is design-only. The retained evidence must show 14 headers, 69 symbols, `ANOCRYPTO_C_0`, hosted `NOT_RUN`, review `UNREVIEWED`, handoff `BLOCKED`, and authorization `NO`. Future mutation/truncation/path/concurrency results belong only after the integrity implementation gate.

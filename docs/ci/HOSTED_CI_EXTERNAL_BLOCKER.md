@@ -38,6 +38,8 @@ Those records may verify local policy behavior only. Actual hosted status must r
 
 P2-02 selection of `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`, its CMake enforcement rule, or a local failure/success of that rule does not create hosted execution evidence and does not alter this blocker.
 
+P2-03 self-test/integrity policy checks, state/recovery documentation, orderly reinitialization tests, or locally assembled evidence likewise do not implement the selected integrity mechanism and do not create hosted execution evidence. They do not alter this blocker.
+
 ## Impact
 
 The blocker does not prevent local P2 readiness documentation, local tests, package smoke, PoC smoke, ABI checks, or evidence tooling. It continues to block:

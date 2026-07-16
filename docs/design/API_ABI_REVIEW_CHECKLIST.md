@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P2-02 ABI no-change review for the internally frozen boundary/environment candidate.
+Status: P2-03 ABI no-change review for the internally frozen self-test/integrity/state/recovery design.
 
 ## Identity
 
@@ -101,9 +101,19 @@ These checks are toolchain-specific guardrails. Calling convention, loader behav
 
 ## P2-02 boundary/environment ABI review
 
-- Runtime/version metadata advances to `0.1.0-p2-02-boundary-freeze`; package version remains `0.1.0`.
+- Runtime/version metadata advances to `0.1.0-p2-03-selftest-integrity`; package version remains `0.1.0`.
 - No public function, header, public type layout, enum value, non-version macro contract, or exported symbol is added or removed.
 - Public header count remains 14 and the clean Release symbol baseline remains 69 on `ANOCRYPTO_C_0`.
 - Normalized declarations, public types, non-version constants, retained P1-29-header consumption, and stored exported names remain compatibility inputs.
 - `cmake/AnoCryptoCConfig.cmake.in` is a case-sensitive source filename correction matching the pre-existing CMake/policy reference; installed package names and ABI are unchanged.
 - P1-34 actual hosted review remains blocked and is not replaced by local P2-02 checks.
+
+## P2-03 self-test/integrity ABI review
+
+- public headers remain 14 and exported baseline entries remain 69 on `ANOCRYPTO_C_0`;
+- no public function, type, enum value, status, or header is added or removed;
+- `ac_module.h` and `ac_selftest.h` changes are comment/contract clarification only;
+- the existing `ano_crypto_selftest_run()` symbol is retained, while target on-demand state behavior is tracked as a private implementation delta;
+- `INT-HMAC-SHA256-SINGLE-SO-R1`, its metadata format, policy record, checker, and future injection tooling are internal/build-time assets and do not enter public ABI;
+- version/prerelease/build-fingerprint metadata advances to `0.1.0-p2-03-selftest-integrity`;
+- P1-34 actual hosted review remains blocked and is not replaced by local P2-03 checks.

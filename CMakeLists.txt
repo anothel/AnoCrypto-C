@@ -11,6 +11,7 @@ include(CheckCSourceCompiles)
 include(TestBigEndian)
 include("${CMAKE_CURRENT_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
 include("${CMAKE_CURRENT_SOURCE_DIR}/release/ANOCRYPTO_C_VALIDATION_CANDIDATE.cmake")
+include("${CMAKE_CURRENT_SOURCE_DIR}/release/ANOCRYPTO_C_SELF_TEST_POLICY.cmake")
 
 if(NOT PROJECT_VERSION STREQUAL ANO_CRYPTO_RELEASE_PACKAGE_VERSION)
     message(FATAL_ERROR "project() version and release package version must match")
@@ -461,7 +462,7 @@ add_custom_target(ano_crypto_release_compatibility_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_compatibility.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Checking P2-02 release identity and retained P1-29 public source/ABI compatibility")
+    COMMENT "Checking P2-03 release identity and retained P1-29 public source/ABI compatibility")
 
 add_custom_target(ano_crypto_release_provenance_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -471,7 +472,7 @@ add_custom_target(ano_crypto_release_provenance_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_provenance_policy.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Checking P2-02 retained unsigned release provenance, source SBOM, and signing boundary")
+    COMMENT "Checking P2-03 retained unsigned release provenance, source SBOM, and signing boundary")
 
 add_custom_target(ano_crypto_tagged_release_compatibility_smoke
     COMMAND ${CMAKE_COMMAND} -E env
@@ -488,7 +489,7 @@ add_custom_target(ano_crypto_tagged_release_compatibility_smoke
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_tagged_release_compatibility_smoke.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Building installed P2-02 package and running current/P1-29 header compatibility consumers")
+    COMMENT "Building installed P2-03 package and running current/P1-29 header compatibility consumers")
 
 add_custom_target(ano_crypto_public_surface_check
     COMMAND ${CMAKE_COMMAND}
@@ -508,6 +509,16 @@ add_custom_target(ano_crypto_validation_candidate_policy_check
     USES_TERMINAL
     VERBATIM
     COMMENT "Checking P2-02 module-boundary and operating-environment freeze")
+
+add_custom_target(ano_crypto_self_test_integrity_policy_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_SELF_TEST_POLICY_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/SELF_TEST_INTEGRITY_POLICY_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_self_test_integrity_policy.cmake
+    USES_TERMINAL
+    VERBATIM
+    COMMENT "Checking P2-03 self-test, integrity-candidate, finite-state, and recovery policy")
 
 add_custom_target(ano_crypto_thread_safety_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -698,6 +709,15 @@ if(ANO_CRYPTO_BUILD_TESTS)
     target_include_directories(ano_crypto_module_state_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
 
     add_test(NAME ano_crypto_module_state_tests COMMAND ano_crypto_module_state_tests)
+
+    add_test(NAME ano_crypto_self_test_integrity_policy_tests
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+            -DANO_CRYPTO_SELF_TEST_POLICY_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/SELF_TEST_INTEGRITY_POLICY_CHECK.txt
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_self_test_integrity_policy.cmake)
+    set_tests_properties(ano_crypto_self_test_integrity_policy_tests PROPERTIES
+        LABELS "kcmvp;self-test;integrity;policy")
 
     add_executable(ano_crypto_service_gate_negative_tests
         tests/negative/crypto_service_gate_tests.c)
@@ -1022,7 +1042,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
     add_executable(ano_crypto_current_header_compatibility_tests
         tests/compat/p1_29_compatibility_probe.c)
     target_compile_definitions(ano_crypto_current_header_compatibility_tests PRIVATE
-        ANO_CRYPTO_COMPAT_HEADER_MODE="current-p2-02"
+        ANO_CRYPTO_COMPAT_HEADER_MODE="current-p2-03"
         ANO_CRYPTO_EXPECT_CURRENT_HEADER=1
         ANO_CRYPTO_EXPECT_RUNTIME_VERSION="${ANO_CRYPTO_RELEASE_VERSION}")
     target_link_libraries(ano_crypto_current_header_compatibility_tests PRIVATE anocrypto_c)
@@ -1258,7 +1278,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-02
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-03
             -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-provenance-evidence
             -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff
             -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff-check.txt
@@ -1269,6 +1289,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON
             -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON
             -DANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON
+            -DANO_CRYPTO_RUN_SELF_TEST_INTEGRITY_CHECK=ON
             -DANO_CRYPTO_RUN_POC_PACKAGE_SMOKE=ON
             -DANO_CRYPTO_RUN_SHA512_FAMILY_CHECK=ON
             -DANO_CRYPTO_RUN_AES_CBC_CHECK=ON
@@ -1290,19 +1311,19 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Preparing hash-bound P2-02 status evidence")
+        COMMENT "Preparing hash-bound P2-03 status evidence")
     add_dependencies(ano_crypto_prepare_release_status_evidence
         ano_crypto_release_signing_handoff_evidence)
 
     add_custom_target(ano_crypto_collect_release_evidence
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-02
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p2-02
+            -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-03
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p2-03
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/assemble_release_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Assembling AnoCrypto-C P2-02 evidence from prepared artifacts")
+        COMMENT "Assembling AnoCrypto-C P2-03 evidence from prepared artifacts")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_prepare_release_status_evidence)
 endif()

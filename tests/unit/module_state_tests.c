@@ -89,6 +89,25 @@ static int test_shutdown_blocks_services(void)
     return 0;
 }
 
+static int test_orderly_shutdown_allows_full_reinit(void)
+{
+    ano_crypto_module_state_t state;
+    ano_crypto_status_t last_selftest;
+    uint32_t last_flags;
+
+    ASSERT_STATUS(ano_crypto_module_init(0), ANO_CRYPTO_OK);
+    ASSERT_STATUS(ano_crypto_module_get_state(&state), ANO_CRYPTO_OK);
+    ASSERT_TRUE(state == ANO_CRYPTO_MODULE_STATE_OPERATIONAL);
+    ASSERT_STATUS(ano_crypto_module_require_operational(), ANO_CRYPTO_OK);
+
+    ASSERT_STATUS(ano_crypto_selftest_get_last_status(&last_selftest), ANO_CRYPTO_OK);
+    ASSERT_TRUE(last_selftest == ANO_CRYPTO_OK);
+    ASSERT_STATUS(ano_crypto_selftest_get_last_flags(&last_flags), ANO_CRYPTO_OK);
+    ASSERT_TRUE((last_flags & ANO_CRYPTO_SELFTEST_FLAG_STARTUP) != 0u);
+
+    return 0;
+}
+
 static int test_internal_fatal_transition_enters_error_state(void)
 {
     ano_crypto_module_state_t state;
@@ -116,6 +135,9 @@ int main(void)
         return 1;
     }
     if (test_shutdown_blocks_services() != 0) {
+        return 1;
+    }
+    if (test_orderly_shutdown_allows_full_reinit() != 0) {
         return 1;
     }
     if (test_internal_fatal_transition_enters_error_state() != 0) {

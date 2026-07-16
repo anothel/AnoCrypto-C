@@ -1,6 +1,6 @@
 # C99 Priority TODO
 
-Status: P2-02 module-boundary and operating-environment freeze completed; P2-03 is next.
+Status: P2-03 self-test, integrity-candidate, finite-state, and recovery design freeze completed; P2-04 is next.
 
 ## Completed Through P1-33
 
@@ -44,16 +44,23 @@ Do not substitute local or synthetic evidence. Resume only after billing is reso
 - added machine-readable candidate metadata, fail-closed CMake enforcement, policy/evidence checks, and unchanged-ABI verification;
 - retained formal boundary/environment acceptance, immutable candidate execution, and P1-34 hosted review as unresolved.
 
+## Completed P2-03
+
+- froze self-test policy `STP-P2-03-R1` and finite-state policy `FSM-P2-03-R1`;
+- selected `INT-HMAC-SHA256-SINGLE-SO-R1` as an internal candidate without claiming implementation or external acceptance;
+- documented startup order, conditional-test ownership, service availability, fatal/recoverable failures, orderly reinitialization, and process-termination recovery;
+- recorded runtime integrity, on-demand state transition, controlled key/tag injection, tamper tests, and exact OE-01 execution as open implementation/evidence work;
+- added machine-readable policy, fail-closed checker, evidence integration, and orderly reinitialization regression;
+- retained 14 headers, 69 symbols, `ANOCRYPTO_C_0`, and all P1-34/release blockers.
+
 ## Next Sequence
 
-1. **P2-03 — Self-test, integrity, finite-state, and recovery specification**
-2. **P2-04 — Entropy/provider/DRBG responsibility and evidence closure**
-3. **P2-05 — CSP inventory and zeroization evidence closure**
-4. **P2-06 — Secure coding and target-specific side-channel review**
-5. **P2-07 — Controlled submission-document skeleton**
-6. **P2-08 — Pre-consultation rehearsal and decision capture**
-
-Detailed deliverables and exit criteria are in `docs/roadmap/P2_VALIDATION_READINESS_ROADMAP.md`.
+1. **P2-04 — Entropy/provider/DRBG responsibility and evidence closure**
+2. **P2-05 — CSP inventory and zeroization evidence closure**
+3. **P2-06 — Secure-coding and target side-channel review**
+4. **P2-07 — Controlled submission-document skeleton**
+5. **P2-08 — Pre-consultation rehearsal and answer capture**
+6. Resume **P1-34** independently only after GitHub billing is resolved.
 
 ## Deferred Until Explicit Scope Gate
 

@@ -1,6 +1,6 @@
 # KCMVP Candidate Algorithm Scope
 
-Status: P2-02 current engineering scope; accepted validation scope remains pending.
+Status: P2-03 current engineering scope; accepted validation scope remains pending.
 
 | Family | Service | Status and boundary |
 |---|---|---|

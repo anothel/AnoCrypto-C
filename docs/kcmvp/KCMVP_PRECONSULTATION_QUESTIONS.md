@@ -1,6 +1,6 @@
 # KCMVP Pre-consultation Questions
 
-Status: P2-02 question pack against internally frozen candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`. All proposed answers remain provisional until retained external confirmation is received.
+Status: P2-03 question pack against frozen boundary candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` and internal self-test/integrity design `STP-P2-03-R1`. All proposed answers remain provisional until retained external confirmation is received.
 
 ## Use and Recording Rule
 
@@ -14,7 +14,7 @@ For every consultation response, retain:
 
 Do not record keys, entropy samples, customer data, private infrastructure details, signing credentials, or unpublished exploit material.
 
-## Priority A — Confirm the Frozen Boundary and Environment Before P2-03
+## Priority A — Confirm the Frozen Boundary and Environment
 
 | ID | Recipient | Question | Why it matters | Current project option / decision impact |
 |---|---|---|---|---|
@@ -32,12 +32,14 @@ Do not record keys, entropy samples, customer data, private infrastructure detai
 
 | ID | Recipient | Question | Why it matters | Current project option / decision impact |
 |---|---|---|---|---|
-| PCQ-008 | Testing institution | Which implemented algorithms/services require startup KATs, and which require conditional tests on key generation, instantiation, reseed, or other events? | Finalizes P2-03 test classification. | Startup KATs exist for all implemented families; conditional classification is incomplete. |
-| PCQ-009 | Testing institution | What module-integrity mechanisms are acceptable for the selected shared-library environments, and what key/verification material may reside inside or outside the module? | Current integrity check is not a final mechanism. | Select only after boundary and operating environments are frozen. |
-| PCQ-010 | Testing institution | Is integrity verification required at every load/startup, and how should dynamically loaded libraries, package managers, and signed OS binaries affect the design? | Determines startup flow and deployment guidance. | `EXTERNAL_CONFIRMATION_REQUIRED`. |
-| PCQ-011 | Testing institution | Which failures must enter a persistent fatal state, which may remain operation-local, and what restart or reinstallation action is expected? | Finalizes state machine and operator guidance. | Current fatal self-test/selected health failures are sticky until process restart. |
-| PCQ-012 | Testing institution | Which non-cryptographic queries may remain available in fatal state, such as version, build identity, state, and last-error queries? | Prevents service-availability mismatch. | Current state/status/build/version queries are candidates; exact set needs approval. |
-| PCQ-013 | Testing institution | May shutdown acknowledge a sticky fatal state without clearing it, and is process termination/reload an acceptable recovery boundary? | Matches current implementation behavior. | Current module does not recover from fatal state in-process. |
+| PCQ-008 | Testing institution | Is the P2-03 startup order—module integrity, structural checks, then SHA-2/HMAC/AES-CBC/AES-CMAC/HMAC_DRBG KATs—acceptable, and must any submitted service use a different order or trigger? | Controls the startup gate and test procedure. | Internally frozen; exact institution acceptance and OE-01 retained execution are pending. |
+| PCQ-009 | Testing/validation institution | Is `INT-HMAC-SHA256-SINGLE-SO-R1` acceptable for the single shared-object boundary, including an embedded fixed metadata/tag region and runtime verification material inside the measured binary? | Determines whether the selected candidate may proceed to implementation. | Candidate is fully specified but `SELECTED_CANDIDATE_NOT_IMPLEMENTED`; embedded verification material and its security limitations require explicit acceptance. |
+| PCQ-010 | Testing institution | Is the proposed canonical measurement acceptable: full shared-object bytes with only the expected-tag field zeroed, fixed metadata validation, exact loaded-path resolution, and failure on missing/unreadable/modified/truncated content? | Freezes the build/runtime integrity contract and test vectors. | No verifier or tag injection exists yet; alternate detached-HMAC or public-key-signature designs remain consultation options. |
+| PCQ-011 | Testing institution | Is process termination plus fresh load the acceptable recovery boundary after integrity/KAT/fatal health failure, while orderly shutdown permits full reinitialization in the same process? | Confirms fatal recovery versus normal lifecycle behavior. | P2-03 freezes this policy internally and adds orderly reinitialization regression coverage. |
+| PCQ-012 | Testing institution | May state, status, build identity, version, and self-test-result metadata remain queryable in `ERROR_STATE`, while all cryptographic services and recovery self-tests are rejected? | Prevents service-availability mismatch and sensitive diagnostics. | P2-03 matrix permits status-only non-cryptographic queries; exact accepted set requires confirmation. |
+| PCQ-013 | Testing institution | For the existing `ano_crypto_selftest_run()` symbol, is the target on-demand behavior acceptable: serialize in `OPERATIONAL`, block services during `SELF_TEST_RUNNING`, reject re-entrancy, and enter sticky error on failure without adding public API? | Determines the implementation and concurrency tests while preserving ABI. | The symbol exists, but the target state transition is not implemented and is tracked as a P2-03 delta. |
+| PCQ-013A | Testing institution | Which P2-03 events are formally conditional self-tests rather than service validation—DRBG instantiate/reseed, OS-provider operational checks, symmetric key import, or none beyond startup/on-demand tests for this scope? | Prevents incorrect classification and duplicate requirements. | P2-03 leaves OS entropy/direct-source interpretation to P2-04 and treats key-import checks as service validation. |
+| PCQ-013B | Testing/validation institution | Must integrity-test HMAC key custody, rotation, backup, and destruction be reviewed as a module CSP/configuration-management item, and may the same controlled key reproduce an approved binary? | Affects P2-05 CSP inventory and P2-07 build/release procedure. | Current design requires per-validation/release-binary controlled material and prohibits source/CI/log/evidence disclosure. |
 
 ## Priority C — Entropy and DRBG
 

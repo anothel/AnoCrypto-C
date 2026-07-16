@@ -1,6 +1,6 @@
 # KCMVP Submission Document Inventory
 
-Status: P2-02 inventory. Boundary and one operating environment are available as engineering inputs; exact current templates and accepted contents remain `EXTERNAL_CONFIRMATION_REQUIRED`.
+Status: P2-03 inventory. Boundary/OE plus self-test, integrity-candidate, finite-state, and recovery records are available as engineering inputs; runtime integrity implementation, exact current templates, and accepted contents remain pending or `EXTERNAL_CONFIRMATION_REQUIRED`.
 
 ## Inventory Categories
 
@@ -22,20 +22,20 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 | DOC-BD-002 | Physical/logical cryptographic boundary | `KCMVP_MODULE_BOUNDARY_SPEC.md`; candidate configuration record | `EXISTING_ENGINEERING_INPUT` | Reconcile into controlled basic design after institution confirmation. |
 | DOC-BD-003 | Security level and requirement applicability | none accepted | `AFTER_CONSULTATION` | Record institution-confirmed level and applicability table. |
 | DOC-BD-004 | Operating environment and configuration variants | `KCMVP_OPERATING_ENVIRONMENT_MATRIX.md`; candidate configuration record; portability/CI docs | `EXISTING_ENGINEERING_INPUT` | Add immutable OE-01 execution records and institution-confirmed variant rules. |
-| DOC-BD-005 | Roles, services, and service availability by state | public headers; module state; service matrix | `UPDATE_AND_CONSOLIDATE` | P2-03 normative role/service/state table. |
+| DOC-BD-005 | Roles, services, and service availability by state | public headers; service matrix; `KCMVP_FINITE_STATE_MODEL.md`; failure/recovery matrix | `EXISTING_ENGINEERING_INPUT` | Reconcile P2-03 state/service tables into controlled basic design after consultation. |
 | DOC-BD-006 | Approved algorithm/service scope | `KCMVP_ALGORITHM_SCOPE.md` | `AFTER_CONSULTATION` | Confirm target algorithms/configuration; retain unsupported placeholders separately. |
 | DOC-BD-007 | Ports and interfaces | 14 public headers; install/package docs | `UPDATE_AND_CONSOLIDATE` | Classify data/control/status interfaces and caller responsibilities. |
-| DOC-BD-008 | Finite-state model | `module_state.c`; self-test design | `UPDATE_AND_CONSOLIDATE` | P2-03 transition diagram, preconditions, failure/recovery. |
+| DOC-BD-008 | Finite-state model | `module_state.c`; `KCMVP_FINITE_STATE_MODEL.md`; failure/recovery matrix | `EXISTING_ENGINEERING_INPUT` | Resolve tracked implementation deltas and convert to controlled submission form. |
 | DOC-BD-009 | Cryptographic key/CSP overview | CSP lifecycle; key/CSP headers | `UPDATE_AND_CONSOLIDATE` | P2-05 formal CSP summary. |
-| DOC-BD-010 | Self-test and integrity overview | self-test design and KAT plans | `UPDATE_AND_CONSOLIDATE` | P2-03 after accepted integrity mechanism is selected. |
+| DOC-BD-010 | Self-test and integrity overview | `KCMVP_SELF_TEST_AND_INTEGRITY_SPEC.md`; KAT plans; P2-03 policy record | `EXISTING_ENGINEERING_INPUT` | Candidate selected but not implemented; revise after institution feedback and implementation. |
 
 ## B. Detailed Design
 
 | ID | Proposed controlled document | Current source inputs | State | P2 owner/action |
 |---|---|---|---|---|
 | DOC-DD-001 | Module architecture and component decomposition | `src/*` layout; architecture docs | `UPDATE_AND_CONSOLIDATE` | P2-07 detailed design skeleton. |
-| DOC-DD-002 | Module lifecycle/error-state design | `module_state.c`; module tests | `UPDATE_AND_CONSOLIDATE` | P2-03 normative specification. |
-| DOC-DD-003 | Self-test, conditional-test, and integrity design | `selftest.c`; KAT manifest; self-test design | `UPDATE_AND_CONSOLIDATE` | P2-03; integrity section depends on consultation. |
+| DOC-DD-002 | Module lifecycle/error-state design | `module_state.c`; module tests; finite-state and failure/recovery matrices | `EXISTING_ENGINEERING_INPUT` | Reconcile implementation deltas and external recovery interpretation. |
+| DOC-DD-003 | Self-test, conditional-test, and integrity design | `selftest.c`; KAT manifest; P2-03 specification/policy/delta register | `EXISTING_ENGINEERING_INPUT` | Integrity design is selected but not implemented; conditional entropy classification remains P2-04/external. |
 | DOC-DD-004 | SHA-2/HMAC design and API behavior | hash/HMAC source and API docs | `UPDATE_AND_CONSOLIDATE` | Map algorithm operations, buffers, state, and failure cleanup. |
 | DOC-DD-005 | HMAC_DRBG and random-service design | DRBG/random/entropy docs | `UPDATE_AND_CONSOLIDATE` | P2-04 consolidated design. |
 | DOC-DD-006 | Entropy source/provider and health-test design | entropy adapter/operational/health docs | `AFTER_CONSULTATION` | Final ownership/tests only after source/environment confirmation. |
@@ -58,6 +58,7 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 | DOC-CM-007 | Evidence/artifact retention and access control | evidence manifest policy | `UPDATE_AND_CONSOLIDATE` | Define retention, protected storage, hash verification, and disposal. |
 | DOC-CM-008 | Third-party/component/license/vulnerability inventory policy | source-only SPDX and clean-room records | `AFTER_CONSULTATION` | Select scope with legal and institution input. |
 | DOC-CM-009 | Maintenance/change-impact and retest policy | compatibility policy | `AFTER_CONSULTATION` | Define impact classes for source, compiler, OS, API, and security fixes. |
+| DOC-CM-010 | Integrity metadata/key injection, custody, rotation, and destruction procedure | P2-03 integrity specification and policy record | `AFTER_CONSULTATION` | Create only after mechanism acceptance; no key material enters source, ordinary CI, logs, evidence, or PoC. |
 
 ## D. Test Document
 
@@ -65,7 +66,7 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 |---|---|---|---|---|
 | DOC-TS-001 | Master test strategy and environment matrix | CI matrix; differential strategy; release evidence workflow | `UPDATE_AND_CONSOLIDATE` | P2-07 test document skeleton. |
 | DOC-TS-002 | Requirement-to-test traceability | P2 evidence traceability matrix | `UPDATE_AND_CONSOLIDATE` | Convert institution-confirmed requirements into test IDs. |
-| DOC-TS-003 | Startup/conditional/integrity test procedure | self-test design and KAT plans | `AFTER_CONSULTATION` | Complete after P2-03 mechanism decisions. |
+| DOC-TS-003 | Startup/conditional/integrity test procedure | P2-03 specification, KAT plans, implementation/test delta | `AFTER_CONSULTATION` | Convert only after integrity acceptance and runtime implementation; do not simulate mutation/institution results. |
 | DOC-TS-004 | Algorithm KAT/conformance procedure | KAT tests/plans and public vector sources | `UPDATE_AND_CONSOLIDATE` | Separate vendor engineering tests from institution results. |
 | DOC-TS-005 | Negative, state, misuse, and failure-injection procedure | negative/unit/stress tests | `UPDATE_AND_CONSOLIDATE` | Define expected statuses and cleanup without sensitive values. |
 | DOC-TS-006 | Entropy/DRBG test procedure | entropy/DRBG tests and policies | `AFTER_CONSULTATION` | Finalize provider/direct-source responsibilities and limits. |
@@ -80,7 +81,7 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 | ID | Proposed controlled document | Current source inputs | State | P2 owner/action |
 |---|---|---|---|---|
 | DOC-OP-001 | Installation and build guide for submitted configuration | P2-02 OE command; SDK integration guide; install smoke | `UPDATE_AND_CONSOLIDATE` | Execute and retain exact OE-01 commands, artifact hashes, SONAME/imports, and install paths. |
-| DOC-OP-002 | Crypto officer/operator guidance | README/state/error notes | `CREATE_NEW` | Startup, status, fatal state, restart, key lifecycle, supported environment. |
+| DOC-OP-002 | Crypto officer/operator guidance | README; finite-state model; failure/recovery matrix; self-test/integrity spec | `UPDATE_AND_CONSOLIDATE` | P2-07 controlled guidance using P2-03 startup/fatal/restart policy and later P2-04/P2-05 inputs. |
 | DOC-OP-003 | Developer API/service guide | public headers; PoC example | `UPDATE_AND_CONSOLIDATE` | Include buffer/alias/state/status rules without internal details. |
 | DOC-OP-004 | Secure operation/environment assumptions | P2-02 boundary/OE matrix; entropy/thread/process/VM notes | `UPDATE_AND_CONSOLIDATE` | Boundary/thread/deployment assumptions exist; finalize entropy and lifecycle wording in P2-04. |
 | DOC-OP-005 | Vulnerability/security reporting guide | none controlled | `CREATE_NEW` | Define contact, supported branches, embargo and patch/retest handling. |
@@ -100,6 +101,7 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 | Compiler disassembly | `NOT_IN_SUBMISSION_PACKAGE` | Internal review input unless institution specifically requests it. |
 | Synthetic hosted/tag fixtures | `NOT_IN_SUBMISSION_PACKAGE` | Policy regression only; not actual hosted or release evidence. |
 | Production keys, tokens, signatures, timestamp requests/responses | `NOT_IN_SUBMISSION_PACKAGE` | Must remain outside source, CI, ordinary evidence, and PoC. |
+| Integrity-test HMAC key and unprotected injection material | `NOT_IN_SUBMISSION_PACKAGE` | Controlled CSP/configuration material; never copied into ordinary documentation/evidence. |
 | Customer data or internal deployment details | `NOT_IN_SUBMISSION_PACKAGE` | Outside validation evidence and prohibited by project policy. |
 
 ## P2-07 Entry Gate

@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P2-02 validation-readiness workflow; P2-03 is next.
+Status: P2-03 validation-readiness workflow; P2-04 is next.
 
 ## Purpose
 
@@ -253,6 +253,7 @@ P1-23 deliverables:
 | P1-33 | Clean tagged-release rehearsal and hosted artifact review | Completed with an isolated synthetic tag rehearsal, clean/moved identity checks, explicit hosted lane records, actual/synthetic separation, and fail-closed review regressions. |
 | P2-01 | Readiness gap consolidation and pre-consultation pack | Completed with traceability, gap status, document inventory, blocker record, and P2-02 through P2-08 roadmap; no public ABI change. |
 | P2-02 | Module boundary and operating environment freeze | Completed with one shared-library candidate, OE-01 configuration record, explicit exclusions, fail-closed CMake enforcement, and no public ABI change. |
+| P2-03 | Self-test, integrity, finite-state, and recovery specification | Completed as an internal design freeze with a selected-but-unimplemented integrity candidate, policy checker, state/recovery matrices, and no public ABI change. |
 
 ## Stop conditions
 
@@ -345,7 +346,7 @@ P2-01 deliverables:
 - durable P1-34 billing-blocker record;
 - unchanged 14-header, 69-symbol `ANOCRYPTO_C_0` public boundary.
 
-P2-02 is completed as an internal freeze. P2-03 is the next codebase work item. P1-34 resumes only after GitHub billing is resolved and remains a separate actual-hosted-evidence lane.
+P2-03 is completed as an internal design freeze. P2-04 is the next codebase work item. P1-34 resumes only after GitHub billing is resolved and remains a separate actual-hosted-evidence lane.
 
 ## P2-02 placement
 
@@ -357,4 +358,16 @@ P2-02 converts the broad P2-01 boundary/environment gaps into one controlled int
 - tests, examples, hooks, OpenSSL differential code, signing fixtures, sanitizers, LTO, and native CPU tuning excluded;
 - static linkage and all non-selected operating environments deferred or unsupported for the initial candidate.
 
-The candidate is a configuration-management decision, not a validation result. Exact selected-environment execution, immutable image/CPU/kernel/package evidence, institution confirmation, integrity design, and hosted artifact review remain open. P2-03 must now define self-test, module integrity, finite-state, service availability, failure classification, and recovery/operator actions against this boundary.
+The candidate is a configuration-management decision, not a validation result. P2-03 has now frozen the internal self-test/integrity/state/recovery design against this boundary, while runtime integrity implementation, exact selected-environment execution, immutable image/CPU/kernel/package evidence, institution confirmation, and hosted artifact review remain open.
+
+## P2-03 placement
+
+P2-03 converts the self-test/integrity/state gaps into one controlled internal design:
+
+- policy `STP-P2-03-R1` and state model `FSM-P2-03-R1`;
+- candidate `INT-HMAC-SHA256-SINGLE-SO-R1`;
+- startup, on-demand target, service-gating, fatal-state, orderly shutdown/reinitialization, and process-restart rules;
+- implementation/test delta IDs for behavior not present in the runtime;
+- fail-closed policy/evidence checks that preserve ABI and blocked hosted/release state.
+
+The design freeze is not a runtime integrity implementation or institution acceptance. P2-04 now owns OS entropy-provider responsibility, direct-source health-test applicability, DRBG limits, process/VM/suspend policy, and related failure evidence.

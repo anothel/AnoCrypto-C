@@ -1,6 +1,6 @@
 # P2 Validation Readiness Roadmap
 
-Status: P2-02 internal boundary/environment freeze completed; P2-03 is next. P2 remains validation-readiness work, not automatic feature expansion.
+Status: P2-03 internal self-test, integrity-candidate, finite-state, and recovery design freeze completed; P2-04 is next. P2 remains validation-readiness work, not automatic feature expansion.
 
 ## Fixed P2 Constraints
 
@@ -18,8 +18,8 @@ Status: P2-02 internal boundary/environment freeze completed; P2-03 is next. P2 
 |---|---|---|---|---|
 | P2-01 | `COMPLETE_LOCAL` | Consolidate gaps, traceability, consultation, submission inventory, and roadmap. | Current P2 pack and blocker record. | No change. |
 | P2-02 | `FROZEN_INTERNAL_CANDIDATE` | Freeze candidate module boundary and one operating environment. | Boundary/environment specification, machine-readable candidate record, and fail-closed CMake/policy checks. | No change. |
-| P2-03 | `NEXT` | Finalize self-test, integrity, state, and recovery specification. | Normative self-test/integrity/error-state design. | No change by default; implementation only after accepted design. |
-| P2-04 | `PLANNED` | Close entropy/provider/DRBG responsibility and evidence plan. | Entropy/DRBG specification, limits, environment policy, evidence mapping. | No change by default. |
+| P2-03 | `FROZEN_INTERNAL_DESIGN` | Finalize self-test, integrity-candidate, finite-state, and recovery specification. | Normative design, machine-readable policy, fail-closed policy check, and implementation/test delta. | No public change; runtime integrity and on-demand transition remain unimplemented. |
+| P2-04 | `NEXT` | Close entropy/provider/DRBG responsibility and evidence plan. | Entropy/DRBG specification, limits, environment policy, evidence mapping. | No change by default. |
 | P2-05 | `PLANNED` | Close CSP inventory, lifecycle, and zeroization evidence. | Formal CSP and zeroization register. | No change. |
 | P2-06 | `PLANNED` | Perform secure-coding and target side-channel review. | Findings register, compiler/CPU dispositions, remediation plan. | No change unless a separately approved fix requires it. |
 | P2-07 | `PLANNED` | Build controlled submission-document skeleton. | Basic design, detailed design, configuration-management, test, and operator-document skeletons. | No change. |
@@ -90,30 +90,49 @@ Status: `FROZEN_INTERNAL_CANDIDATE`; formal acceptability remains `EXTERNAL_CONF
 
 ## P2-03 — Self-test, Integrity, and Error-state Specification
 
-### Objectives
+Status: `FROZEN_INTERNAL_DESIGN`; the selected module-integrity mechanism is `SELECTED_CANDIDATE_NOT_IMPLEMENTED` and remains `EXTERNAL_CONFIRMATION_REQUIRED`.
 
-- classify startup, conditional, and on-demand tests;
-- select a candidate module-integrity mechanism;
-- define state transitions, service availability, fatal/recoverable failures, restart, and operator action;
-- map every submitted service to required test behavior.
+### Frozen internal design
 
-### Required documents
+- self-test policy ID: `STP-P2-03-R1`;
+- finite-state policy ID: `FSM-P2-03-R1`;
+- integrity candidate: `INT-HMAC-SHA256-SINGLE-SO-R1`;
+- startup order: candidate integrity authentication, structural checks, then SHA-2/HMAC/AES-CBC/AES-CMAC/HMAC_DRBG KATs;
+- cryptographic services remain blocked while `SELF_TEST_RUNNING`;
+- fatal self-test or integrity failure enters sticky `ERROR_STATE`;
+- fatal recovery requires process termination and a fresh module load;
+- orderly `SHUTDOWN` may be followed by a full reinitialization and complete startup sequence;
+- the existing public on-demand self-test symbol is retained, but the target state-transition behavior is a separately tracked implementation delta;
+- entropy-provider and direct-noise-source conditional-test responsibility remains owned by P2-04.
+
+### Deliverables
 
 - `docs/kcmvp/KCMVP_SELF_TEST_AND_INTEGRITY_SPEC.md`;
 - `docs/kcmvp/KCMVP_FINITE_STATE_MODEL.md`;
-- failure/recovery/service-availability matrix;
-- implementation/test delta list.
+- `docs/kcmvp/KCMVP_FAILURE_RECOVERY_SERVICE_MATRIX.md`;
+- `docs/kcmvp/P2_03_IMPLEMENTATION_TEST_DELTA.md`;
+- `release/ANOCRYPTO_C_SELF_TEST_POLICY.cmake`;
+- `tools/check_self_test_integrity_policy.cmake`;
+- evidence integration through `SELF_TEST_INTEGRITY_POLICY_CHECK.txt`;
+- orderly shutdown/reinitialization regression coverage.
 
-### Completion criteria
+### Completion criteria and disposition
 
-- integrity placeholder is no longer treated as a completed mechanism;
-- selected design has explicit key/material ownership and deployment implications;
-- state and recovery language matches code or a separately approved implementation plan;
-- no fatal/recoverable ambiguity remains unowned.
+- the legacy integrity placeholder is explicitly separated from a real module-byte integrity test;
+- the selected HMAC-SHA-256 single-shared-object candidate documents canonical measurement, key ownership, deployment, evidence, and limitations;
+- the finite-state and failure/recovery matrices define service availability and operator action;
+- code/design differences have unique implementation and test IDs rather than being represented as completed behavior;
+- public headers remain 14, exported symbols remain 69, and ABI line remains `ANOCRYPTO_C_0`;
+- local policy and regression evidence may pass without advancing hosted, signing, or validation status.
 
-### External dependencies
+### Open implementation and external dependencies
 
-- accepted integrity mechanism and test classification guidance.
+- obtain institution feedback on the selected integrity mechanism, embedded verification material, canonicalization, startup ordering, and conditional-test classification;
+- implement the verifier, controlled tag/key injection, and target on-demand state transitions only after the design gate is accepted;
+- add retained tests for modified/truncated/unreadable/wrong-candidate shared objects and concurrency/re-entrancy;
+- enter the integrity-test key and temporary state into the P2-05 CSP inventory;
+- retain actual execution on the exact P2-02 operating environment;
+- keep P1-34 hosted review independently `BLOCKED_EXTERNAL`.
 
 ## P2-04 — Entropy and DRBG Evidence Closure
 

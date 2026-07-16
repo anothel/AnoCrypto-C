@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P2-02 current manifest
+Status: P2-03 current manifest
 Date: 2026-07-14
 
 ## Purpose
@@ -658,3 +658,19 @@ P1-30 hosted artifacts retain only status, counts, versions, target/compiler met
 - The selected environment does not expand runtime dependencies to OpenSSL, C++, test providers, or signing infrastructure.
 - P2-02 adds no algorithm, public header, function, enum, exported symbol, KAT value, or sensitive material.
 - The P1-34 billing blocker remains unchanged and no local result is represented as hosted execution.
+
+## P2-03 Self-test, Integrity, and Recovery Design Inputs
+
+| Record | Input | Source class | Use | Boundary |
+|---|---|---|---|---|
+| DER-4401 | Existing project-owned `module_state.c`, `selftest.c`, public headers, tests, and P2-01/P2-02 records | Project-owned implementation/evidence | Observe current startup KAT, structural checks, service gate, fatal latch, shutdown/reinit, and public ABI | No external implementation copied. |
+| DER-4402 | Public KCMVP process/submission landing information | Public official guidance | Confirm that consultation/submission planning remains external and controlled | No normative standard text copied into code or KAT fixtures. |
+| DER-4403 | Project-authored HMAC-SHA-256 single-shared-object integrity candidate | Fresh project-owned design | Consultation and implementation planning only | No key, expected tag, metadata binary, or verifier implementation added. |
+| DER-4404 | Finite-state, failure/recovery, policy, checker, roadmap, and evidence records | Fresh project-owned artifacts | P2-03 internal design freeze and fail-closed claims control | Engineering evidence only; no formal acceptance implied. |
+
+## P2-03 Clean-room Notes
+
+- No external proprietary code, binary, module-integrity implementation, private standard text, or confidential test material was used.
+- No integrity key, tag, signing key, entropy sample, CSP value, or customer data was added.
+- P2-03 adds no algorithm, public header, function, status value, enum value, exported symbol, or public data layout.
+- The HMAC-based integrity candidate reuses an already implemented internal primitive only as a future design; implementation remains gated by consultation and controlled key-management decisions.

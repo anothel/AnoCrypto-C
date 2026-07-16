@@ -2,7 +2,7 @@
 
 AnoCrypto-C is a private C99 cryptographic module candidate skeleton. The repository slug may remain `anocrypto-c`, but the product/brand spelling is `AnoCrypto-C`.
 
-Current status: `0.1.0-p2-02-boundary-freeze`, the P2-02 module-boundary and operating-environment freeze built on the completed P2-01 readiness consolidation. The internal validation candidate is `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`: one Release shared library for Ubuntu Server 24.04.4 LTS x86_64, GCC 13.3.0, thread safety and the Linux OS entropy provider enabled, and all tests, examples, internal hooks, OpenSSL differential code, signing fixtures, sanitizers, and LTO excluded from the runtime build. Formal acceptability remains `EXTERNAL_CONFIRMATION_REQUIRED`. The public boundary remains 14 headers and 69 exported symbols on `ANOCRYPTO_C_0`. P1-34 actual hosted artifact review is still `BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING`; actual hosted lanes remain `NOT_RUN`, actual review remains `UNREVIEWED`, the repository remains `UNSIGNED`, signing handoff remains `BLOCKED`, and external release authorization remains `NO`.
+Current status: `0.1.0-p2-03-selftest-integrity`, the P2-03 self-test, integrity-candidate, finite-state, and recovery design freeze built on the P2-02 module-boundary/operating-environment candidate. The runtime still implements startup structural checks and KATs plus a sticky process-local `ERROR_STATE`, but it does **not** yet authenticate the installed shared-object bytes. `INT-HMAC-SHA256-SINGLE-SO-R1` is only a selected internal candidate and remains `SELECTED_CANDIDATE_NOT_IMPLEMENTED` and `EXTERNAL_CONFIRMATION_REQUIRED`. The public boundary remains 14 headers and 69 exported symbols on `ANOCRYPTO_C_0`. P1-34 actual hosted artifact review is still `BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING`; actual hosted lanes remain `NOT_RUN`, actual review remains `UNREVIEWED`, the repository remains `UNSIGNED`, signing handoff remains `BLOCKED`, and external release authorization remains `NO`.
 
 Implemented processing scope:
 
@@ -50,6 +50,7 @@ Implemented processing scope:
 Skeleton-only / TODO scope:
 
 - Hash_DRBG-SHA-256 ABI placeholder
+- Actual module-byte integrity authentication, controlled integrity-key injection, binary finalization, and tamper evidence
 - Direct noise-source selection, source-specific startup/continuous health tests, thresholds, and recovery policy
 - Cross-platform hosted-CI review of process-change behavior and unsupported-process-marker policy
 - Persistent keystore, key export, key wrapping, and multi-process CSP model
@@ -84,7 +85,21 @@ P2-02 freezes one internal candidate for design, test planning, and pre-consulta
 - CMake option `ANO_CRYPTO_ENFORCE_VALIDATION_CANDIDATE=ON`;
 - evidence record `VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt`.
 
-The selected candidate is shared-library only. Static linkage, Windows, macOS, non-x86-64 architectures, 32-bit, big-endian, musl, mobile/embedded environments, hardware dispatch, VM-clone guarantees, and suspend/resume detection are deferred or unsupported for the initial candidate. P2-03 is the next work item and must select the self-test, integrity, finite-state, and recovery specification without expanding the public ABI.
+The selected candidate is shared-library only. Static linkage, Windows, macOS, non-x86-64 architectures, 32-bit, big-endian, musl, mobile/embedded environments, hardware dispatch, VM-clone guarantees, and suspend/resume detection are deferred or unsupported for the initial candidate.
+
+## P2-03 self-test, integrity, state, and recovery design
+
+P2-03 freezes internal design and evidence policy without implementing or claiming an accepted module-integrity mechanism. Controlled outputs are:
+
+- `docs/kcmvp/KCMVP_SELF_TEST_AND_INTEGRITY_SPEC.md`;
+- `docs/kcmvp/KCMVP_FINITE_STATE_MODEL.md`;
+- `docs/kcmvp/KCMVP_FAILURE_RECOVERY_SERVICE_MATRIX.md`;
+- `docs/kcmvp/P2_03_IMPLEMENTATION_TEST_DELTA.md`;
+- `release/ANOCRYPTO_C_SELF_TEST_POLICY.cmake`;
+- `tools/check_self_test_integrity_policy.cmake`;
+- evidence record `SELF_TEST_INTEGRITY_POLICY_CHECK.txt`.
+
+The selected candidate is `INT-HMAC-SHA256-SINGLE-SO-R1`, which preserves the P2-02 single-shared-object boundary. It requires explicit consultation/implementation gates, protected integrity-key handling, CSP inventory integration, tamper tests, selected-OE execution, and target-specific review. No integrity verifier, key, tag, or binary metadata record is included in this step. P2-04 is next and owns entropy-provider, direct-source health-test, DRBG limit, process/VM/suspend, and failure-policy closure.
 
 ## Build
 
@@ -97,8 +112,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p2-02
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-02
+cmake --install build --prefix /tmp/anocrypto-c-p2-03
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-03
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -116,8 +131,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p2-02
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-02
+cmake --install build --prefix /tmp/anocrypto-c-p2-03
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-03
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -148,7 +163,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-02/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-03/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 

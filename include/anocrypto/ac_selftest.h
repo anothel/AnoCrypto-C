@@ -14,13 +14,16 @@ extern "C" {
 #define ANO_CRYPTO_SELFTEST_FLAG_INTEGRITY_PLACEHOLDER 0x00000004u
 
 /*
- * Runs the current startup self-test sequence.
+ * Runs the current internal self-test sequence.
  *
- * The P1-33 sequence retains the P1-29 build/manifest checks, SHA-2/HMAC KATs,
- * AES-128/192/256 and CBC path KATs, full-tag AES-CMAC KATs, and
- * HMAC_DRBG-SHA-256 KATs.
+ * The P2-03 implementation retains build/KAT-manifest structural checks,
+ * SHA-2/HMAC KATs, AES-128/192/256 and CBC-path KATs, a full-tag AES-CMAC
+ * KAT, and an HMAC_DRBG-SHA-256 KAT.
  *
- * A self-test failure must move the module to ERROR_STATE.
+ * ANO_CRYPTO_SELFTEST_FLAG_INTEGRITY_PLACEHOLDER is an ABI-retained legacy
+ * flag name. The P2-03 runtime does not yet authenticate the installed module
+ * bytes; callers must not interpret the flag as completed integrity evidence.
+ * A failing implemented mandatory self-test enters ERROR_STATE.
  */
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_selftest_run(uint32_t flags);
 

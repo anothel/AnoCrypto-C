@@ -1,6 +1,6 @@
 # CI Matrix
 
-Status: P2-02 engineering matrix; OE-01 is internally frozen, while actual hosted lanes remain `NOT_RUN`/`UNREVIEWED`.
+Status: P2-03 engineering matrix; OE-01 and the internal self-test/integrity design are frozen, while runtime integrity remains not implemented and actual hosted lanes remain `NOT_RUN`/`UNREVIEWED`.
 
 | Lane | Linux | macOS | Windows | Notes |
 |---|---:|---:|---:|---|
@@ -49,6 +49,19 @@ metadata where supported. All lanes run the CMAC hardening policy and retain
 the 69-symbol clean Release baseline. Hosted workflow definitions do not count
 as reviewed run evidence.
 
+
+## P2-03 self-test/integrity policy lane
+
+Every configured engineering build runs `ano_crypto_self_test_integrity_policy_check`. The check verifies:
+
+- self-test policy `STP-P2-03-R1` and finite-state policy `FSM-P2-03-R1`;
+- integrity candidate `INT-HMAC-SHA256-SINGLE-SO-R1`;
+- runtime integrity and target on-demand state transitions remain explicitly `NOT_IMPLEMENTED`;
+- orderly shutdown/reinitialization policy and sticky fatal recovery wording;
+- 14 public headers, 69 exported-symbol baseline entries, and `ANOCRYPTO_C_0`;
+- hosted `NOT_RUN`, review `UNREVIEWED`, and external authorization `NO`.
+
+This policy lane is a static/document/code-consistency guard. A PASS does not prove shared-object authentication, tamper resistance, selected-OE execution, or institution acceptance.
 
 ## P2-02 / P1-34 hosted blocker
 

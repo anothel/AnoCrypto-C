@@ -1,6 +1,6 @@
 # Release Provenance and Signing Policy
 
-Status: P2-02 unsigned engineering policy retaining P1-33 controls. External release authorized: NO. The repository is `UNSIGNED`; the offline-signing handoff is `BLOCKED` because the production signer, RFC 3161 timestamp policy, required role identities, actual tag/hosted review, and product release authorization are not provisioned or completed.
+Status: P2-03 unsigned engineering policy retaining P1-33 controls. External release authorized: NO. The repository is `UNSIGNED`; the offline-signing handoff is `BLOCKED` because the production signer, RFC 3161 timestamp policy, required role identities, actual tag/hosted review, and product release authorization are not provisioned or completed.
 
 ## Purpose
 

@@ -1,58 +1,59 @@
 # C99 Self-test Design
 
-Status: P1-15 draft.
+Status: P2-03 implementation-alignment record. Normative candidate policy is in:
 
-## Startup flow
+- `docs/kcmvp/KCMVP_SELF_TEST_AND_INTEGRITY_SPEC.md`;
+- `docs/kcmvp/KCMVP_FINITE_STATE_MODEL.md`;
+- `docs/kcmvp/KCMVP_FAILURE_RECOVERY_SERVICE_MATRIX.md`;
+- `docs/kcmvp/P2_03_IMPLEMENTATION_TEST_DELTA.md`.
 
-`ano_crypto_module_init(NULL)` transitions the module to `SELF_TEST_RUNNING`, invokes `ano_crypto_selftest_run()`, and enters `OPERATIONAL` only if all startup checks pass.
+## Current startup flow
 
-Current startup checks:
+`ano_crypto_module_init(NULL)` transitions the module to `SELF_TEST_RUNNING`, invokes the current internal self-test sequence, and enters `OPERATIONAL` only when every implemented check passes.
 
-1. Build identity sanity check.
-2. KAT manifest structure check.
-3. SHA-256 KATs.
-4. HMAC-SHA-256 KATs.
-5. HMAC_DRBG-SHA-256 KAT.
+Current implemented sequence:
+
+1. Build-identity structure sanity check.
+2. KAT-manifest structure sanity check.
+3. SHA-256/384/512 KATs.
+4. HMAC-SHA-256/384/512 KATs.
+5. AES-128/192/256 primitive and CBC-path KATs.
+6. AES-CMAC full-tag KAT.
+7. HMAC_DRBG-SHA-256 KAT.
+
+The build-identity and KAT-manifest checks are supporting structural checks. They are not module-byte authentication.
+
+## Integrity status
+
+The public `ANO_CRYPTO_SELFTEST_FLAG_INTEGRITY_PLACEHOLDER` value is retained for ABI compatibility. The current runtime does not authenticate the installed shared-object bytes, and the flag MUST NOT be used as evidence that a module-integrity test ran.
+
+P2-03 selects `INT-HMAC-SHA256-SINGLE-SO-R1` as an internal candidate only. It remains:
+
+```text
+SELECTED_CANDIDATE_NOT_IMPLEMENTED
+EXTERNAL_CONFIRMATION_REQUIRED
+```
+
+No integrity key, tag, binary metadata record, runtime verifier, or tamper test is introduced in P2-03.
 
 ## Failure behavior
 
-A startup self-test failure records the failure status and transitions the module into `ERROR_STATE`. The current policy keeps `ERROR_STATE` sticky for the process.
+An implemented startup structural/KAT failure records status and enters sticky `ERROR_STATE`. Cryptographic processing is denied for the remainder of the process. Orderly `SHUTDOWN` can be reinitialized in-process and reruns startup checks; fatal `ERROR_STATE` cannot be reset in-process.
 
-## Service-gate rule
+## Service gate
 
-External cryptographic processing APIs require `OPERATIONAL`. Self-test uses internal helpers to avoid exposing cryptographic services before successful startup self-test completion.
+Public cryptographic processing APIs require `OPERATIONAL`. Self-tests use internal primitive helpers so startup does not expose public cryptographic services before the gate opens.
 
-## Current startup KATs
+## On-demand gap
 
-- SHA-256 empty message.
-- SHA-256 `abc` message.
-- SHA-256 standard multi-block message.
-- HMAC-SHA-256 RFC 4231 test case 1.
-- HMAC-SHA-256 RFC 4231 test case 2.
-- HMAC-SHA-256 RFC 4231 test case 6 for long-key handling.
-- HMAC_DRBG-SHA-256 NIST CAVP no-prediction-resistance with reseed COUNT=0 flow.
+The public `ano_crypto_selftest_run()` symbol currently executes the internal sequence but does not own the full `OPERATIONAL -> SELF_TEST_RUNNING -> OPERATIONAL/ERROR_STATE` transition. P2-03 specifies the target behavior and records implementation/tests as open deltas rather than claiming completion.
 
-## Extended non-startup KAT/test coverage
+## Conditional-test boundary
 
-The `ano_crypto_sha256_hmac_extended_kat_tests` executable adds:
-
-- SHA-256 million-`a` vector.
-- HMAC-SHA-256 RFC 4231 test cases 3, 4, and 7.
-- Chunk-boundary consistency tests for one-shot versus streaming APIs.
-
-The `ano_crypto_hmac_drbg_kat_tests` executable adds:
-
-- HMAC_DRBG-SHA-256 public CAVP flow through the public API.
-- instantiate, reseed, generate, state query, and uninstantiate coverage.
+- Public-key pairwise-consistency tests are out of scope because no public-key algorithm or key-generation service exists.
+- Symmetric/HMAC/CMAC key-import validation is service/CSP behavior, not silently relabeled as a cryptographic self-test.
+- Entropy-provider/direct-source health-test classification remains P2-04 and `EXTERNAL_CONFIRMATION_REQUIRED`.
 
 ## Evidence boundary
 
-These KATs are implementation correctness checks only. They are not official validation evidence.
-
-## TODO
-
-- Add dedicated KAT manifest files with source URL/date/hash metadata.
-- Add negative self-test injection cases beyond test hook forced failure.
-- Add more DRBG KAT cases for no-reseed, personalization string, and no-additional-input paths.
-- Add conditional tests for future key generation and public-key algorithms.
-- Add policy for startup self-test duration versus extended evidence-only KATs.
+Current KAT and state tests are engineering evidence only. They are not institution test results or formal validation evidence. Logs and documents must not include keys, entropy, DRBG state, random output, expected/computed KAT values, integrity key, or expected/computed integrity tag.

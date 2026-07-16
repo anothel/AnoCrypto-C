@@ -24,14 +24,14 @@ typedef enum ano_crypto_module_state_e {
 /*
  * Module lifecycle.
  *
- * P0 policy:
- * - ano_crypto_module_init(NULL) runs startup self-tests.
- * - Cryptographic services must call ano_crypto_module_require_operational()
- *   before processing any cryptographic operation.
- * - A self-test failure enters ERROR_STATE.
- * - ERROR_STATE is sticky for this process; recovery policy is TODO(P1).
- * - P1-14 documents the internal global-state lock; caller-owned operation contexts
- *   are still not safe for concurrent mutation by multiple threads.
+ * P2-03 policy:
+ * - ano_crypto_module_init(NULL) runs the mandatory implemented startup checks.
+ * - Cryptographic services require OPERATIONAL before processing.
+ * - A mandatory self-test or fatal internal failure enters sticky ERROR_STATE.
+ * - Orderly SHUTDOWN may be initialized again and reruns startup checks.
+ * - ERROR_STATE has no in-process recovery; a fresh process load is required.
+ * - The internal global-state lock protects module/self-test/CSP global state;
+ *   caller-owned mutable operation contexts still require caller serialization.
  */
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_module_init(
     const ano_crypto_module_config_t *config);

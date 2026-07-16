@@ -36,7 +36,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-02-boundary-freeze
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-03-selftest-integrity
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -155,7 +155,7 @@ jobs:
       - name: Upload hosted platform review bundle
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p2-02-hosted-platform-${{ runner.os }}-thread-safety-${{ matrix.thread_safety }}
+          name: anocrypto-c-p2-03-hosted-platform-${{ runner.os }}-thread-safety-${{ matrix.thread_safety }}
           path: hosted-artifact-bundle
           if-no-files-found: error
 
@@ -170,6 +170,9 @@ jobs:
 
       - name: P2-02 validation candidate boundary policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_validation_candidate_policy_check
+
+      - name: P2-03 self-test and integrity policy check
+        run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_self_test_integrity_policy_check
 
       - name: Thread-safety policy check
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_thread_safety_policy_check
@@ -253,7 +256,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
           -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-02-boundary-freeze-openssl
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-03-selftest-integrity-openssl
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build differential lane
@@ -313,7 +316,7 @@ jobs:
       - name: Upload differential hosted bundle
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p2-02-openssl-differential-Linux
+          name: anocrypto-c-p2-03-openssl-differential-Linux
           path: hosted-differential-bundle
           if-no-files-found: error
 
@@ -350,7 +353,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-02-boundary-freeze-linux32
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-03-selftest-integrity-linux32
           -DCMAKE_C_FLAGS=-m32
           -DCMAKE_EXE_LINKER_FLAGS=-m32
           -DCMAKE_SHARED_LINKER_FLAGS=-m32
@@ -427,7 +430,7 @@ jobs:
       - name: Upload 32-bit hosted bundle
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p2-02-portability-Linux-32bit
+          name: anocrypto-c-p2-03-portability-Linux-32bit
           path: hosted-32bit-bundle
           if-no-files-found: error
 
@@ -465,7 +468,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-02-boundary-freeze-${{ matrix.cc }}-compiler-review
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-03-selftest-integrity-${{ matrix.cc }}-compiler-review
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Capture AES compiler output
@@ -515,7 +518,7 @@ jobs:
       - name: Upload compiler-output hosted bundle
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p2-02-compiler-output-${{ matrix.cc }}-Linux
+          name: anocrypto-c-p2-03-compiler-output-${{ matrix.cc }}-Linux
           path: hosted-compiler-bundle
           if-no-files-found: error
 
@@ -554,7 +557,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DBUILD_SHARED_LIBS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-02-boundary-freeze-s390x
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-03-selftest-integrity-s390x
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build s390x lane
@@ -621,7 +624,7 @@ jobs:
       - name: Upload s390x hosted bundle
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p2-02-portability-Linux-s390x
+          name: anocrypto-c-p2-03-portability-Linux-s390x
           path: hosted-s390x-bundle
           if-no-files-found: error
 
@@ -658,7 +661,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_SANITIZER_MODE=address-undefined
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-02-boundary-freeze-GCC-asan-ubsan
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-03-selftest-integrity-GCC-asan-ubsan
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build sanitizer lane
@@ -697,7 +700,7 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-02-boundary-freeze-test-hook
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-03-selftest-integrity-test-hook
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build dedicated test-hook lane
@@ -752,7 +755,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-02-boundary-freeze-provider-disabled
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-03-selftest-integrity-provider-disabled
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build provider-disabled lane
@@ -817,7 +820,7 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON
           -DBUILD_SHARED_LIBS=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-02-boundary-freeze-clean-release
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-03-selftest-integrity-clean-release
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Compare clean Release exports with ABI-0 baseline
@@ -873,7 +876,7 @@ jobs:
       - name: Upload exported-symbol hosted bundle
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p2-02-symbol-compatibility-${{ runner.os }}
+          name: anocrypto-c-p2-03-symbol-compatibility-${{ runner.os }}
           path: hosted-symbol-bundle
           if-no-files-found: error
 
@@ -954,7 +957,7 @@ jobs:
       - name: Upload tagged compatibility hosted bundle
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p2-02-tagged-compatibility-${{ runner.os }}
+          name: anocrypto-c-p2-03-tagged-compatibility-${{ runner.os }}
           path: hosted-tagged-compatibility-bundle
           if-no-files-found: error
 
@@ -992,7 +995,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
           -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-02-boundary-freeze
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p2-03-selftest-integrity
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
@@ -1006,7 +1009,7 @@ jobs:
           cmake
           -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
           -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-release-provenance-bundle
-          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=build/evidence/p2-02/RELEASE_PROVENANCE_CHECK.txt;build/evidence/p2-02/RELEASE_PROVENANCE_POLICY_CHECK.txt;build/evidence/p2-02/release-provenance/RELEASE_PROVENANCE.txt;build/evidence/p2-02/release-provenance/SOURCE_SBOM.spdx.json;build/evidence/p2-02/release-provenance/SOURCE_SBOM_SUMMARY.txt;build/evidence/p2-02/release-provenance/RELEASE_ARTIFACTS.sha256;build/evidence/p2-02/release-provenance/SBOM_STATUS.txt;build/evidence/p2-02/release-provenance/SIGNING_STATUS.txt;build/evidence/p2-02/release-provenance/RELEASE_AUTHORIZATION.md;build/evidence/p2-02/release-provenance/HOSTED_ARTIFACT_DISPOSITION.txt"
+          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=build/evidence/p2-03/RELEASE_PROVENANCE_CHECK.txt;build/evidence/p2-03/RELEASE_PROVENANCE_POLICY_CHECK.txt;build/evidence/p2-03/release-provenance/RELEASE_PROVENANCE.txt;build/evidence/p2-03/release-provenance/SOURCE_SBOM.spdx.json;build/evidence/p2-03/release-provenance/SOURCE_SBOM_SUMMARY.txt;build/evidence/p2-03/release-provenance/RELEASE_ARTIFACTS.sha256;build/evidence/p2-03/release-provenance/SBOM_STATUS.txt;build/evidence/p2-03/release-provenance/SIGNING_STATUS.txt;build/evidence/p2-03/release-provenance/RELEASE_AUTHORIZATION.md;build/evidence/p2-03/release-provenance/HOSTED_ARTIFACT_DISPOSITION.txt"
           -DANO_CRYPTO_HOSTED_LANE=${{ env.HOSTED_PROVENANCE_LANE }}
           -DANO_CRYPTO_HOSTED_PLATFORM=Linux
           -DANO_CRYPTO_HOSTED_ARCH=x86_64
@@ -1036,7 +1039,7 @@ jobs:
       - name: Upload release provenance hosted bundle
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p2-02-release-provenance-Linux-${{ matrix.cc }}
+          name: anocrypto-c-p2-03-release-provenance-Linux-${{ matrix.cc }}
           path: hosted-release-provenance-bundle
           if-no-files-found: error
 
@@ -1045,7 +1048,7 @@ jobs:
           cmake
           -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
           -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-release-signing-handoff-bundle
-          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=build/evidence/p2-02/RELEASE_SIGNING_HANDOFF_CHECK.txt;build/evidence/p2-02/release-signing-handoff/APPROVED_RELEASE_SIGNERS.txt;build/evidence/p2-02/release-signing-handoff/APPROVED_TIMESTAMP_POLICY.txt;build/evidence/p2-02/release-signing-handoff/HOSTED_ARTIFACT_DISPOSITION.txt;build/evidence/p2-02/release-signing-handoff/RELEASE_ARTIFACTS.sha256;build/evidence/p2-02/release-signing-handoff/RELEASE_AUTHORIZATION.md;build/evidence/p2-02/release-signing-handoff/RELEASE_PROVENANCE.txt;build/evidence/p2-02/release-signing-handoff/SIGNING_HANDOFF_FILES.sha256;build/evidence/p2-02/release-signing-handoff/SIGNING_HANDOFF_STATUS.txt;build/evidence/p2-02/release-signing-handoff/SIGNING_POLICY.txt;build/evidence/p2-02/release-signing-handoff/SIGNING_REQUEST.txt"
+          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=build/evidence/p2-03/RELEASE_SIGNING_HANDOFF_CHECK.txt;build/evidence/p2-03/release-signing-handoff/APPROVED_RELEASE_SIGNERS.txt;build/evidence/p2-03/release-signing-handoff/APPROVED_TIMESTAMP_POLICY.txt;build/evidence/p2-03/release-signing-handoff/HOSTED_ARTIFACT_DISPOSITION.txt;build/evidence/p2-03/release-signing-handoff/RELEASE_ARTIFACTS.sha256;build/evidence/p2-03/release-signing-handoff/RELEASE_AUTHORIZATION.md;build/evidence/p2-03/release-signing-handoff/RELEASE_PROVENANCE.txt;build/evidence/p2-03/release-signing-handoff/SIGNING_HANDOFF_FILES.sha256;build/evidence/p2-03/release-signing-handoff/SIGNING_HANDOFF_STATUS.txt;build/evidence/p2-03/release-signing-handoff/SIGNING_POLICY.txt;build/evidence/p2-03/release-signing-handoff/SIGNING_REQUEST.txt"
           -DANO_CRYPTO_HOSTED_LANE=${{ env.HOSTED_SIGNING_LANE }}
           -DANO_CRYPTO_HOSTED_PLATFORM=Linux
           -DANO_CRYPTO_HOSTED_ARCH=x86_64
@@ -1075,15 +1078,15 @@ jobs:
       - name: Upload release signing-handoff hosted bundle
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p2-02-signing-handoff-Linux-${{ matrix.cc }}
+          name: anocrypto-c-p2-03-signing-handoff-Linux-${{ matrix.cc }}
           path: hosted-release-signing-handoff-bundle
           if-no-files-found: error
 
       - name: Upload evidence draft
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p2-02-evidence-draft-${{ matrix.cc }}
-          path: build/evidence/p2-02
+          name: anocrypto-c-p2-03-evidence-draft-${{ matrix.cc }}
+          path: build/evidence/p2-03
           if-no-files-found: error
 
   hosted-artifact-index:
@@ -1097,56 +1100,56 @@ jobs:
       - name: Download platform bundles
         uses: actions/download-artifact@v4
         with:
-          pattern: anocrypto-c-p2-02-hosted-platform-*
+          pattern: anocrypto-c-p2-03-hosted-platform-*
           path: downloaded-hosted-artifacts
           merge-multiple: false
 
       - name: Download differential bundles
         uses: actions/download-artifact@v4
         with:
-          pattern: anocrypto-c-p2-02-openssl-differential-*
+          pattern: anocrypto-c-p2-03-openssl-differential-*
           path: downloaded-hosted-artifacts
           merge-multiple: false
 
       - name: Download portability bundles
         uses: actions/download-artifact@v4
         with:
-          pattern: anocrypto-c-p2-02-portability-*
+          pattern: anocrypto-c-p2-03-portability-*
           path: downloaded-hosted-artifacts
           merge-multiple: false
 
       - name: Download compiler-output bundles
         uses: actions/download-artifact@v4
         with:
-          pattern: anocrypto-c-p2-02-compiler-output-*
+          pattern: anocrypto-c-p2-03-compiler-output-*
           path: downloaded-hosted-artifacts
           merge-multiple: false
 
       - name: Download symbol compatibility bundles
         uses: actions/download-artifact@v4
         with:
-          pattern: anocrypto-c-p2-02-symbol-compatibility-*
+          pattern: anocrypto-c-p2-03-symbol-compatibility-*
           path: downloaded-hosted-artifacts
           merge-multiple: false
 
       - name: Download tagged compatibility bundles
         uses: actions/download-artifact@v4
         with:
-          pattern: anocrypto-c-p2-02-tagged-compatibility-*
+          pattern: anocrypto-c-p2-03-tagged-compatibility-*
           path: downloaded-hosted-artifacts
           merge-multiple: false
 
       - name: Download signing-handoff bundles
         uses: actions/download-artifact@v4
         with:
-          pattern: anocrypto-c-p2-02-signing-handoff-*
+          pattern: anocrypto-c-p2-03-signing-handoff-*
           path: downloaded-hosted-artifacts
           merge-multiple: false
 
       - name: Download release-provenance bundles
         uses: actions/download-artifact@v4
         with:
-          pattern: anocrypto-c-p2-02-release-provenance-*
+          pattern: anocrypto-c-p2-03-release-provenance-*
           path: downloaded-hosted-artifacts
           merge-multiple: false
 
@@ -1164,6 +1167,6 @@ jobs:
       - name: Upload hosted artifact index
         uses: actions/upload-artifact@v4
         with:
-          name: anocrypto-c-p2-02-hosted-artifact-index
+          name: anocrypto-c-p2-03-hosted-artifact-index
           path: hosted-artifact-index
           if-no-files-found: error

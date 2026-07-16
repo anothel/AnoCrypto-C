@@ -1,13 +1,13 @@
 # KCMVP Readiness Gap — P2 Consolidated Register
 
-Status: P2-02 internal module-boundary and operating-environment freeze. Formal validation and external review remain pending.
+Status: P2-03 internal self-test, integrity-candidate, finite-state, and recovery design freeze. Runtime integrity implementation, exact operating-environment execution, formal validation, and external review remain pending.
 
 ## Baseline and Claims Boundary
 
 | Item | Current value |
 |---|---|
 | Product | `AnoCrypto-C` |
-| Work-product version | `0.1.0-p2-02-boundary-freeze` |
+| Work-product version | `0.1.0-p2-03-selftest-integrity` |
 | Input baseline declared by project owner | `0.1.0-p1-33-release-rehearsal` at `cf0f3c425dd265c7509fb64a6123db97f71055dd` |
 | Public headers | 14 |
 | Exported public symbols | 69 |
@@ -56,7 +56,9 @@ This document is an engineering readiness record. It does not establish an accep
 ### Self-test, state, entropy, and CSP assets
 
 - Startup KAT paths for the implemented SHA-2, HMAC, HMAC_DRBG, AES, CBC, and CMAC services.
-- KAT manifest and build-identity consistency checks.
+- KAT manifest and build-identity consistency checks. These are supporting structural checks, not module-byte integrity authentication.
+- P2-03 finite-state, service-availability, failure/recovery, and operator-action matrices.
+- Selected integrity candidate `INT-HMAC-SHA256-SINGLE-SO-R1`, explicitly `SELECTED_CANDIDATE_NOT_IMPLEMENTED` and `EXTERNAL_CONFIRMATION_REQUIRED`.
 - Startup and continuous duplicate-block health-test candidates for internal engineering evaluation.
 - OS-provider status-only operational probe and provider-disabled failure behavior.
 - Process/fork marker with reseed-required behavior for source-backed random contexts.
@@ -66,7 +68,7 @@ This document is an engineering readiness record. It does not establish an accep
 
 ## Test and Evidence Inventory
 
-The ordinary tests-enabled build currently registers 49 CTest cases when OpenSSL 3.x differential tests are available. Coverage includes:
+The ordinary tests-enabled build is expected to register 50 CTest cases when OpenSSL 3.x differential tests are available, including the P2-03 self-test/integrity policy check. Coverage includes:
 
 - startup/extended KATs and API-negative tests;
 - module state and cryptographic service gating;
@@ -90,11 +92,11 @@ Existing engineering evidence assets include source/archive hashes, SPDX 2.3 sou
 | GAP-003 | Operating environments | `PARTIAL` | Initial OE-01 is frozen to Ubuntu Server 24.04.4 LTS x86_64, GCC 13.3.0, CMake 3.28.3, Release shared library; all other environments are deferred or unsupported for the initial candidate. | Capture immutable image/CPU/kernel/package identifiers, execute on the selected candidate, and confirm variant/retest treatment externally. |
 | GAP-004 | Algorithm/service target scope | `EXTERNAL_CONFIRMATION_REQUIRED` | Implemented scope is narrow and recorded. | Confirm which implemented services are in the initial validation target and whether any identifiers/placeholders must be excluded from the submitted configuration. |
 | GAP-005 | Public API/ABI control | `READY_FOR_INTERNAL_REVIEW` | 14 headers, 69 symbols, retained P1-29 headers, normalized compatibility checks. | Institution acceptance and selected-platform ABI review remain external. |
-| GAP-006 | Finite-state model | `PARTIAL` | State gate and sticky fatal state are implemented and tested. | Produce a normative state/transition/service-availability specification and recovery/operator-action matrix in P2-03. |
-| GAP-007 | Startup algorithm KATs | `READY_FOR_INTERNAL_REVIEW` | Startup KAT implementation and external extended KAT tests exist. | Map every submitted service and configuration to accepted startup/conditional tests. |
-| GAP-008 | Module integrity test | `NOT_IMPLEMENTED` | Current integrity flag is a placeholder plus build/KAT-manifest consistency checks. | Select, implement, and document an accepted integrity mechanism after consultation. |
-| GAP-009 | Conditional tests | `PARTIAL` | Key-purpose checks, DRBG lifecycle checks, and failure paths exist. | Determine required conditional-test set and trigger points for the selected scope. |
-| GAP-010 | Fatal/recoverable failure policy | `PARTIAL` | Sticky fatal state exists; ordinary errors remain service-local. | Freeze exact classification, restart requirements, and allowed status queries in P2-03. |
+| GAP-006 | Finite-state model | `READY_FOR_INTERNAL_REVIEW` | `KCMVP_FINITE_STATE_MODEL.md` freezes states, transitions, service availability, fatal latch, orderly reinitialization, and implementation differences. | Obtain external interpretation and implement the separately tracked on-demand transition/concurrency deltas. |
+| GAP-007 | Startup algorithm KATs | `READY_FOR_INTERNAL_REVIEW` | Startup KAT implementation, structural checks, sequence specification, and external extended KAT tests exist. | Confirm accepted startup order and required submitted-service mapping; retain exact OE-01 execution. |
+| GAP-008 | Module integrity test | `PARTIAL` | P2-03 selects and specifies `INT-HMAC-SHA256-SINGLE-SO-R1`, including canonical measurement, key ownership, deployment, failure, and evidence rules. Current runtime still has only placeholder/structural checks. | Obtain external confirmation, then implement controlled tag/key injection and runtime verification with mutation/truncation/path/concurrency tests. |
+| GAP-009 | Conditional tests | `PARTIAL` | P2-03 separates out-of-scope key-pair tests, service validation, DRBG/provider operational checks, and on-demand self-test. | P2-04 must finalize entropy/direct-source applicability and institution-confirmed trigger classification. |
+| GAP-010 | Fatal/recoverable failure policy | `READY_FOR_INTERNAL_REVIEW` | P2-03 failure/recovery matrix freezes fatal versus operation-local handling, sticky error behavior, allowed queries, process-termination recovery, and orderly reinitialization. | Reconcile remaining implementation deltas and obtain external confirmation of operator/recovery wording. |
 | GAP-011 | Entropy-source responsibility | `EXTERNAL_CONFIRMATION_REQUIRED` | OS-provider adapter and external-provider health ownership are documented. | Confirm whether the OS provider can remain outside direct noise-source testing and what evidence is required for each environment. |
 | GAP-012 | Health-test interpretation | `PARTIAL` | Duplicate-block engineering skeleton and fatal/local policy wiring exist. | Select source-specific tests, thresholds, startup/continuous placement, and recovery rules only for an owned direct noise source, if required. |
 | GAP-013 | DRBG limits and lifecycle | `PARTIAL` | Instantiate/reseed/generate limits and reseed-required tests exist. | Consolidate exact limits, prediction-resistance policy, process-change behavior, and operator guidance in P2-04. |
@@ -118,13 +120,16 @@ Existing engineering evidence assets include source/archive hashes, SPDX 2.3 sou
 | GAP-031 | Customer evaluation terms | `NOT_IMPLEMENTED` | PoC technical boundary is documented. | Legal review and approved evaluation/support terms are required before broader distribution. |
 | GAP-032 | Product-layer separation | `READY_FOR_INTERNAL_REVIEW` | AnoCrypto-C, AnoSecureKit, AnoPKI, and optional wrapper boundaries are documented. | Reconfirm during consultation so application/PKI workflow is not pulled into the module scope unintentionally. |
 
-## P2-01 and P2-02 Disposition
+## P2-01 through P2-03 Disposition
 
 P2-01 consolidated the implementation/test/evidence inventory, traceability, consultation questions, submission inventory, roadmap, blocker record, ABI check, and local regression records.
 
 P2-02 freezes the internal candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` and its shared-library boundary/configuration. This closes the internal selection action for GAP-001 and narrows GAP-003, GAP-015, and GAP-019, but it does not establish formal boundary or environment acceptance. Immutable selected-environment evidence is still incomplete, and P1-34 remains `BLOCKED_EXTERNAL`.
 
 All institution-dependent items remain `EXTERNAL_CONFIRMATION_REQUIRED` until a named institution or qualified reviewer supplies a retained response.
+
+
+P2-03 additionally froze the internal self-test/integrity/state/recovery design without claiming implementation or acceptance of module integrity. The machine-readable policy and checker require `SELECTED_CANDIDATE_NOT_IMPLEMENTED`, `EXTERNAL_CONFIRMATION_REQUIRED`, 14 headers, 69 symbols, `ANOCRYPTO_C_0`, hosted `NOT_RUN/UNREVIEWED`, and external authorization `NO`.
 
 ## External Reference Checkpoint
 

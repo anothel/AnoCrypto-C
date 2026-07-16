@@ -20,9 +20,9 @@ enable_testing()
 add_executable(anocrypto_c_current_header_compatibility_consumer
     p1_29_compatibility_probe.c)
 target_compile_definitions(anocrypto_c_current_header_compatibility_consumer PRIVATE
-    ANO_CRYPTO_COMPAT_HEADER_MODE="current-installed-p2-02"
+    ANO_CRYPTO_COMPAT_HEADER_MODE="current-installed-p2-03"
     ANO_CRYPTO_EXPECT_CURRENT_HEADER=1
-    ANO_CRYPTO_EXPECT_RUNTIME_VERSION="0.1.0-p2-02-boundary-freeze")
+    ANO_CRYPTO_EXPECT_RUNTIME_VERSION="0.1.0-p2-03-selftest-integrity")
 target_link_libraries(anocrypto_c_current_header_compatibility_consumer PRIVATE
     AnoCryptoC::AnoCryptoC)
 add_test(NAME current_header_compatibility
@@ -36,7 +36,7 @@ target_include_directories(anocrypto_c_p129_header_compatibility_consumer BEFORE
 target_compile_definitions(anocrypto_c_p129_header_compatibility_consumer PRIVATE
     ANO_CRYPTO_COMPAT_HEADER_MODE="retained-p1-29"
     ANO_CRYPTO_EXPECT_P1_29_HEADER_SNAPSHOT=1
-    ANO_CRYPTO_EXPECT_RUNTIME_VERSION="0.1.0-p2-02-boundary-freeze")
+    ANO_CRYPTO_EXPECT_RUNTIME_VERSION="0.1.0-p2-03-selftest-integrity")
 target_link_libraries(anocrypto_c_p129_header_compatibility_consumer PRIVATE
     AnoCryptoC::AnoCryptoC)
 add_test(NAME p129_header_current_library_compatibility

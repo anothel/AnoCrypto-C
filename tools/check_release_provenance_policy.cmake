@@ -110,7 +110,7 @@ _ano_require_text("tools/create_poc_package.cmake"
     "The internal source archive and source SBOM are not included")
 _ano_require_text("docs/kcmvp/SBOM_SIGNING_PLAN.md" "SPDX 2.3 JSON source inventory")
 _ano_require_text("docs/release/RELEASE_PROVENANCE_AND_SIGNING_POLICY.md"
-    "Status: P2-02 unsigned engineering policy retaining P1-33 controls")
+    "Status: P2-03 unsigned engineering policy retaining P1-33 controls")
 _ano_require_text("docs/release/RELEASE_PROVENANCE_AND_SIGNING_POLICY.md"
     "External release authorized: NO")
 _ano_require_text("docs/ci/RELEASE_PROVENANCE_CI_CHECKLIST.md"
@@ -231,4 +231,4 @@ file(WRITE "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}"
     "External release authorization: NO\n"
     "Result: PASS\n")
 
-message(STATUS "AnoCrypto-C P2-02 release provenance policy check passed")
+message(STATUS "AnoCrypto-C P2-03 release provenance policy check passed")

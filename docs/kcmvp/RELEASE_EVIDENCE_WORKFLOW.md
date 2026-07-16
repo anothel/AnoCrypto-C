@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P2-02 unsigned engineering draft retaining the P1-33 release-engineering boundary. It prepares a key-free offline-signing handoff and clean synthetic tag rehearsal but performs no actual tag creation, production signing, or external-release authorization.
+Status: P2-03 unsigned engineering draft retaining the P1-33 release-engineering boundary and adding a self-test/integrity policy record. It performs no runtime module-integrity authentication, actual tag creation, production signing, or external-release authorization.
 
 ## Purpose
 
@@ -15,15 +15,15 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p2-02/
+build/evidence/p2-03/
 ```
 
 The build graph serializes clean Release symbol/runtime-dependency inspection,
 installed-package smoke, customer PoC smoke, tagged-release compatibility,
 compiler-output capture, full CTest, provenance preparation, and key-free
 signing-handoff verification. A predecessor writes a complete hash-bound tree
-under `build/prepared-release-evidence/p2-02/`. Final collection verifies that
-manifest and copies only regular-file content into `build/evidence/p2-02/`; it
+under `build/prepared-release-evidence/p2-03/`. Final collection verifies that
+manifest and copies only regular-file content into `build/evidence/p2-03/`; it
 does not run a configure, build, CTest, package, policy, or status-test process.
 Outer Make/Ninja jobserver variables are removed from nested prerequisite
 processes, and child processes have explicit timeouts.
@@ -306,8 +306,9 @@ Local evidence records expected tag metadata but does not claim that a tag exist
 
 ## Retained P1-33 clean rehearsal and hosted-review additions
 
-- Release identity is `0.1.0-p2-02-boundary-freeze`; public surface remains 14 headers and 69 `ANOCRYPTO_C_0` symbols.
-- `VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt` binds the internal candidate ID, selected boundary/environment metadata, public counts, and unchanged P1-34 blocker. It is a policy record, not selected-OE execution evidence.
+- Release identity is `0.1.0-p2-03-selftest-integrity`; public surface remains 14 headers and 69 `ANOCRYPTO_C_0` symbols.
+- `VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt`
+- `SELF_TEST_INTEGRITY_POLICY_CHECK.txt` binds the internal candidate ID, selected boundary/environment metadata, public counts, and unchanged P1-34 blocker. It is a policy record, not selected-OE execution evidence.
 - A temporary clean Git repository creates a synthetic local tag and proves expected tag, supplied commit, tag-resolved commit, and `HEAD` equality without tagging the user repository.
 - Dirty state, moved tag, moved `HEAD`, commit/ref mismatch, missing or duplicate lanes, unsafe/unlisted/tampered artifacts, incomplete reviewer metadata, conflicting roles, and false approval claims fail closed.
 - Required review categories cover Linux, Windows, macOS, Linux 32-bit, s390x big-endian, GCC/Clang compiler output, OpenSSL differential, provenance, and signing handoff.
@@ -315,3 +316,16 @@ Local evidence records expected tag metadata but does not claim that a tag exist
 - Synthetic/local output is never hosted evidence. Missing hosted execution remains `NOT_RUN`; downloaded but unreviewed output remains `UNREVIEWED`.
 - The clean checkout reproduces configure/build/CTest, install, PoC, compatibility, provenance, signing handoff, and final evidence collection.
 - Production signer/TSA remain `UNPROVISIONED`; signing remains `UNSIGNED`, handoff `BLOCKED`, and external authorization `NO`.
+
+## P2-03 self-test/integrity evidence addition
+
+`SELF_TEST_INTEGRITY_POLICY_CHECK.txt` records only policy identifiers, candidate/status fields, public-surface counts, recovery model, and blocked hosted/release status. It must state:
+
+- integrity candidate `INT-HMAC-SHA256-SINGLE-SO-R1`;
+- integrity runtime `NOT_IMPLEMENTED`;
+- external confirmation `REQUIRED`;
+- on-demand state transition `NOT_IMPLEMENTED`;
+- public headers 14, exported-symbol baseline 69, ABI `ANOCRYPTO_C_0`;
+- actual hosted lanes `NOT_RUN`, review `UNREVIEWED`, external authorization `NO`.
+
+A PASS proves only that the repository's P2-03 design, policy record, code observations, and claims boundary remain mutually consistent. It is not a tamper-test result and must not be represented as module-integrity execution evidence.

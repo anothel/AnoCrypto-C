@@ -2,9 +2,9 @@
 
 This directory contains engineering helper scripts for the C99 codebase.
 
-## P2-02 evidence preparation and assembly
+## P2-03 evidence preparation and assembly
 
-Creates a local P2-02 release-evidence draft while retaining the reviewed P1-33 release-engineering boundary:
+Creates a local P2-03 release-evidence draft while retaining the reviewed P1-33 release-engineering boundary and the P2-02 validation-candidate record:
 
 ```sh
 cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DANO_CRYPTO_BUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release
@@ -20,7 +20,7 @@ The target serializes clean Release symbol/runtime-dependency inspection, instal
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p2-02 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p2-03 \
   -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=build/release-provenance-evidence \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=build/release-signing-handoff \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=build/release-signing-handoff-check.txt \
@@ -32,6 +32,7 @@ cmake \
   -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
   -DANO_CRYPTO_RUN_PUBLIC_SURFACE_CHECK=ON \
   -DANO_CRYPTO_RUN_VALIDATION_CANDIDATE_CHECK=ON \
+  -DANO_CRYPTO_RUN_SELF_TEST_INTEGRITY_CHECK=ON \
   -DANO_CRYPTO_RUN_POC_PACKAGE_SMOKE=ON \
   -P tools/collect_release_evidence.cmake
 ```
@@ -41,12 +42,12 @@ The final assembly step consumes only that hash-bound tree:
 ```sh
 cmake \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p2-02 \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-02 \
+  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p2-03 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-03 \
   -P tools/assemble_release_evidence.cmake
 ```
 
-P2-02 output retains the P1-33 build/test/package records and copies verified `release-provenance/` plus key-free `release-signing-handoff/`. The source inventory does not perform dependency discovery, vulnerability analysis, or license conclusions. Current state remains `UNSIGNED`, hosted review `UNREVIEWED`, handoff `BLOCKED`, external authorization `NO`. `SENSITIVE_ARTIFACT_SCAN.txt` checks evidence, installed SDK, and PoC package for prohibited credential/signature artifacts.
+P2-03 output retains the P1-33 build/test/package records, the P2-02 boundary policy, and the P2-03 self-test/integrity policy record and copies verified `release-provenance/` plus key-free `release-signing-handoff/`. The source inventory does not perform dependency discovery, vulnerability analysis, or license conclusions. Current state remains `UNSIGNED`, hosted review `UNREVIEWED`, handoff `BLOCKED`, external authorization `NO`. `SENSITIVE_ARTIFACT_SCAN.txt` checks evidence, installed SDK, and PoC package for prohibited credential/signature artifacts.
 
 ## `check_validation_candidate_policy.cmake`
 
@@ -57,6 +58,16 @@ cmake --build build --target ano_crypto_validation_candidate_policy_check
 ```
 
 This static check does not prove execution on OE-01. The optional configure-time gate `-DANO_CRYPTO_ENFORCE_VALIDATION_CANDIDATE=ON` must be used on the exact selected environment and fails closed on environment or option drift.
+
+## `check_self_test_integrity_policy.cmake`
+
+Checks P2-03 policy IDs, the selected-but-unimplemented HMAC-SHA-256 single-shared-object integrity design, finite-state/recovery records, current startup KAT/state code, 14-header/69-symbol ABI guards, and unchanged hosted/release blockers.
+
+```sh
+cmake --build build --target ano_crypto_self_test_integrity_policy_check
+```
+
+The output `SELF_TEST_INTEGRITY_POLICY_CHECK.txt` is a claims-boundary and consistency record. It is not runtime module-integrity evidence.
 
 ## `check_public_surface.cmake`
 

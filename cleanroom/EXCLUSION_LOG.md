@@ -422,3 +422,15 @@ If excluded material is discovered:
 | EX-4305 | Copying official submission guide attachments, proprietary test-institution guidance, third-party system images, package contents, or vendor source into project documents/code | Provenance and rights risk | Excluded | Only public high-level metadata and fresh project-owned descriptions are retained. |
 | EX-4306 | Adding or logging keys, entropy/provider bytes, seed, DRBG state, random output, plaintext/ciphertext, MAC/tag values, private signing material, tokens, or customer data in boundary/OE evidence | Sensitive-material disclosure | Excluded | Candidate evidence is limited to identifiers, options, statuses, counts, hashes, dependencies, and review metadata. |
 | EX-4307 | Push, tag, production signing, timestamping, or external release during P2-02 | Release-integrity risk | Excluded | Repository remains `UNSIGNED`, handoff `BLOCKED`, external authorization `NO`. |
+
+## P2-03 Self-test, Integrity, and Recovery Exclusions
+
+| Record | Excluded item/action | Reason | Disposition |
+|---|---|---|---|
+| EX-4401 | Treating build-identity or KAT-manifest structural checks as module-byte integrity authentication | False assurance | Excluded | Documents and policy explicitly state runtime integrity is not implemented. |
+| EX-4402 | Implementing an integrity verifier, embedded key, tag, or metadata record before consultation/design approval | Premature security mechanism and configuration-management risk | Deferred | Candidate remains `SELECTED_CANDIDATE_NOT_IMPLEMENTED`. |
+| EX-4403 | Adding a new public self-test API, flag, status, header, or exported symbol | ABI expansion outside P2-03 gate | Excluded | Existing public surface remains 14/69/`ANOCRYPTO_C_0`. |
+| EX-4404 | Copying proprietary integrity code, confidential standard text, or unlicensed fixtures | Clean-room/legal risk | Excluded | Use only project-owned design and public official guidance. |
+| EX-4405 | Storing integrity-test keys/tags, production signing material, or sensitive values in source, ordinary CI, logs, evidence, PoC, or artifacts | Secret disclosure risk | Excluded | Future controlled injection/custody belongs to P2-05/P2-07 after acceptance. |
+| EX-4406 | Claiming local policy/CTest evidence as hosted execution, institution acceptance, or runtime tamper evidence | Evidence misrepresentation | Excluded | P1-34 remains `BLOCKED_EXTERNAL`; integrity execution remains not implemented. |
+| EX-4407 | Push, tag, production signing, timestamping, or external release during P2-03 | Release-integrity risk | Excluded | Repository remains `UNSIGNED`, handoff `BLOCKED`, external authorization `NO`. |

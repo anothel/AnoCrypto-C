@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-02 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-03 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-02")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-03")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -44,6 +44,10 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_VALIDATION_CANDIDATE_CHECK)
     set(ANO_CRYPTO_RUN_VALIDATION_CANDIDATE_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_SELF_TEST_INTEGRITY_CHECK)
+    set(ANO_CRYPTO_RUN_SELF_TEST_INTEGRITY_CHECK ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_POC_PACKAGE_SMOKE)
@@ -620,6 +624,32 @@ else()
         "Validation candidate policy check was not requested. Set ANO_CRYPTO_RUN_VALIDATION_CANDIDATE_CHECK=ON.\n")
 endif()
 
+if(ANO_CRYPTO_RUN_SELF_TEST_INTEGRITY_CHECK)
+    set(_self_test_integrity_output
+        "${ANO_CRYPTO_EVIDENCE_DIR}/SELF_TEST_INTEGRITY_POLICY_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+            -DANO_CRYPTO_SELF_TEST_POLICY_CHECK_OUTPUT=${_self_test_integrity_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_self_test_integrity_policy.cmake"
+        RESULT_VARIABLE _self_test_integrity_result
+        OUTPUT_VARIABLE _self_test_integrity_stdout
+        ERROR_VARIABLE _self_test_integrity_stderr
+        TIMEOUT 300)
+    file(APPEND "${_self_test_integrity_output}"
+        "\nCommand output:\n${_self_test_integrity_stdout}${_self_test_integrity_stderr}\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "Self-test/integrity policy result: ${_self_test_integrity_result}\n")
+    if(NOT _self_test_integrity_result EQUAL 0)
+        message(FATAL_ERROR
+            "self-test/integrity policy check failed; see ${_self_test_integrity_output}")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SELF_TEST_INTEGRITY_POLICY_CHECK.txt"
+        "Self-test/integrity policy check was not requested. Set ANO_CRYPTO_RUN_SELF_TEST_INTEGRITY_CHECK=ON.\n")
+endif()
+
 if(ANO_CRYPTO_RUN_RELEASE_COMPATIBILITY_CHECK)
     set(_release_compatibility_output
         "${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_COMPATIBILITY_CHECK.txt")
@@ -1035,6 +1065,8 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "Source hash list: SOURCE_FILES.sha256\n"
     "Binary hash list: BINARY_FILES.sha256\n"
     "Public surface check: PUBLIC_SURFACE_CHECK.txt\n"
+    "Validation candidate check: VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt\n"
+    "Self-test/integrity policy check: SELF_TEST_INTEGRITY_POLICY_CHECK.txt\n"
     "Thread-safety policy check: THREAD_SAFETY_CHECK.txt\n"
     "SHA-512-family implementation check: SHA512_FAMILY_CHECK.txt\n"
     "Random-service implementation policy check: RANDOM_SERVICE_CHECK.txt\n"
@@ -1053,9 +1085,9 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P1-33 evidence and scope-review notes\n"
+    "AnoCrypto-C P2-03 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-33 engineering scope artifact covering implemented SHA-2/HMAC, random, AES-CBC, and AES-CMAC services; not official validation evidence.\n"
+    "Status: P2-03 engineering scope artifact covering implemented services plus the non-implemented self-test/integrity candidate; not official validation evidence.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"
@@ -1649,6 +1681,8 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `SOURCE_ARCHIVE.sha256`: SHA-256 hash of `anocrypto-c-source.tar.gz` when archive creation is enabled.\n"
 "- `BINARY_FILES.sha256`: SHA-256 hashes of build outputs matched by the script.\n"
 "- `PUBLIC_SURFACE_CHECK.txt`: repository naming, claims-boundary, header, and package identity check.\n"
+"- `VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt`: P2-02 candidate boundary/environment policy record; not selected-OE execution evidence.\n"
+"- `SELF_TEST_INTEGRITY_POLICY_CHECK.txt`: P2-03 startup/conditional/on-demand classification, integrity-candidate, finite-state, recovery, ABI, and blocker policy record.\n"
 "- `RELEASE_COMPATIBILITY_CHECK.txt`: P1-29/P1-33 normalized public declaration, header-hash, release-identity, and stored-symbol comparison.\n"
 "- `TAGGED_COMPATIBILITY_SMOKE.txt`: clean installed-package current-header/P1-29-header and package-version smoke summary.\n"
 "- `TAG_COMMIT_IDENTITY_CHECK.txt`: strict tagged-workflow identity result or explicit NOT_RUN placeholder when no actual tag exists.\n"

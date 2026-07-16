@@ -1,6 +1,6 @@
 # Hosted Platform Artifact Review
 
-Status: P2-02 retained review model. Actual hosted results are `NOT_RUN` or `UNREVIEWED` unless a referenced workflow artifact has been downloaded, verified, and dispositioned by a named reviewer.
+Status: P2-03 retained review model. Actual hosted results are `NOT_RUN` or `UNREVIEWED` unless a referenced workflow artifact has been downloaded, verified, and dispositioned by a named reviewer.
 
 Use this table only after the corresponding workflow run has completed, its `HOSTED_ARTIFACT_MANIFEST.txt` has been verified after download, and the final hosted artifact index has been generated. Workflow YAML or artifact presence alone is not a completed review.
 

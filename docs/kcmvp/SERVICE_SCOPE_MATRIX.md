@@ -1,6 +1,6 @@
 # Service Scope Matrix
 
-Status: P2-02 current engineering service inventory bound to the internal OE-01 candidate.
+Status: P2-03 current engineering service inventory bound to OE-01 and the internal self-test/state design; module-byte integrity remains unimplemented.
 
 | Service | Public surface | Status | Key boundary |
 |---|---|---|---|
@@ -32,3 +32,7 @@ added.
 ## P2-02 boundary note
 
 The service inventory remains 14 public headers and 69 exports on `ANOCRYPTO_C_0`. P2-02 binds the unchanged services to `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` without adding runtime services or public API. Module integrity, final conditional-test classification, entropy-provider responsibility, formal CSP inventory, and target-specific side-channel review remain open P2 items.
+
+## P2-03 self-test and state note
+
+No cryptographic service or public symbol is added. Startup KATs and the sticky service gate remain current behavior. `INT-HMAC-SHA256-SINGLE-SO-R1` is a selected internal design only; no shared-object verifier, integrity key, expected tag, or metadata record is present. Target on-demand self-test state transitions are also pending implementation. The service matrix therefore must not label module integrity as operational.
