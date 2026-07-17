@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P2-03 validation-readiness workflow; P2-04 is next.
+Status: P2-05 CSP/zeroization closure workflow completed locally; P2-06 is next.
 
 ## Purpose
 
@@ -346,7 +346,7 @@ P2-01 deliverables:
 - durable P1-34 billing-blocker record;
 - unchanged 14-header, 69-symbol `ANOCRYPTO_C_0` public boundary.
 
-P2-03 is completed as an internal design freeze. P2-04 is the next codebase work item. P1-34 resumes only after GitHub billing is resolved and remains a separate actual-hosted-evidence lane.
+P2-05 is completed as a local internal CSP/zeroization policy and remediation slice. P2-06 is the next codebase work item. P1-34 resumes only after GitHub billing is resolved and remains a separate actual-hosted-evidence lane.
 
 ## P2-02 placement
 
@@ -370,4 +370,16 @@ P2-03 converts the self-test/integrity/state gaps into one controlled internal d
 - implementation/test delta IDs for behavior not present in the runtime;
 - fail-closed policy/evidence checks that preserve ABI and blocked hosted/release state.
 
-The design freeze is not a runtime integrity implementation or institution acceptance. P2-04 now owns OS entropy-provider responsibility, direct-source health-test applicability, DRBG limits, process/VM/suspend policy, and related failure evidence.
+The P2-03 design freeze is not a runtime integrity implementation or institution acceptance. P2-04 owns OS entropy-provider responsibility, direct-source health-test applicability, DRBG limits, process/VM/suspend policy, and related failure evidence. P2-05 adds a formal CSP/zeroization inventory and module-owned shutdown/fatal cleanup; exact OE-01 and formal acceptance remain open.
+
+
+## P2-05 CSP and zeroization closure workflow
+
+1. inventory module-owned CSP slots, caller-owned contexts, DRBG state, and sensitive intermediates;
+2. verify purpose/type restrictions and out-of-scope export/persistence/wrapping paths;
+3. remediate module-owned orderly-shutdown and locked-fatal cleanup without changing public ABI;
+4. add shutdown/fatal/tombstone/reinitialization regressions;
+5. capture optimized zeroization compiler output as local engineering evidence;
+6. run policy, CTest, clean-symbol, compatibility, install, PoC, provenance, sensitive-artifact, and evidence checks;
+7. retain exact OE-01 and institution acceptance as `NOT_RUN`/`EXTERNAL_CONFIRMATION_REQUIRED`;
+8. proceed to P2-06 secure-coding and target-specific side-channel review.

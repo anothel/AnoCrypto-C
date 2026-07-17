@@ -69,3 +69,8 @@ Do not edit this record to `PASS`, `REVIEWED`, or equivalent based only on P2 lo
 ## P2-04 continuation note
 
 P2-04 local entropy/DRBG documentation, policy checks, operational review, CTest, install, PoC, compatibility, provenance, and evidence assembly do not change this blocker. They are `LOCAL_ENGINEERING_ONLY` and do not establish an actual hosted lane or review disposition.
+
+
+## P2-05 continuation note
+
+P2-05 local CSP inventory, module-owned shutdown/fatal zeroization remediation, compiler-output capture, policy checks, CTest, install, PoC, compatibility, provenance, and evidence assembly do not change this blocker. The exact OE-01 compiler review is also `NOT_RUN`. All such records are `LOCAL_ENGINEERING_ONLY`; actual hosted lanes remain `NOT_RUN` and review remains `UNREVIEWED`.

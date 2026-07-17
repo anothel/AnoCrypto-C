@@ -830,7 +830,7 @@ endforeach()
 list(LENGTH _manifest_paths _manifest_file_count)
 string(TIMESTAMP _checked_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_PROVENANCE_CHECK_OUTPUT}"
-    "AnoCrypto-C P2-04 release provenance check\n"
+    "AnoCrypto-C P2-05 release provenance check\n"
     "Checked UTC: ${_checked_utc}\n"
     "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Expected tag: ${ANO_CRYPTO_RELEASE_TAG}\n"

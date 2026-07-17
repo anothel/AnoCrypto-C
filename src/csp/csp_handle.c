@@ -109,6 +109,26 @@ static ano_crypto_status_t find_free_slot_unlocked(size_t *out_index)
     return ANO_CRYPTO_ERR_RESOURCE_EXHAUSTED;
 }
 
+
+void ano_crypto_internal_csp_zeroize_all_unlocked(void)
+{
+    size_t i;
+
+    for (i = 0u; i < ANO_CRYPTO_INTERNAL_CSP_TABLE_CAPACITY; ++i) {
+        ano_crypto_csp_slot_t *slot = &g_csp_slots[i];
+
+        if (!slot_state_is_live(slot->state)) {
+            continue;
+        }
+
+        ano_crypto_internal_zeroize(slot->key_material, sizeof(slot->key_material));
+        slot->key_len = 0u;
+        slot->key_type = 0u;
+        slot->flags = 0u;
+        slot->state = (uint32_t)ANO_CRYPTO_CSP_STATE_ZEROIZED;
+    }
+}
+
 static uint32_t next_generation_unlocked(void)
 {
     uint32_t generation = g_csp_next_generation;
@@ -205,11 +225,15 @@ ano_crypto_status_t ano_crypto_internal_csp_destroy(
     }
 
     slot = slot_from_handle_unlocked(handle);
-    if (slot == 0 || !slot_state_is_live(slot->state)) {
+    if (slot == 0 ||
+        (!slot_state_is_live(slot->state) &&
+         slot->state != (uint32_t)ANO_CRYPTO_CSP_STATE_ZEROIZED)) {
         ano_crypto_internal_global_unlock();
         return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
     }
 
+    /* A ZEROIZED tombstone may be explicitly destroyed after module shutdown
+     * or fatal transition without restoring or exposing key material. */
     ano_crypto_internal_zeroize(slot->key_material, sizeof(slot->key_material));
     slot->key_len = 0u;
     slot->key_type = 0u;

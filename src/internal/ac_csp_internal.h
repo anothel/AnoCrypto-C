@@ -20,6 +20,13 @@ ano_crypto_status_t ano_crypto_internal_csp_import_secret(
 ano_crypto_status_t ano_crypto_internal_csp_destroy(
     ano_crypto_csp_handle_t handle);
 
+/*
+ * Zeroize every live module-owned CSP slot while the global lock is held.
+ * The generation is retained and the state becomes ZEROIZED so a caller may
+ * still complete explicit destruction after orderly shutdown or fatal error.
+ */
+void ano_crypto_internal_csp_zeroize_all_unlocked(void);
+
 ano_crypto_status_t ano_crypto_internal_csp_copy_secret(
     ano_crypto_csp_handle_t handle,
     ano_crypto_key_type_t expected_type,

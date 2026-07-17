@@ -1,4 +1,4 @@
-# Assemble the final P2-03 evidence directory from one complete, hash-bound
+# Assemble the final P2-05 evidence directory from one complete, hash-bound
 # predecessor artifact. This script intentionally launches no child process.
 cmake_minimum_required(VERSION 3.16)
 
@@ -73,6 +73,9 @@ foreach(_status_check IN ITEMS
         "CTEST_EVIDENCE_SUMMARY.txt|CTest result: 0"
         "VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt|Result: PASS"
         "SELF_TEST_INTEGRITY_POLICY_CHECK.txt|Result: PASS"
+        "CSP_ZEROIZATION_POLICY_CHECK.txt|Result: PASS"
+        "CSP_ZEROIZATION_POLICY_REVIEW.txt|csp_zeroization_policy_review: PASS"
+        "ZEROIZATION_COMPILER_OUTPUT_REVIEW.txt|Result: CAPTURED"
         "SENSITIVE_ARTIFACT_SCAN.txt|Result: PASS"
         "RELEASE_PROVENANCE_CHECK.txt|Result: PASS"
         "RELEASE_PROVENANCE_POLICY_CHECK.txt|Result: PASS"

@@ -1,6 +1,7 @@
 #include <anocrypto/ac_module.h>
 #include <anocrypto/ac_selftest.h>
 #include "ac_internal.h"
+#include "ac_csp_internal.h"
 #include "ac_thread_internal.h"
 
 static ano_crypto_module_state_t g_module_state = ANO_CRYPTO_MODULE_STATE_UNINITIALIZED;
@@ -29,6 +30,9 @@ void ano_crypto_internal_module_mark_error(ano_crypto_status_t status)
 
     lock_status = ano_crypto_internal_global_lock();
     if (lock_status == ANO_CRYPTO_OK) {
+        /* The module owns the CSP handle table, so a fatal transition clears
+         * all live module-owned key slots before the sticky state is exposed. */
+        ano_crypto_internal_csp_zeroize_all_unlocked();
         ano_crypto_mark_error_unlocked(status);
         ano_crypto_internal_global_unlock();
         return;
@@ -83,6 +87,7 @@ ano_crypto_status_t ano_crypto_module_init(
 
     if (st != ANO_CRYPTO_OK) {
         if (g_module_state != ANO_CRYPTO_MODULE_STATE_ERROR_STATE) {
+            ano_crypto_internal_csp_zeroize_all_unlocked();
             ano_crypto_mark_error_unlocked(st);
         }
         ano_crypto_internal_global_unlock();
@@ -108,6 +113,11 @@ ano_crypto_status_t ano_crypto_module_shutdown(void)
     if (st != ANO_CRYPTO_OK) {
         return st;
     }
+
+    /* Orderly shutdown and fatal-state shutdown both clear the module-owned
+     * CSP table. Caller-owned opaque operation contexts remain the caller's
+     * responsibility because the module does not retain their addresses. */
+    ano_crypto_internal_csp_zeroize_all_unlocked();
 
     if (g_module_state == ANO_CRYPTO_MODULE_STATE_ERROR_STATE || g_fatal_latched != 0) {
         /* Keep ERROR_STATE sticky. Shutdown is acknowledged but does not recover. */

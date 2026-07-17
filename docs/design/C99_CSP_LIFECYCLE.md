@@ -1,55 +1,70 @@
-# C99 CSP / Key Lifecycle Skeleton
+# C99 CSP / Key Lifecycle — P2-05 Current Design
 
-Status: P1-22 engineering design.
+Status: `FROZEN_INTERNAL_POLICY`; formal CSP classification and accepted zeroization evidence remain `EXTERNAL_CONFIRMATION_REQUIRED`.
 
-## Implemented lifecycle slice
+## Scope
 
-anocrypto-c currently provides a small in-process CSP handle table for HMAC keys. This is a lifecycle and API-gating slice, not a complete key-management subsystem.
+AnoCrypto-C provides a fixed-size, in-process, module-owned CSP handle table for HMAC, block-cipher, and CMAC secret keys. It also exposes caller-owned opaque HMAC, AES-CBC, AES-CMAC, HMAC_DRBG, and random-service contexts. This is not a persistent key store or a general key-management subsystem.
 
-Implemented behavior:
+Current public surface remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
 
-- `ano_crypto_key_import_secret()` imports HMAC keys into an opaque `ano_crypto_csp_handle_t`.
-- `ano_crypto_hmac_compute_with_key()` computes HMAC-SHA-256, HMAC-SHA-384, or HMAC-SHA-512 using an imported HMAC key handle.
-- `ano_crypto_key_destroy()` zeroizes stored key bytes and marks the handle as destroyed.
-- `ano_crypto_key_get_state()` and `ano_crypto_csp_handle_is_valid()` expose state/validity queries without exposing key material.
-- Cleanup through `ano_crypto_key_destroy()` is allowed outside `OPERATIONAL` so callers can clear CSP storage during shutdown/error cleanup.
-- Negative tests cover fixed-table exhaustion, generation-based stale-handle rejection, slot reuse after destroy, and algorithm/handle misuse.
-- Cross-platform Win32/pthread regression tests cover independent handles and supported shared-handle reads when thread safety is enabled.
+## Module-owned handle table
 
-## Candidate CSP States
+- Capacity: 16 slots.
+- Maximum secret per slot: 128 bytes.
+- Supported purposes: HMAC, block cipher, and CMAC.
+- Import validates type, size, flags, and module operational state.
+- Exportable-candidate requests are rejected.
+- Every allocation receives a generation; stale generations cannot address a reused slot.
+- Cryptographic use requires a live purpose-matching state.
+- The module copies a bounded key snapshot for an operation and clears that snapshot before return.
+
+## Handle states
 
 ```text
 INVALID
-ALLOCATED
-INITIALIZED
-ACTIVE
-RESTRICTED
-ZEROIZED
-DESTROYED
+  -> ALLOCATED
+  -> INITIALIZED
+  -> ACTIVE
+  -> RESTRICTED
+  -> ZEROIZED
+  -> DESTROYED
 ```
 
-The current implementation uses `ACTIVE` for imported HMAC keys and `DESTROYED` after destroy. After a destroyed slot is reused with a new generation, the old handle resolves to `INVALID`. Other states are ABI-reserved for later lifecycle work.
+Not every transitional state is currently externally observable in ordinary flows. `ZEROIZED` is used as a tombstone after module-wide cleanup: it is invalid for cryptographic use but may be explicitly destroyed once. Slot reuse assigns a new generation, so the old handle remains invalid.
 
-## Current constraints
+## Cleanup rules
 
-- Only HMAC keys are accepted by `ano_crypto_key_import_secret()`.
-- Imported key length must be 1..128 bytes.
-- Exportable-key flag is rejected until export policy exists.
-- Key material is stored in process memory only.
-- No persistence, serialization, export, or keystore integration is implemented.
-- Thread safety is available only when `ANO_CRYPTO_ENABLE_THREAD_SAFETY=ON` and a reviewed platform lock backend is selected; otherwise callers must serialize CSP access.
-- Handle table capacity is intentionally small and fixed for P1 tests.
-- Exhaustion currently returns `ANO_CRYPTO_ERR_RESOURCE_EXHAUSTED`.
+### Explicit destroy
 
-## Sensitive data rules
+`ano_crypto_key_destroy()` is allowed outside `OPERATIONAL`. It clears the complete secret slot and metadata and marks the slot `DESTROYED`. It also accepts a valid-generation `ZEROIZED` tombstone so callers can complete cleanup after shutdown or fatal transition.
 
-- Raw key bytes must not be printed, logged, copied to evidence, or included in diagnostics.
-- Test keys are public synthetic KAT inputs only.
-- Destroy paths must zeroize key storage before marking the slot destroyed.
+### Orderly shutdown
 
-## TODO(P1/P2)
+`ano_crypto_module_shutdown()` clears all live module-owned HMAC/AES/CMAC slots under the global lock and changes them to `ZEROIZED`. A later orderly reinitialization is permitted, but old handles remain invalid.
 
-1. Define import/export permission matrix by key type and candidate mode.
-2. Add internal zeroization evidence strategy for optimized builds.
-3. Review long-running handle exhaustion and process lifecycle behavior on selected customer platforms.
-4. Decide whether CSP/key lifecycle belongs inside the validation-target boundary for each product package.
+### Fatal transition
+
+When a fatal transition acquires the global lock, it clears every live module-owned slot before exposing sticky `ERROR_STATE`. Shutdown acknowledges the error but does not recover it; a fresh process/load is required. If lock acquisition itself fails, the code latches fatal state without unsafely walking the table. This residual cleanup limitation is explicit and requires P2-06/external review.
+
+### Caller-owned contexts
+
+The module does not retain addresses of caller-owned opaque contexts. Callers must invoke the matching final, uninit, uninstantiate, or random-uninit path. Abandoned contexts, forced process termination, OS copies, swap, core dumps, hibernation, VM snapshots, debugger copies, and hardware remanence are not claimed cleared by module-wide table cleanup.
+
+## Thread/process rules
+
+- The table and module state use the reviewed global-lock abstraction when thread safety is enabled.
+- Callers must serialize mutable caller-owned contexts unless the service specification says otherwise.
+- Handles are in-process only and are not persistent or transferable across processes.
+- VM/container cloning and suspend/resume policy follows the P2-04 entropy/DRBG constraints and does not convert handles into portable credentials.
+
+## Explicit exclusions
+
+- key export, persistence, wrapping, recovery, backup, rotation, platform keystore, and multi-process sharing;
+- public/private-key objects;
+- integrity-test key material until the P2-03 verifier is implemented;
+- universal optimizer, physical-remanence, constant-time, or formal-validation claims.
+
+## Evidence
+
+P2-05 evidence includes explicit-destroy/stale-handle tests, orderly-shutdown and fatal-transition zeroization regressions, a status-only policy review, source/policy checks, local compiler-output capture, clean 69-symbol ABI checks, install/PoC checks, and sensitive-artifact scanning. Exact OE-01 GCC 13.3.0 human review remains `NOT_RUN`.

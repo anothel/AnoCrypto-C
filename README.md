@@ -1,6 +1,6 @@
 # AnoCrypto-C
 
-Current status: `0.1.0-p2-04-entropy-drbg`, the P2-04 internal entropy-provider and HMAC_DRBG-SHA-256 responsibility/evidence freeze built on the P2-02 candidate and P2-03 self-test/state design. The initial candidate selects Linux `getrandom(flags=0)` as an external conditioned provider and contains no project-owned direct noise source. Provider acceptance, entropy credit, health-test allocation, and exact OE-01 retained execution remain `EXTERNAL_CONFIRMATION_REQUIRED`/`NOT_RUN`. P2-03 runtime module-byte integrity remains `SELECTED_CANDIDATE_NOT_IMPLEMENTED`. The public boundary remains 14 headers and 69 exported symbols on `ANOCRYPTO_C_0`. P1-34 remains `BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING`; hosted lanes remain `NOT_RUN`, hosted review remains `UNREVIEWED`, the repository remains `UNSIGNED`, signing handoff remains `BLOCKED`, and external release authorization remains `NO`.
+Current status: `0.1.0-p2-05-csp-zeroization`, the P2-05 CSP ownership and zeroization evidence closure built on the P2-02 candidate, P2-03 self-test/state design, and P2-04 entropy/DRBG responsibility policy. P2-05 formally inventories module-owned and caller-owned CSP/sensitive state, wipes all live module-owned HMAC/AES/CMAC key slots on orderly shutdown and locked fatal transitions, preserves explicit destroy of `ZEROIZED` tombstones, and adds local compiler-output capture plus regression evidence. Caller-owned opaque contexts remain explicitly caller-managed and require their documented final/uninit paths. Exact OE-01 compiler review and formal CSP/zeroization acceptance remain `NOT_RUN`/`EXTERNAL_CONFIRMATION_REQUIRED`; P2-03 runtime integrity remains `SELECTED_CANDIDATE_NOT_IMPLEMENTED`. The public boundary remains 14 headers and 69 exported symbols on `ANOCRYPTO_C_0`. P1-34 remains `BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING`; hosted lanes remain `NOT_RUN`, hosted review remains `UNREVIEWED`, the repository remains `UNSIGNED`, signing handoff remains `BLOCKED`, and external release authorization remains `NO`.
 
 Implemented processing scope:
 
@@ -97,7 +97,7 @@ P2-03 freezes internal design and evidence policy without implementing or claimi
 - `tools/check_self_test_integrity_policy.cmake`;
 - evidence record `SELF_TEST_INTEGRITY_POLICY_CHECK.txt`.
 
-The selected candidate is `INT-HMAC-SHA256-SINGLE-SO-R1`, which preserves the P2-02 single-shared-object boundary. It requires explicit consultation/implementation gates, protected integrity-key handling, CSP inventory integration, tamper tests, selected-OE execution, and target-specific review. No integrity verifier, key, tag, or binary metadata record is included in this step. P2-04 is next and owns entropy-provider, direct-source health-test, DRBG limit, process/VM/suspend, and failure-policy closure.
+The selected candidate is `INT-HMAC-SHA256-SINGLE-SO-R1`, which preserves the P2-02 single-shared-object boundary. It requires explicit consultation/implementation gates, protected integrity-key handling, CSP inventory integration, tamper tests, selected-OE execution, and target-specific review. No integrity verifier, key, tag, or binary metadata record is included in this step. P2-04 froze entropy-provider, direct-source health-test, DRBG limit, process/VM/suspend, and failure-policy responsibility. P2-05 now freezes CSP ownership and zeroization evidence; the integrity verifier remains unimplemented.
 
 ## Build
 
@@ -110,8 +110,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p2-04
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-04
+cmake --install build --prefix /tmp/anocrypto-c-p2-05
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-05
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -129,8 +129,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p2-04
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-04
+cmake --install build --prefix /tmp/anocrypto-c-p2-05
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-05
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
@@ -161,7 +161,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-04/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, CSP/zeroization policy and compiler-output, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-05/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -414,3 +414,16 @@ P1-27 selected the narrow AES-CMAC scope and reviewed the API, dedicated key-pur
 - Keeps unavailable hosted results `NOT_RUN` or `UNREVIEWED`; synthetic fixtures prove policy behavior only.
 - Retains `RELEASE_ARTIFACTS.sha256` as the only signing subject and keeps production signer/TSA `UNPROVISIONED`, repository `UNSIGNED`, handoff `BLOCKED`, and external release `NO`.
 - Adds no public header, function, type, constant, cryptographic service, or exported symbol.
+
+
+## P2-05 CSP and zeroization evidence closure
+
+P2-05 freezes internal policy `CZP-P2-05-R1` without claiming institution acceptance:
+
+- module-owned CSP table entries for HMAC, block cipher, and CMAC are zeroized on explicit destroy, orderly shutdown, and locked fatal transition;
+- shutdown/fatal wipe changes live slots to `ZEROIZED`, invalidates use, and permits one explicit transition to `DESTROYED`;
+- caller-owned HMAC, AES-CBC, AES-CMAC, DRBG, and random contexts are not globally tracked and require documented final/uninit cleanup;
+- persistence, export, wrapping, platform keystore, and multi-process sharing remain outside the initial candidate;
+- local disassembly capture is an engineering input only; exact OE-01 GCC 13.3.0 human review remains `NOT_RUN`;
+- lock-acquisition failure can latch fatal state without safely walking the CSP table and requires external/secure-coding review;
+- no physical-remanence, universal optimizer, or formal-validation claim is made.

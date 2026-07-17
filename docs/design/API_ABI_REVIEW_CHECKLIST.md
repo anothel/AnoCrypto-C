@@ -81,7 +81,7 @@ remain separate review items.
 - No public header, function, enum value, macro contract, or exported symbol is added or removed.
 - The public header count remains 14 and the clean Release ABI-0 export count remains 69.
 - Exact P1-29 public headers and symbol names are retained under `abi/baselines/0.1.0-p1-29-cmac-hardening/` as test/evidence input.
-- `release/PUBLIC_HEADERS.sha256` records the current P1-32 public-header files.
+- `release/PUBLIC_HEADERS.sha256` records the current P2-05 public-header files.
 - Normalized function declarations, public types, and non-version constants are compared against P1-29. Version string/prerelease macros are intentionally excluded from that equality comparison.
 - A C99 consumer built with retained P1-29 headers binds all 69 functions and runs against the P1-32 installed library.
 - `AnoCryptoCConfigVersion.cmake` uses package version `0.1.0` with `SameMinorVersion`; an exact 0.1.0 request is accepted and a 0.2.0 request is rejected.
@@ -101,7 +101,7 @@ These checks are toolchain-specific guardrails. Calling convention, loader behav
 
 ## P2-02 boundary/environment ABI review
 
-- Runtime/version metadata advances to `0.1.0-p2-04-entropy-drbg`; package version remains `0.1.0`.
+- Runtime/version metadata advances to `0.1.0-p2-05-csp-zeroization`; package version remains `0.1.0`.
 - No public function, header, public type layout, enum value, non-version macro contract, or exported symbol is added or removed.
 - Public header count remains 14 and the clean Release symbol baseline remains 69 on `ANOCRYPTO_C_0`.
 - Normalized declarations, public types, non-version constants, retained P1-29-header consumption, and stored exported names remain compatibility inputs.
@@ -115,5 +115,5 @@ These checks are toolchain-specific guardrails. Calling convention, loader behav
 - `ac_module.h` and `ac_selftest.h` changes are comment/contract clarification only;
 - the existing `ano_crypto_selftest_run()` symbol is retained, while target on-demand state behavior is tracked as a private implementation delta;
 - `INT-HMAC-SHA256-SINGLE-SO-R1`, its metadata format, policy record, checker, and future injection tooling are internal/build-time assets and do not enter public ABI;
-- version/prerelease/build-fingerprint metadata advances to `0.1.0-p2-04-entropy-drbg`;
+- version/prerelease/build-fingerprint metadata advances to `0.1.0-p2-05-csp-zeroization`;
 - P1-34 actual hosted review remains blocked and is not replaced by local P2-03 checks.

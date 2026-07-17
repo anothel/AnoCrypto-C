@@ -1,6 +1,6 @@
 # KCMVP Pre-consultation Questions
 
-Status: P2-03 question pack against frozen boundary candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` and internal self-test/integrity design `STP-P2-03-R1`. All proposed answers remain provisional until retained external confirmation is received.
+Status: P2-05 question pack against frozen boundary candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`, self-test/integrity design `STP-P2-03-R1`, entropy/DRBG policy `EDP-P2-04-R1`, and CSP/zeroization policy `CZP-P2-05-R1`. All proposed answers remain provisional until retained external confirmation is received.
 
 ## Use and Recording Rule
 
@@ -59,10 +59,12 @@ Do not record keys, entropy samples, customer data, private infrastructure detai
 
 | ID | Recipient | Question | Why it matters | Current project option / decision impact |
 |---|---|---|---|---|
-| PCQ-021 | Testing institution | Which values in the current implementation must be listed as CSPs, including imported keys, expanded schedules, HMAC pads, CMAC subkeys, DRBG V/K, entropy buffers, and intermediate state? | Defines formal CSP inventory. | P2-05 will enumerate conservatively and request confirmation. |
+| PCQ-021 | Testing institution | Which values in the current implementation must be listed as CSPs, including imported keys, expanded schedules, HMAC pads, CMAC subkeys, DRBG V/K, entropy buffers, and intermediate state? | Defines formal CSP inventory. | P2-05 enumerates conservatively; confirmation is still required. |
 | PCQ-022 | Testing institution | Is in-memory-only, non-exportable key storage with purpose-separated opaque handles an acceptable initial scope? | Avoids persistence/wrapping expansion. | Export, persistence, wrapping, and platform keystore integration remain outside scope. |
 | PCQ-023 | Testing institution | What evidence is accepted for zeroization under optimizing compilers, and are compiler output plus lifecycle/failure tests sufficient as engineering inputs? | Defines closure criteria. | Target/compiler-specific human disposition is planned; universal guarantees are not claimed. |
 | PCQ-024 | Testing institution | What process/OS memory behavior is explicitly outside module zeroization responsibility after buffer clearing or process termination? | Prevents overclaiming OS/hardware behavior. | Requires operating-environment wording. |
+| PCQ-024A | Testing institution | Is the split between module-owned table wipe and caller-owned explicit final/uninit cleanup acceptable for a shared-library software boundary? | Determines whether caller-abandoned opaque contexts need additional controls or API changes. | Current module does not retain caller context addresses and makes no global cleanup claim for them. |
+| PCQ-024B | Testing institution / security specialist | If the module global lock cannot be acquired during a fatal transition, is immediate process termination with no unsafe table traversal an acceptable fail-closed response? | Determines whether an emergency cleanup design is required. | Current fallback latches fatal state; safe module-owned table wipe is guaranteed only when the lock is acquired. |
 | PCQ-025 | Testing institution / side-channel specialist | What side-channel review depth is expected for table-free portable AES, HMAC/DRBG, CMAC comparison, and compiler-specific output at the selected level? | Sizes P2-06 and external review. | Compiler captures exist; timing/cache/fault review remains incomplete. |
 | PCQ-026 | Testing institution | Are shared read-only key handles with internal locking acceptable, and what caller serialization rules must be documented for mutable contexts? | Freezes thread-safety model. | Global state and handle tables are locked; mutable operation contexts are caller-owned. |
 

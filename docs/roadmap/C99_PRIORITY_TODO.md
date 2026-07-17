@@ -1,6 +1,6 @@
 # C99 Priority TODO
 
-Status: P2-03 self-test, integrity-candidate, finite-state, and recovery design freeze completed; P2-04 is next.
+Status: P2-05 CSP ownership/lifecycle/zeroization closure completed locally; P2-06 is next.
 
 ## Completed Through P1-33
 
@@ -53,14 +53,28 @@ Do not substitute local or synthetic evidence. Resume only after billing is reso
 - added machine-readable policy, fail-closed checker, evidence integration, and orderly reinitialization regression;
 - retained 14 headers, 69 symbols, `ANOCRYPTO_C_0`, and all P1-34/release blockers.
 
+## Completed P2-04
+
+- froze `EDP-P2-04-R1` and Linux `getrandom(flags=0)` external-conditioned-provider responsibility for OE-01;
+- recorded entropy/nonce/reseed lengths, request/reseed limits, unsupported prediction resistance, and process/VM/suspend behavior;
+- separated OS-provider responsibility from any future project-owned direct-noise-source health tests;
+- added policy, operational review, responsibility/recovery matrices, evidence integration, and status-only safeguards;
+- retained provider acceptance, entropy credit, exact OE-01 run, and formal conditional-test interpretation as external/open.
+
+## Completed P2-05
+
+- froze `CZP-P2-05-R1` and a conservative inventory of module-owned keys, caller-owned contexts, DRBG state, and sensitive intermediates;
+- remediated module-owned CSP cleanup on orderly shutdown and locked fatal transition without public ABI growth;
+- defined `ZEROIZED` tombstones, explicit destroy, generation-based stale-handle rejection, and caller-owned uninit responsibility;
+- added shutdown/fatal/reinitialization regressions, policy checks, and local compiler-output capture;
+- retained exact OE-01 review, formal CSP classification, OS/process memory controls, integrity-key realization, and lock-failure expectations as open.
+
 ## Next Sequence
 
-1. **P2-04 — Entropy/provider/DRBG responsibility and evidence closure**
-2. **P2-05 — CSP inventory and zeroization evidence closure**
-3. **P2-06 — Secure-coding and target side-channel review**
-4. **P2-07 — Controlled submission-document skeleton**
-5. **P2-08 — Pre-consultation rehearsal and answer capture**
-6. Resume **P1-34** independently only after GitHub billing is resolved.
+1. **P2-06 — Secure-coding and target side-channel review**
+2. **P2-07 — Controlled submission-document skeleton**
+3. **P2-08 — Pre-consultation rehearsal and answer capture**
+4. Resume **P1-34** independently only after GitHub billing is resolved.
 
 ## Deferred Until Explicit Scope Gate
 

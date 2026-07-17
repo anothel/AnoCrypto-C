@@ -320,3 +320,18 @@ Confirm the rehearsal tag exists only in an isolated temporary repository. Mark 
 ## P2-03 self-test/integrity review
 
 Review `SELF_TEST_INTEGRITY_POLICY_CHECK.txt` and confirm that it does not claim runtime module authentication. The selected candidate is design-only. The retained evidence must show 14 headers, 69 symbols, `ANOCRYPTO_C_0`, hosted `NOT_RUN`, review `UNREVIEWED`, handoff `BLOCKED`, and authorization `NO`. Future mutation/truncation/path/concurrency results belong only after the integrity implementation gate.
+
+
+## P2-05 CSP and Zeroization Review
+
+Include and review:
+
+- `CSP_ZEROIZATION_POLICY_CHECK.txt`;
+- `CSP_ZEROIZATION_POLICY_REVIEW.txt`;
+- `CSP_ZEROIZATION_REVIEW_NOTES.txt`;
+- `ZEROIZATION_COMPILER_OUTPUT_REVIEW.txt`;
+- `ZEROIZATION_COMPILER_OUTPUT_DISASSEMBLY.txt` when available;
+- shutdown/fatal/tombstone/reinitialization CTest results;
+- clean Release exported-symbol, install, PoC, compatibility, provenance, signing-handoff, and sensitive-artifact records.
+
+Confirm that module-owned HMAC/AES/CMAC table slots are cleared on explicit destroy, orderly shutdown, and locked fatal transition; zeroized handles are invalid for cryptographic use; explicit destroy of a valid-generation `ZEROIZED` tombstone is allowed; reused slots receive new generations; caller-owned contexts remain subject to explicit final/uninit responsibility; persistence/export/wrapping/platform-keystore/multi-process sharing remain out of scope; and no key, schedule, context, DRBG state, random output, plaintext, ciphertext, IV, tag, signature, token, or customer value appears in evidence. Compiler capture is local engineering evidence only and exact OE-01 named human review remains `NOT_RUN`. Do not infer physical memory remanence elimination, universal optimizer behavior, constant-time certification, formal validation, hosted completion, signing, or release authorization.

@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-04 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-05 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-04")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-05")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -108,6 +108,14 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_ENTROPY_DRBG_POLICY_CHECK)
     set(ANO_CRYPTO_RUN_ENTROPY_DRBG_POLICY_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_CSP_ZEROIZATION_POLICY_CHECK)
+    set(ANO_CRYPTO_RUN_CSP_ZEROIZATION_POLICY_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_ZEROIZATION_COMPILER_REVIEW)
+    set(ANO_CRYPTO_RUN_ZEROIZATION_COMPILER_REVIEW ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK)
@@ -951,6 +959,24 @@ else()
         "CMAC compiler-output disassembly was not requested.\n")
 endif()
 
+if(ANO_CRYPTO_RUN_ZEROIZATION_COMPILER_REVIEW)
+    set(_zeroization_compiler_review_source "${ANO_CRYPTO_BUILD_DIR}/policy-check/zeroization-compiler-review")
+    if(NOT EXISTS "${_zeroization_compiler_review_source}/ZEROIZATION_COMPILER_OUTPUT_REVIEW.txt" OR
+       NOT EXISTS "${_zeroization_compiler_review_source}/ZEROIZATION_COMPILER_OUTPUT_DISASSEMBLY.txt")
+        message(FATAL_ERROR "Prepared zeroization compiler-output review artifact is incomplete")
+    endif()
+    file(COPY "${_zeroization_compiler_review_source}/ZEROIZATION_COMPILER_OUTPUT_REVIEW.txt"
+              "${_zeroization_compiler_review_source}/ZEROIZATION_COMPILER_OUTPUT_DISASSEMBLY.txt"
+         DESTINATION "${ANO_CRYPTO_EVIDENCE_DIR}")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "P2-05 zeroization compiler-output capture result: 0 (prepared predecessor artifact)\n")
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ZEROIZATION_COMPILER_OUTPUT_REVIEW.txt"
+        "Zeroization compiler-output review was not requested.\n")
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ZEROIZATION_COMPILER_OUTPUT_DISASSEMBLY.txt"
+        "Zeroization compiler-output disassembly was not requested.\n")
+endif()
+
 if(ANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK)
     set(_random_service_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/RANDOM_SERVICE_CHECK.txt")
     execute_process(
@@ -1085,6 +1111,41 @@ else()
         "P2-04 entropy/DRBG policy check was not requested. Set ANO_CRYPTO_RUN_ENTROPY_DRBG_POLICY_CHECK=ON.\n")
 endif()
 
+if(ANO_CRYPTO_RUN_CSP_ZEROIZATION_POLICY_CHECK)
+    set(_csp_zeroization_policy_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/CSP_ZEROIZATION_POLICY_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+            -DANO_CRYPTO_CSP_ZEROIZATION_POLICY_CHECK_OUTPUT=${_csp_zeroization_policy_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_csp_zeroization_policy.cmake"
+        RESULT_VARIABLE _csp_zeroization_policy_check_result
+        OUTPUT_VARIABLE _csp_zeroization_policy_check_stdout
+        ERROR_VARIABLE _csp_zeroization_policy_check_stderr
+        TIMEOUT 300)
+    file(APPEND "${_csp_zeroization_policy_check_output}"
+        "\nCommand output:\n${_csp_zeroization_policy_check_stdout}${_csp_zeroization_policy_check_stderr}\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "P2-05 CSP/zeroization policy check result: ${_csp_zeroization_policy_check_result}\n")
+    if(NOT _csp_zeroization_policy_check_result EQUAL 0)
+        message(FATAL_ERROR "P2-05 CSP/zeroization policy check failed")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CSP_ZEROIZATION_POLICY_CHECK.txt"
+        "P2-05 CSP/zeroization policy check was not requested.\n")
+endif()
+
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CSP_ZEROIZATION_REVIEW_NOTES.txt"
+    "AnoCrypto-C P2-05 CSP and zeroization review notes\n"
+    "Policy ID: CZP-P2-05-R1\n"
+    "Status: internal engineering evidence; formal classification and selected-OE review pending.\n"
+    "Implemented purposes: HMAC, BLOCK_CIPHER, CMAC.\n"
+    "Module-owned table wipe: orderly shutdown and locked fatal transition implemented in P2-05.\n"
+    "Caller-owned contexts: explicit uninit required; module does not retain addresses.\n"
+    "Export, persistence, wrapping, and multi-process sharing: out of scope.\n"
+    "Selected OE compiler review: NOT_RUN.\n"
+    "Sensitive values recorded: none.\n")
+
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "AnoCrypto-C reproducible build evidence notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
@@ -1105,6 +1166,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "Entropy/health policy check: ENTROPY_HEALTH_CHECK.txt\n"
     "Entropy operational policy check: ENTROPY_OPERATIONAL_POLICY_CHECK.txt\n"
     "P2-04 entropy/DRBG policy check: ENTROPY_DRBG_POLICY_CHECK.txt\n"
+    "P2-05 CSP/zeroization policy check: CSP_ZEROIZATION_POLICY_CHECK.txt\n"
     "Differential/portability policy check: DIFFERENTIAL_PORTABILITY_CHECK.txt\n"
     "AES/CBC implementation policy check: AES_CBC_IMPLEMENTATION_CHECK.txt\n"
     "AES/CBC hardening policy check: AES_HARDENING_CHECK.txt\n"
@@ -1112,13 +1174,14 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "AES-CMAC hardening policy check: AES_CMAC_HARDENING_CHECK.txt\n"
     "AES compiler-output review: AES_COMPILER_OUTPUT_REVIEW.txt\n"
     "CMAC compiler-output review: CMAC_COMPILER_OUTPUT_REVIEW.txt\n"
+    "Zeroization compiler-output review: ZEROIZATION_COMPILER_OUTPUT_REVIEW.txt\n"
     "TODO: normalize archive timestamps if byte-for-byte source archives become a release requirement.\n"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P2-04 evidence and scope-review notes\n"
+    "AnoCrypto-C P2-05 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P2-04 engineering scope artifact covering the frozen entropy/provider/DRBG responsibility model plus retained P2-03 implementation gaps; not official validation evidence.\n"
+    "Status: P2-05 engineering scope artifact covering CSP ownership and zeroization closure plus retained P2-03/P2-04 gaps; not official validation evidence.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"
@@ -1611,6 +1674,20 @@ if(NOT _entropy_drbg_review_result EQUAL 0 OR
 endif()
 
 _ano_crypto_run_evidence_test(
+    ano_crypto_csp_zeroization_policy_review
+    _csp_zeroization_review_result _csp_zeroization_review_stdout _csp_zeroization_review_stderr)
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CSP_ZEROIZATION_POLICY_REVIEW.txt"
+    "${_csp_zeroization_review_stdout}${_csp_zeroization_review_stderr}")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "P2-05 CSP/zeroization operational review result: ${_csp_zeroization_review_result}\n")
+if(NOT _csp_zeroization_review_result EQUAL 0 OR
+   NOT _csp_zeroization_review_stdout MATCHES "policy_id=CZP-P2-05-R1" OR
+   NOT _csp_zeroization_review_stdout MATCHES "sensitive_values_printed=0" OR
+   NOT _csp_zeroization_review_stdout MATCHES "csp_zeroization_policy_review: PASS")
+    message(FATAL_ERROR "P2-05 CSP/zeroization operational review failed")
+endif()
+
+_ano_crypto_run_evidence_test(
     ano_crypto_thread_platform_review
     _thread_platform_review_result _thread_platform_review_stdout _thread_platform_review_stderr)
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/THREAD_PLATFORM_REVIEW.log"
@@ -1791,6 +1868,11 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `ENTROPY_DRBG_POLICY_CHECK.txt`: P2-04 provider, health ownership, limits, lifecycle, ABI, and blocker policy record.\n"
 "- `ENTROPY_DRBG_POLICY_REVIEW.txt`: status-only runtime provider/classification/limit/capability review; contains no provider or generated bytes.\n"
 "- `ENTROPY_DRBG_REVIEW_NOTES.txt`: P2-04 responsibility and remaining external-confirmation review notes.\n"
+"- `CSP_ZEROIZATION_POLICY_CHECK.txt`: P2-05 CSP inventory, lifecycle, zeroization, ABI, and blocker policy record.\n"
+"- `CSP_ZEROIZATION_POLICY_REVIEW.txt`: status-only public zeroize and ownership-boundary review.\n"
+"- `CSP_ZEROIZATION_REVIEW_NOTES.txt`: P2-05 closure and remaining external-confirmation notes.\n"
+"- `ZEROIZATION_COMPILER_OUTPUT_REVIEW.txt`: local compiler/target/hash capture; manual review required.\n"
+"- `ZEROIZATION_COMPILER_OUTPUT_DISASSEMBLY.txt`: internal machine-code artifact; not selected-OE evidence.\n"
 "- `REPRODUCIBLE_BUILD_NOTES.txt`: current reproducibility procedure notes and unresolved gaps.\n"
 "- `ctest.log`: captured CTest output when requested.\n"
 "- `INSTALL_SMOKE_*.log`: installed-package configure/build/run logs when requested.\n"

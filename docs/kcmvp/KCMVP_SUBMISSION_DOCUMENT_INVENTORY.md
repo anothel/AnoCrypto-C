@@ -1,6 +1,6 @@
 # KCMVP Submission Document Inventory
 
-Status: P2-03 inventory. Boundary/OE plus self-test, integrity-candidate, finite-state, and recovery records are available as engineering inputs; runtime integrity implementation, exact current templates, and accepted contents remain pending or `EXTERNAL_CONFIRMATION_REQUIRED`.
+Status: P2-05 inventory. Boundary/OE, self-test/integrity, entropy/DRBG, and CSP/zeroization records are available as engineering inputs; runtime integrity implementation, exact current templates, formal CSP classification, and accepted contents remain pending or `EXTERNAL_CONFIRMATION_REQUIRED`.
 
 ## Inventory Categories
 
@@ -26,7 +26,7 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 | DOC-BD-006 | Approved algorithm/service scope | `KCMVP_ALGORITHM_SCOPE.md` | `AFTER_CONSULTATION` | Confirm target algorithms/configuration; retain unsupported placeholders separately. |
 | DOC-BD-007 | Ports and interfaces | 14 public headers; install/package docs | `UPDATE_AND_CONSOLIDATE` | Classify data/control/status interfaces and caller responsibilities. |
 | DOC-BD-008 | Finite-state model | `module_state.c`; `KCMVP_FINITE_STATE_MODEL.md`; failure/recovery matrix | `EXISTING_ENGINEERING_INPUT` | Resolve tracked implementation deltas and convert to controlled submission form. |
-| DOC-BD-009 | Cryptographic key/CSP overview | CSP lifecycle; key/CSP headers | `UPDATE_AND_CONSOLIDATE` | P2-05 formal CSP summary. |
+| DOC-BD-009 | Cryptographic key/CSP overview | P2-05 CSP inventory, lifecycle, service matrix, key/CSP headers | `EXISTING_INTERNAL_DRAFT` | Convert the frozen internal inventory after formal classification feedback. |
 | DOC-BD-010 | Self-test and integrity overview | `KCMVP_SELF_TEST_AND_INTEGRITY_SPEC.md`; KAT plans; P2-03 policy record | `EXISTING_ENGINEERING_INPUT` | Candidate selected but not implemented; revise after institution feedback and implementation. |
 
 ## B. Detailed Design
@@ -40,7 +40,7 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 | DOC-DD-005 | HMAC_DRBG and random-service design | DRBG/random/entropy docs | `UPDATE_AND_CONSOLIDATE` | P2-04 internal consolidated design exists; convert after consultation. |
 | DOC-DD-006 | Entropy source/provider and health-test design | entropy adapter/operational/health docs | `AFTER_CONSULTATION` | Final ownership/tests only after source/environment confirmation. |
 | DOC-DD-007 | AES/CBC/CMAC design and API behavior | AES/CBC/CMAC design/hardening docs | `UPDATE_AND_CONSOLIDATE` | Consolidate without expanding service scope. |
-| DOC-DD-008 | CSP lifecycle and zeroization design | CSP lifecycle; zeroize source; side-channel checklist | `UPDATE_AND_CONSOLIDATE` | P2-05 formal inventory and path matrix. |
+| DOC-DD-008 | CSP lifecycle and zeroization design | P2-05 inventory, zeroization evidence, service matrix, source and policy | `EXISTING_INTERNAL_DRAFT` | Reconcile exact OE-01 and institution evidence expectations before controlled issue. |
 | DOC-DD-009 | Thread/process model | P2-02 boundary/OE matrix; thread-safety and random portability docs | `UPDATE_AND_CONSOLIDATE` | OE-01 thread/process assumptions frozen; P2-04 internal lifecycle wording is frozen; formal acceptance and exact OE evidence remain open. |
 | DOC-DD-010 | Secure coding and side-channel analysis | security checklist; compiler capture plans | `CREATE_NEW` | P2-06 findings register and retained review dispositions. |
 | DOC-DD-011 | Build/package/runtime dependency design | candidate record, CMake enforcement, boundary/OE matrix, install/PoC/provenance docs | `UPDATE_AND_CONSOLIDATE` | Convert P2-02 dependency/exclusion record into controlled detailed design. |
@@ -70,7 +70,7 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 | DOC-TS-004 | Algorithm KAT/conformance procedure | KAT tests/plans and public vector sources | `UPDATE_AND_CONSOLIDATE` | Separate vendor engineering tests from institution results. |
 | DOC-TS-005 | Negative, state, misuse, and failure-injection procedure | negative/unit/stress tests | `UPDATE_AND_CONSOLIDATE` | Define expected statuses and cleanup without sensitive values. |
 | DOC-TS-006 | Entropy/DRBG test procedure | entropy/DRBG tests and policies | `AFTER_CONSULTATION` | Finalize provider/direct-source responsibilities and limits. |
-| DOC-TS-007 | CSP/zeroization test procedure | lifecycle/hardening tests | `UPDATE_AND_CONSOLIDATE` | Add target/compiler-specific review evidence in P2-05. |
+| DOC-TS-007 | CSP/zeroization test procedure | P2-05 lifecycle/shutdown/fatal tests, policy review, compiler capture | `EXISTING_INTERNAL_DRAFT` | Add exact OE-01 named review and institution-approved test procedure. |
 | DOC-TS-008 | Portability/concurrency/sanitizer procedure | current operational/stress tests | `UPDATE_AND_CONSOLIDATE` | Limit conclusions to selected environments. |
 | DOC-TS-009 | Install/package/public-boundary procedure | install/PoC/public-surface tests | `UPDATE_AND_CONSOLIDATE` | Retain clean installed-package and exclusion results. |
 | DOC-TS-010 | Test result and review disposition template | evidence templates and hosted review fields | `UPDATE_AND_CONSOLIDATE` | Add reviewer, date, commit, environment, hash, disposition, limitations. |
@@ -83,7 +83,7 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 | DOC-OP-001 | Installation and build guide for submitted configuration | P2-02 OE command; SDK integration guide; install smoke | `UPDATE_AND_CONSOLIDATE` | Execute and retain exact OE-01 commands, artifact hashes, SONAME/imports, and install paths. |
 | DOC-OP-002 | Crypto officer/operator guidance | README; finite-state model; failure/recovery matrix; self-test/integrity spec | `UPDATE_AND_CONSOLIDATE` | P2-07 controlled guidance using P2-03 startup/fatal/restart policy and later P2-04/P2-05 inputs. |
 | DOC-OP-003 | Developer API/service guide | public headers; PoC example | `UPDATE_AND_CONSOLIDATE` | Include buffer/alias/state/status rules without internal details. |
-| DOC-OP-004 | Secure operation/environment assumptions | P2-02 boundary/OE matrix; entropy/thread/process/VM notes | `UPDATE_AND_CONSOLIDATE` | Boundary/thread/deployment assumptions exist; Use P2-04 frozen internal wording and reconcile it after consultation. |
+| DOC-OP-004 | Secure operation/environment assumptions | P2-02 boundary/OE; P2-04 entropy/process/VM; P2-05 caller/OS zeroization limits | `UPDATE_AND_CONSOLIDATE` | Add core-dump, swap, hibernation, crash, debugger, forced-termination, and VM controls after consultation. |
 | DOC-OP-005 | Vulnerability/security reporting guide | none controlled | `CREATE_NEW` | Define contact, supported branches, embargo and patch/retest handling. |
 | DOC-SUP-001 | Algorithm and public-vector source register | clean-room source manifest | `EXISTING_ENGINEERING_INPUT` | Review and extract controlled references. |
 | DOC-SUP-002 | Public ABI/symbol/header baseline | `abi/*`; `release/PUBLIC_HEADERS.sha256` | `EXISTING_ENGINEERING_INPUT` | Retain as supporting configuration evidence. |
@@ -126,3 +126,18 @@ Do not finalize the submission skeleton until P2-02 through P2-06 have produced 
 | `ENTROPY_DRBG_POLICY_REVIEW.txt` and policy check evidence | `LOCAL_ENGINEERING_ONLY` until exact OE-01 run | Retain identifiers/status/lengths only; never retain provider or generated bytes. |
 
 Open submission dependencies remain provider acceptance, entropy credit, health-test ownership, exact OE-01 evidence, and institution-approved lifecycle terminology.
+
+
+## P2-05 CSP/zeroization controlled inputs
+
+| Document / evidence | Current disposition | Submission action |
+|---|---|---|
+| `KCMVP_CSP_INVENTORY.md` | `EXISTING_INTERNAL_DRAFT` | Confirm formal CSP classifications and integrity-key treatment before controlled issue. |
+| `KCMVP_SERVICE_CSP_OPERATION_MATRIX.md` | `EXISTING_INTERNAL_DRAFT` | Convert ownership/lifetime/cleanup paths into detailed design and operator guidance. |
+| `KCMVP_ZEROIZATION_EVIDENCE.md` | `EXISTING_INTERNAL_DRAFT` | Retain limitations; add exact OE-01 reviewer/hash/disposition and institution-approved method. |
+| `P2_05_IMPLEMENTATION_TEST_DELTA.md` | `ENGINEERING_CONTROL` | Track shutdown/fatal remediation and unresolved lock/caller/OS boundaries; not an institution result. |
+| `ANOCRYPTO_C_CSP_ZEROIZATION_POLICY.cmake` and checker | `ENGINEERING_CONTROL` | Preserve 14/69/ABI/blocker/claim drift controls. |
+| shutdown/fatal/policy CTest logs | `LOCAL_ENGINEERING_ONLY` | Use as vendor engineering inputs; do not label as institution evidence. |
+| `ZEROIZATION_COMPILER_OUTPUT_REVIEW.txt` and disassembly | `LOCAL_ENGINEERING_ONLY` | Internal manual-review input; exact OE-01 named review remains `NOT_RUN`. |
+
+Open dependencies remain formal CSP classification, accepted zeroization evidence, exact OE-01 review, operator controls for OS/process copies, integrity-key implementation, and lock-failure cleanup expectations.

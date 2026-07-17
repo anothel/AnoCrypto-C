@@ -1,6 +1,6 @@
 # Service Scope Matrix
 
-Status: P2-03 current engineering service inventory bound to OE-01 and the internal self-test/state design; module-byte integrity remains unimplemented.
+Status: P2-05 current engineering service inventory bound to OE-01 and the internal self-test/state, entropy/DRBG, and CSP/zeroization policies; module-byte integrity and formal CSP classification remain pending.
 
 | Service | Public surface | Status | Key boundary |
 |---|---|---|---|

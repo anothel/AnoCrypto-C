@@ -1,6 +1,6 @@
 # P2 Validation Readiness Roadmap
 
-Status: P2-04 internal entropy/provider/DRBG responsibility and evidence policy freeze completed; P2-05 is next. P2 remains validation-readiness work, not automatic feature expansion.
+Status: P2-05 CSP ownership, lifecycle, and zeroization evidence closure completed locally; P2-06 is next. P2 remains validation-readiness work, not automatic feature expansion.
 
 ## Fixed P2 Constraints
 
@@ -20,8 +20,8 @@ Status: P2-04 internal entropy/provider/DRBG responsibility and evidence policy 
 | P2-02 | `FROZEN_INTERNAL_CANDIDATE` | Freeze candidate module boundary and one operating environment. | Boundary/environment specification, machine-readable candidate record, and fail-closed CMake/policy checks. | No change. |
 | P2-03 | `FROZEN_INTERNAL_DESIGN` | Finalize self-test, integrity-candidate, finite-state, and recovery specification. | Normative design, machine-readable policy, fail-closed policy check, and implementation/test delta. | No public change; runtime integrity and on-demand transition remain unimplemented. |
 | P2-04 | `FROZEN_INTERNAL_POLICY` | Close entropy/provider/DRBG responsibility and evidence plan. | Entropy/DRBG specification, responsibility/health matrices, machine-readable policy, operational review, and implementation/test delta. | No change. |
-| P2-05 | `NEXT` | Close CSP inventory, lifecycle, and zeroization evidence. | Formal CSP and zeroization register. | No change. |
-| P2-06 | `PLANNED` | Perform secure-coding and target side-channel review. | Findings register, compiler/CPU dispositions, remediation plan. | No change unless a separately approved fix requires it. |
+| P2-05 | `COMPLETE_LOCAL_INTERNAL_POLICY` | Close CSP inventory, lifecycle, and zeroization evidence. | Formal CSP inventory, service/operation matrix, zeroization evidence plan, internal shutdown/fatal remediation, compiler capture, and policy check. | No change. |
+| P2-06 | `NEXT` | Perform secure-coding and target side-channel review. | Findings register, compiler/CPU dispositions, remediation plan. | No change unless a separately approved fix requires it. |
 | P2-07 | `PLANNED` | Build controlled submission-document skeleton. | Basic design, detailed design, configuration-management, test, and operator-document skeletons. | No change. |
 | P2-08 | `PLANNED` | Rehearse pre-consultation evidence walkthrough and decision capture. | Mock walkthrough, prioritized questions, unresolved decision register, feedback process. | No change. |
 
@@ -182,30 +182,44 @@ Status: `FROZEN_INTERNAL_POLICY`; formal institution acceptance and exact OE-01 
 
 ## P2-05 — CSP and Zeroization Evidence Closure
 
-### Objectives
+Status: `COMPLETE_LOCAL_INTERNAL_POLICY`; policy ID `CZP-P2-05-R1`. Formal CSP classification, accepted evidence method, and exact OE-01 compiler review remain external or `NOT_RUN`.
 
-- enumerate all CSPs and sensitive intermediates;
-- record creation, storage, use, duplication, restriction, destruction, and zeroization paths;
-- define key-purpose and handle-state rules;
-- retain compiler/optimization and process/OS boundary limitations.
+### Frozen internal policy and remediation
 
-### Required documents
+- conservatively enumerate module-owned table keys, caller-owned opaque contexts, DRBG Key/V state, and sensitive intermediates;
+- distinguish module-owned storage from caller-owned memory and external OS/provider copies;
+- purpose-separate HMAC, block-cipher, and CMAC handles; persistence, export, wrapping, platform keystore, and multi-process sharing remain outside the initial candidate;
+- explicit destroy clears the full slot and marks it `DESTROYED`; orderly shutdown and locked fatal transition clear every live module-owned slot and mark it `ZEROIZED`;
+- a `ZEROIZED` tombstone is invalid for cryptographic use and may be explicitly destroyed once; slot reuse receives a new generation;
+- caller-owned contexts are not retained by the module and require their documented final/uninit paths; abandoned or forcibly terminated caller memory is not claimed cleared;
+- the volatile-byte-store primitive and relevant call sites are captured for local compiler review, but exact OE-01 human disposition remains `NOT_RUN`;
+- if global lock acquisition fails, fatal state is latched but safe table traversal is not attempted; the residual risk is deferred to P2-06/external review.
+
+### Deliverables
 
 - `docs/kcmvp/KCMVP_CSP_INVENTORY.md`;
 - `docs/kcmvp/KCMVP_ZEROIZATION_EVIDENCE.md`;
-- service/CSP/operation matrix;
-- target/compiler review plan and findings.
+- `docs/kcmvp/KCMVP_SERVICE_CSP_OPERATION_MATRIX.md`;
+- `docs/kcmvp/P2_05_IMPLEMENTATION_TEST_DELTA.md`;
+- `release/ANOCRYPTO_C_CSP_ZEROIZATION_POLICY.cmake`;
+- `tools/check_csp_zeroization_policy.cmake`;
+- `tools/capture_zeroization_compiler_review.cmake`;
+- shutdown/fatal zeroization regressions and status-only operational review.
 
-### Completion criteria
+### Completion disposition
 
-- every CSP has a code path, owner, lifetime, zeroization path, and evidence reference;
-- export/persistence/wrapping remain explicitly outside scope;
-- zeroization wording is limited to what code and selected environments support;
-- required remediation is tracked without silent ABI growth.
+- all currently implemented CSPs and sensitive intermediates have owners, lifetimes, cleanup paths, limitations, and evidence references;
+- module-owned shutdown/fatal cleanup gap is remediated without public declaration or symbol growth;
+- local policy, CTest, clean ABI, install, PoC, compatibility, compiler capture, provenance, and evidence checks are required for the final artifact;
+- public surface remains 14 headers, 69 symbols, and `ANOCRYPTO_C_0`;
+- formal classification, exact OE-01 compiler/CPU review, OS/process memory controls, and integrity-key realization remain open.
 
 ### External dependencies
 
-- accepted CSP classification and zeroization evidence expectations.
+- accepted CSP classification and zeroization-evidence expectations;
+- exact OE-01 GCC 13.3.0 build and named human disposition;
+- operator controls for core dumps, swap, hibernation, crash telemetry, debugger access, and VM snapshots;
+- decision on emergency cleanup expectations when locking or process integrity is already compromised.
 
 ## P2-06 — Secure Coding and Side-channel Review
 

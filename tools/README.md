@@ -2,9 +2,9 @@
 
 This directory contains engineering helper scripts for the C99 codebase.
 
-## P2-03 evidence preparation and assembly
+## P2-05 evidence preparation and assembly
 
-Creates a local P2-03 release-evidence draft while retaining the reviewed P1-33 release-engineering boundary and the P2-02 validation-candidate record:
+Creates a local P2-05 release-evidence draft while retaining the reviewed P1-33 release-engineering boundary and the P2-02/P2-03/P2-04 candidate policies:
 
 ```sh
 cmake -S . -B build -DANO_CRYPTO_BUILD_TESTS=ON -DANO_CRYPTO_BUILD_EXAMPLES=ON -DCMAKE_BUILD_TYPE=Release
@@ -20,7 +20,7 @@ The target serializes clean Release symbol/runtime-dependency inspection, instal
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p2-04 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p2-05 \
   -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=build/release-provenance-evidence \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=build/release-signing-handoff \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=build/release-signing-handoff-check.txt \
@@ -42,12 +42,12 @@ The final assembly step consumes only that hash-bound tree:
 ```sh
 cmake \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p2-04 \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-04 \
+  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p2-05 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-05 \
   -P tools/assemble_release_evidence.cmake
 ```
 
-P2-03 output retains the P1-33 build/test/package records, the P2-02 boundary policy, and the P2-03 self-test/integrity policy record and copies verified `release-provenance/` plus key-free `release-signing-handoff/`. The source inventory does not perform dependency discovery, vulnerability analysis, or license conclusions. Current state remains `UNSIGNED`, hosted review `UNREVIEWED`, handoff `BLOCKED`, external authorization `NO`. `SENSITIVE_ARTIFACT_SCAN.txt` checks evidence, installed SDK, and PoC package for prohibited credential/signature artifacts.
+P2-05 output retains the P1-33 build/test/package records, P2-02 boundary policy, P2-03 self-test/integrity policy, P2-04 entropy/DRBG policy, and P2-05 CSP/zeroization policy and compiler capture and copies verified `release-provenance/` plus key-free `release-signing-handoff/`. The source inventory does not perform dependency discovery, vulnerability analysis, or license conclusions. Current state remains `UNSIGNED`, hosted review `UNREVIEWED`, handoff `BLOCKED`, external authorization `NO`. `SENSITIVE_ARTIFACT_SCAN.txt` checks evidence, installed SDK, and PoC package for prohibited credential/signature artifacts.
 
 ## `check_validation_candidate_policy.cmake`
 
@@ -240,3 +240,14 @@ cmake -DANO_CRYPTO_SOURCE_DIR=. -DANO_CRYPTO_OUTPUT_FILE=build/ENTROPY_DRBG_POLI
 ```
 
 The check binds `EDP-P2-04-R1`, `ENT-OE01-LINUX-GETRANDOM-R1`, the frozen implementation limits, 14/69/`ANOCRYPTO_C_0`, and the unchanged hosted/release blocker state. It is engineering evidence only.
+
+
+## P2-05 CSP/zeroization policy and compiler review
+
+```sh
+cmake --build build --target ano_crypto_csp_zeroization_policy_check
+cmake --build build --target ano_crypto_zeroization_compiler_review
+ctest --test-dir build -R "csp_(shutdown|fatal|zeroization)" --output-on-failure
+```
+
+`check_csp_zeroization_policy.cmake` binds `CZP-P2-05-R1`, current CSP ownership/lifecycle documentation, module-owned shutdown/fatal cleanup, 14 headers, 69 symbols, `ANOCRYPTO_C_0`, and unchanged hosted/signing/release blockers. `capture_zeroization_compiler_review.cmake` records compiler/target/build/library-hash metadata and disassembly markers for local human review. It does not establish exact OE-01 execution, physical memory remanence elimination, optimizer universality, or formal validation.

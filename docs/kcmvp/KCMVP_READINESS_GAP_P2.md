@@ -1,13 +1,13 @@
 # KCMVP Readiness Gap — P2 Consolidated Register
 
-Status: P2-03 internal self-test, integrity-candidate, finite-state, and recovery design freeze. Runtime integrity implementation, exact operating-environment execution, formal validation, and external review remain pending.
+Status: P2-05 local CSP ownership/lifecycle/zeroization closure. Runtime integrity implementation, exact operating-environment execution, formal CSP classification, formal validation, and external review remain pending.
 
 ## Baseline and Claims Boundary
 
 | Item | Current value |
 |---|---|
 | Product | `AnoCrypto-C` |
-| Work-product version | `0.1.0-p2-04-entropy-drbg` |
+| Work-product version | `0.1.0-p2-05-csp-zeroization` |
 | Input baseline declared by project owner | `0.1.0-p1-33-release-rehearsal` at `cf0f3c425dd265c7509fb64a6123db97f71055dd` |
 | Public headers | 14 |
 | Exported public symbols | 69 |
@@ -63,12 +63,15 @@ This document is an engineering readiness record. It does not establish an accep
 - OS-provider status-only operational probe and provider-disabled failure behavior.
 - Process/fork marker with reseed-required behavior for source-backed random contexts.
 - Sticky fatal-state transition on selected fatal health-test failures.
-- Key destruction and internal temporary/key-schedule zeroization paths.
+- Formal P2-05 CSP and sensitive-intermediate inventory covering module-owned HMAC/AES/CMAC table keys, caller-owned contexts, DRBG state, and temporary copies.
+- Explicit destroy plus orderly-shutdown and locked-fatal cleanup for all live module-owned CSP table entries; `ZEROIZED` tombstones are invalid for use and may be explicitly destroyed.
+- Caller-owned opaque contexts remain caller-managed through documented final/uninit paths; module-wide cleanup cannot locate abandoned contexts.
+- Local zeroization compiler-output capture and review procedure; exact OE-01 human disposition remains `NOT_RUN`.
 - Limited global locking and cross-platform thread/process seams.
 
 ## Test and Evidence Inventory
 
-The ordinary tests-enabled build is expected to register 50 CTest cases when OpenSSL 3.x differential tests are available, including the P2-03 self-test/integrity policy check. Coverage includes:
+The ordinary tests-enabled build is expected to register 56 CTest cases when OpenSSL 3.x differential tests are available, including P2-03, P2-04, and P2-05 policy/operational checks. Coverage includes:
 
 - startup/extended KATs and API-negative tests;
 - module state and cryptographic service gating;
@@ -76,7 +79,7 @@ The ordinary tests-enabled build is expected to register 50 CTest cases when Ope
 - entropy adapter/provider/health/process behavior;
 - AES-CBC and AES-CMAC hardening, lifecycle, concurrency, and differential tests;
 - SHA-512-family representation/alignment/endian review inputs;
-- CSP exhaustion, stale handle, key lifecycle, and thread-safety checks;
+- CSP exhaustion, stale handle, key lifecycle, thread-safety, orderly-shutdown zeroization, fatal-transition zeroization, and status-only zeroization policy checks;
 - current-header and retained P1-29-header compatibility consumers;
 - install/build-tree PoC consumers;
 - hosted artifact manifest, tagged rehearsal, provenance, signing-handoff, and sensitive-artifact negative regressions.
@@ -102,8 +105,8 @@ Existing engineering evidence assets include source/archive hashes, SPDX 2.3 sou
 | GAP-013 | DRBG limits and lifecycle | `READY_FOR_INTERNAL_REVIEW` | P2-04 freezes input/request lengths, `2^48` implementation interval, unsupported prediction resistance, process-change reseed, and VM/suspend limitations with policy/test traceability. | Confirm entropy credit, profile limits, and any stricter operational reseed rule externally. |
 | GAP-014 | Fork/process behavior | `READY_FOR_INTERNAL_REVIEW` | Process-marker change rejects generation until reseed; unsupported marker branches fail closed and output is cleared. | Retain exact OE-01 execution and confirm accepted process-model wording. |
 | GAP-015 | VM clone/snapshot and suspend/resume | `NOT_IMPLEMENTED` | P2-04 freezes explicit unsupported wording: duplicated/restored state must be discarded and independently reinitialized; no automatic detection is claimed. | Confirm operator guidance and whether deployment restrictions or extra evidence are required. |
-| GAP-016 | CSP inventory and lifecycle | `PARTIAL` | Purpose-separated in-memory handles and destruction paths exist. | Create a formal CSP inventory, state/ownership table, and service-by-service lifecycle in P2-05. |
-| GAP-017 | Zeroization evidence | `PARTIAL` | Explicit zeroize paths and negative/lifecycle tests exist. | Retain target/compiler-specific evidence and define what is guaranteed at module/process/OS boundaries. |
+| GAP-016 | CSP inventory and lifecycle | `READY_FOR_INTERNAL_REVIEW` | `CZP-P2-05-R1`, the formal inventory, service/CSP matrix, and current lifecycle design distinguish module-owned table keys, caller contexts, DRBG state, sensitive intermediates, purpose restrictions, and excluded persistence/export/wrapping. | Obtain institution confirmation of CSP classification, integrity-key treatment, and caller/module ownership wording. |
+| GAP-017 | Zeroization evidence | `PARTIAL` | Explicit destroy, orderly-shutdown, and locked-fatal table cleanup are implemented and regression-tested; caller-owned cleanup boundaries and local compiler capture are documented. | Execute/review exact OE-01 output, confirm accepted evidence method, define OS/process operator controls, and resolve lock-failure cleanup expectations. |
 | GAP-018 | Persistent/exported keys | `OUT_OF_SCOPE` | Public export/persistence/wrapping are rejected or absent. | Keep excluded unless a separate product and validation scope gate approves them. |
 | GAP-019 | Thread-safety model | `PARTIAL` | OE-01 freezes thread safety ON with the POSIX/pthread-compatible branch; module/global state is serialized while caller-owned mutable contexts require caller serialization. | Retain OE-01 target results and formalize role/service concurrency wording. |
 | GAP-020 | Secure coding review | `PARTIAL` | Warnings, sanitizers, negative tests, policy scripts, and clean-room records exist. | Establish review checklist completion, findings register, and disposition process in P2-06. |
@@ -120,7 +123,7 @@ Existing engineering evidence assets include source/archive hashes, SPDX 2.3 sou
 | GAP-031 | Customer evaluation terms | `NOT_IMPLEMENTED` | PoC technical boundary is documented. | Legal review and approved evaluation/support terms are required before broader distribution. |
 | GAP-032 | Product-layer separation | `READY_FOR_INTERNAL_REVIEW` | AnoCrypto-C, AnoSecureKit, AnoPKI, and optional wrapper boundaries are documented. | Reconfirm during consultation so application/PKI workflow is not pulled into the module scope unintentionally. |
 
-## P2-01 through P2-03 Disposition
+## P2-01 through P2-05 Disposition
 
 P2-01 consolidated the implementation/test/evidence inventory, traceability, consultation questions, submission inventory, roadmap, blocker record, ABI check, and local regression records.
 
@@ -131,7 +134,9 @@ All institution-dependent items remain `EXTERNAL_CONFIRMATION_REQUIRED` until a 
 
 P2-03 additionally froze the internal self-test/integrity/state/recovery design without claiming implementation or acceptance of module integrity. The machine-readable policy and checker require `SELECTED_CANDIDATE_NOT_IMPLEMENTED`, `EXTERNAL_CONFIRMATION_REQUIRED`, 14 headers, 69 symbols, `ANOCRYPTO_C_0`, hosted `NOT_RUN/UNREVIEWED`, and external authorization `NO`.
 
-P2-04 freezes `EDP-P2-04-R1` and `ENT-OE01-LINUX-GETRANDOM-R1` as internal policy only. It closes responsibility/limit documentation and local evidence wiring, but leaves provider acceptance, entropy credit, health-test allocation, exact OE-01 execution, and formal conditional-test interpretation externally open. P2-05 is next.
+P2-04 freezes `EDP-P2-04-R1` and `ENT-OE01-LINUX-GETRANDOM-R1` as internal policy only. It closes responsibility/limit documentation and local evidence wiring, but leaves provider acceptance, entropy credit, health-test allocation, exact OE-01 execution, and formal conditional-test interpretation externally open.
+
+P2-05 freezes `CZP-P2-05-R1`, inventories current CSP/sensitive state, and remediates module-owned CSP cleanup on orderly shutdown and locked fatal transitions without changing the public ABI. It adds explicit tombstone lifecycle tests and local compiler-output capture. Formal CSP classification, exact OE-01 review, caller/OS/process boundary acceptance, integrity-key realization, and lock-failure cleanup expectations remain open. P2-06 is next.
 
 ## External Reference Checkpoint
 
