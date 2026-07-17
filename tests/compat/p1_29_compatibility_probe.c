@@ -9,7 +9,7 @@
 #define ANO_CRYPTO_COMPAT_HEADER_MODE "unspecified"
 #endif
 #ifndef ANO_CRYPTO_EXPECT_RUNTIME_VERSION
-#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p2-12-consultation-contact-readiness"
+#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p3-00-downstream-requirement-intake"
 #endif
 
 #define ANO_COMPAT_JOIN_INNER(a, b) a##b

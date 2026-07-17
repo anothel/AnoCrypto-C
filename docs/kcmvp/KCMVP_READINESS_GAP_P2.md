@@ -7,7 +7,7 @@ Status: P2-09 cumulative local closeout complete under `P2C-P2-09-R1`. The contr
 | Item | Current value |
 |---|---|
 | Product | `AnoCrypto-C` |
-| Work-product version | `0.1.0-p2-12-consultation-contact-readiness` |
+| Work-product version | `0.1.0-p3-00-downstream-requirement-intake` |
 | Input baseline declared by project owner | `0.1.0-p1-33-release-rehearsal` at `cf0f3c425dd265c7509fb64a6123db97f71055dd` |
 | Public headers | 14 |
 | Exported public symbols | 69 |

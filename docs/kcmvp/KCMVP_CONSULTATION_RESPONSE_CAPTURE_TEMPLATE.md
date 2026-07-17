@@ -31,7 +31,7 @@ Record the module candidate, operating environment, security-level assumption, a
 
 ```text
 Candidate: AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1
-Engineering version: 0.1.0-p2-12-consultation-contact-readiness
+Engineering version: 0.1.0-p3-00-downstream-requirement-intake
 Security level assumption: TODO
 Question scope/conditions: TODO
 ```

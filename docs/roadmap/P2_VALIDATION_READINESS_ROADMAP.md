@@ -401,3 +401,11 @@ Outputs:
 - `CCR-P2-12-R1` policy and package smoke.
 
 Exit remains human-controlled: a real independent reviewer must complete P2-11, and the project owner must select an institution, sender, recipient, channel, and exact outbound message. P2-12 does not conduct consultation or authorize P3.
+
+## P3-00 transition — product-driven downstream intake
+
+P2 validation-readiness remains a completed local snapshot. The ACTIVE lane is
+P3-00 requirement intake from exact matched AnoSecureKit and AnoPKI
+Community/Enterprise revisions. KCMVP consultation and contact work is deferred.
+No new algorithm, public API, ABI line or implementation item is authorized by
+P2 closeout documents alone.

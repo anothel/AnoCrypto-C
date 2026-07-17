@@ -520,7 +520,7 @@ add_custom_target(ano_crypto_release_compatibility_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_compatibility.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Checking P2-12 release identity and retained P1-29 public source/ABI compatibility")
+    COMMENT "Checking P3-00 release identity and retained P1-29 public source/ABI compatibility")
 
 add_custom_target(ano_crypto_release_provenance_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -530,7 +530,7 @@ add_custom_target(ano_crypto_release_provenance_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_provenance_policy.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Checking P2-12 retained unsigned release provenance, source SBOM, and signing boundary")
+    COMMENT "Checking P3-00 retained unsigned release provenance, source SBOM, and signing boundary")
 
 add_custom_target(ano_crypto_tagged_release_compatibility_smoke
     COMMAND ${CMAKE_COMMAND} -E env
@@ -547,7 +547,7 @@ add_custom_target(ano_crypto_tagged_release_compatibility_smoke
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_tagged_release_compatibility_smoke.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Building installed P2-12 package and running current/P1-29 header compatibility consumers")
+    COMMENT "Building installed P3-00 package and running current/P1-29 header compatibility consumers")
 
 add_custom_target(ano_crypto_public_surface_check
     COMMAND ${CMAKE_COMMAND}
@@ -821,6 +821,23 @@ add_custom_target(ano_crypto_consultation_contact_readiness_package_smoke
     VERBATIM
     COMMENT "Creating and checking the P2-12 status-only consultation contact-readiness package")
 
+add_custom_target(ano_crypto_downstream_requirement_intake_policy_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_DRI_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/DOWNSTREAM_REQUIREMENT_INTAKE_POLICY_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_downstream_requirement_intake_policy.cmake
+    VERBATIM
+    COMMENT "Checking P3-00 downstream requirement intake, ownership, ABI, and blocker policy")
+
+add_custom_target(ano_crypto_downstream_requirement_intake_package_smoke
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_DRI_SMOKE_DIR=${CMAKE_CURRENT_BINARY_DIR}/downstream-requirement-intake-package
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_downstream_requirement_intake_package_smoke.cmake
+    VERBATIM
+    COMMENT "Creating and checking the P3-00 status-only downstream requirement intake package")
+
 if(ANO_CRYPTO_BUILD_EXAMPLES)
     add_subdirectory(examples/core_poc)
 endif()
@@ -1042,6 +1059,23 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_consultation_contact_readiness_package_smoke.cmake)
     set_tests_properties(ano_crypto_consultation_contact_readiness_package_tests PROPERTIES
         LABELS "kcmvp;p2;preconsultation;contact;readiness;package;policy")
+
+    add_test(NAME ano_crypto_downstream_requirement_intake_policy_tests
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+            -DANO_CRYPTO_DRI_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/DOWNSTREAM_REQUIREMENT_INTAKE_POLICY_CHECK.txt
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_downstream_requirement_intake_policy.cmake)
+    set_tests_properties(ano_crypto_downstream_requirement_intake_policy_tests PROPERTIES
+        LABELS "product;p3;downstream;requirements;ownership;policy")
+
+    add_test(NAME ano_crypto_downstream_requirement_intake_package_tests
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DANO_CRYPTO_DRI_SMOKE_DIR=${CMAKE_CURRENT_BINARY_DIR}/downstream-requirement-intake-ctest
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_downstream_requirement_intake_package_smoke.cmake)
+    set_tests_properties(ano_crypto_downstream_requirement_intake_package_tests PROPERTIES
+        LABELS "product;p3;downstream;requirements;package;policy")
 
     add_executable(ano_crypto_service_gate_negative_tests
         tests/negative/crypto_service_gate_tests.c)
@@ -1414,7 +1448,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
     add_executable(ano_crypto_current_header_compatibility_tests
         tests/compat/p1_29_compatibility_probe.c)
     target_compile_definitions(ano_crypto_current_header_compatibility_tests PRIVATE
-        ANO_CRYPTO_COMPAT_HEADER_MODE="current-p2-12"
+        ANO_CRYPTO_COMPAT_HEADER_MODE="current-p3-00"
         ANO_CRYPTO_EXPECT_CURRENT_HEADER=1
         ANO_CRYPTO_EXPECT_RUNTIME_VERSION="${ANO_CRYPTO_RELEASE_VERSION}")
     target_link_libraries(ano_crypto_current_header_compatibility_tests PRIVATE anocrypto_c)
@@ -1588,7 +1622,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_BUILD_CONFIG=$<CONFIG>
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_ctest_evidence.cmake
         USES_TERMINAL
-        COMMENT "Capturing AnoCrypto-C P2-12 CTest evidence")
+        COMMENT "Capturing AnoCrypto-C P3-00 CTest evidence")
     add_dependencies(ano_crypto_ctest_evidence ${_ano_crypto_evidence_test_targets})
 
     # Serialize nested build trees before CTest. Direct sibling dependencies can
@@ -1619,7 +1653,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/prepare_release_provenance_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Preparing verified unsigned P2-12 release provenance evidence")
+        COMMENT "Preparing verified unsigned P3-00 release provenance evidence")
     add_dependencies(ano_crypto_release_provenance_evidence
         ano_crypto_ctest_evidence)
 
@@ -1637,7 +1671,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_signing_handoff.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Creating and checking the key-free P2-12 retained offline-signing handoff")
+        COMMENT "Creating and checking the key-free P3-00 retained offline-signing handoff")
     add_dependencies(ano_crypto_release_signing_handoff_evidence
         ano_crypto_release_provenance_evidence)
 
@@ -1657,7 +1691,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-12
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p3-00
             -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-provenance-evidence
             -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff
             -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff-check.txt
@@ -1695,25 +1729,26 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_LIVE_REHEARSAL_CHECK=ON
             -DANO_CRYPTO_RUN_HUMAN_REHEARSAL_HANDOFF_CHECK=ON
             -DANO_CRYPTO_RUN_CONSULTATION_CONTACT_READINESS_CHECK=ON
+            -DANO_CRYPTO_RUN_DOWNSTREAM_REQUIREMENT_INTAKE_CHECK=ON
             -DANO_CRYPTO_RUN_ZEROIZATION_COMPILER_REVIEW=ON
             -DANO_CRYPTO_RUN_SECURE_CODING_COMPILER_REVIEW=ON
             -DANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Preparing hash-bound P2-12 status evidence")
+        COMMENT "Preparing hash-bound P3-00 status evidence")
     add_dependencies(ano_crypto_prepare_release_status_evidence
         ano_crypto_release_signing_handoff_evidence)
 
     add_custom_target(ano_crypto_collect_release_evidence
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-12
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p2-12
+            -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p3-00
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p3-00
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/assemble_release_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Assembling AnoCrypto-C P2-12 evidence from prepared artifacts")
+        COMMENT "Assembling AnoCrypto-C P3-00 evidence from prepared artifacts")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_prepare_release_status_evidence)
 endif()

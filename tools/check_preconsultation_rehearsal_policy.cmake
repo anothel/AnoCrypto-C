@@ -83,7 +83,7 @@ require_text("docs/kcmvp/KCMVP_CONSULTATION_RESPONSE_CAPTURE_TEMPLATE.md" "Autho
 require_text("docs/kcmvp/KCMVP_POST_CONSULTATION_ACTION_IMPACT_MATRIX.md" "ACT-4_PUBLIC_API_ABI_GATE")
 require_text("docs/kcmvp/P2_08_IMPLEMENTATION_TEST_DELTA.md" "Institution consultation: NOT_CONDUCTED")
 require_text("docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md" "| Actual hosted lanes | `NOT_RUN` |")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p2-12-consultation-contact-readiness")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p3-00-downstream-requirement-intake")
 
 file(READ "${ANO_CRYPTO_SOURCE_DIR}/docs/kcmvp/KCMVP_PRECONSULTATION_REHEARSAL.md" _rehearsal)
 string(REGEX MATCHALL "\\| A-[0-9][0-9] \\|" _agendas "${_rehearsal}")

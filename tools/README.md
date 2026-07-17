@@ -295,3 +295,10 @@ The assisted rehearsal is not an independent human review or institution consult
 - `create_consultation_contact_readiness_package.cmake`: stages the controlled 15-document status-only contact-readiness pack.
 - `check_consultation_contact_readiness_package.cmake`: verifies hashes, file count, pending states, and prohibited artifact/sensitive-marker exclusions.
 - `run_consultation_contact_readiness_package_smoke.cmake`: creates and validates the pack in one test.
+
+## P3-00 downstream requirement intake
+
+- `check_downstream_requirement_intake_policy.cmake`: validates `DRI-P3-00-R1`, four unimported matched source sets, zero accepted requirements/gaps, no selected implementation, unchanged 14/69/`ANOCRYPTO_C_0`, deferred KCMVP work, and retained hosted/signing blockers.
+- `create_downstream_requirement_intake_package.cmake`: stages only the 15 allowlisted status/request documents and writes a SHA-256 manifest/status record.
+- `check_downstream_requirement_intake_package.cmake`: verifies hashes, file counts, non-sensitive status-only contents, zero imported requirements, and no API/ABI authorization.
+- `run_downstream_requirement_intake_package_smoke.cmake`: creates and validates the intake package in one test.
