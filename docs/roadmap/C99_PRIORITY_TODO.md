@@ -1,6 +1,6 @@
 # C99 Priority TODO
 
-Status: P2-01 through P2-08 internal readiness sequence completed locally. External consultation remains `NOT_CONDUCTED`; institution responses remain `NOT_RECEIVED`.
+Status: P2-01 through P2-09 internal readiness and closeout sequence completed locally. The status-only closeout pack is ready for internal review; external consultation remains `NOT_CONDUCTED`, institution responses remain `NOT_RECEIVED`, and formal validation is `NOT_STARTED`.
 
 ## Completed Through P1-33
 
@@ -83,6 +83,11 @@ Do not substitute local or synthetic evidence. Resume only after billing is reso
 - P2-07 created the controlled internal submission-document skeleton under `SDP-P2-07-R1`.
 - P2-08 created the scripted rehearsal, evidence walkthrough, Priority-1 ownership map, 20-entry unresolved-decision register, blank response template, action-impact routing, policy checker, and status-only package smoke under `PCR-P2-08-R1`.
 - External consultation is `NOT_CONDUCTED`; institution responses are `NOT_RECEIVED`; no implementation, ABI, algorithm, signing, submission, or release action is authorized by rehearsal completion.
+
+## Completed P2-09
+
+- consolidated the cumulative P2 disposition, claims boundary, open-item/exit criteria, 17-document closeout allowlist, and next-work authority gate under `P2C-P2-09-R1`;
+- marked the closeout pack ready for internal review only; external consultation, institution answers, formal validation, next implementation, submission, signing, and release remain pending, blocked, or unauthorized.
 
 ## Next Selection Gate
 

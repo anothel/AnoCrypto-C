@@ -4,7 +4,7 @@ Status: P1-33 unsigned engineering checklist. Actual tag authorization, hosted-a
 
 ## Configure and static policy
 
-- Configure with release identity `0.1.0-p2-08-preconsultation-rehearsal`.
+- Configure with release identity `0.1.0-p2-09-closeout-review`.
 - Run `ano_crypto_release_compatibility_policy_check`.
 - Run `ano_crypto_release_provenance_policy_check`.
 - Confirm the clean Release public surface remains 14 headers and 69 ABI-0 symbols.
@@ -72,7 +72,7 @@ Require the release-evidence dependency chain to prepare and verify prerequisite
 - full CTest result;
 - prepared provenance bundle/check;
 - key-free signing handoff/check;
-- complete `prepared-release-evidence/p2-08/EVIDENCE_MANIFEST.sha256` status tree.
+- complete `prepared-release-evidence/p2-09/EVIDENCE_MANIFEST.sha256` status tree.
 
 Final evidence must contain:
 

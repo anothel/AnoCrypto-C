@@ -1,6 +1,6 @@
 # KCMVP Submission Document Inventory
 
-Status: P2-08 controlled internal skeleton and pre-consultation routing inventory. Boundary/OE, self-test/integrity, entropy/DRBG, CSP/zeroization, and secure-coding/side-channel records are available as engineering inputs; runtime integrity implementation, exact current templates, selected-OE/external dispositions, and accepted contents remain pending or `EXTERNAL_CONFIRMATION_REQUIRED`.
+Status: P2-09 controlled internal skeleton, pre-consultation routing, and closeout inventory. Boundary/OE, self-test/integrity, entropy/DRBG, CSP/zeroization, and secure-coding/side-channel records are available as engineering inputs; runtime integrity implementation, exact current templates, selected-OE/external dispositions, and accepted contents remain pending or `EXTERNAL_CONFIRMATION_REQUIRED`.
 
 ## Inventory Categories
 

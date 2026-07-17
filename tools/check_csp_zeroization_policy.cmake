@@ -85,7 +85,7 @@ require_text("docs/kcmvp/KCMVP_CSP_INVENTORY.md" "CSP-104")
 require_text("docs/kcmvp/KCMVP_ZEROIZATION_EVIDENCE.md" "Selected OE review status")
 require_text("tests/operational/csp_zeroization_policy_review.c" "sensitive_values_printed=0")
 require_text("tools/capture_zeroization_compiler_review.cmake" "Automated proof of effective zeroization: no")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p2-08-preconsultation-rehearsal")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p2-09-closeout-review")
 
 file(GLOB _public_headers "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/*.h")
 list(LENGTH _public_headers _public_header_count)

@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P2-01 through P2-08 internal readiness sequence completed locally; external pre-consultation and institution answers remain pending.
+Status: P2-01 through P2-09 internal readiness and closeout sequence completed locally; external pre-consultation, institution answers, formal validation, submission, and release remain pending or unauthorized.
 
 ## Purpose
 
@@ -255,6 +255,7 @@ P1-23 deliverables:
 | P2-01 | Readiness gap consolidation and pre-consultation pack | Completed with traceability, gap status, document inventory, blocker record, and P2-02 through P2-08 roadmap; no public ABI change. |
 | P2-02 through P2-07 | Boundary/OE, self-test/integrity, entropy/DRBG, CSP/zeroization, secure coding, and controlled submission skeleton | Completed locally with external-confirmation and exact-OE gaps retained. |
 | P2-08 | Pre-consultation rehearsal and answer capture | Completed as `COMPLETE_LOCAL_SCRIPTED` with 10 Priority-1 agendas, 20 unresolved decisions, response capture, action routing, and status-only package smoke; external consultation remains `NOT_CONDUCTED`. |
+| P2-09 | Cumulative closeout and consultation-pack finalization | Completed as `COMPLETE_LOCAL_CLOSEOUT` with claims/status control, exit criteria, 17-document closeout allowlist, next-work gate, and policy/package smoke; all external authorizations remain `NO`. |
 | P2-02 | Module boundary and operating environment freeze | Completed with one shared-library candidate, OE-01 configuration record, explicit exclusions, fail-closed CMake enforcement, and no public ABI change. |
 | P2-03 | Self-test, integrity, finite-state, and recovery specification | Completed as an internal design freeze with a selected-but-unimplemented integrity candidate, policy checker, state/recovery matrices, and no public ABI change. |
 

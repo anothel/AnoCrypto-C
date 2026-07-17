@@ -1,6 +1,6 @@
 # AnoCrypto-C
 
-Current status: `0.1.0-p2-08-preconsultation-rehearsal`, the completed local P2-01 through P2-08 validation-readiness sequence. P2-08 adds policy `PCR-P2-08-R1`, a scripted pre-consultation walkthrough, Priority-1 question ownership, a 20-entry unresolved-decision register, response capture, and controlled post-answer routing. External consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, runtime integrity and exact OE-01 remain `NOT_IMPLEMENTED`/`NOT_RUN`, and P1-34 hosted evidence, signing, submission, and external authorization remain blocked or unapproved. The public boundary remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
+Current status: `0.1.0-p2-09-closeout-review`. P2-01 through P2-09 are complete as local validation-readiness work under closeout policy `P2C-P2-09-R1`. The status-only pre-consultation closeout pack is ready for internal review, but external consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, formal validation is `NOT_STARTED`, runtime integrity is `NOT_IMPLEMENTED`, exact OE-01 is `NOT_RUN`, and P1-34 hosted evidence, signing, submission, next implementation, and external release remain blocked or unauthorized. The public boundary remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
 
 Implemented processing scope:
 
@@ -164,7 +164,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, CSP/zeroization policy and compiler-output, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-08/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, CSP/zeroization policy and compiler-output, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-09/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -456,3 +456,14 @@ cmake --build build --target ano_crypto_preconsultation_rehearsal_package_smoke
 ```
 
 A captured answer never authorizes code, ABI, algorithm, signing, submission, release, or customer distribution by itself.
+
+## P2-09 cumulative closeout review
+
+P2-09 freezes policy `P2C-P2-09-R1` and consolidates the P2-01 through P2-08 result into a controlled closeout decision, claims summary, open-item/exit-criteria register, next-work gate, and a 17-document status-only pre-consultation closeout package. The package contains no source, binary, credentials, cryptographic result values, institution answers, signature, timestamp response, or authorization.
+
+```sh
+cmake --build build --target ano_crypto_p2_closeout_policy_check
+cmake --build build --target ano_crypto_preconsultation_closeout_package_smoke
+```
+
+P2 closeout permits internal pack review only. It does not authorize external consultation, implementation, formal submission, signing, publication, or release.

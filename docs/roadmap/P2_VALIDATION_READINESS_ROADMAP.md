@@ -1,6 +1,6 @@
 # P2 Validation Readiness Roadmap
 
-Status: P2-01 through P2-08 internal validation-readiness sequence completed locally. P2-08 scripted pre-consultation rehearsal is complete under `PCR-P2-08-R1`; external consultation is `NOT_CONDUCTED` and institution responses are `NOT_RECEIVED`. P2 remains validation-readiness work, not automatic feature expansion.
+Status: P2-01 through P2-09 internal validation-readiness and closeout sequence completed locally. P2-09 closeout is complete under `P2C-P2-09-R1`; the controlled status-only pack is ready for internal review, while external consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, and formal validation is `NOT_STARTED`. P2 remains validation-readiness work, not automatic feature expansion.
 
 ## Fixed P2 Constraints
 
@@ -24,6 +24,7 @@ Status: P2-01 through P2-08 internal validation-readiness sequence completed loc
 | P2-06 | `COMPLETE_LOCAL_WITH_OPEN_FINDINGS` | Perform secure-coding and target side-channel review. | Secure-coding record, side-channel limitations, findings register, compiler/CPU matrix, hardening capture, and policy tests. | No change. |
 | P2-07 | `COMPLETE_LOCAL_INTERNAL_SKELETON` | Build controlled submission-document skeleton. | Basic design, detailed design, configuration-management, test, and operator-document skeletons. | No change. |
 | P2-08 | `COMPLETE_LOCAL_SCRIPTED` | Rehearse pre-consultation evidence walkthrough and decision capture. | Scripted walkthrough, Priority-1 owner/recipient map, 20-entry decision register, response template, action-impact routing, and status-only package smoke. | No change. |
+| P2-09 | `COMPLETE_LOCAL_CLOSEOUT` | Consolidate cumulative P2 disposition, claims, blockers, exit criteria, pack index, and next-work gate. | Closeout review, status summary, open-item/exit register, controlled 17-document closeout package, policy/package checks. | No change. |
 
 ## P2-01 — Readiness Gap Consolidation
 
@@ -311,9 +312,22 @@ Completion record: `SDP-P2-07-R1` and the controlled internal skeleton set are c
 
 Completion record: `PCR-P2-08-R1` is complete as a scripted local rehearsal. Priority-1 agendas: 10; unresolved decisions: 20; external consultation: `NOT_CONDUCTED`; institution responses: `NOT_RECEIVED`; live independent internal rehearsal: `NOT_RUN`.
 
-### Post-P2-08 gate
+## P2-09 — Cumulative Closeout Review
 
-The next numbered work item must be selected from retained institution answers or an explicitly authorized independent blocker-remediation lane. Runtime integrity implementation, exact OE-01 execution, side-channel specialist work, official document conversion, signing, submission, or release do not begin automatically.
+### Deliverables
+
+- cumulative P2-01 through P2-08 disposition and go/no-go review;
+- claims/status summary;
+- open-item and exit-criteria register;
+- controlled pre-consultation closeout pack index and allowlist;
+- next-work authority/selection gate;
+- policy and package smoke checks.
+
+Completion record: `P2C-P2-09-R1` is `COMPLETE_LOCAL_CLOSEOUT`. The status-only pack is ready for internal review. External consultation remains `NOT_CONDUCTED`; institution responses remain `NOT_RECEIVED`; formal validation remains `NOT_STARTED`; submission, next implementation, and external release authorization remain `NO`.
+
+### Post-P2-09 gate
+
+The next numbered work item must be selected from retained institution answers or an explicitly authorized independent blocker-remediation lane. Runtime integrity implementation, exact OE-01 execution, side-channel specialist work, official document conversion, signing, submission, or release do not begin automatically. See `P2_CLOSEOUT_AND_NEXT_WORK_GATE.md`.
 
 ## Parallel Lane — P1-34 Actual Hosted Artifact Review
 

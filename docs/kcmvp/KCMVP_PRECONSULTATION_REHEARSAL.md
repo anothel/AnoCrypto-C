@@ -10,7 +10,7 @@
 | Approval | `NO` |
 | Policy ID | `PCR-P2-08-R1` |
 | Candidate ID | `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` |
-| Work-product version | `0.1.0-p2-08-preconsultation-rehearsal` |
+| Work-product version | `0.1.0-p2-09-closeout-review` |
 | Scripted internal rehearsal | `COMPLETE_LOCAL_SCRIPTED` |
 | Independent live internal rehearsal | `NOT_RUN` |
 | External consultation | `NOT_CONDUCTED` |

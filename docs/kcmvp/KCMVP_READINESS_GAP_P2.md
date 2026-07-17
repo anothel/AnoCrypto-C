@@ -1,13 +1,13 @@
 # KCMVP Readiness Gap — P2 Consolidated Register
 
-Status: P2-08 scripted pre-consultation rehearsal complete locally under `PCR-P2-08-R1`. External consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, and runtime integrity, exact OE-01, formal CSP classification, specialist side-channel work, formal validation, and hosted evidence remain pending.
+Status: P2-09 cumulative local closeout complete under `P2C-P2-09-R1`. The controlled status-only pre-consultation pack is ready for internal review; external consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, formal validation is `NOT_STARTED`, and runtime integrity, exact OE-01, formal CSP classification, specialist side-channel work, and hosted evidence remain pending.
 
 ## Baseline and Claims Boundary
 
 | Item | Current value |
 |---|---|
 | Product | `AnoCrypto-C` |
-| Work-product version | `0.1.0-p2-08-preconsultation-rehearsal` |
+| Work-product version | `0.1.0-p2-09-closeout-review` |
 | Input baseline declared by project owner | `0.1.0-p1-33-release-rehearsal` at `cf0f3c425dd265c7509fb64a6123db97f71055dd` |
 | Public headers | 14 |
 | Exported public symbols | 69 |
@@ -71,7 +71,7 @@ This document is an engineering readiness record. It does not establish an accep
 
 ## Test and Evidence Inventory
 
-The ordinary tests-enabled build is expected to register 62 CTest cases when OpenSSL 3.x differential tests are available, including P2-03 through P2-08 policy/operational and package checks. Coverage includes:
+The ordinary tests-enabled build is expected to register 64 CTest cases when OpenSSL 3.x differential tests are available, including P2-03 through P2-09 policy/operational and package checks. Coverage includes:
 
 - startup/extended KATs and API-negative tests;
 - module state and cryptographic service gating;
@@ -139,6 +139,8 @@ P2-04 freezes `EDP-P2-04-R1` and `ENT-OE01-LINUX-GETRANDOM-R1` as internal polic
 P2-07 freezes `SDP-P2-07-R1` and creates the controlled internal submission-document set without changing public ABI.
 
 P2-08 freezes `PCR-P2-08-R1`, completes the scripted evidence walkthrough, assigns 10 Priority-1 agendas, records 20 unresolved decisions, and adds controlled response/action routing plus a status-only package smoke. External consultation remains `NOT_CONDUCTED`; institution responses remain `NOT_RECEIVED`; official form conformity, selected security level, named approval, secure delivery, exact OE-01 evidence, runtime integrity, institution results, and P1-34 hosted evidence remain open.
+
+P2-09 freezes `P2C-P2-09-R1`, records the cumulative closeout decision, permitted/prohibited claims, open-item/exit criteria, 17-document closeout-pack allowlist, and next-work selection gate. It marks internal pack preparation as ready for review while leaving external consultation, institution responses, formal validation, implementation authorization, submission authorization, signing, and release authorization unresolved or denied.
 
 ## External Reference Checkpoint
 

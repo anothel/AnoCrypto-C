@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p2-08-preconsultation-rehearsal"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p2-09-closeout-review"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)

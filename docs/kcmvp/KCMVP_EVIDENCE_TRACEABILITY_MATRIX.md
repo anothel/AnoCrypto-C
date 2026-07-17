@@ -1,6 +1,6 @@
 # KCMVP Evidence Traceability Matrix
 
-Status: P2-08 traceability baseline with frozen P2-02 through P2-07 inputs and controlled pre-consultation rehearsal/decision routing. Runtime integrity, provider acceptance, formal CSP classification, exact OE-01 review, external side-channel disposition, and institution answers remain pending.
+Status: P2-09 traceability closeout with frozen P2-02 through P2-08 inputs, cumulative claims/exit control, and a status-only pre-consultation closeout pack. Runtime integrity, provider acceptance, formal CSP classification, exact OE-01 review, external side-channel disposition, institution answers, formal validation, submission, and release remain pending or unauthorized.
 
 ## Matrix Rules
 
@@ -86,13 +86,14 @@ Status: P2-08 traceability baseline with frozen P2-02 through P2-07 inputs and c
 | TR-CM-002 | Configuration/change/release baselines are controlled. | release identity, ABI baseline, hashes, Git/CMake metadata | compatibility/provenance/rehearsal tests | `AC-KCMVP-CM-001`; `AC-KCMVP-DC-001` | `PARTIAL` | Named roles, approved retention, signing and post-baseline retest rules remain open. |
 | TR-DOC-001 | Submission document set maps to implementation/evidence. | P2-01 inventory, P2-02 through P2-06 controlled inputs, and `docs/kcmvp/submission/*` | P2 policy reviews and `check_submission_document_policy.cmake` | `SDP-P2-07-R1`; package index and document register | `READY_FOR_INTERNAL_REVIEW` | Official form conformity, named approval, exact package and institution results remain open. |
 | TR-CONSULT-001 | High-priority external questions, evidence handling, answer capture, and post-answer actions are controlled before consultation. | P2-08 rehearsal, walkthrough, decision register, response template, action-impact matrix | `check_preconsultation_rehearsal_policy.cmake`; rehearsal package smoke | `PCR-P2-08-R1`; status-only package manifest | `READY_FOR_INTERNAL_REVIEW` | Live internal rehearsal, approved channel, external consultation, and institution responses remain open. |
+| TR-CLOSEOUT-001 | Cumulative P2 disposition, claims, blockers, exit criteria, and next-work authority are controlled without implying submission or validation. | P2-09 closeout policy, allowlist, closeout package scripts | `check_p2_closeout_policy.cmake`; closeout package smoke | `P2C-P2-09-R1`; closeout review; claims summary; exit criteria; closeout manifest | `READY_FOR_INTERNAL_REVIEW` | Named internal approval, live rehearsal, external consultation, retained answers, and all formal gates remain open. |
 
-## P2-08 ABI Trace Result
+## P2-09 ABI Trace Result
 
 - Public header file count: 14.
 - Stored exported symbol count: 69.
 - ABI line: `ANOCRYPTO_C_0`.
-- No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01 through P2-08.
-- Version/prerelease metadata changed to `0.1.0-p2-08-preconsultation-rehearsal`; this is intentionally excluded from normalized non-version API equality.
-- P2-07 adds controlled submission documents; P2-08 adds rehearsal/decision documents, policy/package checks, evidence wiring, and version metadata only. Public declarations and symbol baseline remain unchanged.
+- No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01 through P2-09.
+- Version/prerelease metadata changed to `0.1.0-p2-09-closeout-review`; this is intentionally excluded from normalized non-version API equality.
+- P2-07 adds controlled submission documents; P2-08 adds rehearsal/decision controls; P2-09 adds cumulative closeout documents, policy/package checks, evidence wiring, and version metadata only. Public declarations and symbol baseline remain unchanged.
 - The selected integrity candidate, policy record, checker, and roadmap documents are internal/build-time assets and add no public symbol.

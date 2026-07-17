@@ -20,7 +20,7 @@ The target serializes clean Release symbol/runtime-dependency inspection, instal
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p2-08 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p2-09 \
   -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=build/release-provenance-evidence \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=build/release-signing-handoff \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=build/release-signing-handoff-check.txt \
@@ -42,8 +42,8 @@ The final assembly step consumes only that hash-bound tree:
 ```sh
 cmake \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p2-08 \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-08 \
+  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p2-09 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-09 \
   -P tools/assemble_release_evidence.cmake
 ```
 
@@ -266,3 +266,10 @@ ctest --test-dir build -R "csp_(shutdown|fatal|zeroization)" --output-on-failure
 - `create_preconsultation_rehearsal_package.cmake`: stages only nine allowlisted status-only documents and writes a SHA-256 manifest/status file.
 - `check_preconsultation_rehearsal_package.cmake`: rejects source, binary, credential-like material, unexpected files, hash drift, external-consultation claims, or authorization drift.
 - `run_preconsultation_rehearsal_package_smoke.cmake`: creates and verifies the internal rehearsal package.
+
+## P2-09 cumulative closeout
+
+- `check_p2_closeout_policy.cmake`: validates `P2C-P2-09-R1`, cumulative status/claims/exit controls, unchanged 14/69/`ANOCRYPTO_C_0`, and retained blocker/authorization states.
+- `create_preconsultation_closeout_package.cmake`: stages the 17-document status-only closeout allowlist and writes a SHA-256 manifest/status record.
+- `check_preconsultation_closeout_package.cmake`: verifies hashes, file count/type, non-disclosure, blocker states, and non-authorization.
+- `run_preconsultation_closeout_package_smoke.cmake`: creates and checks the controlled internal closeout pack.
