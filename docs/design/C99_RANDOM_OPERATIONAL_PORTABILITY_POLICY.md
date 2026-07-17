@@ -1,6 +1,9 @@
 # C99 Random Operational Portability Policy
 
-Status: P2-02 target-bound engineering policy. OE-01 selects the Linux `getrandom` adapter; entropy responsibility and final evidence remain P2-04/`EXTERNAL_CONFIRMATION_REQUIRED`.
+> P2-04 canonical policy: `docs/kcmvp/KCMVP_ENTROPY_AND_DRBG_SPEC.md` and policy ID `EDP-P2-04-R1`. This file remains supporting engineering detail and must not override the P2-04 responsibility, health-test, lifecycle, or claims boundaries.
+
+
+Status: P2-04 target-bound internal policy under `EDP-P2-04-R1`. OE-01 selects the Linux `getrandom(flags=0)` adapter as an external conditioned provider; formal acceptance and exact OE-01 evidence remain `EXTERNAL_CONFIRMATION_REQUIRED`/`NOT_RUN`.
 
 ## Purpose
 

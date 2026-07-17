@@ -65,3 +65,7 @@ Repository signing remains `UNSIGNED`; production signer and timestamp authority
 ## Change-control Rule
 
 Do not edit this record to `PASS`, `REVIEWED`, or equivalent based only on P2 local work. Preserve this blocker until an actual hosted run and retained human review satisfy the resume conditions.
+
+## P2-04 continuation note
+
+P2-04 local entropy/DRBG documentation, policy checks, operational review, CTest, install, PoC, compatibility, provenance, and evidence assembly do not change this blocker. They are `LOCAL_ENGINEERING_ONLY` and do not establish an actual hosted lane or review disposition.

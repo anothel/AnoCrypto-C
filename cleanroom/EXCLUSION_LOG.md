@@ -434,3 +434,14 @@ If excluded material is discovered:
 | EX-4405 | Storing integrity-test keys/tags, production signing material, or sensitive values in source, ordinary CI, logs, evidence, PoC, or artifacts | Secret disclosure risk | Excluded | Future controlled injection/custody belongs to P2-05/P2-07 after acceptance. |
 | EX-4406 | Claiming local policy/CTest evidence as hosted execution, institution acceptance, or runtime tamper evidence | Evidence misrepresentation | Excluded | P1-34 remains `BLOCKED_EXTERNAL`; integrity execution remains not implemented. |
 | EX-4407 | Push, tag, production signing, timestamping, or external release during P2-03 | Release-integrity risk | Excluded | Repository remains `UNSIGNED`, handoff `BLOCKED`, external authorization `NO`. |
+
+## P2-04 Entropy and DRBG Exclusions
+
+| Record | Excluded item/action | Reason | Disposition |
+|---|---|---|---|
+| EX-4501 | Treating Linux `getrandom`, entropy credit, external health ownership, or P2-04 terminology as institution-approved | False validation claim | Excluded; all remain `EXTERNAL_CONFIRMATION_REQUIRED`. |
+| EX-4502 | Applying or describing the generic duplicate-block engineering scaffolding as a finalized raw-noise health test for conditioned OS-provider output | Incorrect health-test claim | Rejected; no direct noise source is in the initial candidate. |
+| EX-4503 | Logging or retaining provider bytes, entropy/nonce input, DRBG Key/V state, personalization/additional input with customer data, or generated random bytes | Sensitive-material disclosure | Excluded from tests, evidence, PoC, and packages. |
+| EX-4504 | Adding prediction resistance, automatic VM/suspend detection, a direct source, new limits, public API, header, enum, or symbol without a separate scope/ABI gate | Scope and ABI drift | Excluded; P2-04 remains 14/69/`ANOCRYPTO_C_0`. |
+| EX-4505 | Treating local operational review, workflow definitions, or synthetic evidence as actual hosted or exact OE-01 execution | Evidence substitution | Rejected; P1-34 remains `BLOCKED_EXTERNAL`, hosted `NOT_RUN/UNREVIEWED`. |
+| EX-4506 | Push, tag, production signing, timestamping, or external release during P2-04 | Release-integrity risk | Excluded; repository remains `UNSIGNED`, handoff `BLOCKED`, authorization `NO`. |

@@ -7,7 +7,7 @@ Status: P2-03 internal self-test, integrity-candidate, finite-state, and recover
 | Item | Current value |
 |---|---|
 | Product | `AnoCrypto-C` |
-| Work-product version | `0.1.0-p2-03-selftest-integrity` |
+| Work-product version | `0.1.0-p2-04-entropy-drbg` |
 | Input baseline declared by project owner | `0.1.0-p1-33-release-rehearsal` at `cf0f3c425dd265c7509fb64a6123db97f71055dd` |
 | Public headers | 14 |
 | Exported public symbols | 69 |
@@ -95,13 +95,13 @@ Existing engineering evidence assets include source/archive hashes, SPDX 2.3 sou
 | GAP-006 | Finite-state model | `READY_FOR_INTERNAL_REVIEW` | `KCMVP_FINITE_STATE_MODEL.md` freezes states, transitions, service availability, fatal latch, orderly reinitialization, and implementation differences. | Obtain external interpretation and implement the separately tracked on-demand transition/concurrency deltas. |
 | GAP-007 | Startup algorithm KATs | `READY_FOR_INTERNAL_REVIEW` | Startup KAT implementation, structural checks, sequence specification, and external extended KAT tests exist. | Confirm accepted startup order and required submitted-service mapping; retain exact OE-01 execution. |
 | GAP-008 | Module integrity test | `PARTIAL` | P2-03 selects and specifies `INT-HMAC-SHA256-SINGLE-SO-R1`, including canonical measurement, key ownership, deployment, failure, and evidence rules. Current runtime still has only placeholder/structural checks. | Obtain external confirmation, then implement controlled tag/key injection and runtime verification with mutation/truncation/path/concurrency tests. |
-| GAP-009 | Conditional tests | `PARTIAL` | P2-03 separates out-of-scope key-pair tests, service validation, DRBG/provider operational checks, and on-demand self-test. | P2-04 must finalize entropy/direct-source applicability and institution-confirmed trigger classification. |
+| GAP-009 | Conditional tests | `PARTIAL` | P2-04 freezes OS-provider versus direct-source responsibility and keeps provider operational checks distinct from raw-noise health tests. | Institution confirmation of formal conditional-test classification and triggers remains required. |
 | GAP-010 | Fatal/recoverable failure policy | `READY_FOR_INTERNAL_REVIEW` | P2-03 failure/recovery matrix freezes fatal versus operation-local handling, sticky error behavior, allowed queries, process-termination recovery, and orderly reinitialization. | Reconcile remaining implementation deltas and obtain external confirmation of operator/recovery wording. |
-| GAP-011 | Entropy-source responsibility | `EXTERNAL_CONFIRMATION_REQUIRED` | OS-provider adapter and external-provider health ownership are documented. | Confirm whether the OS provider can remain outside direct noise-source testing and what evidence is required for each environment. |
-| GAP-012 | Health-test interpretation | `PARTIAL` | Duplicate-block engineering skeleton and fatal/local policy wiring exist. | Select source-specific tests, thresholds, startup/continuous placement, and recovery rules only for an owned direct noise source, if required. |
-| GAP-013 | DRBG limits and lifecycle | `PARTIAL` | Instantiate/reseed/generate limits and reseed-required tests exist. | Consolidate exact limits, prediction-resistance policy, process-change behavior, and operator guidance in P2-04. |
-| GAP-014 | Fork/process behavior | `PARTIAL` | Process marker and reseed-required behavior are implemented. | Retain actual target results and confirm unsupported-marker policy. |
-| GAP-015 | VM clone/snapshot and suspend/resume | `NOT_IMPLEMENTED` | P2-02 explicitly excludes automatic detection and treats cloned/restored contexts as unsupported unless discarded and reinitialized by the consuming environment. | Confirm operator guidance and evidence expectations in P2-04; do not claim automatic protection. |
+| GAP-011 | Entropy-source responsibility | `EXTERNAL_CONFIRMATION_REQUIRED` | `EDP-P2-04-R1` selects `ENT-OE01-LINUX-GETRANDOM-R1`, classifies it as an external conditioned provider, and excludes a direct noise source from the initial candidate. | Confirm provider acceptance, entropy credit, external health ownership, and required OE evidence. |
+| GAP-012 | Health-test interpretation | `PARTIAL` | P2-04 forbids applying the generic duplicate-block scaffolding to conditioned `getrandom()` output and reserves source-specific tests for any future owned direct source. | Confirm that external provider health ownership is acceptable; a future direct source needs a separate assessment and thresholds. |
+| GAP-013 | DRBG limits and lifecycle | `READY_FOR_INTERNAL_REVIEW` | P2-04 freezes input/request lengths, `2^48` implementation interval, unsupported prediction resistance, process-change reseed, and VM/suspend limitations with policy/test traceability. | Confirm entropy credit, profile limits, and any stricter operational reseed rule externally. |
+| GAP-014 | Fork/process behavior | `READY_FOR_INTERNAL_REVIEW` | Process-marker change rejects generation until reseed; unsupported marker branches fail closed and output is cleared. | Retain exact OE-01 execution and confirm accepted process-model wording. |
+| GAP-015 | VM clone/snapshot and suspend/resume | `NOT_IMPLEMENTED` | P2-04 freezes explicit unsupported wording: duplicated/restored state must be discarded and independently reinitialized; no automatic detection is claimed. | Confirm operator guidance and whether deployment restrictions or extra evidence are required. |
 | GAP-016 | CSP inventory and lifecycle | `PARTIAL` | Purpose-separated in-memory handles and destruction paths exist. | Create a formal CSP inventory, state/ownership table, and service-by-service lifecycle in P2-05. |
 | GAP-017 | Zeroization evidence | `PARTIAL` | Explicit zeroize paths and negative/lifecycle tests exist. | Retain target/compiler-specific evidence and define what is guaranteed at module/process/OS boundaries. |
 | GAP-018 | Persistent/exported keys | `OUT_OF_SCOPE` | Public export/persistence/wrapping are rejected or absent. | Keep excluded unless a separate product and validation scope gate approves them. |
@@ -130,6 +130,8 @@ All institution-dependent items remain `EXTERNAL_CONFIRMATION_REQUIRED` until a 
 
 
 P2-03 additionally froze the internal self-test/integrity/state/recovery design without claiming implementation or acceptance of module integrity. The machine-readable policy and checker require `SELECTED_CANDIDATE_NOT_IMPLEMENTED`, `EXTERNAL_CONFIRMATION_REQUIRED`, 14 headers, 69 symbols, `ANOCRYPTO_C_0`, hosted `NOT_RUN/UNREVIEWED`, and external authorization `NO`.
+
+P2-04 freezes `EDP-P2-04-R1` and `ENT-OE01-LINUX-GETRANDOM-R1` as internal policy only. It closes responsibility/limit documentation and local evidence wiring, but leaves provider acceptance, entropy credit, health-test allocation, exact OE-01 execution, and formal conditional-test interpretation externally open. P2-05 is next.
 
 ## External Reference Checkpoint
 

@@ -71,8 +71,17 @@ function(ano_crypto_detect_sensitive_signing_material_text
             endforeach()
             if(_status_line MATCHES
                "^[ \t]*(export[ \t]+|set[ \t]+)?(entropy|seed|signature|[a-z0-9_]*token[a-z0-9_]*)[ \t]*=[ \t]*(.*)$")
+                set(_status_key_match "${CMAKE_MATCH_2}")
                 set(_status_value "${CMAKE_MATCH_3}")
                 string(STRIP "${_status_value}" _status_value)
+                # CTest emits label-time summary rows such as
+                # `entropy = 0.09 sec*proc (2 tests)`. This is duration metadata,
+                # not entropy material, so retain the evidence log while keeping
+                # all other non-placeholder assignments fail-closed.
+                if(_status_key_match STREQUAL "entropy" AND
+                   _status_value MATCHES "^[0-9]+([.][0-9]+)?[ \t]+sec[*]proc[ \t]+[(][0-9]+[ \t]+tests?[)]$")
+                    continue()
+                endif()
                 if(NOT _status_value MATCHES
                    "^(no|none|absent|not_created|not_run|unprovisioned|unreviewed)$")
                     set(${_out_reason} "sensitive generic value assignment" PARENT_SCOPE)

@@ -20,7 +20,7 @@ The target serializes clean Release symbol/runtime-dependency inspection, instal
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p2-03 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p2-04 \
   -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=build/release-provenance-evidence \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=build/release-signing-handoff \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=build/release-signing-handoff-check.txt \
@@ -42,8 +42,8 @@ The final assembly step consumes only that hash-bound tree:
 ```sh
 cmake \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p2-03 \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-03 \
+  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p2-04 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-04 \
   -P tools/assemble_release_evidence.cmake
 ```
 
@@ -232,3 +232,11 @@ ctest --test-dir build -R "ano_crypto_release_(provenance|signing_handoff)_tests
 Offline profile: sign `RELEASE_ARTIFACTS.sha256` with Ed25519; store raw 64-byte `RELEASE_ARTIFACTS.sha256.ed25519`; identify approved public key by SHA-256 of DER SubjectPublicKeyInfo; obtain RFC 3161 timestamp over the signature file. GitHub attestation is optional secondary evidence only.
 
 Production signer/TSA records and required role identities are `UNPROVISIONED`. Actual hosted review, tag authorization, production signature/timestamp generation and verification, Security Reviewer/Product Release Owner approval, legal/product authorization, and external distribution remain incomplete. No key, token, signature, timestamp request, or timestamp response belongs in source, evidence, installed SDK, or PoC package.
+
+## P2-04 entropy/DRBG policy check
+
+```sh
+cmake -DANO_CRYPTO_SOURCE_DIR=. -DANO_CRYPTO_OUTPUT_FILE=build/ENTROPY_DRBG_POLICY_CHECK.txt -P tools/check_entropy_drbg_policy.cmake
+```
+
+The check binds `EDP-P2-04-R1`, `ENT-OE01-LINUX-GETRANDOM-R1`, the frozen implementation limits, 14/69/`ANOCRYPTO_C_0`, and the unchanged hosted/release blocker state. It is engineering evidence only.

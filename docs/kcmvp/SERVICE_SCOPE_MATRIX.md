@@ -36,3 +36,7 @@ The service inventory remains 14 public headers and 69 exports on `ANOCRYPTO_C_0
 ## P2-03 self-test and state note
 
 No cryptographic service or public symbol is added. Startup KATs and the sticky service gate remain current behavior. `INT-HMAC-SHA256-SINGLE-SO-R1` is a selected internal design only; no shared-object verifier, integrity key, expected tag, or metadata record is present. Target on-demand self-test state transitions are also pending implementation. The service matrix therefore must not label module integrity as operational.
+
+## P2-04 entropy/DRBG scope note
+
+`EDP-P2-04-R1` freezes Linux `getrandom(flags=0)` as the initial external conditioned provider profile, with no direct noise source and no generic health test applied to conditioned output. This is internal policy only; provider acceptance, entropy credit, formal conditional-test classification, and exact OE-01 execution remain open. Public service scope and ABI are unchanged.

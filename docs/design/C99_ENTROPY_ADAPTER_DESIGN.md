@@ -1,5 +1,8 @@
 # C99 Entropy Adapter Design Skeleton
 
+> P2-04 canonical policy: `docs/kcmvp/KCMVP_ENTROPY_AND_DRBG_SPEC.md` and policy ID `EDP-P2-04-R1`. This file remains supporting engineering detail and must not override the P2-04 responsibility, health-test, lifecycle, or claims boundaries.
+
+
 Status: P1-21 draft.
 
 ## Purpose

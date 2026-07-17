@@ -168,6 +168,18 @@ ano_crypto_detect_sensitive_signing_material_file(
 if(NOT _sensitive_reason STREQUAL "sensitive assignment")
     message(FATAL_ERROR "Sensitive assignment regression was not rejected")
 endif()
+file(WRITE "${_sensitive_fixture}" "entropy = 0.09 sec*proc (2 tests)\n")
+ano_crypto_detect_sensitive_signing_material_file(
+    "${_sensitive_fixture}" ON _sensitive_reason)
+if(_sensitive_reason)
+    message(FATAL_ERROR "CTest entropy label-time metadata was incorrectly rejected")
+endif()
+file(WRITE "${_sensitive_fixture}" "entropy = fixture-only\n")
+ano_crypto_detect_sensitive_signing_material_file(
+    "${_sensitive_fixture}" ON _sensitive_reason)
+if(NOT _sensitive_reason STREQUAL "sensitive generic value assignment")
+    message(FATAL_ERROR "Generic entropy assignment regression was not rejected")
+endif()
 set(_sensitive_extension_fixture "${ANO_CRYPTO_TEST_WORK_DIR}/fixture.key")
 file(WRITE "${_sensitive_extension_fixture}" "fixture-only\n")
 ano_crypto_detect_sensitive_signing_material_file(

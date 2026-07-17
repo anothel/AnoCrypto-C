@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-03 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-04 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-03")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-04")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -104,6 +104,10 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK)
     set(ANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_ENTROPY_DRBG_POLICY_CHECK)
+    set(ANO_CRYPTO_RUN_ENTROPY_DRBG_POLICY_CHECK ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK)
@@ -1055,6 +1059,32 @@ else()
         "Entropy operational policy check was not requested. Set ANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK=ON.\n")
 endif()
 
+
+if(ANO_CRYPTO_RUN_ENTROPY_DRBG_POLICY_CHECK)
+    set(_entropy_drbg_policy_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_DRBG_POLICY_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+            -DANO_CRYPTO_ENTROPY_DRBG_POLICY_CHECK_OUTPUT=${_entropy_drbg_policy_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_entropy_drbg_policy.cmake"
+        RESULT_VARIABLE _entropy_drbg_policy_check_result
+        OUTPUT_VARIABLE _entropy_drbg_policy_check_stdout
+        ERROR_VARIABLE _entropy_drbg_policy_check_stderr
+        TIMEOUT 300)
+    file(APPEND "${_entropy_drbg_policy_check_output}"
+        "\nCommand output:\n${_entropy_drbg_policy_check_stdout}${_entropy_drbg_policy_check_stderr}\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "P2-04 entropy/DRBG policy check result: ${_entropy_drbg_policy_check_result}\n")
+    if(NOT _entropy_drbg_policy_check_result EQUAL 0)
+        message(FATAL_ERROR
+            "P2-04 entropy/DRBG policy check failed; see ${_entropy_drbg_policy_check_output}")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_DRBG_POLICY_CHECK.txt"
+        "P2-04 entropy/DRBG policy check was not requested. Set ANO_CRYPTO_RUN_ENTROPY_DRBG_POLICY_CHECK=ON.\n")
+endif()
+
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "AnoCrypto-C reproducible build evidence notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
@@ -1074,6 +1104,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "Clean Release exported-symbol baseline: EXPORTED_SYMBOL_BASELINE_CHECK.txt\n"
     "Entropy/health policy check: ENTROPY_HEALTH_CHECK.txt\n"
     "Entropy operational policy check: ENTROPY_OPERATIONAL_POLICY_CHECK.txt\n"
+    "P2-04 entropy/DRBG policy check: ENTROPY_DRBG_POLICY_CHECK.txt\n"
     "Differential/portability policy check: DIFFERENTIAL_PORTABILITY_CHECK.txt\n"
     "AES/CBC implementation policy check: AES_CBC_IMPLEMENTATION_CHECK.txt\n"
     "AES/CBC hardening policy check: AES_HARDENING_CHECK.txt\n"
@@ -1085,9 +1116,9 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P2-03 evidence and scope-review notes\n"
+    "AnoCrypto-C P2-04 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P2-03 engineering scope artifact covering implemented services plus the non-implemented self-test/integrity candidate; not official validation evidence.\n"
+    "Status: P2-04 engineering scope artifact covering the frozen entropy/provider/DRBG responsibility model plus retained P2-03 implementation gaps; not official validation evidence.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"
@@ -1239,6 +1270,27 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_OPERATIONAL_REVIEW_NOTES.txt"
     "Explicit-entropy DRBG state remains caller-managed across process inheritance; this is a boundary record, not a fork-safety claim.\n"
     "The public random service is implemented through source-backed HMAC_DRBG-SHA-256 contexts. Evidence records status and policy only, not provider output, seed material, nonce material, DRBG state, or generated output.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Entropy operational review notes: ENTROPY_OPERATIONAL_REVIEW_NOTES.txt\n")
+
+
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_DRBG_REVIEW_NOTES.txt"
+    "AnoCrypto-C P2-04 entropy/provider/DRBG responsibility review notes\n"
+    "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
+    "Status: frozen internal engineering policy; formal provider and health-test acceptance remains EXTERNAL_CONFIRMATION_REQUIRED.\n"
+    "Policy ID: EDP-P2-04-R1\n"
+    "Specification: docs/kcmvp/KCMVP_ENTROPY_AND_DRBG_SPEC.md\n"
+    "Responsibility matrix: docs/kcmvp/KCMVP_ENTROPY_RESPONSIBILITY_MATRIX.md\n"
+    "Health/recovery matrix: docs/kcmvp/KCMVP_ENTROPY_HEALTH_AND_RECOVERY_MATRIX.md\n"
+    "Implementation delta: docs/kcmvp/P2_04_IMPLEMENTATION_TEST_DELTA.md\n"
+    "Policy check: ENTROPY_DRBG_POLICY_CHECK.txt\n"
+    "Selected provider profile: ENT-OE01-LINUX-GETRANDOM-R1 using Linux getrandom(flags=0) as an external conditioned provider.\n"
+    "Direct project-owned raw noise source: OUT_OF_SCOPE_INITIAL_CANDIDATE.\n"
+    "Module health tests on conditioned provider output: disabled; generic duplicate-block candidates remain test-only.\n"
+    "HMAC_DRBG limits: 32-byte entropy input, 16-byte nonce, 65,536-byte maximum generate request, and 2^48 generate-request reseed interval.\n"
+    "Lifecycle: detected process changes require reseed; VM/container checkpoint duplication and suspend/resume are not automatically detected.\n"
+    "Evidence records provider/status/length/count/hash metadata only. Entropy, nonce, DRBG state, and generated output are prohibited.\n"
+    "Actual selected-OE and P1-34 hosted evidence remain NOT_RUN/BLOCKED_EXTERNAL.\n")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "P2-04 entropy/DRBG review notes: ENTROPY_DRBG_REVIEW_NOTES.txt\n")
 
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
     "SBOM status: SBOM_STATUS.txt\n"
@@ -1545,6 +1597,20 @@ if(NOT _cmac_lifecycle_result EQUAL 0 OR
 endif()
 
 _ano_crypto_run_evidence_test(
+    ano_crypto_entropy_drbg_policy_review
+    _entropy_drbg_review_result _entropy_drbg_review_stdout _entropy_drbg_review_stderr)
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_DRBG_POLICY_REVIEW.txt"
+    "${_entropy_drbg_review_stdout}${_entropy_drbg_review_stderr}")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "P2-04 entropy/DRBG operational review result: ${_entropy_drbg_review_result}\n")
+if(NOT _entropy_drbg_review_result EQUAL 0 OR
+   NOT _entropy_drbg_review_stdout MATCHES "policy_id=EDP-P2-04-R1" OR
+   NOT _entropy_drbg_review_stdout MATCHES "generated_bytes_logged=no" OR
+   NOT _entropy_drbg_review_stdout MATCHES "provider_probe_status=ANO_CRYPTO_OK")
+    message(FATAL_ERROR "P2-04 entropy/DRBG operational review failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/ENTROPY_DRBG_POLICY_REVIEW.txt")
+endif()
+
+_ano_crypto_run_evidence_test(
     ano_crypto_thread_platform_review
     _thread_platform_review_result _thread_platform_review_stdout _thread_platform_review_stderr)
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/THREAD_PLATFORM_REVIEW.log"
@@ -1722,6 +1788,9 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `ENTROPY_HEALTH_REVIEW_NOTES.txt`: health-test state-transition and logging review notes.\n"
 "- `ENTROPY_OPERATIONAL_POLICY_CHECK.txt`: source classification, health ownership, operational probe, and process-boundary policy check.\n"
 "- `ENTROPY_OPERATIONAL_REVIEW_NOTES.txt`: entropy source and process-change review notes.\n"
+"- `ENTROPY_DRBG_POLICY_CHECK.txt`: P2-04 provider, health ownership, limits, lifecycle, ABI, and blocker policy record.\n"
+"- `ENTROPY_DRBG_POLICY_REVIEW.txt`: status-only runtime provider/classification/limit/capability review; contains no provider or generated bytes.\n"
+"- `ENTROPY_DRBG_REVIEW_NOTES.txt`: P2-04 responsibility and remaining external-confirmation review notes.\n"
 "- `REPRODUCIBLE_BUILD_NOTES.txt`: current reproducibility procedure notes and unresolved gaps.\n"
 "- `ctest.log`: captured CTest output when requested.\n"
 "- `INSTALL_SMOKE_*.log`: installed-package configure/build/run logs when requested.\n"

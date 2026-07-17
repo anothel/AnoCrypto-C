@@ -31,7 +31,7 @@ endforeach()
 if(NOT ANO_CRYPTO_RELEASE_PROVENANCE_SCHEMA STREQUAL "1" OR
    NOT ANO_CRYPTO_RELEASE_SBOM_FORMAT STREQUAL "SPDX-2.3-JSON" OR
    NOT ANO_CRYPTO_RELEASE_SIGNING_MODE STREQUAL "UNSIGNED")
-    message(FATAL_ERROR "Unexpected P2-02 release provenance identity policy")
+    message(FATAL_ERROR "Unexpected P2-04 release provenance identity policy")
 endif()
 
 set(_required_files
@@ -206,7 +206,7 @@ endif()
 
 string(TIMESTAMP _checked_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}"
-    "AnoCrypto-C P2-02 release provenance policy check\n"
+    "AnoCrypto-C P2-04 release provenance policy check\n"
     "Checked UTC: ${_checked_utc}\n"
     "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Provenance schema: ${ANO_CRYPTO_RELEASE_PROVENANCE_SCHEMA}\n"
@@ -231,4 +231,4 @@ file(WRITE "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}"
     "External release authorization: NO\n"
     "Result: PASS\n")
 
-message(STATUS "AnoCrypto-C P2-03 release provenance policy check passed")
+message(STATUS "AnoCrypto-C P2-04 release provenance policy check passed")

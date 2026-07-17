@@ -35,13 +35,13 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 |---|---|---|---|---|
 | DOC-DD-001 | Module architecture and component decomposition | `src/*` layout; architecture docs | `UPDATE_AND_CONSOLIDATE` | P2-07 detailed design skeleton. |
 | DOC-DD-002 | Module lifecycle/error-state design | `module_state.c`; module tests; finite-state and failure/recovery matrices | `EXISTING_ENGINEERING_INPUT` | Reconcile implementation deltas and external recovery interpretation. |
-| DOC-DD-003 | Self-test, conditional-test, and integrity design | `selftest.c`; KAT manifest; P2-03 specification/policy/delta register | `EXISTING_ENGINEERING_INPUT` | Integrity design is selected but not implemented; conditional entropy classification remains P2-04/external. |
+| DOC-DD-003 | Self-test, conditional-test, and integrity design | `selftest.c`; KAT manifest; P2-03 specification/policy/delta register | `EXISTING_ENGINEERING_INPUT` | Integrity design is selected but not implemented; P2-04 internal responsibility is frozen; formal conditional-test classification remains external. |
 | DOC-DD-004 | SHA-2/HMAC design and API behavior | hash/HMAC source and API docs | `UPDATE_AND_CONSOLIDATE` | Map algorithm operations, buffers, state, and failure cleanup. |
-| DOC-DD-005 | HMAC_DRBG and random-service design | DRBG/random/entropy docs | `UPDATE_AND_CONSOLIDATE` | P2-04 consolidated design. |
+| DOC-DD-005 | HMAC_DRBG and random-service design | DRBG/random/entropy docs | `UPDATE_AND_CONSOLIDATE` | P2-04 internal consolidated design exists; convert after consultation. |
 | DOC-DD-006 | Entropy source/provider and health-test design | entropy adapter/operational/health docs | `AFTER_CONSULTATION` | Final ownership/tests only after source/environment confirmation. |
 | DOC-DD-007 | AES/CBC/CMAC design and API behavior | AES/CBC/CMAC design/hardening docs | `UPDATE_AND_CONSOLIDATE` | Consolidate without expanding service scope. |
 | DOC-DD-008 | CSP lifecycle and zeroization design | CSP lifecycle; zeroize source; side-channel checklist | `UPDATE_AND_CONSOLIDATE` | P2-05 formal inventory and path matrix. |
-| DOC-DD-009 | Thread/process model | P2-02 boundary/OE matrix; thread-safety and random portability docs | `UPDATE_AND_CONSOLIDATE` | OE-01 thread/process assumptions frozen; entropy/VM/suspend closure remains P2-04. |
+| DOC-DD-009 | Thread/process model | P2-02 boundary/OE matrix; thread-safety and random portability docs | `UPDATE_AND_CONSOLIDATE` | OE-01 thread/process assumptions frozen; P2-04 internal lifecycle wording is frozen; formal acceptance and exact OE evidence remain open. |
 | DOC-DD-010 | Secure coding and side-channel analysis | security checklist; compiler capture plans | `CREATE_NEW` | P2-06 findings register and retained review dispositions. |
 | DOC-DD-011 | Build/package/runtime dependency design | candidate record, CMake enforcement, boundary/OE matrix, install/PoC/provenance docs | `UPDATE_AND_CONSOLIDATE` | Convert P2-02 dependency/exclusion record into controlled detailed design. |
 
@@ -83,7 +83,7 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 | DOC-OP-001 | Installation and build guide for submitted configuration | P2-02 OE command; SDK integration guide; install smoke | `UPDATE_AND_CONSOLIDATE` | Execute and retain exact OE-01 commands, artifact hashes, SONAME/imports, and install paths. |
 | DOC-OP-002 | Crypto officer/operator guidance | README; finite-state model; failure/recovery matrix; self-test/integrity spec | `UPDATE_AND_CONSOLIDATE` | P2-07 controlled guidance using P2-03 startup/fatal/restart policy and later P2-04/P2-05 inputs. |
 | DOC-OP-003 | Developer API/service guide | public headers; PoC example | `UPDATE_AND_CONSOLIDATE` | Include buffer/alias/state/status rules without internal details. |
-| DOC-OP-004 | Secure operation/environment assumptions | P2-02 boundary/OE matrix; entropy/thread/process/VM notes | `UPDATE_AND_CONSOLIDATE` | Boundary/thread/deployment assumptions exist; finalize entropy and lifecycle wording in P2-04. |
+| DOC-OP-004 | Secure operation/environment assumptions | P2-02 boundary/OE matrix; entropy/thread/process/VM notes | `UPDATE_AND_CONSOLIDATE` | Boundary/thread/deployment assumptions exist; Use P2-04 frozen internal wording and reconcile it after consultation. |
 | DOC-OP-005 | Vulnerability/security reporting guide | none controlled | `CREATE_NEW` | Define contact, supported branches, embargo and patch/retest handling. |
 | DOC-SUP-001 | Algorithm and public-vector source register | clean-room source manifest | `EXISTING_ENGINEERING_INPUT` | Review and extract controlled references. |
 | DOC-SUP-002 | Public ABI/symbol/header baseline | `abi/*`; `release/PUBLIC_HEADERS.sha256` | `EXISTING_ENGINEERING_INPUT` | Retain as supporting configuration evidence. |
@@ -114,3 +114,15 @@ Do not finalize the submission skeleton until P2-02 through P2-06 have produced 
 - integrity and entropy responsibilities;
 - expected source/binary/test artifact package;
 - confidentiality and delivery channel.
+## P2-04 Entropy/DRBG controlled inputs
+
+| Document / evidence | Current disposition | Submission action |
+|---|---|---|
+| `KCMVP_ENTROPY_AND_DRBG_SPEC.md` | `EXISTING_INTERNAL_DRAFT` | Convert to controlled detailed-design content only after provider/profile consultation. |
+| `KCMVP_ENTROPY_RESPONSIBILITY_MATRIX.md` | `EXISTING_INTERNAL_DRAFT` | Use to assign module, OS provider, caller, operator, and institution responsibilities. |
+| `KCMVP_ENTROPY_HEALTH_AND_RECOVERY_MATRIX.md` | `EXISTING_INTERNAL_DRAFT` | Reconcile formal conditional-test and fatal/recoverable classification after consultation. |
+| `P2_04_IMPLEMENTATION_TEST_DELTA.md` | `ENGINEERING_CONTROL` | Track remediation and retained evidence; not an institution result. |
+| `ANOCRYPTO_C_ENTROPY_DRBG_POLICY.cmake` and policy check | `ENGINEERING_CONTROL` | Preserve candidate configuration/claim drift checks. |
+| `ENTROPY_DRBG_POLICY_REVIEW.txt` and policy check evidence | `LOCAL_ENGINEERING_ONLY` until exact OE-01 run | Retain identifiers/status/lengths only; never retain provider or generated bytes. |
+
+Open submission dependencies remain provider acceptance, entropy credit, health-test ownership, exact OE-01 evidence, and institution-approved lifecycle terminology.

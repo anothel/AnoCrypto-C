@@ -1,4 +1,4 @@
-# Build a clean installed P1-33 package, then compile and run current-header and
+# Build a clean installed current package, then compile and run current-header and
 # retained-P1-29-header C99 consumers against that package.
 cmake_minimum_required(VERSION 3.16)
 

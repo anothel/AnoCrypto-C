@@ -11,8 +11,8 @@ extern "C" {
 #define ANO_CRYPTO_VERSION_MAJOR 0u
 #define ANO_CRYPTO_VERSION_MINOR 1u
 #define ANO_CRYPTO_VERSION_PATCH 0u
-#define ANO_CRYPTO_VERSION_PRERELEASE "p2-03-selftest-integrity"
-#define ANO_CRYPTO_VERSION_STRING "0.1.0-p2-03-selftest-integrity"
+#define ANO_CRYPTO_VERSION_PRERELEASE "p2-04-entropy-drbg"
+#define ANO_CRYPTO_VERSION_STRING "0.1.0-p2-04-entropy-drbg"
 
 /*
  * Version query APIs are allowed in all module states, including error state.

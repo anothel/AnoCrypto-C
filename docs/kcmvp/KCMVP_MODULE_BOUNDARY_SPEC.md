@@ -8,7 +8,7 @@ Status: P2-02 internally frozen candidate. Formal acceptability remains `EXTERNA
 |---|---|
 | Candidate ID | `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` |
 | Product | `AnoCrypto-C` |
-| Engineering version | `0.1.0-p2-03-selftest-integrity` |
+| Engineering version | `0.1.0-p2-04-entropy-drbg` |
 | Module type | Software cryptographic module candidate |
 | Linkage form | Shared library only |
 | Runtime artifact | `libanocrypto_c.so.0.1.0` |
@@ -65,9 +65,9 @@ Customer application process
 ```
 
 The OS provider and general-purpose operating system are dependencies and
-operating-environment elements, not AnoCrypto-C source components. The final
-entropy-source responsibility and accepted provider evidence remain P2-04 and
-consultation items.
+operating-environment elements, not AnoCrypto-C source components. P2-04 freezes
+the internal entropy-source responsibility; accepted provider evidence and formal
+interpretation remain consultation items.
 
 ## 4. Runtime Source Inventory
 

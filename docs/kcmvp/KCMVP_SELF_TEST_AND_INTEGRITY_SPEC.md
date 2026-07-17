@@ -63,8 +63,8 @@ P2-03 does not create conditional tests that are not applicable to the frozen se
 |---|---|---|
 | Public-key generation or key-pair consistency | `OUT_OF_SCOPE` | No public-key algorithm or key-generation service exists. |
 | Symmetric/HMAC/CMAC key import | `NOT_A_SELF_TEST` | Length, purpose, stale-handle, and lifecycle checks are service validation; P2-05 owns CSP evidence. |
-| HMAC_DRBG instantiate/reseed/generate | `OPERATIONAL_CHECKS_PRESENT` | Provider/reseed/process guards are not reclassified as KATs. P2-04 owns final limits and failure policy. |
-| Direct physical noise source health tests | `NOT_APPLICABLE_CURRENT_CANDIDATE / EXTERNAL_CONFIRMATION_REQUIRED` | OE-01 consumes the Linux OS RNG and has no project-owned direct noise source. P2-04 owns final interpretation. |
+| HMAC_DRBG instantiate/reseed/generate | `OPERATIONAL_CHECKS_PRESENT` | Provider/reseed/process guards are not reclassified as KATs. `EDP-P2-04-R1` freezes internal limits and operation-local provider failure; formal classification remains external. |
+| Direct physical noise source health tests | `NOT_APPLICABLE_CURRENT_CANDIDATE / EXTERNAL_CONFIRMATION_REQUIRED` | OE-01 consumes the Linux OS RNG and has no project-owned direct noise source. `EDP-P2-04-R1` excludes a direct source and keeps formal interpretation external. |
 | OS entropy provider failure | `P2-04` | Fatal versus retry/reseed treatment must be finalized with provider responsibility. |
 | Module load or explicit on-demand request | `STARTUP_OR_ON_DEMAND_SELF_TEST` | Target behavior is described below. |
 

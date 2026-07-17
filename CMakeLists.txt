@@ -462,7 +462,7 @@ add_custom_target(ano_crypto_release_compatibility_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_compatibility.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Checking P2-03 release identity and retained P1-29 public source/ABI compatibility")
+    COMMENT "Checking P2-04 release identity and retained P1-29 public source/ABI compatibility")
 
 add_custom_target(ano_crypto_release_provenance_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -472,7 +472,7 @@ add_custom_target(ano_crypto_release_provenance_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_provenance_policy.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Checking P2-03 retained unsigned release provenance, source SBOM, and signing boundary")
+    COMMENT "Checking P2-04 retained unsigned release provenance, source SBOM, and signing boundary")
 
 add_custom_target(ano_crypto_tagged_release_compatibility_smoke
     COMMAND ${CMAKE_COMMAND} -E env
@@ -489,7 +489,7 @@ add_custom_target(ano_crypto_tagged_release_compatibility_smoke
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_tagged_release_compatibility_smoke.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Building installed P2-03 package and running current/P1-29 header compatibility consumers")
+    COMMENT "Building installed P2-04 package and running current/P1-29 header compatibility consumers")
 
 add_custom_target(ano_crypto_public_surface_check
     COMMAND ${CMAKE_COMMAND}
@@ -630,6 +630,16 @@ add_custom_target(ano_crypto_entropy_operational_policy_check
     USES_TERMINAL
     COMMENT "Checking AnoCrypto-C entropy source classification, provider ownership, and process-boundary policy")
 
+add_custom_target(ano_crypto_entropy_drbg_policy_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+        -DANO_CRYPTO_ENTROPY_DRBG_POLICY_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/ENTROPY_DRBG_POLICY_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_entropy_drbg_policy.cmake
+    USES_TERMINAL
+    VERBATIM
+    COMMENT "Checking P2-04 entropy-provider, health ownership, DRBG limits, and lifecycle policy")
+
 if(ANO_CRYPTO_BUILD_EXAMPLES)
     add_subdirectory(examples/core_poc)
 endif()
@@ -718,6 +728,16 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_self_test_integrity_policy.cmake)
     set_tests_properties(ano_crypto_self_test_integrity_policy_tests PROPERTIES
         LABELS "kcmvp;self-test;integrity;policy")
+
+
+    add_test(NAME ano_crypto_entropy_drbg_policy_tests
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
+            -DANO_CRYPTO_ENTROPY_DRBG_POLICY_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/ENTROPY_DRBG_POLICY_CHECK.txt
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_entropy_drbg_policy.cmake)
+    set_tests_properties(ano_crypto_entropy_drbg_policy_tests PROPERTIES
+        LABELS "kcmvp;entropy;drbg;policy")
 
     add_executable(ano_crypto_service_gate_negative_tests
         tests/negative/crypto_service_gate_tests.c)
@@ -897,6 +917,19 @@ if(ANO_CRYPTO_BUILD_TESTS)
     add_test(NAME ano_crypto_random_platform_review COMMAND ano_crypto_random_platform_review)
     set_tests_properties(ano_crypto_random_platform_review PROPERTIES LABELS "random-service;hosted-review")
 
+
+    add_executable(ano_crypto_entropy_drbg_policy_review
+        tests/operational/entropy_drbg_policy_review.c)
+    target_link_libraries(ano_crypto_entropy_drbg_policy_review PRIVATE anocrypto_c)
+    target_include_directories(ano_crypto_entropy_drbg_policy_review PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
+    if(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER AND
+       (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR WIN32 OR APPLE))
+        target_compile_definitions(ano_crypto_entropy_drbg_policy_review PRIVATE ANO_CRYPTO_EXPECT_RANDOM_AVAILABLE)
+    endif()
+    add_test(NAME ano_crypto_entropy_drbg_policy_review COMMAND ano_crypto_entropy_drbg_policy_review)
+    set_tests_properties(ano_crypto_entropy_drbg_policy_review PROPERTIES
+        LABELS "kcmvp;entropy;drbg;operational-review")
+
     add_executable(ano_crypto_drbg_api_negative_tests
         tests/negative/drbg_api_negative_tests.c)
     target_link_libraries(ano_crypto_drbg_api_negative_tests PRIVATE anocrypto_c)
@@ -1042,7 +1075,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
     add_executable(ano_crypto_current_header_compatibility_tests
         tests/compat/p1_29_compatibility_probe.c)
     target_compile_definitions(ano_crypto_current_header_compatibility_tests PRIVATE
-        ANO_CRYPTO_COMPAT_HEADER_MODE="current-p2-03"
+        ANO_CRYPTO_COMPAT_HEADER_MODE="current-p2-04"
         ANO_CRYPTO_EXPECT_CURRENT_HEADER=1
         ANO_CRYPTO_EXPECT_RUNTIME_VERSION="${ANO_CRYPTO_RELEASE_VERSION}")
     target_link_libraries(ano_crypto_current_header_compatibility_tests PRIVATE anocrypto_c)
@@ -1165,6 +1198,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_random_service_tests
         ano_crypto_random_lifecycle_stress_tests
         ano_crypto_random_platform_review
+        ano_crypto_entropy_drbg_policy_review
         ano_crypto_drbg_api_negative_tests
         ano_crypto_csp_key_lifecycle_negative_tests
         ano_crypto_csp_handle_stale_exhaustion_tests
@@ -1211,7 +1245,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_BUILD_CONFIG=$<CONFIG>
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_ctest_evidence.cmake
         USES_TERMINAL
-        COMMENT "Capturing AnoCrypto-C P2-02 CTest evidence")
+        COMMENT "Capturing AnoCrypto-C P2-04 CTest evidence")
     add_dependencies(ano_crypto_ctest_evidence ${_ano_crypto_evidence_test_targets})
 
     # Serialize nested build trees before CTest. Direct sibling dependencies can
@@ -1240,7 +1274,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/prepare_release_provenance_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Preparing verified unsigned P2-02 release provenance evidence")
+        COMMENT "Preparing verified unsigned P2-04 release provenance evidence")
     add_dependencies(ano_crypto_release_provenance_evidence
         ano_crypto_ctest_evidence)
 
@@ -1258,7 +1292,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_signing_handoff.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Creating and checking the key-free P2-02 retained offline-signing handoff")
+        COMMENT "Creating and checking the key-free P2-04 retained offline-signing handoff")
     add_dependencies(ano_crypto_release_signing_handoff_evidence
         ano_crypto_release_provenance_evidence)
 
@@ -1278,7 +1312,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-03
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-04
             -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-provenance-evidence
             -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff
             -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff-check.txt
@@ -1307,23 +1341,24 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_TAGGED_COMPATIBILITY_CHECK=ON
             -DANO_CRYPTO_RUN_ENTROPY_HEALTH_CHECK=ON
             -DANO_CRYPTO_RUN_ENTROPY_OPERATIONAL_CHECK=ON
+            -DANO_CRYPTO_RUN_ENTROPY_DRBG_POLICY_CHECK=ON
             -DANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Preparing hash-bound P2-03 status evidence")
+        COMMENT "Preparing hash-bound P2-04 status evidence")
     add_dependencies(ano_crypto_prepare_release_status_evidence
         ano_crypto_release_signing_handoff_evidence)
 
     add_custom_target(ano_crypto_collect_release_evidence
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-03
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p2-03
+            -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p2-04
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p2-04
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/assemble_release_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Assembling AnoCrypto-C P2-03 evidence from prepared artifacts")
+        COMMENT "Assembling AnoCrypto-C P2-04 evidence from prepared artifacts")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_prepare_release_status_evidence)
 endif()
