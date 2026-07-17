@@ -1,6 +1,6 @@
 # KCMVP Submission Document Inventory
 
-Status: P2-06 inventory. Boundary/OE, self-test/integrity, entropy/DRBG, CSP/zeroization, and secure-coding/side-channel records are available as engineering inputs; runtime integrity implementation, exact current templates, selected-OE/external dispositions, and accepted contents remain pending or `EXTERNAL_CONFIRMATION_REQUIRED`.
+Status: P2-07 controlled internal skeleton inventory. Boundary/OE, self-test/integrity, entropy/DRBG, CSP/zeroization, and secure-coding/side-channel records are available as engineering inputs; runtime integrity implementation, exact current templates, selected-OE/external dispositions, and accepted contents remain pending or `EXTERNAL_CONFIRMATION_REQUIRED`.
 
 ## Inventory Categories
 
@@ -12,7 +12,7 @@ Status: P2-06 inventory. Boundary/OE, self-test/integrity, entropy/DRBG, CSP/zer
 | `AFTER_CONSULTATION` | Content/template depends on institution response or selected environment. |
 | `NOT_IN_SUBMISSION_PACKAGE` | Internal/test/customer artifact that should remain outside unless specifically requested through a protected channel. |
 
-KISA public guidance identifies basic design, detailed design, configuration-management, and test documents as core submission-document categories for software modules. Exact current forms, versions, security-level requirements, and package staging must be confirmed before P2-07 finalization.
+KISA public guidance identifies basic design, detailed design, configuration-management, and test documents as core submission-document categories for software modules. Exact current forms, versions, security-level requirements, and package staging must be confirmed before any external submission or P2-08 disposition.
 
 ## A. Basic Design / Module Specification
 
@@ -104,9 +104,9 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 | Integrity-test HMAC key and unprotected injection material | `NOT_IN_SUBMISSION_PACKAGE` | Controlled CSP/configuration material; never copied into ordinary documentation/evidence. |
 | Customer data or internal deployment details | `NOT_IN_SUBMISSION_PACKAGE` | Outside validation evidence and prohibited by project policy. |
 
-## P2-07 Entry Gate
+## External Submission Finalization Gate
 
-Do not finalize the submission skeleton until P2-02 through P2-06 have produced reviewed inputs and pre-consultation has confirmed:
+P2-07 may complete the internal skeleton from reviewed P2-02 through P2-06 inputs. Do not mark the package `APPROVED_FOR_SUBMISSION` until pre-consultation or institution guidance has confirmed:
 
 - current document templates/revisions;
 - target security level and module form;
@@ -153,3 +153,7 @@ Open dependencies remain formal CSP classification, accepted zeroization evidenc
 | `SECURE_CODING_POLICY_REVIEW.txt` | `LOCAL_ENGINEERING_ONLY` | Status-only fixed-tag-path review; no timing or leakage conclusion. |
 
 Open dependencies remain exact OE-01 compiler/CPU review, named disposition, accepted timing/cache method if required, power/EM/fault applicability, runtime integrity, and institution acceptance.
+
+## P2-07 Controlled Skeleton Mapping
+
+The controlled internal set is under `docs/kcmvp/submission/` and uses policy `SDP-P2-07-R1`. Basic design, detailed design, configuration management, test, operator, traceability, reference, staging, document-control, package-index, and review-checklist files are now `CONTROLLED_INTERNAL_SKELETON`. Official forms, security level, exact OE-01 evidence, runtime integrity, institution results, secure delivery, signing, and authorization remain open.

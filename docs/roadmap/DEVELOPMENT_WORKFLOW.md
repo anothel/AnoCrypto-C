@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P2-06 secure-coding and side-channel review workflow completed locally; P2-07 submission-document skeleton is next.
+Status: P2-07 controlled internal submission-document skeleton completed locally; P2-08 pre-consultation rehearsal is next.
 
 ## Purpose
 

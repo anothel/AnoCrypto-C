@@ -1,13 +1,13 @@
 # KCMVP Readiness Gap — P2 Consolidated Register
 
-Status: P2-06 local secure-coding and target-specific side-channel engineering review. Runtime integrity implementation, exact operating-environment compiler/CPU review, formal CSP classification, empirical/external side-channel review, formal validation, and hosted evidence remain pending.
+Status: P2-07 controlled internal submission-document skeleton. Runtime integrity implementation, exact operating-environment compiler/CPU review, formal CSP classification, empirical/external side-channel review, formal validation, and hosted evidence remain pending.
 
 ## Baseline and Claims Boundary
 
 | Item | Current value |
 |---|---|
 | Product | `AnoCrypto-C` |
-| Work-product version | `0.1.0-p2-06-secure-coding-review` |
+| Work-product version | `0.1.0-p2-07-submission-documents` |
 | Input baseline declared by project owner | `0.1.0-p1-33-release-rehearsal` at `cf0f3c425dd265c7509fb64a6123db97f71055dd` |
 | Public headers | 14 |
 | Exported public symbols | 69 |
@@ -71,7 +71,7 @@ This document is an engineering readiness record. It does not establish an accep
 
 ## Test and Evidence Inventory
 
-The ordinary tests-enabled build is expected to register 56 CTest cases when OpenSSL 3.x differential tests are available, including P2-03, P2-04, and P2-05 policy/operational checks. Coverage includes:
+The ordinary tests-enabled build is expected to register 60 CTest cases when OpenSSL 3.x differential tests are available, including P2-03 through P2-07 policy/operational checks. Coverage includes:
 
 - startup/extended KATs and API-negative tests;
 - module state and cryptographic service gating;
@@ -136,7 +136,7 @@ P2-03 additionally froze the internal self-test/integrity/state/recovery design 
 
 P2-04 freezes `EDP-P2-04-R1` and `ENT-OE01-LINUX-GETRANDOM-R1` as internal policy only. It closes responsibility/limit documentation and local evidence wiring, but leaves provider acceptance, entropy credit, health-test allocation, exact OE-01 execution, and formal conditional-test interpretation externally open.
 
-P2-06 freezes `SCP-P2-06-R1`, records source/local compiler review and open findings, fixes the internal CSP enum-switch coverage gap, and applies a Linux Release hardening overlay without changing public ABI. Exact OE-01 GCC 13.3.0 review, named reviewer disposition, approved timing/cache methodology, power/EM/fault applicability, runtime integrity, and P1-34 hosted evidence remain open. P2-07 is next.
+P2-07 freezes `SDP-P2-07-R1` and creates the controlled internal submission-document set without changing public ABI. Official form conformity, selected security level, named approval, secure delivery, exact OE-01 evidence, runtime integrity, institution results, and P1-34 hosted evidence remain open. P2-08 is next.
 
 ## External Reference Checkpoint
 

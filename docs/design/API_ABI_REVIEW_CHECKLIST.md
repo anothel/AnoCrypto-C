@@ -101,7 +101,7 @@ These checks are toolchain-specific guardrails. Calling convention, loader behav
 
 ## P2-02 boundary/environment ABI review
 
-- Runtime/version metadata advances to `0.1.0-p2-06-secure-coding-review`; package version remains `0.1.0`.
+- Runtime/version metadata advances to `0.1.0-p2-07-submission-documents`; package version remains `0.1.0`.
 - No public function, header, public type layout, enum value, non-version macro contract, or exported symbol is added or removed.
 - Public header count remains 14 and the clean Release symbol baseline remains 69 on `ANOCRYPTO_C_0`.
 - Normalized declarations, public types, non-version constants, retained P1-29-header consumption, and stored exported names remain compatibility inputs.
@@ -115,5 +115,5 @@ These checks are toolchain-specific guardrails. Calling convention, loader behav
 - `ac_module.h` and `ac_selftest.h` changes are comment/contract clarification only;
 - the existing `ano_crypto_selftest_run()` symbol is retained, while target on-demand state behavior is tracked as a private implementation delta;
 - `INT-HMAC-SHA256-SINGLE-SO-R1`, its metadata format, policy record, checker, and future injection tooling are internal/build-time assets and do not enter public ABI;
-- version/prerelease/build-fingerprint metadata advances to `0.1.0-p2-06-secure-coding-review`;
+- version/prerelease/build-fingerprint metadata advances to `0.1.0-p2-07-submission-documents`;
 - P1-34 actual hosted review remains blocked and is not replaced by local P2-03 checks.

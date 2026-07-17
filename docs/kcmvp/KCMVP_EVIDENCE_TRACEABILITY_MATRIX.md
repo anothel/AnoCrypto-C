@@ -1,6 +1,6 @@
 # KCMVP Evidence Traceability Matrix
 
-Status: P2-06 traceability baseline with frozen boundary/OE, self-test/state, entropy/DRBG, CSP/zeroization, and secure-coding/side-channel engineering policies. Runtime integrity, provider acceptance, formal CSP classification, exact OE-01 review, and external side-channel disposition remain pending.
+Status: P2-07 traceability baseline with frozen boundary/OE, self-test/state, entropy/DRBG, CSP/zeroization, and secure-coding/side-channel engineering policies. Runtime integrity, provider acceptance, formal CSP classification, exact OE-01 review, and external side-channel disposition remain pending.
 
 ## Matrix Rules
 
@@ -82,16 +82,16 @@ Status: P2-06 traceability baseline with frozen boundary/OE, self-test/state, en
 | TR-EVD-004 | Actual hosted artifacts are reviewed before support claims. | workflow/review model | no completed actual run | `docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md` | `BLOCKED_EXTERNAL` | Resolve billing, execute, hash, and review. |
 | TR-REL-001 | Release signing remains key-free in repository/CI. | signing policy/handoff tools | signing-handoff and sensitive-artifact tests | release signing policy | `READY_FOR_INTERNAL_REVIEW` | Production signer/TSA/roles not provisioned. |
 | TR-REL-002 | External release requires separate authorization. | authorization records and fail-closed checks | provenance/signing negative tests | release policy and handoff docs | `BLOCKED_EXTERNAL` | Hosted review, tag, signer, TSA, roles, legal/product approval. |
-| TR-CM-001 | Sources and exclusions are traceable. | `cleanroom/SOURCE_MANIFEST.md`; `EXCLUSION_LOG.md` | public-surface and sensitive-artifact scans | clean-room policy | `READY_FOR_INTERNAL_REVIEW` | Add controlled reviewer/approval workflow in P2-07. |
-| TR-CM-002 | Configuration/change/release baselines are controlled. | release identity, ABI baseline, hashes, Git/CMake metadata | compatibility/provenance/rehearsal tests | development workflow | `PARTIAL` | Formal configuration-management document and retention rules. |
-| TR-DOC-001 | Submission document set maps to implementation/evidence. | P2-01 inventory, P2-02 boundary/OE, P2-03 self-test/state/recovery, P2-04 entropy/DRBG, P2-05 CSP/zeroization, and P2-06 secure-coding/side-channel records | document and P2 policy reviews | submission inventory and P2 roadmap | `PARTIAL` | Create the controlled skeleton in P2-07. |
+| TR-CM-001 | Sources and exclusions are traceable. | `cleanroom/SOURCE_MANIFEST.md`; `EXCLUSION_LOG.md` | public-surface and sensitive-artifact scans | clean-room policy; `AC-KCMVP-RF-001`; `AC-KCMVP-SH-001` | `READY_FOR_INTERNAL_REVIEW` | Named reviewer/approval and external delivery disposition remain open. |
+| TR-CM-002 | Configuration/change/release baselines are controlled. | release identity, ABI baseline, hashes, Git/CMake metadata | compatibility/provenance/rehearsal tests | `AC-KCMVP-CM-001`; `AC-KCMVP-DC-001` | `PARTIAL` | Named roles, approved retention, signing and post-baseline retest rules remain open. |
+| TR-DOC-001 | Submission document set maps to implementation/evidence. | P2-01 inventory, P2-02 through P2-06 controlled inputs, and `docs/kcmvp/submission/*` | P2 policy reviews and `check_submission_document_policy.cmake` | `SDP-P2-07-R1`; package index and document register | `READY_FOR_INTERNAL_REVIEW` | Official form conformity, named approval, exact package and institution results remain open. |
 
-## P2-06 ABI Trace Result
+## P2-07 ABI Trace Result
 
 - Public header file count: 14.
 - Stored exported symbol count: 69.
 - ABI line: `ANOCRYPTO_C_0`.
-- No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01 through P2-06.
-- Version/prerelease metadata changed to `0.1.0-p2-06-secure-coding-review`; this is intentionally excluded from normalized non-version API equality.
-- P2-06 changes internal switch coverage, build hardening, tests, policy, documentation, evidence plumbing, and version metadata only; public declarations and symbol baseline remain unchanged.
+- No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01 through P2-07.
+- Version/prerelease metadata changed to `0.1.0-p2-07-submission-documents`; this is intentionally excluded from normalized non-version API equality.
+- P2-07 adds controlled submission documents, staging policy/checks, evidence wiring, and version metadata only; public declarations and symbol baseline remain unchanged.
 - The selected integrity candidate, policy record, checker, and roadmap documents are internal/build-time assets and add no public symbol.

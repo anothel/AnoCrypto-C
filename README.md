@@ -1,6 +1,6 @@
 # AnoCrypto-C
 
-Current status: `0.1.0-p2-06-secure-coding-review`, the P2-06 secure-coding and target-specific side-channel engineering review built on the frozen OE-01 candidate and P2-03 through P2-05 mechanism policies. P2-06 records source-level and local compiler findings, fixes the internal CSP state-switch coverage gap, and enables a Linux GNU/Clang Release hardening overlay with FORTIFY 3, strong stack protection, stack-clash protection, full RELRO/BIND_NOW, and a non-executable stack. AES remains table-free at source level and CMAC verification retains a fixed 16-byte comparison candidate, but exact OE-01 GCC 13.3.0 compiler/CPU review, statistical timing/cache work, power/EM/fault assessment, and named external disposition remain `NOT_RUN`, `NOT_EVALUATED`, or `EXTERNAL_CONFIRMATION_REQUIRED`. The public boundary remains 14 headers and 69 exported symbols on `ANOCRYPTO_C_0`. P1-34 remains `BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING`; hosted lanes remain `NOT_RUN`, hosted review remains `UNREVIEWED`, the repository remains `UNSIGNED`, signing handoff remains `BLOCKED`, and external release authorization remains `NO`.
+Current status: `0.1.0-p2-07-submission-documents`, the P2-07 controlled internal KCMVP submission-document skeleton built from P2-01 through P2-06 engineering inputs. The set adds controlled basic-design, detailed-design, configuration-management, test, operator, traceability, reference, staging, and review documents under policy `SDP-P2-07-R1`. It is not an institution-approved form set or completed submission. Runtime integrity, exact OE-01 execution, institution results, P1-34 hosted evidence, signing, and external authorization remain open or blocked. The public boundary remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
 
 Implemented processing scope:
 
@@ -164,7 +164,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, CSP/zeroization policy and compiler-output, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-06/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, CSP/zeroization policy and compiler-output, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-07/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -441,3 +441,7 @@ P2-06 freezes internal policy `SCP-P2-06-R1` without claiming universal constant
 - documents table-free portable AES source and fixed-length CMAC tag-comparison candidates;
 - keeps exact OE-01 GCC 13.3.0 review, named reviewer disposition, empirical timing/cache work, and power/EM/fault work open;
 - preserves 14 public headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
+
+## P2-07 controlled submission-document skeleton
+
+P2-07 creates the internal document set under `docs/kcmvp/submission/`, controlled by `SDP-P2-07-R1` and `release/ANOCRYPTO_C_SUBMISSION_STAGING_MANIFEST.txt`. Official template conformity, security level, secure delivery channel, institution results, and authorization remain external or unset.

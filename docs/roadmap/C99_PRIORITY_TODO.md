@@ -1,6 +1,6 @@
 # C99 Priority TODO
 
-Status: P2-06 secure-coding/side-channel engineering review completed locally with open selected-OE/external findings; P2-07 is next.
+Status: P2-07 controlled internal submission-document skeleton completed locally; P2-08 is next.
 
 ## Completed Through P1-33
 

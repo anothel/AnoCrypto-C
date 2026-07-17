@@ -20,7 +20,7 @@ The target serializes clean Release symbol/runtime-dependency inspection, instal
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p2-06 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p2-07 \
   -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=build/release-provenance-evidence \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=build/release-signing-handoff \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=build/release-signing-handoff-check.txt \
@@ -42,8 +42,8 @@ The final assembly step consumes only that hash-bound tree:
 ```sh
 cmake \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p2-06 \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-06 \
+  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p2-07 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-07 \
   -P tools/assemble_release_evidence.cmake
 ```
 
@@ -251,3 +251,10 @@ ctest --test-dir build -R "csp_(shutdown|fatal|zeroization)" --output-on-failure
 ```
 
 `check_csp_zeroization_policy.cmake` binds `CZP-P2-05-R1`, current CSP ownership/lifecycle documentation, module-owned shutdown/fatal cleanup, 14 headers, 69 symbols, `ANOCRYPTO_C_0`, and unchanged hosted/signing/release blockers. `capture_zeroization_compiler_review.cmake` records compiler/target/build/library-hash metadata and disassembly markers for local human review. It does not establish exact OE-01 execution, physical memory remanence elimination, optimizer universality, or formal validation.
+
+## P2-07 submission skeleton
+
+- `check_submission_document_policy.cmake`: validates the controlled document set, staging allow-list, ABI and retained blocker/claim states.
+- `create_submission_skeleton_package.cmake`: stages only allow-listed S0 documents and writes a SHA-256 manifest/status record.
+- `check_submission_skeleton_package.cmake`: verifies the staged hashes, file types, count and non-authorization status.
+- `run_submission_skeleton_package_smoke.cmake`: creates and verifies the internal skeleton package.

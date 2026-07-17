@@ -1,6 +1,6 @@
 # KCMVP Pre-consultation Questions
 
-Status: P2-06 question pack against frozen boundary candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`, policies `STP-P2-03-R1`, `EDP-P2-04-R1`, `CZP-P2-05-R1`, and secure-coding policy `SCP-P2-06-R1`. All proposed answers remain provisional until retained external confirmation is received.
+Status: P2-07 question pack against frozen boundary candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`, policies `STP-P2-03-R1`, `EDP-P2-04-R1`, `CZP-P2-05-R1`, and secure-coding policy `SCP-P2-06-R1`. All proposed answers remain provisional until retained external confirmation is received.
 
 ## Use and Recording Rule
 

@@ -1,0 +1,13 @@
+# P2-07 internal submission-skeleton staging manifest.
+# This manifest authorizes internal S0 staging only, not external submission.
+docs/kcmvp/submission/KCMVP_SUBMISSION_PACKAGE_INDEX.md
+docs/kcmvp/submission/KCMVP_DOCUMENT_CONTROL_REGISTER.md
+docs/kcmvp/submission/KCMVP_MODULE_BASIC_DESIGN_SKELETON.md
+docs/kcmvp/submission/KCMVP_MODULE_DETAILED_DESIGN_SKELETON.md
+docs/kcmvp/submission/KCMVP_CONFIGURATION_MANAGEMENT_PLAN_SKELETON.md
+docs/kcmvp/submission/KCMVP_TEST_DOCUMENT_SET_SKELETON.md
+docs/kcmvp/submission/KCMVP_INSTALLATION_OPERATOR_GUIDE_SKELETON.md
+docs/kcmvp/submission/KCMVP_REQUIREMENT_TRACEABILITY_APPENDIX.md
+docs/kcmvp/submission/KCMVP_CONTROLLED_REFERENCE_REGISTER.md
+docs/kcmvp/submission/KCMVP_SUBMISSION_STAGING_AND_HANDLING.md
+docs/kcmvp/submission/KCMVP_SUBMISSION_REVIEW_CHECKLIST.md

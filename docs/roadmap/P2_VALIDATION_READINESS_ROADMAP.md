@@ -1,6 +1,6 @@
 # P2 Validation Readiness Roadmap
 
-Status: P2-06 secure-coding and target-specific side-channel engineering review completed locally with open exact-OE and external-review findings; P2-07 is next. P2 remains validation-readiness work, not automatic feature expansion.
+Status: P2-07 controlled internal submission-document skeleton completed; P2-08 pre-consultation rehearsal is next. P2 remains validation-readiness work, not automatic feature expansion.
 
 ## Fixed P2 Constraints
 
@@ -22,8 +22,8 @@ Status: P2-06 secure-coding and target-specific side-channel engineering review 
 | P2-04 | `FROZEN_INTERNAL_POLICY` | Close entropy/provider/DRBG responsibility and evidence plan. | Entropy/DRBG specification, responsibility/health matrices, machine-readable policy, operational review, and implementation/test delta. | No change. |
 | P2-05 | `COMPLETE_LOCAL_INTERNAL_POLICY` | Close CSP inventory, lifecycle, and zeroization evidence. | Formal CSP inventory, service/operation matrix, zeroization evidence plan, internal shutdown/fatal remediation, compiler capture, and policy check. | No change. |
 | P2-06 | `COMPLETE_LOCAL_WITH_OPEN_FINDINGS` | Perform secure-coding and target side-channel review. | Secure-coding record, side-channel limitations, findings register, compiler/CPU matrix, hardening capture, and policy tests. | No change. |
-| P2-07 | `NEXT` | Build controlled submission-document skeleton. | Basic design, detailed design, configuration-management, test, and operator-document skeletons. | No change. |
-| P2-08 | `PLANNED` | Rehearse pre-consultation evidence walkthrough and decision capture. | Mock walkthrough, prioritized questions, unresolved decision register, feedback process. | No change. |
+| P2-07 | `COMPLETE_LOCAL_INTERNAL_SKELETON` | Build controlled submission-document skeleton. | Basic design, detailed design, configuration-management, test, and operator-document skeletons. | No change. |
+| P2-08 | `NEXT` | Rehearse pre-consultation evidence walkthrough and decision capture. | Mock walkthrough, prioritized questions, unresolved decision register, feedback process. | No change. |
 
 ## P2-01 — Readiness Gap Consolidation
 
@@ -249,6 +249,8 @@ P2-06 is complete as an internal engineering review and backlog consolidation st
 
 ## P2-07 — Submission-document Skeleton
 
+Status: `COMPLETE_LOCAL_INTERNAL_SKELETON`; policy `SDP-P2-07-R1`. Formal template conformity and submission authorization remain external/unapproved.
+
 ### Objectives
 
 - create controlled basic design, detailed design, configuration-management, test, and operator-document structures;
@@ -270,14 +272,18 @@ At minimum:
 
 ### Completion criteria
 
-- current institution templates/revisions are confirmed;
+- controlled skeleton files have document IDs, revisions, owners, reviewer/approval placeholders, status, and cross-references;
 - all provisional sections are marked clearly;
 - engineering evidence is distinguished from institution results;
-- internal/test/customer-only artifacts are not copied into the submission package by default.
+- internal/test/customer-only artifacts are excluded from the S0 staging manifest;
+- policy checks preserve 14 headers, 69 symbols, `ANOCRYPTO_C_0`, P1-34 blocker state, `UNSIGNED/BLOCKED/NO`, and runtime-integrity `NOT_IMPLEMENTED` status.
+
+Completion record: `SDP-P2-07-R1` and the controlled internal skeleton set are complete locally. Official forms, security level, secure delivery, exact package contents, and submission authorization remain open.
 
 ### External dependencies
 
-- current forms, secure delivery channel, and package-content guidance.
+- current forms/revision acceptance, security level, secure delivery channel, and package-content guidance;
+- exact OE-01 and institution-result integration after P2-08 decisions.
 
 ## P2-08 — Pre-consultation Rehearsal
 

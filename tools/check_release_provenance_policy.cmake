@@ -1,4 +1,4 @@
-# Static and generated-artifact policy check for the P2-02 unsigned release
+# Static and generated-artifact policy check for the retained unsigned release
 # provenance/SBOM/signing boundary.
 cmake_minimum_required(VERSION 3.16)
 
@@ -31,7 +31,7 @@ endforeach()
 if(NOT ANO_CRYPTO_RELEASE_PROVENANCE_SCHEMA STREQUAL "1" OR
    NOT ANO_CRYPTO_RELEASE_SBOM_FORMAT STREQUAL "SPDX-2.3-JSON" OR
    NOT ANO_CRYPTO_RELEASE_SIGNING_MODE STREQUAL "UNSIGNED")
-    message(FATAL_ERROR "Unexpected P2-05 release provenance identity policy")
+    message(FATAL_ERROR "Unexpected P2-07 release provenance identity policy")
 endif()
 
 set(_required_files
@@ -125,7 +125,7 @@ _ano_require_text("README.md" "${ANO_CRYPTO_RELEASE_VERSION}")
 _ano_require_text("README.md" "unsigned release-provenance bundle")
 
 # A signing credential or detached signature must never be committed merely to
-# make the P2-02 engineering gate pass.
+# make the retained engineering gate pass.
 set(_source_entries "")
 find_program(_git_executable git)
 if(_git_executable)
@@ -168,12 +168,12 @@ endforeach()
 if(_credential_like_files)
     list(JOIN _credential_like_files ", " _credential_text)
     message(FATAL_ERROR
-        "Credential/signature-like files are forbidden in the P2-02 source tree: ${_credential_text}")
+        "Credential/signature-like files are forbidden in the source tree: ${_credential_text}")
 endif()
 if(_sensitive_source_files)
     list(JOIN _sensitive_source_files ", " _sensitive_source_text)
     message(FATAL_ERROR
-        "Sensitive signing material is forbidden in the P2-02 source tree: ${_sensitive_source_text}")
+        "Sensitive signing material is forbidden in the source tree: ${_sensitive_source_text}")
 endif()
 
 # If the full evidence target has already produced a provenance bundle, verify
@@ -206,7 +206,7 @@ endif()
 
 string(TIMESTAMP _checked_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}"
-    "AnoCrypto-C P2-05 release provenance policy check\n"
+    "AnoCrypto-C P2-07 release provenance policy check\n"
     "Checked UTC: ${_checked_utc}\n"
     "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Provenance schema: ${ANO_CRYPTO_RELEASE_PROVENANCE_SCHEMA}\n"
@@ -231,4 +231,4 @@ file(WRITE "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}"
     "External release authorization: NO\n"
     "Result: PASS\n")
 
-message(STATUS "AnoCrypto-C P2-05 release provenance policy check passed")
+message(STATUS "AnoCrypto-C P2-07 release provenance policy check passed")

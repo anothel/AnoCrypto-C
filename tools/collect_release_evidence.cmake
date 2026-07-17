@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-06 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-07 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-06")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-07")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -124,6 +124,10 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_SECURE_CODING_COMPILER_REVIEW)
     set(ANO_CRYPTO_RUN_SECURE_CODING_COMPILER_REVIEW ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_SUBMISSION_DOCUMENT_POLICY_CHECK)
+    set(ANO_CRYPTO_RUN_SUBMISSION_DOCUMENT_POLICY_CHECK ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK)
@@ -1188,6 +1192,37 @@ else()
         "P2-06 secure-coding/side-channel policy check was not requested.\n")
 endif()
 
+
+if(ANO_CRYPTO_RUN_SUBMISSION_DOCUMENT_POLICY_CHECK)
+    set(_submission_document_policy_check_output
+        "${ANO_CRYPTO_EVIDENCE_DIR}/SUBMISSION_DOCUMENT_POLICY_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+            -DANO_CRYPTO_SUBMISSION_DOCUMENT_CHECK_OUTPUT=${_submission_document_policy_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_submission_document_policy.cmake"
+        RESULT_VARIABLE _submission_document_policy_check_result
+        OUTPUT_VARIABLE _submission_document_policy_check_stdout
+        ERROR_VARIABLE _submission_document_policy_check_stderr
+        TIMEOUT 300)
+    file(APPEND "${_submission_document_policy_check_output}"
+        "
+Command output:
+${_submission_document_policy_check_stdout}${_submission_document_policy_check_stderr}
+")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "P2-07 submission-document policy check result: ${_submission_document_policy_check_result}
+")
+    if(NOT _submission_document_policy_check_result EQUAL 0)
+        message(FATAL_ERROR "P2-07 submission-document policy check failed")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SUBMISSION_DOCUMENT_POLICY_CHECK.txt"
+        "P2-07 submission-document policy check was not requested.
+")
+endif()
+
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CSP_ZEROIZATION_REVIEW_NOTES.txt"
     "AnoCrypto-C P2-05 CSP and zeroization review notes\n"
     "Policy ID: CZP-P2-05-R1\n"
@@ -1250,7 +1285,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
     "AnoCrypto-C P2-06 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P2-06 engineering scope artifact covering secure coding, target-specific review limitations, build hardening, and retained mechanism gaps; not official validation evidence.\n"
+    "Status: P2-07 engineering scope artifact covering the controlled submission skeleton plus retained P2 mechanism gaps; not official validation evidence.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"
