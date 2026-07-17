@@ -94,7 +94,7 @@ Status: P2-09 traceability closeout with frozen P2-02 through P2-08 inputs, cumu
 - Stored exported symbol count: 69.
 - ABI line: `ANOCRYPTO_C_0`.
 - No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01 through P2-09.
-- Version/prerelease metadata changed to `0.1.0-p2-10-assisted-rehearsal`; this is intentionally excluded from normalized non-version API equality.
+- Version/prerelease metadata changed to `0.1.0-p2-11-human-rehearsal-handoff`; this is intentionally excluded from normalized non-version API equality.
 - P2-07 adds controlled submission documents; P2-08 adds rehearsal/decision controls; P2-09 adds cumulative closeout documents, policy/package checks, evidence wiring, and version metadata only. Public declarations and symbol baseline remain unchanged.
 - The selected integrity candidate, policy record, checker, and roadmap documents are internal/build-time assets and add no public symbol.
 
@@ -104,3 +104,13 @@ Status: P2-09 traceability closeout with frozen P2-02 through P2-08 inputs, cumu
 |---|---|---|---|
 | Ten Priority-1 agenda groups have accurate status-disciplined project answers. | `KCMVP_INTERNAL_ASSISTED_REHEARSAL_REPORT.md`, `KCMVP_ASSISTED_REHEARSAL_TRANSCRIPT.md` | `check_live_rehearsal_policy.cmake`, `ano_crypto_live_rehearsal_policy_tests` | `LOCAL_ENGINEERING_ONLY` |
 | Institution contact remains blocked until named authorization and six preconditions. | `KCMVP_EXTERNAL_CONSULTATION_DECISION_GATE.md` | P2-10 policy/package checks | `CONTROLLED_INTERNAL_DECISION`; no external answer |
+
+## P2-11 human-rehearsal handoff trace
+
+| Requirement | Controlled design/code path | Test/policy path | Evidence class |
+|---|---|---|---|
+| A real named person, not generated text or policy automation, must perform the independent rehearsal. | `KCMVP_INDEPENDENT_HUMAN_REHEARSAL_HANDOFF.md`; named-reviewer guide | `check_human_rehearsal_handoff_policy.cmake` | `READY_FOR_NAMED_HUMAN_EXECUTION`; reviewer `UNASSIGNED` |
+| All ten Priority-1 agendas must receive a retained human disposition. | named-reviewer guide; minutes template | policy checker counts ten agenda rows | `NOT_RUN`; no human disposition exists |
+| Human objections and defects require owner, remediation, exit evidence, and retained closure. | objection/defect register | handoff package policy/smoke | `NO_HUMAN_FINDINGS_RECORDED`; does not imply no defects |
+| Institution contact requires a separate project-owner decision after the rehearsal. | consultation authorization record; P2-10 contact gate | P2-11 policy/package checks | authorization `NOT_RECORDED`/`NO`; external consultation `NOT_CONDUCTED` |
+| Handoff package excludes source, binaries, credentials, evidence originals, and institution material. | 17-document allowlist and package index | package creation/hash/sensitive-marker smoke | `LOCAL_ENGINEERING_ONLY`; not an external submission |

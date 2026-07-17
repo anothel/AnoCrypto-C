@@ -52,3 +52,7 @@ Satisfying these preconditions permits contact only. It does not authorize sourc
 | Exact OE-01 execution | `NO_GO_UNTIL_ENVIRONMENT_AND_OWNER_APPROVED` |
 | P1-34 hosted rerun | `NO_GO_UNTIL_BILLING_RESOLVED_AND_EXPLICITLY_AUTHORIZED` |
 | External release | `NO_GO` |
+
+## P2-11 handoff clarification
+
+The `HRH-P2-11-R1` package prepares the records required by `AUTH-02` but does not satisfy it. Reviewer identity is `UNASSIGNED`, human rehearsal is `NOT_RUN`, project-owner authorization is `NOT_RECORDED`, and institution-contact authorization remains `NO`.

@@ -162,3 +162,7 @@ The controlled internal set is under `docs/kcmvp/submission/` and uses policy `S
 ## P2-08 Pre-consultation Mapping
 
 The P2-08 rehearsal set is an internal control layer, not an additional institution submission category. It links the controlled P2-07 skeleton to the question pack, evidence walkthrough, 20 unresolved decisions, blank response records, and `ACT-*` change routing. External consultation remains `NOT_CONDUCTED`; no document is approved for submission by this mapping.
+
+## P2-11 Human Rehearsal Handoff Mapping
+
+The P2-11 handoff documents are internal review controls, not formal submission documents or institution evidence. The index, execution guide, minutes template, objection register, and authorization record may be retained as configuration/program records. Blank templates, generated package status, and policy PASS do not prove a human review occurred.

@@ -7,7 +7,7 @@ Status: P2-09 cumulative local closeout complete under `P2C-P2-09-R1`. The contr
 | Item | Current value |
 |---|---|
 | Product | `AnoCrypto-C` |
-| Work-product version | `0.1.0-p2-10-assisted-rehearsal` |
+| Work-product version | `0.1.0-p2-11-human-rehearsal-handoff` |
 | Input baseline declared by project owner | `0.1.0-p1-33-release-rehearsal` at `cf0f3c425dd265c7509fb64a6123db97f71055dd` |
 | Public headers | 14 |
 | Exported public symbols | 69 |
@@ -71,7 +71,7 @@ This document is an engineering readiness record. It does not establish an accep
 
 ## Test and Evidence Inventory
 
-The ordinary tests-enabled build is expected to register 66 CTest cases when OpenSSL 3.x differential tests are available, including P2-03 through P2-10 policy/operational and package checks. Coverage includes:
+The ordinary tests-enabled build is expected to register 68 CTest cases when OpenSSL 3.x differential tests are available, including P2-03 through P2-11 policy/operational and package checks. Coverage includes:
 
 - startup/extended KATs and API-negative tests;
 - module state and cryptographic service gating;
@@ -153,3 +153,20 @@ Exact current templates, accepted interpretations, security level, test methods,
 ## P2-10 assisted rehearsal update
 
 The ten Priority-1 agenda groups were rehearsed against repository evidence in a controlled assisted desk exercise. No agenda lacked an internally consistent project position, but nine open gaps remain and independent human rehearsal is `NOT_RUN`. Institution contact remains `CONDITIONAL_NO_GO_PENDING_NAMED_AUTHORIZATION`; external consultation and institution responses remain `NOT_CONDUCTED`/`NOT_RECEIVED`.
+
+## P2-11 human-rehearsal handoff update
+
+P2-11 freezes `HRH-P2-11-R1` and converts the P2-10 assisted result into a controlled package for a future real named reviewer. It does not perform or simulate that reviewer role.
+
+Current disposition:
+
+- handoff: `READY_FOR_NAMED_HUMAN_EXECUTION`;
+- reviewer identity: `UNASSIGNED`;
+- reviewer independence/conflict statement: `NOT_RECORDED`;
+- independent human rehearsal: `NOT_RUN`;
+- human findings: `NO_HUMAN_FINDINGS_RECORDED` because the session has not occurred;
+- project-owner authorization: `NOT_RECORDED`;
+- institution-contact authorization: `NO`;
+- external consultation/institution responses: `NOT_CONDUCTED`/`NOT_RECEIVED`.
+
+This closes only the preparation gap. It does not close runtime integrity, exact OE-01, entropy/CSP/institution decisions, P1-34 hosted evidence, signing, submission, or release gaps.

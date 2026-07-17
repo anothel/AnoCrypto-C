@@ -10,10 +10,13 @@
 | Approval | `NO` |
 | Policy ID | `PCR-P2-08-R1` |
 | Candidate ID | `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` |
-| Work-product version | `0.1.0-p2-10-assisted-rehearsal` |
+| Work-product version | `0.1.0-p2-11-human-rehearsal-handoff` |
 | Scripted internal rehearsal | `COMPLETE_LOCAL_SCRIPTED` |
 | Assisted desk rehearsal | `COMPLETE_LOCAL_ASSISTED` |
+| P2-11 handoff | `READY_FOR_NAMED_HUMAN_EXECUTION` |
+| Named reviewer / independence | `UNASSIGNED` / `NOT_RECORDED` |
 | Independent live internal rehearsal | `NOT_RUN` |
+| Institution-contact authorization | `NO` |
 | External consultation | `NOT_CONDUCTED` |
 | Institution response | `NOT_RECEIVED` |
 | Submission authorization | `NO` |
@@ -113,7 +116,7 @@ A consultation session is not complete until:
 
 ## Rehearsal Disposition
 
-The scripted walkthrough and P2-10 assisted desk rehearsal are complete. The pack is ready for a named human internal rehearsal. Institution contact remains conditionally blocked pending the authorization preconditions in `KCMVP_EXTERNAL_CONSULTATION_DECISION_GATE.md`.
+The scripted walkthrough and P2-10 assisted desk rehearsal are complete. P2-11 provides the controlled handoff for a future named human reviewer, but reviewer identity and independence are not recorded and the live rehearsal remains `NOT_RUN`. Institution contact remains unauthorized pending completed human-review records and the project-owner decision in `KCMVP_CONSULTATION_AUTHORIZATION_RECORD.md`.
 
 The following remain open:
 

@@ -1,6 +1,6 @@
 # AnoCrypto-C
 
-Current status: `0.1.0-p2-10-assisted-rehearsal`. P2-01 through P2-09 remain complete as local validation-readiness and closeout work, and P2-10 records a source-backed assisted desk rehearsal under policy `LAR-P2-10-R1`. The pack is ready for a named human internal rehearsal, but independent human rehearsal is `NOT_RUN`, external consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, formal validation is `NOT_STARTED`, runtime integrity is `NOT_IMPLEMENTED`, exact OE-01 is `NOT_RUN`, and P1-34 hosted evidence, signing, submission, next implementation, and external release remain blocked or unauthorized. The public boundary remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
+Current status: `0.1.0-p2-11-human-rehearsal-handoff`. P2-01 through P2-09 remain complete as local validation-readiness and closeout work, P2-10 records the source-backed assisted desk rehearsal, and P2-11 packages the next step for a real named human reviewer under policy `HRH-P2-11-R1`. The handoff is `READY_FOR_NAMED_HUMAN_EXECUTION`, but reviewer identity is `UNASSIGNED`, reviewer independence is `NOT_RECORDED`, independent human rehearsal is `NOT_RUN`, project-owner authorization is `NOT_RECORDED`, institution contact authorization is `NO`, external consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, and formal validation is `NOT_STARTED`. Runtime integrity remains `NOT_IMPLEMENTED`, exact OE-01 remains `NOT_RUN`, and P1-34 hosted evidence, signing, submission, next implementation, and external release remain blocked or unauthorized. The public boundary remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
 
 Implemented processing scope:
 
@@ -117,6 +117,21 @@ P2-10 adds a controlled, status-only assisted rehearsal layer without claiming a
 
 The assisted rehearsal covers ten Priority-1 agenda groups. It concludes that the pack is ready for a named human internal rehearsal. Institution contact remains `CONDITIONAL_NO_GO_PENDING_NAMED_AUTHORIZATION`.
 
+
+## P2-11 independent human rehearsal handoff
+
+P2-11 does not pretend that an automated or document-only exercise is an independent human review. It freezes policy `HRH-P2-11-R1` and provides a status-only handoff package for a future named reviewer. Controlled outputs include:
+
+- `docs/kcmvp/KCMVP_HUMAN_REHEARSAL_HANDOFF_PACK_INDEX.md`;
+- `docs/kcmvp/KCMVP_INDEPENDENT_HUMAN_REHEARSAL_HANDOFF.md`;
+- `docs/kcmvp/KCMVP_NAMED_REVIEWER_EXECUTION_GUIDE.md`;
+- `docs/kcmvp/KCMVP_LIVE_REHEARSAL_MINUTES_TEMPLATE.md`;
+- `docs/kcmvp/KCMVP_REHEARSAL_OBJECTION_AND_DEFECT_REGISTER.md`;
+- `docs/kcmvp/KCMVP_CONSULTATION_AUTHORIZATION_RECORD.md`;
+- policy and 17-document handoff-package smoke checks.
+
+The reviewer remains `UNASSIGNED`, the live rehearsal remains `NOT_RUN`, and institution contact remains unauthorized. A completed human rehearsal and separate project-owner decision are required before the consultation gate can change.
+
 ## Build
 
 ```sh
@@ -128,8 +143,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p2-10
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-10
+cmake --install build --prefix /tmp/anocrypto-c-p2-11
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-11
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -147,8 +162,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p2-10
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-10
+cmake --install build --prefix /tmp/anocrypto-c-p2-11
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-11
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```

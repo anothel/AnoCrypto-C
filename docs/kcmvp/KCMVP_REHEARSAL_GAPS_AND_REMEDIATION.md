@@ -13,3 +13,7 @@
 | RGH-009 | Production signer, TSA and legal/evaluation terms remain absent. | `UNPROVISIONED_OR_TODO` | Separate governance/legal work item after process confirmation. | Release/legal owner | Approved signer/TSA/legal records. |
 
 None of these gaps is closed by the assisted rehearsal itself.
+
+## P2-11 handoff disposition
+
+P2-11 provides the controlled human-review pack, minutes, objection register, and authorization record. `RGH-001` remains open because no person has been assigned and no human session has occurred. Package readiness is not closure evidence for a human-review gap.

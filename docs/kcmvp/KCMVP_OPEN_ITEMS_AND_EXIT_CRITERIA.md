@@ -117,3 +117,16 @@ Work must stop and return to the responsible gate when:
 - a record would disclose prohibited material;
 - a local/synthetic result is being presented as hosted, institution, formal, or production evidence;
 - a tag, signature, timestamp, submission, customer distribution, or release lacks explicit authorization.
+
+## P2-11 human-review exit criteria
+
+The preparation item is complete when policy, package, regression, ABI, install, PoC, provenance, and evidence checks pass. The human-review gate itself exits only after all of the following are retained:
+
+- named reviewer, role, independence/conflict statement, and expertise limits;
+- frozen pack filename and SHA-256;
+- completed minutes for all ten agendas;
+- all material objections and defect IDs with owners and exit evidence;
+- reviewer recommendation;
+- separate project-owner contact decision.
+
+Until then, reviewer identity remains `UNASSIGNED`, live rehearsal remains `NOT_RUN`, and institution-contact authorization remains `NO`.

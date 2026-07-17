@@ -121,7 +121,7 @@ require_text("docs/kcmvp/KCMVP_ENTROPY_HEALTH_AND_RECOVERY_MATRIX.md"
 require_text("docs/kcmvp/P2_04_IMPLEMENTATION_TEST_DELTA.md"
     "BLOCKED_EXTERNAL")
 require_text("docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md" "| Actual hosted lanes | `NOT_RUN` |")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p2-10-assisted-rehearsal")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p2-11-human-rehearsal-handoff")
 
 foreach(_header IN LISTS _public_headers)
     file(READ "${_header}" _header_text)

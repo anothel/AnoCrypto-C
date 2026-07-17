@@ -6,7 +6,7 @@
 | Revision | `0.1` |
 | Status | `COMPLETE_LOCAL_CLOSEOUT` |
 | Policy ID | `P2C-P2-09-R1` |
-| Engineering version | `0.1.0-p2-10-assisted-rehearsal` |
+| Engineering version | `0.1.0-p2-11-human-rehearsal-handoff` |
 | Candidate boundary | `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` |
 | Formal validation | `NOT_STARTED` |
 | External consultation | `NOT_CONDUCTED` |
@@ -117,3 +117,19 @@ Status remains:
 - next implementation authorization: `NO`.
 
 P2-10 does not reopen the P2-09 closeout or authorize a P3 feature lane.
+
+## 11. P2-11 named-human handoff
+
+P2-11 packages the assisted rehearsal for a future named human reviewer under `HRH-P2-11-R1`. It adds the reviewer execution guide, minutes template, objection register, project-owner authorization record, and a hash-verified status-only 17-document handoff package.
+
+Status remains:
+
+- handoff preparation: `READY_FOR_NAMED_HUMAN_EXECUTION`;
+- reviewer identity/independence: `UNASSIGNED`/`NOT_RECORDED`;
+- independent human live rehearsal: `NOT_RUN`;
+- project-owner authorization: `NOT_RECORDED`;
+- institution contact authorization: `NO`;
+- external consultation/responses: `NOT_CONDUCTED`/`NOT_RECEIVED`;
+- next implementation authorization: `NO`.
+
+P2-11 does not reopen closeout, perform an independent review, or authorize a feature, implementation, formal submission, signing, timestamp, publication, or release lane.

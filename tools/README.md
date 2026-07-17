@@ -282,3 +282,10 @@ ctest --test-dir build -R "csp_(shutdown|fatal|zeroization)" --output-on-failure
 - `run_live_rehearsal_package_smoke.cmake`: creates and verifies the assisted-rehearsal package.
 
 The assisted rehearsal is not an independent human review or institution consultation. It authorizes neither implementation nor external contact.
+
+## P2-11 independent human rehearsal handoff
+
+- `check_human_rehearsal_handoff_policy.cmake`: validates `HRH-P2-11-R1`, 17 controlled documents, ten agenda rows, reviewer/authorization pending states, unchanged 14/69/`ANOCRYPTO_C_0`, and retained hosted/signing blockers.
+- `create_human_rehearsal_handoff_package.cmake`: stages the status-only reviewer handoff and writes a SHA-256 manifest/status record.
+- `check_human_rehearsal_handoff_package.cmake`: verifies allowlisted files, hashes, status markers, and source/binary/credential exclusions.
+- `run_human_rehearsal_handoff_package_smoke.cmake`: creates and checks the package without assigning a reviewer or performing a live rehearsal.

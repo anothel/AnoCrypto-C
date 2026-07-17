@@ -1,4 +1,4 @@
-# AnoCrypto-C P2-02 release identity and retained P1-29 source/ABI compatibility check.
+# AnoCrypto-C current release identity and retained P1-29 source/ABI compatibility check.
 # Engineering guardrail only; universal ABI compatibility is not established.
 cmake_minimum_required(VERSION 3.16)
 
@@ -354,7 +354,7 @@ _ano_require_text("CMakeLists.txt"
     "include(\"\${CMAKE_CURRENT_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake\")")
 _ano_require_text("CMakeLists.txt"
     "COMPATIBILITY \${ANO_CRYPTO_RELEASE_PACKAGE_COMPATIBILITY}")
-_ano_require_text("src/core/build_identity.c" "P2-10 assisted pre-consultation rehearsal and decision-gate work product")
+_ano_require_text("src/core/build_identity.c" "P2-11 independent human rehearsal handoff work product")
 _ano_require_text("README.md" "${ANO_CRYPTO_RELEASE_VERSION}")
 _ano_require_text(".github/workflows/ci.yml" "${ANO_CRYPTO_RELEASE_FINGERPRINT}")
 _ano_require_text(".github/workflows/ci.yml"

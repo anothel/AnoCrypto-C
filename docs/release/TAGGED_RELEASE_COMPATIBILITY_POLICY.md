@@ -11,8 +11,8 @@ P1-33 retains a project-owned compatibility input from `0.1.0-p1-29-cmac-hardeni
 The authoritative engineering metadata is `release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake`:
 
 - package version: `0.1.0`
-- engineering version: `0.1.0-p2-10-assisted-rehearsal`
-- expected tag metadata: `v0.1.0-p2-10-assisted-rehearsal`
+- engineering version: `0.1.0-p2-11-human-rehearsal-handoff`
+- expected tag metadata: `v0.1.0-p2-11-human-rehearsal-handoff`
 - ABI line: `ANOCRYPTO_C_0`
 - retained baseline: `0.1.0-p1-29-cmac-hardening`
 - public headers: 14

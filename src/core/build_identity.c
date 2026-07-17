@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p2-10-assisted-rehearsal"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p2-11-human-rehearsal-handoff"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P2-10 assisted pre-consultation rehearsal and decision-gate work product. Public scope remains 14 headers, 69 exported ANOCRYPTO_C_0 symbols, and the existing SHA-2, HMAC-SHA-2, HMAC_DRBG-SHA-256, random, AES-CBC, AES-CMAC, and in-memory CSP services. LAR-P2-10-R1 records a source-backed assisted desk rehearsal of ten Priority-1 agenda groups, with independent human rehearsal NOT_RUN, external consultation NOT_CONDUCTED, institution responses NOT_RECEIVED, formal validation NOT_STARTED, runtime integrity NOT_IMPLEMENTED, exact OE-01 NOT_RUN, P1-34 hosted lanes NOT_RUN and review UNREVIEWED, repository signing UNSIGNED, signing handoff BLOCKED, and external authorization NO. The rehearsal pack is status-only and authorizes neither implementation, submission, signing, timestamping, publication, nor release.";
+    out_identity->notes = "P2-11 independent human rehearsal handoff work product. Public scope remains 14 headers, 69 exported ANOCRYPTO_C_0 symbols, and the existing SHA-2, HMAC-SHA-2, HMAC_DRBG-SHA-256, random, AES-CBC, AES-CMAC, and in-memory CSP services. HRH-P2-11-R1 prepares a status-only 17-document package for a future real named reviewer; reviewer identity is UNASSIGNED, reviewer independence is NOT_RECORDED, independent human rehearsal is NOT_RUN, project-owner authorization is NOT_RECORDED, institution contact authorization is NO, external consultation is NOT_CONDUCTED, institution responses are NOT_RECEIVED, formal validation is NOT_STARTED, runtime integrity is NOT_IMPLEMENTED, exact OE-01 is NOT_RUN, P1-34 hosted lanes are NOT_RUN and review UNREVIEWED, repository signing is UNSIGNED, signing handoff is BLOCKED, and external authorization is NO. The handoff authorizes neither implementation, submission, signing, timestamping, publication, nor release.";
 
     return ANO_CRYPTO_OK;
 }

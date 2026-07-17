@@ -1,6 +1,6 @@
 # P2 Validation Readiness Roadmap
 
-Status: P2-01 through P2-09 internal validation-readiness and closeout sequence completed locally. P2-10 assisted rehearsal is also complete under `LAR-P2-10-R1`; independent human rehearsal remains `NOT_RUN`, institution contact is conditionally blocked pending named authorization, external consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, and formal validation is `NOT_STARTED`. P2 remains validation-readiness work, not automatic feature expansion.
+Status: P2-01 through P2-09 internal validation-readiness and closeout sequence completed locally. P2-10 assisted rehearsal is complete, and P2-11 freezes the named-human handoff under `HRH-P2-11-R1`. Reviewer identity is `UNASSIGNED`, independence is `NOT_RECORDED`, human rehearsal is `NOT_RUN`, institution-contact authorization is `NO`, external consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, and formal validation is `NOT_STARTED`. P2 remains validation-readiness work, not automatic feature expansion.
 
 ## Fixed P2 Constraints
 
@@ -26,6 +26,7 @@ Status: P2-01 through P2-09 internal validation-readiness and closeout sequence 
 | P2-08 | `COMPLETE_LOCAL_SCRIPTED` | Rehearse pre-consultation evidence walkthrough and decision capture. | Scripted walkthrough, Priority-1 owner/recipient map, 20-entry decision register, response template, action-impact routing, and status-only package smoke. | No change. |
 | P2-09 | `COMPLETE_LOCAL_CLOSEOUT` | Consolidate cumulative P2 disposition, claims, blockers, exit criteria, pack index, and next-work gate. | Closeout review, status summary, open-item/exit register, controlled 17-document closeout package, policy/package checks. | No change. |
 | P2-10 | `COMPLETE_LOCAL_ASSISTED` | Rehearse Priority-1 project-position answers and freeze the institution-contact decision gate. | Assisted report/transcript, response scorecard, gap register, six-precondition contact gate, and status-only package. | No change. |
+| P2-11 | `READY_FOR_NAMED_HUMAN_EXECUTION` | Package the assisted result for a future real named reviewer and separate project-owner contact decision. | Handoff index, reviewer guide, minutes, objection register, authorization record, policy, and 17-document status-only package. | No change. |
 
 ## P2-01 — Readiness Gap Consolidation
 
@@ -370,3 +371,20 @@ Status: `COMPLETE_LOCAL_ASSISTED`; independent human rehearsal is `NOT_RUN` and 
 ### Exit rule
 
 P2-10 authorizes preparation for a named human internal rehearsal only. Institution contact requires named authorization and all six retained preconditions. It does not authorize implementation, formal submission, signing, timestamping, publication, or release.
+
+## P2-11 — Independent Human Rehearsal Handoff
+
+Status: `READY_FOR_NAMED_HUMAN_EXECUTION`; reviewer identity is `UNASSIGNED`, reviewer independence is `NOT_RECORDED`, human rehearsal is `NOT_RUN`, and institution-contact authorization is `NO`.
+
+### Deliverables
+
+- controlled handoff pack index and independence boundary;
+- named-reviewer ten-agenda execution guide;
+- minutes template and objection/defect register;
+- separate project-owner consultation authorization record;
+- machine-readable policy and 17-document status-only package smoke;
+- P2-11 traceability, claims, gap, closeout, and evidence integration.
+
+### Exit rule
+
+P2-11 completes preparation only. A real named reviewer must verify the frozen pack, perform the live challenge, retain findings and recommendation, and return the record to the project owner. The project owner must then issue a separate contact decision. No generated artifact, package smoke, or local test result can substitute for those human records.

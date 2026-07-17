@@ -1,14 +1,17 @@
 # P2 Closeout and Next-work Gate
 
-Status: P2-01 through P2-09 are complete as local validation-readiness work. P2-10 assisted rehearsal is complete locally, but independent human rehearsal and institution contact remain unperformed. This document does not create P3 automatically.
+Status: P2-01 through P2-09 are complete as local validation-readiness work. P2-10 assisted rehearsal is complete, and P2-11 human-review handoff is ready. Reviewer identity remains unassigned, independent human rehearsal is `NOT_RUN`, and institution contact is unauthorized. This document does not create P3 automatically.
 
 ## Current state
 
 - Internal closeout: `COMPLETE_LOCAL_CLOSEOUT`.
 - Controlled pre-consultation pack: `READY_FOR_INTERNAL_REVIEW`.
 - Assisted desk rehearsal: `COMPLETE_LOCAL_ASSISTED`.
+- P2-11 human-review handoff: `READY_FOR_NAMED_HUMAN_EXECUTION`.
+- Named reviewer/independence: `UNASSIGNED`/`NOT_RECORDED`.
 - Independent human live rehearsal: `NOT_RUN`.
-- Institution-contact decision: `CONDITIONAL_NO_GO_PENDING_NAMED_AUTHORIZATION`.
+- Project-owner authorization: `NOT_RECORDED`.
+- Institution-contact authorization: `NO`.
 - External consultation: `NOT_CONDUCTED`.
 - Institution answers: `NOT_RECEIVED`.
 - Submission/release authorization: `NO/NO`.
@@ -17,7 +20,7 @@ Status: P2-01 through P2-09 are complete as local validation-readiness work. P2-
 
 ### Lane 1 — named human internal rehearsal
 
-P2-10 assisted rehearsal is complete. The remaining internal rehearsal requires explicit authorization, a named presenter/reviewer, fixed materials, and retained findings. It must not simulate institution approval.
+P2-11 provides the fixed materials and control templates. The remaining internal rehearsal must be performed by a real named reviewer, verify the pack hash, cover all ten agendas, and retain minutes, objections, recommendation, and project-owner receipt. Generated text or a policy check cannot satisfy this lane.
 
 ### Lane 2 — external pre-consultation
 
@@ -48,4 +51,4 @@ The next numbered task title must identify its authority source and lane, for ex
 - `P2-OE1: execute approved exact OE-01 evidence plan`;
 - `P1-34R: collect actual hosted artifacts after billing resolution`.
 
-Without one of these authority sources, the project remains at P2 closeout with P2-10 assisted rehearsal complete and no implementation authorization.
+Without one of these authority sources, the project remains at P2 closeout with P2-11 handoff ready, human rehearsal `NOT_RUN`, institution contact unauthorized, and no implementation authorization.

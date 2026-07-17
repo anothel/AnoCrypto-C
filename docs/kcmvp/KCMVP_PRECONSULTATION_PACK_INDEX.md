@@ -54,3 +54,9 @@
 ## P2-10 assisted-rehearsal supplement
 
 The P2-10 status-only supplement adds the assisted report, compact transcript, response scorecard, rehearsal gap register and institution-contact decision gate. It does not replace the P2-09 closeout pack and contains no institution answer, source, binary or credential.
+
+## P2-11 named-human handoff supplement
+
+The P2-11 supplement is a separate status-only 17-document package for a future named reviewer. It adds an execution guide, minutes template, objection register, and project-owner authorization record while retaining the P2-10 assisted materials and blocker/claims controls.
+
+It contains no source, binary, evidence original, credential, signature, timestamp response, customer data, institution response, or approval. Package generation does not assign a reviewer or authorize contact.

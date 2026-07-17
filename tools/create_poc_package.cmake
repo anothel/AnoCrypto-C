@@ -110,7 +110,7 @@ execute_process(
     ERROR_VARIABLE _release_compat_stderr
     TIMEOUT 300)
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_COMPATIBILITY_CHECK.log"
-    "# Check P1-33 release identity and P1-29 public compatibility baseline\n"
+    "# Check current release identity and retained P1-29 public compatibility baseline\n"
     "# Expected version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "# Expected public symbols: ${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}\n"
     "# Result: ${_release_compat_result}\n\n"
@@ -614,7 +614,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/README.md"
 "- `RANDOM_SERVICE_PACKAGE_NOTES.txt`: P1-29 retained public random-service implementation summary.\n"
 "- `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt`: P1-29 retained lifecycle, process-marker, VM duplication, and clean export-baseline summary.\n"
 "- `CLEAN_RELEASE_SYMBOL_BASELINE.log`: clean shared-library comparison with the stored 69-symbol ABI-0 baseline.\n"
-"- `RELEASE_COMPATIBILITY_CHECK.log`: P1-33 release identity and P1-29 public source/symbol compatibility policy result.\n"
+"- `RELEASE_COMPATIBILITY_CHECK.log`: current release identity and retained P1-29 public source/symbol compatibility policy result.\n"
 "- `RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt`: customer-facing compatibility scope, exclusions, and provenance limitations.\n"
 "- `RELEASE_PROVENANCE_POLICY_CHECK.log`: status-only P1-33 unsigned/source-SBOM policy result.\n"
 "- `ENTROPY_HEALTH_PACKAGE_NOTES.txt`: clean-build and internal entropy/test-hook exclusion summary.\n"

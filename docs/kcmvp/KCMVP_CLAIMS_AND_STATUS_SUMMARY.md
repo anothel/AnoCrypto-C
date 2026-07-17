@@ -3,13 +3,16 @@
 | Area | Current status |
 |---|---|
 | Product | `AnoCrypto-C` C99 cryptographic module candidate SDK |
-| Engineering version | `0.1.0-p2-10-assisted-rehearsal` |
+| Engineering version | `0.1.0-p2-11-human-rehearsal-handoff` |
 | Public boundary | 14 headers, 69 symbols, `ANOCRYPTO_C_0` |
 | Candidate environment | `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` |
 | P2 internal readiness sequence | `COMPLETE_LOCAL_CLOSEOUT` |
 | P2-10 assisted rehearsal | `COMPLETE_LOCAL_ASSISTED` |
+| P2-11 human-rehearsal handoff | `READY_FOR_NAMED_HUMAN_EXECUTION` |
+| Named reviewer / independence | `UNASSIGNED` / `NOT_RECORDED` |
 | Independent human live rehearsal | `NOT_RUN` |
-| Institution-contact decision | `CONDITIONAL_NO_GO_PENDING_NAMED_AUTHORIZATION` |
+| Project-owner authorization | `NOT_RECORDED` |
+| Institution-contact authorization | `NO` |
 | Runtime integrity | `NOT_IMPLEMENTED` |
 | Exact OE-01 evidence | `NOT_RUN` |
 | External consultation | `NOT_CONDUCTED` |
@@ -25,14 +28,14 @@
 
 - KCMVP-oriented candidate module.
 - KCMVP validation-readiness engineering work completed locally through P2 closeout.
-- Controlled internal pre-consultation and assisted-rehearsal packs prepared.
-- Source-backed assisted desk rehearsal completed; named human rehearsal remains pending.
+- Controlled internal pre-consultation, assisted-rehearsal, and named-human handoff packs prepared.
+- Source-backed assisted desk rehearsal completed; the future reviewer remains unassigned and the human rehearsal remains pending.
 - Local engineering tests and evidence passed with stated environment and limitations.
 - External confirmation, institution test, formal validation, and release authorization remain pending.
 
 ## Prohibited wording
 
-- KCMVP validated, certified, approved, institution-tested, or independently rehearsed.
+- KCMVP validated, certified, approved, institution-tested, independently rehearsed, or human-reviewed.
 - Claims of completed production suitability, completed independent audit, formal security assurance, or impossibility of misuse.
 - Universal constant-time or side-channel resistance.
 - Actual Windows/macOS/hosted success when jobs did not run.
