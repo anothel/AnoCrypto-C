@@ -94,8 +94,8 @@ require_text("docs/kcmvp/KCMVP_OPEN_ITEMS_AND_EXIT_CRITERIA.md" "Gate A — inte
 require_text("docs/kcmvp/KCMVP_OPEN_ITEMS_AND_EXIT_CRITERIA.md" "Gate E — external release ready")
 require_text("docs/roadmap/P2_CLOSEOUT_AND_NEXT_WORK_GATE.md" "no automatic P3 feature expansion")
 require_text("docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md" "| Actual hosted lanes | `NOT_RUN` |")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p3-00-downstream-requirement-intake")
-require_text("README.md" "0.1.0-p3-00-downstream-requirement-intake")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p3-01-downstream-requirement-consolidation")
+require_text("README.md" "0.1.0-p3-01-downstream-requirement-consolidation")
 
 file(STRINGS "${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_PRECONSULTATION_CLOSEOUT_MANIFEST.txt" _manifest_lines)
 set(_pack_docs "")

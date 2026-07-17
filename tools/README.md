@@ -298,7 +298,11 @@ The assisted rehearsal is not an independent human review or institution consult
 
 ## P3-00 downstream requirement intake
 
-- `check_downstream_requirement_intake_policy.cmake`: validates `DRI-P3-00-R1`, four unimported matched source sets, zero accepted requirements/gaps, no selected implementation, unchanged 14/69/`ANOCRYPTO_C_0`, deferred KCMVP work, and retained hosted/signing blockers.
-- `create_downstream_requirement_intake_package.cmake`: stages only the 15 allowlisted status/request documents and writes a SHA-256 manifest/status record.
-- `check_downstream_requirement_intake_package.cmake`: verifies hashes, file counts, non-sensitive status-only contents, zero imported requirements, and no API/ABI authorization.
-- `run_downstream_requirement_intake_package_smoke.cmake`: creates and validates the intake package in one test.
+P3-00 established the fail-closed intake gate and is retained as historical design documentation. Its active package/policy tools were superseded by P3-01 after all four exact source sets were imported.
+
+## P3-01 product-driven requirement analysis
+
+- `check_downstream_requirement_analysis_policy.cmake`: validates four imported source sets, one recorded identity conflict, 20 accepted requirement rows, eight approved AnoCrypto-C gaps, selected P3-02 HKDF-SHA-256 work, unchanged current 14/69/`ANOCRYPTO_C_0`, and retained hosted/signing blockers.
+- `create_downstream_requirement_analysis_package.cmake`: stages the 14 allowlisted status-only analysis documents and writes a SHA-256 manifest/status record.
+- `check_downstream_requirement_analysis_package.cmake`: verifies the status record, document hashes, file count and source/binary exclusion.
+- `run_downstream_requirement_analysis_package_smoke.cmake`: creates and validates the P3-01 package in one test.

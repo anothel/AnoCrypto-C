@@ -1,6 +1,6 @@
 # AnoCrypto-C
 
-Current status: `0.1.0-p3-00-downstream-requirement-intake`. P2 remains a retained local validation-readiness snapshot. P3-00 resets the active lane to product-driven downstream requirement intake: exact matched AnoSecureKit and AnoPKI Community/Enterprise revisions are not yet imported, no product requirement or capability gap is approved, no algorithm or public API implementation is selected, and KCMVP consultation work is deferred. Runtime integrity remains `NOT_IMPLEMENTED`, exact OE-01 and P1-34 hosted evidence remain `NOT_RUN`, hosted review remains `UNREVIEWED`, repository signing remains `UNSIGNED`, and external release authorization remains `NO`. The public boundary remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
+Current status: `0.1.0-p3-01-downstream-requirement-consolidation`. P2 remains a retained local validation-readiness snapshot. P3-00 resets the active lane to product-driven downstream requirement intake: exact matched AnoSecureKit and AnoPKI Community/Enterprise revisions are not yet imported, no product requirement or capability gap is approved, no algorithm or public API implementation is selected, and KCMVP consultation work is deferred. Runtime integrity remains `NOT_IMPLEMENTED`, exact OE-01 and P1-34 hosted evidence remain `NOT_RUN`, hosted review remains `UNREVIEWED`, repository signing remains `UNSIGNED`, and external release authorization remains `NO`. The public boundary remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
 
 Implemented processing scope:
 

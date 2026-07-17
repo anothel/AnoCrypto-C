@@ -1,33 +1,30 @@
 # Cross-Repository Requirement Ownership
 
-Status: `P3_00_INTAKE_RULE`
+Status: `P3_01_OWNERSHIP_DECISIONS_APPROVED`
 
-## Ownership test
+## Fixed decisions
 
-| Requirement kind | Default owner |
+| Area | Owner |
 |---|---|
-| Community public API, CLI, format or backend-neutral behavior | corresponding Community repository |
-| OpenSSL provider implementation defect | corresponding Community repository |
-| Enterprise profile, diagnostics, policy, packaging or proprietary adapter | corresponding Enterprise repository |
-| Generic cryptographic primitive, key/CSP lifecycle, random/DRBG, self-test or stable C ABI | AnoCrypto-C candidate, subject to gate |
-| X.509, CSR, CRL, OCSP, trust, ASN.1 or PKI workflow | AnoPKI Core/Enterprise, not AnoCrypto-C |
-| envelope, packet/file/password format, nonce orchestration or application policy | AnoSecureKit, not AnoCrypto-C |
-| HSM/KMS/PKCS#11 routing and provider orchestration | owning Enterprise product unless a generic primitive gap is separately proven |
+| Community public API, CLI, format and backend-neutral semantics | corresponding Community repository |
+| Enterprise profile, diagnostics, packaging, capability mask and no-fallback adapter | corresponding Enterprise repository |
+| Generic hash, MAC, KDF, AEAD, public-key primitive, random, CSP/key lifecycle and stable C ABI | AnoCrypto-C, after gate |
+| `SKT1`, `SKF1`, `SKP1`, file/chunk framing, nonce composition and application output policy | AnoSecureKit |
+| ASN.1, PEM/DER, PKCS#10, X.509, CRL, OCSP, chain/EKU/time policy and normalized operation results | AnoPKI |
+| key reference parsing, provider selection, HSM/KMS routing, signing evidence, retry/idempotency and audit | Enterprise product |
 
-## Routing questions
+## AnoPKI codec decision
 
-1. Is the behavior a product operation or a reusable cryptographic primitive?
-2. Can the backend-neutral product contract express it without AnoCrypto-C types?
-3. Does the OpenSSL implementation combine primitive work with product policy?
-4. Is the primitive already present in AnoCrypto-C?
-5. Would adding it alter a Community v1 format or operation contract?
-6. What public API, ABI, CSP, self-test, zeroization and evidence impact follows?
+P3-01 selects the Enterprise-owned/AnoPKI-owned codec model. AnoCrypto-C will
+not add high-level CSR, certificate, CRL or OCSP APIs from this intake.
+AnoPKI may consume generic AnoCrypto-C hash, signature, key-handle and random
+services through its Enterprise adapter while retaining all PKI object and policy semantics.
 
-## Prohibited shortcuts
+AnoPKI retains all codec, PKI object and policy semantics.
 
-- copying Community operation code into AnoCrypto-C;
-- treating OpenSSL API calls as a one-to-one AnoCrypto-C API specification;
-- modifying a fixed product format to fit missing AnoCrypto-C capability;
-- implementing an Enterprise adapter concern inside the cryptographic module;
-- using silent OpenSSL fallback as parity evidence;
-- starting implementation from an unversioned requirement note.
+## Boundary consequences
+
+- OpenSSL `X509_*`, `OCSP_*`, `PEM_*`, `d2i_*` and `i2d_*` call sequences are not copied into AnoCrypto-C.
+- AnoSecureKit v1 bytes are preserved; missing primitives are implemented beneath the provider contract.
+- Provider capability masks remain downstream-owned and must report only real linked services.
+- No operation may fall back to OpenSSL when the AnoCrypto-C profile is selected.

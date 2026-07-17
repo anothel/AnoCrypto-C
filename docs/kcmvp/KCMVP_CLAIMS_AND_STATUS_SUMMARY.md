@@ -3,7 +3,7 @@
 | Area | Current status |
 |---|---|
 | Product | `AnoCrypto-C` C99 cryptographic module candidate SDK |
-| Engineering version | `0.1.0-p3-00-downstream-requirement-intake` |
+| Engineering version | `0.1.0-p3-01-downstream-requirement-consolidation` |
 | Public boundary | 14 headers, 69 symbols, `ANOCRYPTO_C_0` |
 | Candidate environment | `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` |
 | P2 internal readiness sequence | `COMPLETE_LOCAL_CLOSEOUT` |

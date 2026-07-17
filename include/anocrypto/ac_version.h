@@ -11,8 +11,8 @@ extern "C" {
 #define ANO_CRYPTO_VERSION_MAJOR 0u
 #define ANO_CRYPTO_VERSION_MINOR 1u
 #define ANO_CRYPTO_VERSION_PATCH 0u
-#define ANO_CRYPTO_VERSION_PRERELEASE "p3-00-downstream-requirement-intake"
-#define ANO_CRYPTO_VERSION_STRING "0.1.0-p3-00-downstream-requirement-intake"
+#define ANO_CRYPTO_VERSION_PRERELEASE "p3-01-downstream-requirement-consolidation"
+#define ANO_CRYPTO_VERSION_STRING "0.1.0-p3-01-downstream-requirement-consolidation"
 
 /*
  * Version query APIs are allowed in all module states, including error state.

@@ -1,32 +1,34 @@
 # P3 API and ABI Evolution Gate
 
-Status: `NO_CHANGE_APPROVED`
+Status: `P3_02_ADDITIVE_ABI_APPROVED`
 
 ## Retained baseline
 
 - public headers: 14;
 - exported symbols: 69;
-- ABI line: `ANOCRYPTO_C_0`.
+- existing ABI line: `ANOCRYPTO_C_0`.
 
-P3-00 changes no public declaration or exported symbol.
+P3-01 changes no public declaration or exported symbol.
 
-## Decision options for a future accepted gap
+## Approved P3-02 strategy
 
-1. private implementation using the existing API;
-2. additive symbol in the current ABI line after compatibility review;
-3. additive new header/symbol set under a separately versioned symbol line;
-4. downstream adapter change with no AnoCrypto-C API change;
-5. reject or defer the requirement.
+HKDF-SHA-256 may add a new public header `include/anocrypto/ac_kdf.h` and
+additive symbols under a new symbol-version line `ANOCRYPTO_C_1`.
+`ANOCRYPTO_C_0` symbols and retained P1-29 consumers must remain unchanged.
 
-A new ABI line such as `ANOCRYPTO_C_1` is not pre-approved. It may be selected
-only after exact downstream requirements and compatibility impact are known.
+The precise function names and count are not approved by this document. P3-02
+must complete API review before implementation and update all baselines only
+after tests pass.
 
-## Required evidence before public expansion
+## P3-02 required evidence
 
-- API ownership and misuse-boundary review;
-- old/current header consumers;
-- symbol-version and source-surface comparison;
-- context size/layout and lifecycle rules;
-- status, buffer, alias and failure-zeroization semantics;
-- install/export and downstream adapter integration;
-- release evidence and baseline update approval.
+- RFC 5869 KATs and output-length limits 0, 1, 32, 8160 and 8161;
+- empty IKM/salt/info semantics;
+- no partial output and output clearing on failure;
+- integer overflow and alias rules;
+- OpenSSL test-only differential validation;
+- exact `SKF1` v1 info-byte compatibility case;
+- old/current header consumers and symbol-version inspection;
+- install/export/PoC and AnoSecureKit Enterprise adapter integration plan.
+
+All later AEAD, scrypt and public-key APIs require separate numbered gates.

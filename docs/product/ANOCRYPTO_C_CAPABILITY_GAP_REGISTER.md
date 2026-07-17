@@ -1,28 +1,27 @@
 # AnoCrypto-C Capability Gap Register
 
-Status: `NO_PRODUCT_GAP_APPROVED`
+Status: `8_GAPS_APPROVED_ONE_SELECTED`
 
-## Current baseline
+## Retained baseline
 
-The retained P2 baseline contains the existing SHA-2, HMAC, HMAC_DRBG, random,
-AES-CBC, AES-CMAC and CSP/lifecycle services described by the repository. The
-public baseline remains 14 headers, 69 symbols and `ANOCRYPTO_C_0`.
+The current source still exposes 14 headers, 69 symbols and `ANOCRYPTO_C_0`.
+No public expansion occurs in P3-01.
 
-## Candidate gap table
+| Gap ID | Requirement authority | Minimal capability | API/ABI expectation | Priority/state |
+|---|---|---|---|---|
+| `AC-GAP-001` | `ASK-004` | RFC 5869 HKDF-SHA-256, 0..8160 output, exact empty-input semantics | new `ac_kdf.h`; additive `ANOCRYPTO_C_1` symbols | `SELECTED_P3_02` |
+| `AC-GAP-002` | `ASK-005` | AES-256-GCM one-shot, 12-byte nonce, 16-byte tag, arbitrary AAD, no unauthenticated plaintext release | new AEAD API, additive ABI | `APPROVED_AFTER_P3_02` |
+| `AC-GAP-003` | `ASK-006` | AES-256-GCM incremental encrypt/decrypt with explicit states | opaque context API, additive ABI | `APPROVED_AFTER_ONE_SHOT` |
+| `AC-GAP-004` | `ASK-007` | scrypt fixed v1 profile with overflow/resource rejection | KDF API design required | `APPROVED_DESIGN_PENDING` |
+| `AC-GAP-005` | `PKI-005` | SHA-1 digest only for OCSP CertID interoperability | restricted algorithm/API policy required | `CONDITIONAL_DEFERRED` |
+| `AC-GAP-006` | `PKI-006` | RSA PKCS#1 v1.5 SHA-256/384/512 sign/verify | public-key API and new ABI line | `APPROVED_AFTER_KEY_GATE` |
+| `AC-GAP-007` | `PKI-007` | ECDSA P-256 SHA-256 sign/verify with explicit signature encoding | public-key API and new ABI line | `APPROVED_AFTER_KEY_GATE` |
+| `AC-GAP-008` | `PKI-008` | key handle/import, public metadata and key/public-material binding | key/CSP architecture gate | `APPROVED_DESIGN_GAP` |
 
-| Gap ID | Downstream requirement | Existing capability result | Ownership result | API/ABI impact | Test/evidence plan | Priority | State |
-|---|---|---|---|---|---|---|---|
-| `GAP-TBD` | `WAITING_FOR_CURRENT_DOWNSTREAM_SOURCES` | `UNASSESSED` | `UNDECIDED` | `UNASSESSED` | `NOT_WRITTEN` | `UNRANKED` | `NOT_APPROVED` |
+## Explicitly not gaps
 
-## Approval gate
-
-A gap becomes implementation work only when:
-
-1. the requirement is accepted from an exact downstream revision;
-2. ownership is assigned to AnoCrypto-C;
-3. existing services are proven insufficient;
-4. the minimal API and private implementation scope are reviewed;
-5. ABI compatibility strategy is approved;
-6. KAT, negative, differential, lifecycle, zeroization, install and downstream
-   integration evidence is planned;
-7. a numbered work item and single commit title are approved.
+- AnoSecureKit formats and file/packet orchestration;
+- PKI ASN.1/X.509/CSR/CRL/OCSP codecs;
+- Enterprise capability masks, release authorization and artifact approval;
+- HSM/KMS routing, key reference syntax, audit and retries;
+- Ed25519, RSA-PSS and PQC without new positive product evidence.

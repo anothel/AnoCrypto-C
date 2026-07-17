@@ -306,7 +306,7 @@ Local evidence records expected tag metadata but does not claim that a tag exist
 
 ## Retained P1-33 clean rehearsal and hosted-review additions
 
-- Release identity is `0.1.0-p3-00-downstream-requirement-intake`; public surface remains 14 headers and 69 `ANOCRYPTO_C_0` symbols.
+- Release identity is `0.1.0-p3-01-downstream-requirement-consolidation`; public surface remains 14 headers and 69 `ANOCRYPTO_C_0` symbols.
 - `VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt`
 - `SELF_TEST_INTEGRITY_POLICY_CHECK.txt` binds the internal candidate ID, selected boundary/environment metadata, public counts, and unchanged P1-34 blocker. It is a policy record, not selected-OE execution evidence.
 - A temporary clean Git repository creates a synthetic local tag and proves expected tag, supplied commit, tag-resolved commit, and `HEAD` equality without tagging the user repository.

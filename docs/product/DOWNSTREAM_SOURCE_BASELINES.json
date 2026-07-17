@@ -1,0 +1,58 @@
+{
+  "schema": "anocrypto-c/downstream-source-baselines/v1",
+  "status": "IMPORTED_WITH_ONE_IDENTITY_CONFLICT",
+  "source_sets": [
+    {
+      "id": "ASK-COMM",
+      "repository": "AnoSecureKit-Community",
+      "revision": "694459ebe497d15ba75ef76a52fa7c36ddd7bcce",
+      "version": "0.4.0",
+      "source_sha256": "951f523d9444450e3894f72fae5a45594441530b559dc3d7b4766258ee414484",
+      "pack_sha256": "dc5d27afbf19b903105057aac4a47f07e2f6f8c499b1d251314104c9b83ede2c",
+      "intake_state": "IMPORTED",
+      "identity_note": "Separate Community pack identifies 694459e as Enterprise-consumed release."
+    },
+    {
+      "id": "ASK-ENT",
+      "repository": "AnoSecureKit-Enterprise",
+      "revision": "3a62318fce27985d091bb5445fc59d0fca7033a2",
+      "version": "0.1.0",
+      "source_sha256": "ebf8a4cbbdda8103f4678cbe28c56b1758da26761ecfcd3f5b6990a22c8f10c5",
+      "pack_sha256": "13448abe43fa45307d46f70e8b44b5af7a16c95d2835b1f0c6094a134df694b3",
+      "intake_state": "IMPORTED_WITH_DEPENDENCY_IDENTITY_CONFLICT",
+      "identity_note": "Enterprise vendored tree 9b498f... maps to pinned 102965b..., while separate ASK-COMM pack asserts 694459e...."
+    },
+    {
+      "id": "APKI-COMM",
+      "repository": "AnoPKI-Community",
+      "revision": "ae3ddee72dd05f274b9bbae1b514cdc4c4de03f5",
+      "version": "0.1.0-alpha.0",
+      "source_sha256": "2f5b5750631a4af39293e10a420a6667ff430e682a3ab24bf3f3e54dbc298ac2",
+      "pack_sha256": "0c9c9b0a1c9deaf17554ce22770e2fc5c9da426f85ddadccb516e04c91125268",
+      "intake_state": "IMPORTED",
+      "identity_note": "Exact Enterprise-consumed Community dependency."
+    },
+    {
+      "id": "APKI-ENT",
+      "repository": "AnoPKI-Enterprise",
+      "revision": "68b379e7684c9d8b44c53728949774088352a9d9",
+      "version": "current Enterprise source state",
+      "source_sha256": "af5acc349deee69650a4767a51fdc0214cd529561a9ece906a18ab0eebe7033d",
+      "pack_sha256": "ed55d2aa2ebdd561dc2549d01d1bd8f3fd0bd2d2144c3ce3b74083d86fb47704",
+      "intake_state": "IMPORTED",
+      "identity_note": "Collection binds Enterprise revision to Community ae3ddee...."
+    }
+  ],
+  "conflicts": [
+    {
+      "id": "SRC-CONFLICT-ASK-001",
+      "state": "OPEN_DOWNSTREAM_SYNC_DECISION",
+      "impact": "Exact dependency lineage is unresolved. Requirement contract analysis is usable because normalized contract/source comparison differs semantically only in internal secure_wipe export decoration, not provider operations or v1 formats."
+    },
+    {
+      "id": "SRC-DRIFT-PKI-001",
+      "state": "DOWNSTREAM_DOCUMENTATION_DRIFT",
+      "impact": "Some selected source-derived documents retain older revision markers. Collection manifests and exact source archive identities remain authority for this intake."
+    }
+  ]
+}

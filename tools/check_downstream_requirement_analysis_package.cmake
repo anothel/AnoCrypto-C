@@ -1,0 +1,63 @@
+cmake_minimum_required(VERSION 3.16)
+if(NOT DEFINED ANO_CRYPTO_DRA_DIR OR ANO_CRYPTO_DRA_DIR STREQUAL "")
+  message(FATAL_ERROR "ANO_CRYPTO_DRA_DIR is required")
+endif()
+get_filename_component(_dir "${ANO_CRYPTO_DRA_DIR}" ABSOLUTE)
+if(NOT EXISTS "${_dir}/PACKAGE_STATUS.txt" OR NOT EXISTS "${_dir}/DOWNSTREAM_REQUIREMENT_ANALYSIS_MANIFEST.sha256")
+  message(FATAL_ERROR "downstream requirement analysis package control files missing")
+endif()
+file(READ "${_dir}/PACKAGE_STATUS.txt" _status)
+foreach(_needle IN ITEMS
+  "policy_id=DRA-P3-01-R1"
+  "package_class=STATUS_ONLY_DOWNSTREAM_REQUIREMENT_ANALYSIS"
+  "imported_source_sets=4"
+  "source_identity_conflicts=1"
+  "accepted_requirements=20"
+  "approved_gaps=8"
+  "selected_implementation=P3-02_HKDF_SHA256"
+  "public_api_change_authorization=P3_02_ONLY"
+  "new_abi_line_authorization=ANOCRYPTO_C_1_ADDITIVE_FOR_P3_02"
+  "contains_source_or_binary=NO"
+  "contains_sensitive_material=NO")
+  string(FIND "${_status}" "${_needle}" _pos)
+  if(_pos EQUAL -1)
+    message(FATAL_ERROR "downstream requirement analysis package missing status: ${_needle}")
+  endif()
+endforeach()
+file(STRINGS "${_dir}/DOWNSTREAM_REQUIREMENT_ANALYSIS_MANIFEST.sha256" _lines)
+set(_count 0)
+foreach(_line IN LISTS _lines)
+  string(LENGTH "${_line}" _len)
+  if(_len LESS 67)
+    message(FATAL_ERROR "malformed downstream requirement analysis manifest line: ${_line}")
+  endif()
+  string(SUBSTRING "${_line}" 0 64 _expected)
+  math(EXPR _path_len "${_len}-66")
+  string(SUBSTRING "${_line}" 66 ${_path_len} _rel)
+  if(NOT EXISTS "${_dir}/${_rel}" OR IS_DIRECTORY "${_dir}/${_rel}" OR IS_SYMLINK "${_dir}/${_rel}")
+    message(FATAL_ERROR "manifest file missing: ${_rel}")
+  endif()
+  file(SHA256 "${_dir}/${_rel}" _actual)
+  if(NOT _actual STREQUAL _expected)
+    message(FATAL_ERROR "manifest hash mismatch: ${_rel}")
+  endif()
+  math(EXPR _count "${_count}+1")
+endforeach()
+if(NOT _count EQUAL 14)
+  message(FATAL_ERROR "downstream requirement analysis package document count drifted: ${_count}")
+endif()
+file(GLOB_RECURSE _all RELATIVE "${_dir}" "${_dir}/*")
+set(_files 0)
+foreach(_rel IN LISTS _all)
+  if(IS_DIRECTORY "${_dir}/${_rel}")
+    continue()
+  endif()
+  math(EXPR _files "${_files}+1")
+  if(_rel MATCHES "[.](c|h|o|a|so|dll|dylib|exe|key|pem|p12|pfx|sig|tsr)$")
+    message(FATAL_ERROR "forbidden file in downstream requirement analysis package: ${_rel}")
+  endif()
+endforeach()
+if(NOT _files EQUAL 16)
+  message(FATAL_ERROR "downstream requirement analysis package total file count drifted: ${_files}")
+endif()
+message(STATUS "P3-01 downstream requirement analysis package check passed")

@@ -36,7 +36,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-00-downstream-requirement-intake
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-01-downstream-requirement-consolidation
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build
@@ -256,7 +256,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
           -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-00-downstream-requirement-intake-openssl
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-01-downstream-requirement-consolidation-openssl
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build differential lane
@@ -353,7 +353,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-00-downstream-requirement-intake-linux32
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-01-downstream-requirement-consolidation-linux32
           -DCMAKE_C_FLAGS=-m32
           -DCMAKE_EXE_LINKER_FLAGS=-m32
           -DCMAKE_SHARED_LINKER_FLAGS=-m32
@@ -468,7 +468,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-00-downstream-requirement-intake-${{ matrix.cc }}-compiler-review
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-01-downstream-requirement-consolidation-${{ matrix.cc }}-compiler-review
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Capture AES compiler output
@@ -557,7 +557,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DBUILD_SHARED_LIBS=OFF
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-00-downstream-requirement-intake-s390x
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-01-downstream-requirement-consolidation-s390x
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build s390x lane
@@ -661,7 +661,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_SANITIZER_MODE=address-undefined
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-00-downstream-requirement-intake-GCC-asan-ubsan
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-01-downstream-requirement-consolidation-GCC-asan-ubsan
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build sanitizer lane
@@ -700,7 +700,7 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-00-downstream-requirement-intake-test-hook
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-01-downstream-requirement-consolidation-test-hook
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build dedicated test-hook lane
@@ -755,7 +755,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-00-downstream-requirement-intake-provider-disabled
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-01-downstream-requirement-consolidation-provider-disabled
           -DCMAKE_BUILD_TYPE=Debug
 
       - name: Build provider-disabled lane
@@ -820,7 +820,7 @@ jobs:
           -DANO_CRYPTO_HIDE_INTERNAL_SYMBOLS=ON
           -DBUILD_SHARED_LIBS=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-00-downstream-requirement-intake-clean-release
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-01-downstream-requirement-consolidation-clean-release
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Compare clean Release exports with ABI-0 baseline
@@ -995,7 +995,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
           -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-00-downstream-requirement-intake
+          -DANO_CRYPTO_BUILD_FINGERPRINT=AnoCrypto-C-p3-01-downstream-requirement-consolidation
           -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
@@ -1009,7 +1009,7 @@ jobs:
           cmake
           -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
           -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-release-provenance-bundle
-          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=build/evidence/p3-00/RELEASE_PROVENANCE_CHECK.txt;build/evidence/p3-00/RELEASE_PROVENANCE_POLICY_CHECK.txt;build/evidence/p3-00/release-provenance/RELEASE_PROVENANCE.txt;build/evidence/p3-00/release-provenance/SOURCE_SBOM.spdx.json;build/evidence/p3-00/release-provenance/SOURCE_SBOM_SUMMARY.txt;build/evidence/p3-00/release-provenance/RELEASE_ARTIFACTS.sha256;build/evidence/p3-00/release-provenance/SBOM_STATUS.txt;build/evidence/p3-00/release-provenance/SIGNING_STATUS.txt;build/evidence/p3-00/release-provenance/RELEASE_AUTHORIZATION.md;build/evidence/p3-00/release-provenance/HOSTED_ARTIFACT_DISPOSITION.txt"
+          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=build/evidence/p3-01/RELEASE_PROVENANCE_CHECK.txt;build/evidence/p3-01/RELEASE_PROVENANCE_POLICY_CHECK.txt;build/evidence/p3-01/release-provenance/RELEASE_PROVENANCE.txt;build/evidence/p3-01/release-provenance/SOURCE_SBOM.spdx.json;build/evidence/p3-01/release-provenance/SOURCE_SBOM_SUMMARY.txt;build/evidence/p3-01/release-provenance/RELEASE_ARTIFACTS.sha256;build/evidence/p3-01/release-provenance/SBOM_STATUS.txt;build/evidence/p3-01/release-provenance/SIGNING_STATUS.txt;build/evidence/p3-01/release-provenance/RELEASE_AUTHORIZATION.md;build/evidence/p3-01/release-provenance/HOSTED_ARTIFACT_DISPOSITION.txt"
           -DANO_CRYPTO_HOSTED_LANE=${{ env.HOSTED_PROVENANCE_LANE }}
           -DANO_CRYPTO_HOSTED_PLATFORM=Linux
           -DANO_CRYPTO_HOSTED_ARCH=x86_64
@@ -1048,7 +1048,7 @@ jobs:
           cmake
           -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
           -DANO_CRYPTO_HOSTED_ARTIFACT_ROOT=hosted-release-signing-handoff-bundle
-          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=build/evidence/p3-00/RELEASE_SIGNING_HANDOFF_CHECK.txt;build/evidence/p3-00/release-signing-handoff/APPROVED_RELEASE_SIGNERS.txt;build/evidence/p3-00/release-signing-handoff/APPROVED_TIMESTAMP_POLICY.txt;build/evidence/p3-00/release-signing-handoff/HOSTED_ARTIFACT_DISPOSITION.txt;build/evidence/p3-00/release-signing-handoff/RELEASE_ARTIFACTS.sha256;build/evidence/p3-00/release-signing-handoff/RELEASE_AUTHORIZATION.md;build/evidence/p3-00/release-signing-handoff/RELEASE_PROVENANCE.txt;build/evidence/p3-00/release-signing-handoff/SIGNING_HANDOFF_FILES.sha256;build/evidence/p3-00/release-signing-handoff/SIGNING_HANDOFF_STATUS.txt;build/evidence/p3-00/release-signing-handoff/SIGNING_POLICY.txt;build/evidence/p3-00/release-signing-handoff/SIGNING_REQUEST.txt"
+          "-DANO_CRYPTO_HOSTED_ARTIFACT_SOURCE_FILES=build/evidence/p3-01/RELEASE_SIGNING_HANDOFF_CHECK.txt;build/evidence/p3-01/release-signing-handoff/APPROVED_RELEASE_SIGNERS.txt;build/evidence/p3-01/release-signing-handoff/APPROVED_TIMESTAMP_POLICY.txt;build/evidence/p3-01/release-signing-handoff/HOSTED_ARTIFACT_DISPOSITION.txt;build/evidence/p3-01/release-signing-handoff/RELEASE_ARTIFACTS.sha256;build/evidence/p3-01/release-signing-handoff/RELEASE_AUTHORIZATION.md;build/evidence/p3-01/release-signing-handoff/RELEASE_PROVENANCE.txt;build/evidence/p3-01/release-signing-handoff/SIGNING_HANDOFF_FILES.sha256;build/evidence/p3-01/release-signing-handoff/SIGNING_HANDOFF_STATUS.txt;build/evidence/p3-01/release-signing-handoff/SIGNING_POLICY.txt;build/evidence/p3-01/release-signing-handoff/SIGNING_REQUEST.txt"
           -DANO_CRYPTO_HOSTED_LANE=${{ env.HOSTED_SIGNING_LANE }}
           -DANO_CRYPTO_HOSTED_PLATFORM=Linux
           -DANO_CRYPTO_HOSTED_ARCH=x86_64
@@ -1086,7 +1086,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: anocrypto-c-p2-05-evidence-draft-${{ matrix.cc }}
-          path: build/evidence/p3-00
+          path: build/evidence/p3-01
           if-no-files-found: error
 
   hosted-artifact-index:

@@ -6,7 +6,7 @@
 | Revision | `0.1` |
 | Status | `CONTROLLED_HANDOFF_READY` |
 | Policy ID | `HRH-P2-11-R1` |
-| Engineering version | `0.1.0-p3-00-downstream-requirement-intake` |
+| Engineering version | `0.1.0-p3-01-downstream-requirement-consolidation` |
 | Package class | `STATUS_ONLY_HUMAN_REHEARSAL_HANDOFF` |
 | Named reviewer | `UNASSIGNED` |
 | Independent human live rehearsal | `NOT_RUN` |

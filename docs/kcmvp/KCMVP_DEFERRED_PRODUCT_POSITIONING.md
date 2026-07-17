@@ -1,6 +1,6 @@
 # KCMVP Deferred Product Positioning
 
-Status: `DEFERRED_GOVERNANCE_TRACK`
+Status: `DEFERRED_GOVERNANCE_TRACK_PRODUCT_ROADMAP_ACTIVE`
 
 P2 readiness work remains a useful engineering snapshot. It is not the current
 feature-selection authority.
@@ -21,3 +21,7 @@ conditions for that work.
 
 No existing P2 document is deleted. P2-09 through P2-12 are retained as future
 governance references and are not the ACTIVE roadmap.
+
+## P3-01 position
+
+Product-driven HKDF/AEAD/KDF/public-key work is selected from downstream evidence. Formal KCMVP scope and consultation remain deferred and do not select feature order.

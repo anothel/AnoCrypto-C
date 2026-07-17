@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p3-00 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p3-01 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p3-00")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p3-01")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -150,8 +150,8 @@ if(NOT DEFINED ANO_CRYPTO_RUN_CONSULTATION_CONTACT_READINESS_CHECK)
     set(ANO_CRYPTO_RUN_CONSULTATION_CONTACT_READINESS_CHECK ON)
 endif()
 
-if(NOT DEFINED ANO_CRYPTO_RUN_DOWNSTREAM_REQUIREMENT_INTAKE_CHECK)
-    set(ANO_CRYPTO_RUN_DOWNSTREAM_REQUIREMENT_INTAKE_CHECK ON)
+if(NOT DEFINED ANO_CRYPTO_RUN_DOWNSTREAM_REQUIREMENT_ANALYSIS_CHECK)
+    set(ANO_CRYPTO_RUN_DOWNSTREAM_REQUIREMENT_ANALYSIS_CHECK ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK)
@@ -1520,15 +1520,15 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CONSULTATION_CONTACT_READINESS_NOTES.txt"
     "Sensitive values recorded: none.
 ")
 
-if(ANO_CRYPTO_RUN_DOWNSTREAM_REQUIREMENT_INTAKE_CHECK)
+if(ANO_CRYPTO_RUN_DOWNSTREAM_REQUIREMENT_ANALYSIS_CHECK)
     set(_dri_check_output
-        "${ANO_CRYPTO_EVIDENCE_DIR}/DOWNSTREAM_REQUIREMENT_INTAKE_POLICY_CHECK.txt")
+        "${ANO_CRYPTO_EVIDENCE_DIR}/DOWNSTREAM_REQUIREMENT_ANALYSIS_POLICY_CHECK.txt")
     execute_process(
         COMMAND "${CMAKE_COMMAND}"
             -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
-            -DANO_CRYPTO_DRI_CHECK_OUTPUT=${_dri_check_output}
-            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_downstream_requirement_intake_policy.cmake"
+            -DANO_CRYPTO_DRA_CHECK_OUTPUT=${_dri_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_downstream_requirement_analysis_policy.cmake"
         RESULT_VARIABLE _dri_check_result
         OUTPUT_VARIABLE _dri_check_stdout
         ERROR_VARIABLE _dri_check_stderr
@@ -1539,31 +1539,33 @@ Command output:
 ${_dri_check_stdout}${_dri_check_stderr}
 ")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-        "P3-00 downstream requirement intake policy check result: ${_dri_check_result}
+        "P3-01 downstream requirement analysis policy check result: ${_dri_check_result}
 ")
     if(NOT _dri_check_result EQUAL 0)
-        message(FATAL_ERROR "P3-00 downstream requirement intake policy check failed")
+        message(FATAL_ERROR "P3-01 downstream requirement analysis policy check failed")
     endif()
 else()
-    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DOWNSTREAM_REQUIREMENT_INTAKE_POLICY_CHECK.txt"
-        "P3-00 downstream requirement intake policy check was not requested.
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DOWNSTREAM_REQUIREMENT_ANALYSIS_POLICY_CHECK.txt"
+        "P3-01 downstream requirement analysis policy check was not requested.
 ")
 endif()
 
-file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DOWNSTREAM_REQUIREMENT_INTAKE_NOTES.txt"
-    "AnoCrypto-C P3-00 downstream requirement intake notes
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DOWNSTREAM_REQUIREMENT_ANALYSIS_NOTES.txt"
+    "AnoCrypto-C P3-01 downstream requirement analysis notes
 "
-    "Policy ID: DRI-P3-00-R1
+    "Policy ID: DRA-P3-01-R1
 "
-    "Status: READY_TO_COLLECT_MATCHED_DOWNSTREAM_SOURCES.
+    "Status: DOWNSTREAM_REQUIREMENTS_CONSOLIDATED.
 "
-    "Imported source sets: 0/4.
+    "Imported source sets/conflicts: 4/1.
 "
-    "Accepted requirements/approved gaps: 0/0.
+    "Accepted requirements/approved gaps: 20/8.
 "
-    "Selected implementation: NONE.
+    "Selected implementation: P3-02_HKDF_SHA256.
 "
-    "Public API/new ABI authorization: NO/NO.
+    "Current public ABI remains 14 headers, 69 symbols, ANOCRYPTO_C_0.
+"
+    "Public API/new ABI authorization: P3_02_ONLY/ANOCRYPTO_C_1_ADDITIVE_FOR_P3_02.
 "
     "KCMVP active lane: DEFERRED.
 "
@@ -1628,7 +1630,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "P2-10 assisted rehearsal policy check: LIVE_REHEARSAL_POLICY_CHECK.txt\n"
     "P2-11 human rehearsal handoff policy check: HUMAN_REHEARSAL_HANDOFF_POLICY_CHECK.txt\n"
     "P2-12 consultation contact-readiness policy check: CONSULTATION_CONTACT_READINESS_POLICY_CHECK.txt\n"
-    "P3-00 downstream requirement intake policy check: DOWNSTREAM_REQUIREMENT_INTAKE_POLICY_CHECK.txt\n"
+    "P3-01 downstream requirement analysis policy check: DOWNSTREAM_REQUIREMENT_ANALYSIS_POLICY_CHECK.txt\n"
     "Differential/portability policy check: DIFFERENTIAL_PORTABILITY_CHECK.txt\n"
     "AES/CBC implementation policy check: AES_CBC_IMPLEMENTATION_CHECK.txt\n"
     "AES/CBC hardening policy check: AES_HARDENING_CHECK.txt\n"
@@ -1643,9 +1645,9 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P3-00 evidence and scope-review notes\n"
+    "AnoCrypto-C P3-01 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P3-00 product-driven downstream requirement intake artifact. P2 validation-readiness remains a retained local snapshot; no downstream source set, product requirement, capability gap, algorithm, public API, or ABI expansion is approved.\n"
+    "Status: P3-01 product-driven downstream requirement analysis artifact. Four source sets are imported, 20 requirement rows and eight AnoCrypto-C gaps are accepted, and P3-02 HKDF-SHA-256 is selected. No public API or ABI change is implemented in P3-01.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"

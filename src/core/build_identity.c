@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p3-00-downstream-requirement-intake"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p3-01-downstream-requirement-consolidation"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)

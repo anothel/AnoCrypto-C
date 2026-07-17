@@ -94,7 +94,7 @@ Status: P2-09 traceability closeout with frozen P2-02 through P2-08 inputs, cumu
 - Stored exported symbol count: 69.
 - ABI line: `ANOCRYPTO_C_0`.
 - No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01 through P2-09.
-- Version/prerelease metadata changed to `0.1.0-p3-00-downstream-requirement-intake`; this is intentionally excluded from normalized non-version API equality.
+- Version/prerelease metadata changed to `0.1.0-p3-01-downstream-requirement-consolidation`; this is intentionally excluded from normalized non-version API equality.
 - P2-07 adds controlled submission documents; P2-08 adds rehearsal/decision controls; P2-09 adds cumulative closeout documents, policy/package checks, evidence wiring, and version metadata only. Public declarations and symbol baseline remain unchanged.
 - The selected integrity candidate, policy record, checker, and roadmap documents are internal/build-time assets and add no public symbol.
 

@@ -1,50 +1,41 @@
 # Current / Active / Next
 
-Status: `P3_00_ACTIVE`
+Status: `P3_01_COMPLETE_P3_02_SELECTED`
 
 ## DONE
 
-- P0/P1 cryptographic core and release-engineering baseline.
-- P2 local validation-readiness, evidence, closeout and controlled consultation
-  preparation snapshot.
-- Public baseline: 14 headers, 69 exported symbols, `ANOCRYPTO_C_0`.
+- P0/P1 cryptographic core and release engineering.
+- P2 local validation-readiness snapshot.
+- P3-00 downstream intake gate.
+- P3-01 import and analysis of four downstream source sets.
+- product/primitive ownership decisions and eight accepted gaps.
 
 ## ACTIVE
 
-`P3-00: downstream requirement intake and product-driven roadmap reset`
+`P3-02: HKDF-SHA-256 public C API and downstream compatibility evidence`
 
-- collect exact matched Community/Enterprise source sets;
-- derive operation-to-capability requirements from code and tests;
-- assign cross-repository ownership;
-- compare accepted requirements with current AnoCrypto-C capability;
-- approve or reject concrete gaps;
-- replace the stale GPT CURRENT ONLY Sources pack.
+The implementation has not started in P3-01. P3-02 must design the minimal C99
+API, add KAT/negative/differential tests, preserve `ANOCRYPTO_C_0`, introduce
+additive `ANOCRYPTO_C_1` symbols and prove the exact AnoSecureKit `SKF1` case.
 
 ## NEXT
 
-No implementation item is selected yet.
-
-After all source sets are imported:
-
-1. complete the product operation capability matrix;
-2. approve ownership and capability gaps;
-3. approve an ABI evolution decision if public expansion is required;
-4. select the first numbered implementation slice;
-5. implement and verify it against the originating downstream product.
+1. P3-03 AES-256-GCM one-shot.
+2. P3-04 AES-256-GCM streaming.
+3. P3-05 scrypt fixed-profile API/resource gate.
+4. AnoSecureKit Enterprise adapter parity and no-fallback evidence.
+5. PKI public-key/key-handle architecture gate.
+6. RSA/ECDSA/SHA-1 interoperability slices only after that gate.
 
 ## DEFERRED
 
-- additional institution-contact preparation;
-- independent human KCMVP rehearsal;
-- formal KCMVP submission;
-- algorithms not backed by accepted downstream requirements;
-- broad operating-environment expansion;
+- KCMVP consultation/submission;
+- Ed25519, RSA-PSS, PQC and unsupported algorithm expansion;
+- high-level PKI APIs in AnoCrypto-C;
 - production signing and external release.
 
 ## BLOCKED_EXTERNAL
 
 - P1-34 actual hosted review: GitHub Actions billing;
-- actual hosted lanes: `NOT_RUN`;
-- hosted review: `UNREVIEWED`;
-- repository signing: `UNSIGNED`;
-- external release authorization: `NO`.
+- hosted lanes `NOT_RUN`, review `UNREVIEWED`;
+- repository `UNSIGNED`, external release authorization `NO`.
