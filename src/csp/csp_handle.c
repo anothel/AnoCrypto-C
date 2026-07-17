@@ -341,6 +341,9 @@ ano_crypto_status_t ano_crypto_csp_handle_get_state(
     }
 
     switch ((ano_crypto_csp_state_t)slot->state) {
+    case ANO_CRYPTO_CSP_STATE_INVALID:
+        *out_state = ANO_CRYPTO_CSP_STATE_INVALID;
+        break;
     case ANO_CRYPTO_CSP_STATE_ALLOCATED:
     case ANO_CRYPTO_CSP_STATE_INITIALIZED:
     case ANO_CRYPTO_CSP_STATE_ACTIVE:

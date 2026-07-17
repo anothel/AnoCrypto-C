@@ -1,6 +1,6 @@
 # KCMVP Evidence Traceability Matrix
 
-Status: P2-05 traceability baseline with frozen boundary/OE, self-test/state design, entropy/provider/DRBG responsibility, and CSP/zeroization policy. Runtime integrity, provider acceptance, formal CSP classification, and exact OE-01 execution remain pending.
+Status: P2-06 traceability baseline with frozen boundary/OE, self-test/state, entropy/DRBG, CSP/zeroization, and secure-coding/side-channel engineering policies. Runtime integrity, provider acceptance, formal CSP classification, exact OE-01 review, and external side-channel disposition remain pending.
 
 ## Matrix Rules
 
@@ -70,9 +70,12 @@ Status: P2-05 traceability baseline with frozen boundary/OE, self-test/state des
 | TR-BLD-001 | Build representation assumptions fail at configure time. | CMake type-width and endian checks | configure/build; SHA-512 portability test | SHA-512 portability policy | `READY_FOR_INTERNAL_REVIEW` | Actual 32-bit/big-endian target evidence blocked/unselected. |
 | TR-BLD-002 | Installed CMake package builds a clean consumer. | install/export rules; package config | install smoke build-tree and package-smoke targets | SDK integration guide; PoC package manifest | `READY_FOR_INTERNAL_REVIEW` | Target environment/legal packaging review. |
 | TR-BLD-003 | Customer PoC excludes internal hooks/providers/evidence secrets. | `tools/create_poc_package.cmake` | PoC package smoke and policy checks | PoC package/review manifest | `READY_FOR_INTERNAL_REVIEW` | Approved evaluation notice and customer scope. |
-| TR-TST-001 | KAT/negative/differential/policy tests are separated by evidence meaning. | CMake test groups; OpenSSL test-only option; P2 policy targets | 56 ordinary CTest cases when provider is available | differential strategy; KAT plans; P2-03/P2-04/P2-05 policy records | `READY_FOR_INTERNAL_REVIEW` | Institution test results remain separate. |
+| TR-TST-001 | KAT/negative/differential/policy tests are separated by evidence meaning. | CMake test groups; OpenSSL test-only option; P2 policy targets | 58 ordinary CTest cases when provider is available | differential strategy; KAT plans; P2-03/P2-04/P2-05/P2-06 policy records | `READY_FOR_INTERNAL_REVIEW` | Institution test results remain separate. |
 | TR-TST-002 | OpenSSL is test-only and absent from runtime/PoC. | differential-only CMake targets | install/PoC/policy checks | OpenSSL provider decision | `READY_FOR_INTERNAL_REVIEW` | Retain dependency scan for selected packages. |
-| TR-TST-003 | Sanitizer and compiler-output evidence are diagnostic only. | sanitizer option and capture targets | concurrency/sanitizer policy; compiler review targets | side-channel checklist and compiler plans | `PARTIAL` | Human target-specific disposition required. |
+| TR-TST-003 | Sanitizer, analyzer, and compiler-output evidence are diagnostic only. | sanitizer option; warning/analyzer review; compiler/hardening capture targets | concurrency/sanitizer policy; P2-06 policy and operational reviews | P2-06 secure-coding, side-channel, findings, and compiler/CPU records | `PARTIAL` | Exact OE-01 and named human disposition required. |
+| TR-SC-001 | Portable AES source avoids secret-indexed S-box/T-table arrays and uses fixed-iteration GF operations. | `src/cipher/aes.c` | AES KAT/differential/hardening plus P2-06 source policy | P2-06 side-channel review | `PARTIAL_SOURCE_AND_LOCAL_COMPILER_ONLY` | Exact OE-01 disassembly and any required empirical method remain open. |
+| TR-SC-002 | CMAC tag verification processes the complete fixed 16-byte tag without mismatch-position early exit. | `src/mac/cmac.c` | CMAC negative/differential/hardening and secure-coding operational review | P2-06 side-channel review | `FIXED_LENGTH_CONSTANT_WORK_CANDIDATE` | No universal timing claim; selected target/statistical review remains open. |
+| TR-SC-003 | Selected Linux Release build applies controlled exploit-mitigation flags and captures ELF disposition. | CMake hardening overlay; validation candidate profile | compiler hardening target and policy checker | compiler/CPU matrix and findings register | `READY_FOR_INTERNAL_REVIEW_LOCAL` | Exact OE-01 retained artifact and named review are `NOT_RUN`. |
 | TR-EVD-001 | Evidence binds source archive, file hashes, public headers, and symbols. | provenance/evidence CMake tools | provenance regression and policy checks | release evidence workflow | `READY_FOR_INTERNAL_REVIEW` | Actual candidate tag/reviewer/retention process. |
 | TR-EVD-002 | Source inventory is explicitly source-only. | SPDX source inventory generator | provenance tests/policy | SBOM/signing plan | `PARTIAL` | Select component/runtime/license/vulnerability scope. |
 | TR-EVD-003 | Synthetic/local and actual hosted results are separated. | hosted artifact manifest/index tools | hosted artifact manifest and tagged rehearsal tests | hosted review doc; blocker record | `READY_FOR_INTERNAL_REVIEW` | Actual hosted execution remains blocked. |
@@ -81,14 +84,14 @@ Status: P2-05 traceability baseline with frozen boundary/OE, self-test/state des
 | TR-REL-002 | External release requires separate authorization. | authorization records and fail-closed checks | provenance/signing negative tests | release policy and handoff docs | `BLOCKED_EXTERNAL` | Hosted review, tag, signer, TSA, roles, legal/product approval. |
 | TR-CM-001 | Sources and exclusions are traceable. | `cleanroom/SOURCE_MANIFEST.md`; `EXCLUSION_LOG.md` | public-surface and sensitive-artifact scans | clean-room policy | `READY_FOR_INTERNAL_REVIEW` | Add controlled reviewer/approval workflow in P2-07. |
 | TR-CM-002 | Configuration/change/release baselines are controlled. | release identity, ABI baseline, hashes, Git/CMake metadata | compatibility/provenance/rehearsal tests | development workflow | `PARTIAL` | Formal configuration-management document and retention rules. |
-| TR-DOC-001 | Submission document set maps to implementation/evidence. | P2-01 inventory, P2-02 boundary/OE, P2-03 self-test/state/recovery, P2-04 entropy/DRBG, and P2-05 CSP/zeroization records | document and P2 policy reviews | submission inventory and P2 roadmap | `PARTIAL` | Complete P2-06, then create the controlled skeleton in P2-07. |
+| TR-DOC-001 | Submission document set maps to implementation/evidence. | P2-01 inventory, P2-02 boundary/OE, P2-03 self-test/state/recovery, P2-04 entropy/DRBG, P2-05 CSP/zeroization, and P2-06 secure-coding/side-channel records | document and P2 policy reviews | submission inventory and P2 roadmap | `PARTIAL` | Create the controlled skeleton in P2-07. |
 
-## P2-05 ABI Trace Result
+## P2-06 ABI Trace Result
 
 - Public header file count: 14.
 - Stored exported symbol count: 69.
 - ABI line: `ANOCRYPTO_C_0`.
-- No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01 through P2-05.
-- Version/prerelease metadata changed to `0.1.0-p2-05-csp-zeroization`; this is intentionally excluded from normalized non-version API equality.
-- P2-05 changes internal lifecycle behavior, tests, policy, documentation, and version metadata only; public declarations and symbol baseline remain unchanged.
+- No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01 through P2-06.
+- Version/prerelease metadata changed to `0.1.0-p2-06-secure-coding-review`; this is intentionally excluded from normalized non-version API equality.
+- P2-06 changes internal switch coverage, build hardening, tests, policy, documentation, evidence plumbing, and version metadata only; public declarations and symbol baseline remain unchanged.
 - The selected integrity candidate, policy record, checker, and roadmap documents are internal/build-time assets and add no public symbol.

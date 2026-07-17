@@ -1,13 +1,13 @@
 # KCMVP Readiness Gap — P2 Consolidated Register
 
-Status: P2-05 local CSP ownership/lifecycle/zeroization closure. Runtime integrity implementation, exact operating-environment execution, formal CSP classification, formal validation, and external review remain pending.
+Status: P2-06 local secure-coding and target-specific side-channel engineering review. Runtime integrity implementation, exact operating-environment compiler/CPU review, formal CSP classification, empirical/external side-channel review, formal validation, and hosted evidence remain pending.
 
 ## Baseline and Claims Boundary
 
 | Item | Current value |
 |---|---|
 | Product | `AnoCrypto-C` |
-| Work-product version | `0.1.0-p2-05-csp-zeroization` |
+| Work-product version | `0.1.0-p2-06-secure-coding-review` |
 | Input baseline declared by project owner | `0.1.0-p1-33-release-rehearsal` at `cf0f3c425dd265c7509fb64a6123db97f71055dd` |
 | Public headers | 14 |
 | Exported public symbols | 69 |
@@ -109,7 +109,7 @@ Existing engineering evidence assets include source/archive hashes, SPDX 2.3 sou
 | GAP-017 | Zeroization evidence | `PARTIAL` | Explicit destroy, orderly-shutdown, and locked-fatal table cleanup are implemented and regression-tested; caller-owned cleanup boundaries and local compiler capture are documented. | Execute/review exact OE-01 output, confirm accepted evidence method, define OS/process operator controls, and resolve lock-failure cleanup expectations. |
 | GAP-018 | Persistent/exported keys | `OUT_OF_SCOPE` | Public export/persistence/wrapping are rejected or absent. | Keep excluded unless a separate product and validation scope gate approves them. |
 | GAP-019 | Thread-safety model | `PARTIAL` | OE-01 freezes thread safety ON with the POSIX/pthread-compatible branch; module/global state is serialized while caller-owned mutable contexts require caller serialization. | Retain OE-01 target results and formalize role/service concurrency wording. |
-| GAP-020 | Secure coding review | `PARTIAL` | Warnings, sanitizers, negative tests, policy scripts, and clean-room records exist. | Establish review checklist completion, findings register, and disposition process in P2-06. |
+| GAP-020 | Secure coding review | `PARTIAL` | P2-06 source/local compiler review, controlled findings register, strict-warning/static-analysis records, hardening overlay, and ELF capture exist. | Exact OE-01 GCC 13.3.0 review, named disposition, approved timing/cache methodology, and specialist review remain open. |
 | GAP-021 | Side-channel review | `PARTIAL` | Table-free AES and compiler-output captures exist. | Complete target/compiler/CPU-specific human review and define external-assessment backlog. |
 | GAP-022 | Local test evidence | `READY_FOR_INTERNAL_REVIEW` | Repeatable CTest, policy, install, PoC, compatibility, and evidence tooling exist. | Retain reviewer/date/disposition for the selected release candidate. |
 | GAP-023 | Actual hosted evidence | `BLOCKED_EXTERNAL` | Workflow and manifest/review model exist. | Resolve GitHub Actions billing, run on a known commit, hash/download, and perform human review. P1-34 remains incomplete. |
@@ -136,7 +136,7 @@ P2-03 additionally froze the internal self-test/integrity/state/recovery design 
 
 P2-04 freezes `EDP-P2-04-R1` and `ENT-OE01-LINUX-GETRANDOM-R1` as internal policy only. It closes responsibility/limit documentation and local evidence wiring, but leaves provider acceptance, entropy credit, health-test allocation, exact OE-01 execution, and formal conditional-test interpretation externally open.
 
-P2-05 freezes `CZP-P2-05-R1`, inventories current CSP/sensitive state, and remediates module-owned CSP cleanup on orderly shutdown and locked fatal transitions without changing the public ABI. It adds explicit tombstone lifecycle tests and local compiler-output capture. Formal CSP classification, exact OE-01 review, caller/OS/process boundary acceptance, integrity-key realization, and lock-failure cleanup expectations remain open. P2-06 is next.
+P2-06 freezes `SCP-P2-06-R1`, records source/local compiler review and open findings, fixes the internal CSP enum-switch coverage gap, and applies a Linux Release hardening overlay without changing public ABI. Exact OE-01 GCC 13.3.0 review, named reviewer disposition, approved timing/cache methodology, power/EM/fault applicability, runtime integrity, and P1-34 hosted evidence remain open. P2-07 is next.
 
 ## External Reference Checkpoint
 

@@ -20,7 +20,7 @@ The target serializes clean Release symbol/runtime-dependency inspection, instal
 cmake \
   -DANO_CRYPTO_SOURCE_DIR=. \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p2-05 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/prepared-release-evidence/p2-06 \
   -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=build/release-provenance-evidence \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=build/release-signing-handoff \
   -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=build/release-signing-handoff-check.txt \
@@ -42,8 +42,8 @@ The final assembly step consumes only that hash-bound tree:
 ```sh
 cmake \
   -DANO_CRYPTO_BUILD_DIR=build \
-  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p2-05 \
-  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-05 \
+  -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=build/prepared-release-evidence/p2-06 \
+  -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-06 \
   -P tools/assemble_release_evidence.cmake
 ```
 

@@ -1,6 +1,6 @@
 # C99 Priority TODO
 
-Status: P2-05 CSP ownership/lifecycle/zeroization closure completed locally; P2-06 is next.
+Status: P2-06 secure-coding/side-channel engineering review completed locally with open selected-OE/external findings; P2-07 is next.
 
 ## Completed Through P1-33
 
@@ -69,12 +69,20 @@ Do not substitute local or synthetic evidence. Resume only after billing is reso
 - added shutdown/fatal/reinitialization regressions, policy checks, and local compiler-output capture;
 - retained exact OE-01 review, formal CSP classification, OS/process memory controls, integrity-key realization, and lock-failure expectations as open.
 
+## Completed P2-06
+
+- froze secure-coding policy `SCP-P2-06-R1` and build profile `SCB-P2-06-LINUX-ELF-R1`;
+- recorded source review, local GCC/Clang diagnostics, side-channel limitations, findings, and compiler/CPU dispositions;
+- fixed the internal CSP `INVALID` switch coverage gap without public ABI change;
+- enabled Linux GNU/Clang Release hardening and captured ELF hardening/library hashes;
+- retained exact OE-01, named human disposition, statistical timing/cache, power/EM/fault, runtime integrity, and hosted evidence as open;
+- preserved 14 headers, 69 symbols, `ANOCRYPTO_C_0`, and all release/signing blockers.
+
 ## Next Sequence
 
-1. **P2-06 — Secure-coding and target side-channel review**
-2. **P2-07 — Controlled submission-document skeleton**
-3. **P2-08 — Pre-consultation rehearsal and answer capture**
-4. Resume **P1-34** independently only after GitHub billing is resolved.
+1. **P2-07 — Controlled submission-document skeleton**
+2. **P2-08 — Pre-consultation rehearsal and answer capture**
+3. Resume **P1-34** independently only after GitHub billing is resolved.
 
 ## Deferred Until Explicit Scope Gate
 

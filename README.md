@@ -1,6 +1,6 @@
 # AnoCrypto-C
 
-Current status: `0.1.0-p2-05-csp-zeroization`, the P2-05 CSP ownership and zeroization evidence closure built on the P2-02 candidate, P2-03 self-test/state design, and P2-04 entropy/DRBG responsibility policy. P2-05 formally inventories module-owned and caller-owned CSP/sensitive state, wipes all live module-owned HMAC/AES/CMAC key slots on orderly shutdown and locked fatal transitions, preserves explicit destroy of `ZEROIZED` tombstones, and adds local compiler-output capture plus regression evidence. Caller-owned opaque contexts remain explicitly caller-managed and require their documented final/uninit paths. Exact OE-01 compiler review and formal CSP/zeroization acceptance remain `NOT_RUN`/`EXTERNAL_CONFIRMATION_REQUIRED`; P2-03 runtime integrity remains `SELECTED_CANDIDATE_NOT_IMPLEMENTED`. The public boundary remains 14 headers and 69 exported symbols on `ANOCRYPTO_C_0`. P1-34 remains `BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING`; hosted lanes remain `NOT_RUN`, hosted review remains `UNREVIEWED`, the repository remains `UNSIGNED`, signing handoff remains `BLOCKED`, and external release authorization remains `NO`.
+Current status: `0.1.0-p2-06-secure-coding-review`, the P2-06 secure-coding and target-specific side-channel engineering review built on the frozen OE-01 candidate and P2-03 through P2-05 mechanism policies. P2-06 records source-level and local compiler findings, fixes the internal CSP state-switch coverage gap, and enables a Linux GNU/Clang Release hardening overlay with FORTIFY 3, strong stack protection, stack-clash protection, full RELRO/BIND_NOW, and a non-executable stack. AES remains table-free at source level and CMAC verification retains a fixed 16-byte comparison candidate, but exact OE-01 GCC 13.3.0 compiler/CPU review, statistical timing/cache work, power/EM/fault assessment, and named external disposition remain `NOT_RUN`, `NOT_EVALUATED`, or `EXTERNAL_CONFIRMATION_REQUIRED`. The public boundary remains 14 headers and 69 exported symbols on `ANOCRYPTO_C_0`. P1-34 remains `BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING`; hosted lanes remain `NOT_RUN`, hosted review remains `UNREVIEWED`, the repository remains `UNSIGNED`, signing handoff remains `BLOCKED`, and external release authorization remains `NO`.
 
 Implemented processing scope:
 
@@ -42,6 +42,9 @@ Implemented processing scope:
 - CI matrix skeleton for Linux, macOS, and Windows build/test/install-smoke paths
 - API/ABI review checklist, stored 69-symbol baseline, and build-identity ABI-0 field-order baseline
 - Release-style internal symbol hiding option for supported compilers
+- P2-06 secure-coding policy `SCP-P2-06-R1`, controlled findings register, compiler/CPU review matrix, and status-only operational review
+- Linux GNU/Clang Release hardening overlay: FORTIFY 3, strong stack protector, stack-clash protection, full RELRO/BIND_NOW, and non-executable stack
+- Local GCC/Clang warning/static-analysis review with the exact OE-01 GCC 13.3.0 human disposition kept separate and `NOT_RUN`
 - Customer PoC package v0 staging, package manifest/review records, and standalone public-API example smoke
 - Development workflow, service scope matrix, differential validation strategy, AES/CBC implementation policy, side-channel checklist, customer PoC intake questionnaire, SBOM/signing plan, and evidence manifest policy drafts
 
@@ -56,7 +59,7 @@ Skeleton-only / TODO scope:
 - Byte-identical source archive and binary reproducibility rules
 - Dependency/component discovery, vulnerability and license review, production signer/key-custody provisioning, RFC 3161 service/trust-anchor provisioning, actual release signing/timestamping, and external authorization
 - PoC package legal/evaluation notice and customer-specific support boundary
-- Human review of captured AES compiler output and target-specific side-channel behavior; CMAC target-specific review, CTR counter policy, AEAD, padding helpers, GMAC, and domestic-algorithm decisions
+- Exact OE-01 compiler/CPU and human disposition, approved statistical timing/cache methodology if required, power/EM/fault applicability, CTR counter policy, AEAD, padding helpers, GMAC, and domestic-algorithm decisions
 
 
 ## P2-01 readiness consolidation
@@ -161,7 +164,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, CSP/zeroization policy and compiler-output, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-05/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, CSP/zeroization policy and compiler-output, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-06/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -427,3 +430,14 @@ P2-05 freezes internal policy `CZP-P2-05-R1` without claiming institution accept
 - local disassembly capture is an engineering input only; exact OE-01 GCC 13.3.0 human review remains `NOT_RUN`;
 - lock-acquisition failure can latch fatal state without safely walking the CSP table and requires external/secure-coding review;
 - no physical-remanence, universal optimizer, or formal-validation claim is made.
+## P2-06 secure coding and target-specific side-channel review
+
+P2-06 freezes internal policy `SCP-P2-06-R1` without claiming universal constant-work behavior, side-channel resistance, fault resistance, completed independent assessment, or formal validation:
+
+- records source, GCC analyzer, Clang strict-warning, and Clang static-analyzer review with limitations and retained findings;
+- explicitly handles `ANO_CRYPTO_CSP_STATE_INVALID` in the internal CSP state switch;
+- applies the selected Linux Release hardening profile `SCB-P2-06-LINUX-ELF-R1`;
+- captures ELF stack/RELRO/BIND_NOW/RWX/TEXTREL/stack-protector status and library hash;
+- documents table-free portable AES source and fixed-length CMAC tag-comparison candidates;
+- keeps exact OE-01 GCC 13.3.0 review, named reviewer disposition, empirical timing/cache work, and power/EM/fault work open;
+- preserves 14 public headers, 69 exported symbols, and `ANOCRYPTO_C_0`.

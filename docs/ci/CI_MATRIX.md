@@ -1,6 +1,6 @@
 # CI Matrix
 
-Status: P2-05 engineering matrix; OE-01 plus the P2-03/P2-04/P2-05 internal policies are frozen, while runtime integrity remains not implemented, exact OE-01 evidence is `NOT_RUN`, and actual hosted lanes remain `NOT_RUN`/`UNREVIEWED`.
+Status: P2-06 engineering matrix; OE-01 plus the P2-03 through P2-06 internal policies are frozen, while runtime integrity remains not implemented, exact OE-01 compiler/CPU evidence is `NOT_RUN`, and actual hosted lanes remain `NOT_RUN`/`UNREVIEWED`.
 
 | Lane | Linux | macOS | Windows | Notes |
 |---|---:|---:|---:|---|

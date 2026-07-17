@@ -1,7 +1,7 @@
 # AnoCrypto-C Source Manifest
 
-Status: P2-03 current manifest
-Date: 2026-07-14
+Status: P2-06 current manifest
+Date: 2026-07-17
 
 ## Purpose
 
@@ -685,3 +685,14 @@ P1-30 hosted artifacts retain only status, counts, versions, target/compiler met
 | DER-45004 | Public Linux `getrandom(2)` documentation and public NIST entropy-source/DRBG guidance | Public official/primary references | High-level design and consultation checkpoint | No third-party source code or normative text copied. |
 
 P2-04 introduces no public API or algorithm and preserves 14 headers, 69 symbols, and `ANOCRYPTO_C_0`. The direct-noise health scaffolding remains test-only engineering code and is not promoted as a validated RCT/APT or applied to conditioned OS output.
+
+## P2-06 secure-coding and side-channel review inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| SRC-P206-001 | Existing AnoCrypto-C P2-05 source and evidence policy | User-owned project artifact | Source, warning, analyzer, control-flow, zeroization, and build-hardening review | No external implementation source imported. |
+| SRC-P206-002 | GCC compiler diagnostics and instrumentation documentation | Public vendor documentation | Warning/analyzer and hardening option interpretation | Documentation only; local GCC 14 output is not OE-01 evidence. |
+| SRC-P206-003 | NIST public side-channel methodology and AES implementation-attack publications | Public technical guidance | Threat taxonomy, evidence limitations, and consultation questions | No external crypto implementation or exploit code imported. |
+| DER-P206-001 | Locally generated GCC/Clang warning, analyzer, disassembly, ELF, symbol, and hash records | User-owned generated evidence | Internal finding and regression disposition | Status/metadata only; not formal validation evidence. |
+
+P2-06 does not import third-party implementation code, secret-bearing traces, production keys, customer data, or unpublished attack material.

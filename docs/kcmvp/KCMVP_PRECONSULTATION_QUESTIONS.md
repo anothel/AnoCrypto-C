@@ -1,6 +1,6 @@
 # KCMVP Pre-consultation Questions
 
-Status: P2-05 question pack against frozen boundary candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`, self-test/integrity design `STP-P2-03-R1`, entropy/DRBG policy `EDP-P2-04-R1`, and CSP/zeroization policy `CZP-P2-05-R1`. All proposed answers remain provisional until retained external confirmation is received.
+Status: P2-06 question pack against frozen boundary candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`, policies `STP-P2-03-R1`, `EDP-P2-04-R1`, `CZP-P2-05-R1`, and secure-coding policy `SCP-P2-06-R1`. All proposed answers remain provisional until retained external confirmation is received.
 
 ## Use and Recording Rule
 
@@ -67,6 +67,15 @@ Do not record keys, entropy samples, customer data, private infrastructure detai
 | PCQ-024B | Testing institution / security specialist | If the module global lock cannot be acquired during a fatal transition, is immediate process termination with no unsafe table traversal an acceptable fail-closed response? | Determines whether an emergency cleanup design is required. | Current fallback latches fatal state; safe module-owned table wipe is guaranteed only when the lock is acquired. |
 | PCQ-025 | Testing institution / side-channel specialist | What side-channel review depth is expected for table-free portable AES, HMAC/DRBG, CMAC comparison, and compiler-specific output at the selected level? | Sizes P2-06 and external review. | Compiler captures exist; timing/cache/fault review remains incomplete. |
 | PCQ-026 | Testing institution | Are shared read-only key handles with internal locking acceptable, and what caller serialization rules must be documented for mutable contexts? | Freezes thread-safety model. | Global state and handle tables are locked; mutable operation contexts are caller-owned. |
+
+## Priority D2 — Secure Coding and Side-channel Expectations
+
+| ID | Recipient | Question | Why it matters | Current project option / decision impact |
+|---|---|---|---|---|
+| PCQ-SC-001 | Testing institution | For the software-only OE-01 shared library, what source, selected-binary, timing, and cache evidence is required? | Determines whether P2-06 local review is sufficient or a specialist campaign is mandatory. | Exact OE-01 and empirical testing remain open. |
+| PCQ-SC-002 | Testing institution | May public algorithm, key-size class, message length, and operation type vary execution time, or must any be hidden? | Fixes the leakage model and test classes. | Current design treats these as public API metadata. |
+| PCQ-SC-003 | Testing institution | Are power/EM, transient-execution, and active-fault assessments applicable to this software boundary and intended level? | Prevents unsupported physical/fault claims and defines external specialist scope. | These areas are currently `NOT_EVALUATED`. |
+| PCQ-SC-004 | Testing institution | Are FORTIFY, stack protector, full RELRO/BIND_NOW, NX stack, CET/IBT, or other binary-hardening controls required or recommended? | Freezes final build profile and environment compatibility. | P2-06 selects the first five; CET remains undecided. |
 
 ## Priority E — Tests, Evidence, and Submission Package
 

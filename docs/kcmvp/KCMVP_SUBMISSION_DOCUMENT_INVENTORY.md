@@ -1,6 +1,6 @@
 # KCMVP Submission Document Inventory
 
-Status: P2-05 inventory. Boundary/OE, self-test/integrity, entropy/DRBG, and CSP/zeroization records are available as engineering inputs; runtime integrity implementation, exact current templates, formal CSP classification, and accepted contents remain pending or `EXTERNAL_CONFIRMATION_REQUIRED`.
+Status: P2-06 inventory. Boundary/OE, self-test/integrity, entropy/DRBG, CSP/zeroization, and secure-coding/side-channel records are available as engineering inputs; runtime integrity implementation, exact current templates, selected-OE/external dispositions, and accepted contents remain pending or `EXTERNAL_CONFIRMATION_REQUIRED`.
 
 ## Inventory Categories
 
@@ -42,7 +42,7 @@ KISA public guidance identifies basic design, detailed design, configuration-man
 | DOC-DD-007 | AES/CBC/CMAC design and API behavior | AES/CBC/CMAC design/hardening docs | `UPDATE_AND_CONSOLIDATE` | Consolidate without expanding service scope. |
 | DOC-DD-008 | CSP lifecycle and zeroization design | P2-05 inventory, zeroization evidence, service matrix, source and policy | `EXISTING_INTERNAL_DRAFT` | Reconcile exact OE-01 and institution evidence expectations before controlled issue. |
 | DOC-DD-009 | Thread/process model | P2-02 boundary/OE matrix; thread-safety and random portability docs | `UPDATE_AND_CONSOLIDATE` | OE-01 thread/process assumptions frozen; P2-04 internal lifecycle wording is frozen; formal acceptance and exact OE evidence remain open. |
-| DOC-DD-010 | Secure coding and side-channel analysis | security checklist; compiler capture plans | `CREATE_NEW` | P2-06 findings register and retained review dispositions. |
+| DOC-DD-010 | Secure coding and side-channel analysis | P2-06 secure-coding review, side-channel review, findings register, compiler/CPU matrix, policy and capture | `EXISTING_INTERNAL_DRAFT` | Convert only with exact-OE and consultation dispositions retained as provisional/open. |
 | DOC-DD-011 | Build/package/runtime dependency design | candidate record, CMake enforcement, boundary/OE matrix, install/PoC/provenance docs | `UPDATE_AND_CONSOLIDATE` | Convert P2-02 dependency/exclusion record into controlled detailed design. |
 
 ## C. Configuration Management
@@ -141,3 +141,15 @@ Open submission dependencies remain provider acceptance, entropy credit, health-
 | `ZEROIZATION_COMPILER_OUTPUT_REVIEW.txt` and disassembly | `LOCAL_ENGINEERING_ONLY` | Internal manual-review input; exact OE-01 named review remains `NOT_RUN`. |
 
 Open dependencies remain formal CSP classification, accepted zeroization evidence, exact OE-01 review, operator controls for OS/process copies, integrity-key implementation, and lock-failure cleanup expectations.
+
+## P2-06 Secure-coding/side-channel controlled inputs
+
+| Document / evidence | Current disposition | Submission action |
+|---|---|---|
+| `KCMVP_SECURE_CODING_REVIEW.md`; `KCMVP_SECURITY_FINDINGS_REGISTER.md`; `P2_06_IMPLEMENTATION_TEST_DELTA.md` | `EXISTING_INTERNAL_DRAFT` | Convert findings only with target, reviewer, date, evidence hash, and disposition. |
+| `KCMVP_SIDE_CHANNEL_REVIEW.md`; `KCMVP_COMPILER_CPU_REVIEW_MATRIX.md` | `EXISTING_INTERNAL_DRAFT` | Preserve source/local-compiler limitations; add exact OE-01 and any required empirical results after confirmation. |
+| `ANOCRYPTO_C_SECURE_CODING_POLICY.cmake` and checker | `ENGINEERING_CONTROL` | Preserve hardening, ABI, claims, hosted, and release-state drift controls. |
+| `SECURE_CODING_COMPILER_CPU_REVIEW.txt`; `ELF_HARDENING_REVIEW.txt` | `LOCAL_ENGINEERING_ONLY` | Do not treat as exact OE-01 or formal side-channel evidence. |
+| `SECURE_CODING_POLICY_REVIEW.txt` | `LOCAL_ENGINEERING_ONLY` | Status-only fixed-tag-path review; no timing or leakage conclusion. |
+
+Open dependencies remain exact OE-01 compiler/CPU review, named disposition, accepted timing/cache method if required, power/EM/fault applicability, runtime integrity, and institution acceptance.

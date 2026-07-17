@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P2-05 CSP/zeroization closure workflow completed locally; P2-06 is next.
+Status: P2-06 secure-coding and side-channel review workflow completed locally; P2-07 submission-document skeleton is next.
 
 ## Purpose
 
@@ -46,6 +46,7 @@ Each task should follow this loop:
    - Random-service policy check when public random lifecycle, provider availability, source-backed ownership, output clearing, or reseed behavior changes.
    - Differential/portability policy check when a reference provider, C representation assumption, endian/alignment handling, or hosted architecture lane changes.
    - Release-signing handoff and verifier regressions when signature subject/encoding, signer identity, timestamp, role separation, or authorization policy changes.
+   - Secure-coding/side-channel policy and compiler-hardening capture when warnings, toolchain flags, cryptographic control flow, zeroization, or target claims change.
 
 4. Update clean-room and claims records.
    - Record public standards and user-owned documents used as inputs.

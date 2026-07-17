@@ -1,6 +1,6 @@
 # P2 Validation Readiness Roadmap
 
-Status: P2-05 CSP ownership, lifecycle, and zeroization evidence closure completed locally; P2-06 is next. P2 remains validation-readiness work, not automatic feature expansion.
+Status: P2-06 secure-coding and target-specific side-channel engineering review completed locally with open exact-OE and external-review findings; P2-07 is next. P2 remains validation-readiness work, not automatic feature expansion.
 
 ## Fixed P2 Constraints
 
@@ -21,8 +21,8 @@ Status: P2-05 CSP ownership, lifecycle, and zeroization evidence closure complet
 | P2-03 | `FROZEN_INTERNAL_DESIGN` | Finalize self-test, integrity-candidate, finite-state, and recovery specification. | Normative design, machine-readable policy, fail-closed policy check, and implementation/test delta. | No public change; runtime integrity and on-demand transition remain unimplemented. |
 | P2-04 | `FROZEN_INTERNAL_POLICY` | Close entropy/provider/DRBG responsibility and evidence plan. | Entropy/DRBG specification, responsibility/health matrices, machine-readable policy, operational review, and implementation/test delta. | No change. |
 | P2-05 | `COMPLETE_LOCAL_INTERNAL_POLICY` | Close CSP inventory, lifecycle, and zeroization evidence. | Formal CSP inventory, service/operation matrix, zeroization evidence plan, internal shutdown/fatal remediation, compiler capture, and policy check. | No change. |
-| P2-06 | `NEXT` | Perform secure-coding and target side-channel review. | Findings register, compiler/CPU dispositions, remediation plan. | No change unless a separately approved fix requires it. |
-| P2-07 | `PLANNED` | Build controlled submission-document skeleton. | Basic design, detailed design, configuration-management, test, and operator-document skeletons. | No change. |
+| P2-06 | `COMPLETE_LOCAL_WITH_OPEN_FINDINGS` | Perform secure-coding and target side-channel review. | Secure-coding record, side-channel limitations, findings register, compiler/CPU matrix, hardening capture, and policy tests. | No change. |
+| P2-07 | `NEXT` | Build controlled submission-document skeleton. | Basic design, detailed design, configuration-management, test, and operator-document skeletons. | No change. |
 | P2-08 | `PLANNED` | Rehearse pre-consultation evidence walkthrough and decision capture. | Mock walkthrough, prioritized questions, unresolved decision register, feedback process. | No change. |
 
 ## P2-01 — Readiness Gap Consolidation
@@ -223,30 +223,29 @@ Status: `COMPLETE_LOCAL_INTERNAL_POLICY`; policy ID `CZP-P2-05-R1`. Formal CSP c
 
 ## P2-06 — Secure Coding and Side-channel Review
 
-### Objectives
+Status: `COMPLETE_LOCAL_WITH_OPEN_FINDINGS`; formal/selected-OE disposition remains pending.
 
-- run a controlled secure-coding review over the frozen scope;
-- review warnings, sanitizers, integer/length/alias/failure paths, and sensitive-output rules;
-- perform target/compiler/CPU-specific review of AES, CMAC compare, HMAC/DRBG, and zeroization output;
-- maintain a findings and limitations register.
+### Completed outputs
 
-### Required documents
+- policy ID `SCP-P2-06-R1` and build-hardening profile `SCB-P2-06-LINUX-ELF-R1`;
+- controlled source-review record, side-channel limitations, findings register, and compiler/CPU review matrix;
+- local GCC analyzer and Clang strict/static-analysis review with a documented false positive and one fixed internal enum-switch gap;
+- Linux GNU/Clang Release overlay using FORTIFY 3, strong stack protector, stack-clash protection, full RELRO/BIND_NOW, and non-executable stack;
+- ELF hardening/library-hash capture, source-policy check, and status-only CMAC verify operational review;
+- explicit prohibition on universal constant-time, side-channel, power/EM, fault-resistance, audit, validation, or hosted-review claims;
+- unchanged 14-header, 69-symbol `ANOCRYPTO_C_0` public boundary.
 
-- `docs/security/SECURE_CODING_REVIEW_P2.md`;
-- `docs/security/SIDE_CHANNEL_REVIEW_FINDINGS_P2.md`;
-- compiler/target disposition records;
-- remediation and external-review backlog.
+### Open findings and dependencies
 
-### Completion criteria
+- exact immutable OE-01 GCC 13.3.0 compiler/disassembly/hardening capture and named reviewer/date/disposition are `NOT_RUN`;
+- approved statistical timing/cache methodology and execution remain `EXTERNAL_CONFIRMATION_REQUIRED`;
+- power, EM, transient-execution, and active-fault work remains `NOT_EVALUATED`;
+- runtime module integrity remains unimplemented and CSP cleanup after lock acquisition failure remains externally reviewable;
+- P1-34 actual hosted evidence remains independently `BLOCKED_EXTERNAL`.
 
-- findings have severity, evidence, owner, disposition, and regression requirement;
-- unresolved timing/cache/fault items are not hidden or overstated;
-- any code fix is separately reviewed and retested;
-- no broad leakage-resistance claim is introduced.
+### Exit disposition
 
-### External dependencies
-
-- selected targets from P2-02 and, where needed, independent specialist review.
+P2-06 is complete as an internal engineering review and backlog consolidation step. It does not close target-specific or institution-dependent findings. P2-07 may use the retained P2-06 records while preserving their provisional status.
 
 ## P2-07 — Submission-document Skeleton
 

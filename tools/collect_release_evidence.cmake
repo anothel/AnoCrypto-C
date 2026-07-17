@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-05 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-06 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-05")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-06")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -116,6 +116,14 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_ZEROIZATION_COMPILER_REVIEW)
     set(ANO_CRYPTO_RUN_ZEROIZATION_COMPILER_REVIEW ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_SECURE_CODING_POLICY_CHECK)
+    set(ANO_CRYPTO_RUN_SECURE_CODING_POLICY_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_SECURE_CODING_COMPILER_REVIEW)
+    set(ANO_CRYPTO_RUN_SECURE_CODING_COMPILER_REVIEW ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK)
@@ -977,6 +985,26 @@ else()
         "Zeroization compiler-output disassembly was not requested.\n")
 endif()
 
+if(ANO_CRYPTO_RUN_SECURE_CODING_COMPILER_REVIEW)
+    set(_secure_coding_review_source
+        "${ANO_CRYPTO_BUILD_DIR}/policy-check/secure-coding-review")
+    if(NOT EXISTS "${_secure_coding_review_source}/SECURE_CODING_COMPILER_CPU_REVIEW.txt" OR
+       NOT EXISTS "${_secure_coding_review_source}/ELF_HARDENING_REVIEW.txt")
+        message(FATAL_ERROR "Prepared P2-06 compiler/build-hardening artifact is incomplete")
+    endif()
+    file(COPY
+        "${_secure_coding_review_source}/SECURE_CODING_COMPILER_CPU_REVIEW.txt"
+        "${_secure_coding_review_source}/ELF_HARDENING_REVIEW.txt"
+        DESTINATION "${ANO_CRYPTO_EVIDENCE_DIR}")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "P2-06 compiler/CPU and ELF-hardening capture result: 0 (prepared predecessor artifact)\n")
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SECURE_CODING_COMPILER_CPU_REVIEW.txt"
+        "P2-06 compiler/CPU review was not requested.\n")
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/ELF_HARDENING_REVIEW.txt"
+        "P2-06 ELF hardening review was not requested.\n")
+endif()
+
 if(ANO_CRYPTO_RUN_RANDOM_SERVICE_CHECK)
     set(_random_service_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/RANDOM_SERVICE_CHECK.txt")
     execute_process(
@@ -1135,6 +1163,31 @@ else()
         "P2-05 CSP/zeroization policy check was not requested.\n")
 endif()
 
+if(ANO_CRYPTO_RUN_SECURE_CODING_POLICY_CHECK)
+    set(_secure_coding_policy_check_output
+        "${ANO_CRYPTO_EVIDENCE_DIR}/SECURE_CODING_SIDE_CHANNEL_POLICY_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+            -DANO_CRYPTO_SECURE_CODING_CHECK_OUTPUT=${_secure_coding_policy_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_secure_coding_side_channel_policy.cmake"
+        RESULT_VARIABLE _secure_coding_policy_check_result
+        OUTPUT_VARIABLE _secure_coding_policy_check_stdout
+        ERROR_VARIABLE _secure_coding_policy_check_stderr
+        TIMEOUT 300)
+    file(APPEND "${_secure_coding_policy_check_output}"
+        "\nCommand output:\n${_secure_coding_policy_check_stdout}${_secure_coding_policy_check_stderr}\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "P2-06 secure-coding/side-channel policy check result: ${_secure_coding_policy_check_result}\n")
+    if(NOT _secure_coding_policy_check_result EQUAL 0)
+        message(FATAL_ERROR "P2-06 secure-coding/side-channel policy check failed")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SECURE_CODING_SIDE_CHANNEL_POLICY_CHECK.txt"
+        "P2-06 secure-coding/side-channel policy check was not requested.\n")
+endif()
+
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CSP_ZEROIZATION_REVIEW_NOTES.txt"
     "AnoCrypto-C P2-05 CSP and zeroization review notes\n"
     "Policy ID: CZP-P2-05-R1\n"
@@ -1144,6 +1197,19 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CSP_ZEROIZATION_REVIEW_NOTES.txt"
     "Caller-owned contexts: explicit uninit required; module does not retain addresses.\n"
     "Export, persistence, wrapping, and multi-process sharing: out of scope.\n"
     "Selected OE compiler review: NOT_RUN.\n"
+    "Sensitive values recorded: none.\n")
+
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SECURE_CODING_REVIEW_NOTES.txt"
+    "AnoCrypto-C P2-06 secure-coding and side-channel review notes\n"
+    "Policy ID: SCP-P2-06-R1\n"
+    "Status: local source/compiler/build review with open exact-OE and external findings.\n"
+    "Source AES profile: table-free fixed-work candidate; no universal constant-time claim.\n"
+    "CMAC verify profile: fixed 16-byte comparison candidate; empirical timing is NOT_RUN.\n"
+    "Local analyzers: GCC reviewed false positive, Clang strict PASS after internal switch fix, Clang analyzer PASS.\n"
+    "Build hardening: FORTIFY 3, strong stack protector, stack-clash protection, full RELRO/BIND_NOW, NX stack.\n"
+    "Exact OE-01 GCC 13.3.0 review and named human disposition: NOT_RUN/TODO.\n"
+    "Power, EM, transient-execution, and active-fault assessment: NOT_EVALUATED.\n"
+    "Hosted lanes/review: NOT_RUN/UNREVIEWED.\n"
     "Sensitive values recorded: none.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
@@ -1167,6 +1233,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "Entropy operational policy check: ENTROPY_OPERATIONAL_POLICY_CHECK.txt\n"
     "P2-04 entropy/DRBG policy check: ENTROPY_DRBG_POLICY_CHECK.txt\n"
     "P2-05 CSP/zeroization policy check: CSP_ZEROIZATION_POLICY_CHECK.txt\n"
+    "P2-06 secure-coding/side-channel policy check: SECURE_CODING_SIDE_CHANNEL_POLICY_CHECK.txt\n"
     "Differential/portability policy check: DIFFERENTIAL_PORTABILITY_CHECK.txt\n"
     "AES/CBC implementation policy check: AES_CBC_IMPLEMENTATION_CHECK.txt\n"
     "AES/CBC hardening policy check: AES_HARDENING_CHECK.txt\n"
@@ -1175,13 +1242,15 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "AES compiler-output review: AES_COMPILER_OUTPUT_REVIEW.txt\n"
     "CMAC compiler-output review: CMAC_COMPILER_OUTPUT_REVIEW.txt\n"
     "Zeroization compiler-output review: ZEROIZATION_COMPILER_OUTPUT_REVIEW.txt\n"
+    "P2-06 compiler/CPU review: SECURE_CODING_COMPILER_CPU_REVIEW.txt\n"
+    "P2-06 ELF hardening review: ELF_HARDENING_REVIEW.txt\n"
     "TODO: normalize archive timestamps if byte-for-byte source archives become a release requirement.\n"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P2-05 evidence and scope-review notes\n"
+    "AnoCrypto-C P2-06 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P2-05 engineering scope artifact covering CSP ownership and zeroization closure plus retained P2-03/P2-04 gaps; not official validation evidence.\n"
+    "Status: P2-06 engineering scope artifact covering secure coding, target-specific review limitations, build hardening, and retained mechanism gaps; not official validation evidence.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"
@@ -1688,6 +1757,21 @@ if(NOT _csp_zeroization_review_result EQUAL 0 OR
 endif()
 
 _ano_crypto_run_evidence_test(
+    ano_crypto_secure_coding_policy_review
+    _secure_coding_review_result _secure_coding_review_stdout _secure_coding_review_stderr)
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SECURE_CODING_POLICY_REVIEW.txt"
+    "${_secure_coding_review_stdout}${_secure_coding_review_stderr}")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "P2-06 secure-coding operational review result: ${_secure_coding_review_result}\n")
+if(NOT _secure_coding_review_result EQUAL 0 OR
+   NOT _secure_coding_review_stdout MATCHES "policy_id=SCP-P2-06-R1" OR
+   NOT _secure_coding_review_stdout MATCHES "timing_claim=none" OR
+   NOT _secure_coding_review_stdout MATCHES "sensitive_values_printed=0" OR
+   NOT _secure_coding_review_stdout MATCHES "secure_coding_policy_review: PASS")
+    message(FATAL_ERROR "P2-06 secure-coding operational review failed")
+endif()
+
+_ano_crypto_run_evidence_test(
     ano_crypto_thread_platform_review
     _thread_platform_review_result _thread_platform_review_stdout _thread_platform_review_stderr)
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/THREAD_PLATFORM_REVIEW.log"
@@ -1873,6 +1957,11 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `CSP_ZEROIZATION_REVIEW_NOTES.txt`: P2-05 closure and remaining external-confirmation notes.\n"
 "- `ZEROIZATION_COMPILER_OUTPUT_REVIEW.txt`: local compiler/target/hash capture; manual review required.\n"
 "- `ZEROIZATION_COMPILER_OUTPUT_DISASSEMBLY.txt`: internal machine-code artifact; not selected-OE evidence.\n"
+"- `SECURE_CODING_SIDE_CHANNEL_POLICY_CHECK.txt`: P2-06 source, tool, hardening, ABI, claim, and blocker policy record.\n"
+"- `SECURE_CODING_POLICY_REVIEW.txt`: status-only CMAC fixed-tag review; no key, message, or tag output.\n"
+"- `SECURE_CODING_REVIEW_NOTES.txt`: local review status, limitations, and open selected-OE/external findings.\n"
+"- `SECURE_CODING_COMPILER_CPU_REVIEW.txt`: local compiler/target/library hash and hardening disposition; exact OE-01 remains NOT_RUN.\n"
+"- `ELF_HARDENING_REVIEW.txt`: local readelf/nm capture for stack, RELRO/BIND_NOW, RWX/TEXTREL, and stack-protector review.\n"
 "- `REPRODUCIBLE_BUILD_NOTES.txt`: current reproducibility procedure notes and unresolved gaps.\n"
 "- `ctest.log`: captured CTest output when requested.\n"
 "- `INSTALL_SMOKE_*.log`: installed-package configure/build/run logs when requested.\n"
@@ -1921,6 +2010,9 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- Confirm CMAC compiler-output artifacts are interpreted only for the recorded compiler/target and do not constitute an automated timing or side-channel conclusion.\n"
 "- Confirm CMAC hardening and lifecycle logs contain counts/status only and no key, message, tag, subkey, chain, AES schedule, or reference-result bytes.\n"
 "- Confirm AES logs contain no key, round key, IV, plaintext, ciphertext, or reference-result bytes.\n"
+"- Confirm P2-06 hardening capture refers only to the recorded compiler/target/library hash and is not represented as exact OE-01 evidence.\n"
+"- Confirm table-free/fixed-work source observations are not promoted to universal constant-time or side-channel-resistance claims.\n"
+"- Confirm timing/cache, power/EM, transient-execution, and fault findings retain their NOT_RUN/NOT_EVALUATED/external-confirmation status.\n"
 "- Confirm hosted 32-bit, Windows, macOS, and big-endian artifacts are not marked reviewed unless the referenced runs completed successfully.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/EVIDENCE_MANIFEST_README.txt"
