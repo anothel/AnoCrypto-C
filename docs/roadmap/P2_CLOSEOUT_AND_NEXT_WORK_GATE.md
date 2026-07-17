@@ -52,3 +52,6 @@ The next numbered task title must identify its authority source and lane, for ex
 - `P1-34R: collect actual hosted artifacts after billing resolution`.
 
 Without one of these authority sources, the project remains at P2 closeout with P2-11 handoff ready, human rehearsal `NOT_RUN`, institution contact unauthorized, and no implementation authorization.
+\n## P2-12 contact-readiness supplement
+
+P2-12 refreshes public process/contact sources and provides a controlled first-contact draft, but it does not bypass the P2-11 named-human rehearsal. Without completed human minutes, objections, recommendation, owner receipt, institution selection, and owner-approved message, institution contact authorization remains `NO`.

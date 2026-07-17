@@ -94,7 +94,7 @@ Status: P2-09 traceability closeout with frozen P2-02 through P2-08 inputs, cumu
 - Stored exported symbol count: 69.
 - ABI line: `ANOCRYPTO_C_0`.
 - No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01 through P2-09.
-- Version/prerelease metadata changed to `0.1.0-p2-11-human-rehearsal-handoff`; this is intentionally excluded from normalized non-version API equality.
+- Version/prerelease metadata changed to `0.1.0-p2-12-consultation-contact-readiness`; this is intentionally excluded from normalized non-version API equality.
 - P2-07 adds controlled submission documents; P2-08 adds rehearsal/decision controls; P2-09 adds cumulative closeout documents, policy/package checks, evidence wiring, and version metadata only. Public declarations and symbol baseline remain unchanged.
 - The selected integrity candidate, policy record, checker, and roadmap documents are internal/build-time assets and add no public symbol.
 
@@ -114,3 +114,12 @@ Status: P2-09 traceability closeout with frozen P2-02 through P2-08 inputs, cumu
 | Human objections and defects require owner, remediation, exit evidence, and retained closure. | objection/defect register | handoff package policy/smoke | `NO_HUMAN_FINDINGS_RECORDED`; does not imply no defects |
 | Institution contact requires a separate project-owner decision after the rehearsal. | consultation authorization record; P2-10 contact gate | P2-11 policy/package checks | authorization `NOT_RECORDED`/`NO`; external consultation `NOT_CONDUCTED` |
 | Handoff package excludes source, binaries, credentials, evidence originals, and institution material. | 17-document allowlist and package index | package creation/hash/sensitive-marker smoke | `LOCAL_ENGINEERING_ONLY`; not an external submission |
+\n## P2-12 contact-readiness trace
+
+| Requirement | Controlled source | Test/evidence | Current result |
+|---|---|---|---|
+| Public procedure and contact facts are date-stamped and refreshable. | public-procedure source register; candidate matrix | P2-12 policy check | `PUBLIC_SOURCE_REFRESH_COMPLETE`; recheck required before contact |
+| No institution or sender is invented. | contact plan; request template; readiness checklist | policy/package smoke | institution `UNSELECTED`; sender `UNASSIGNED`; first contact `NOT_SENT` |
+| First-contact material is status-only and excludes sensitive engineering artifacts. | channel/data-handling policy; package allowlist | package hash and sensitive-marker checks | PASS locally; no transmission occurred |
+| Human rehearsal and owner authorization remain prerequisites. | P2-11 handoff; authorization record; P2-12 contact plan | P2-11/P2-12 policy chain | human rehearsal `NOT_RUN`; authorization `NO` |
+| Public ABI remains unchanged. | release identity; public header/symbol baselines | clean Release/compatibility checks | 14 headers, 69 symbols, `ANOCRYPTO_C_0` |

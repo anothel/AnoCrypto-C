@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-11 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-12 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-11")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-12")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -144,6 +144,10 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_HUMAN_REHEARSAL_HANDOFF_CHECK)
     set(ANO_CRYPTO_RUN_HUMAN_REHEARSAL_HANDOFF_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_CONSULTATION_CONTACT_READINESS_CHECK)
+    set(ANO_CRYPTO_RUN_CONSULTATION_CONTACT_READINESS_CHECK ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK)
@@ -1457,6 +1461,61 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/HUMAN_REHEARSAL_HANDOFF_NOTES.txt"
     "Sensitive values recorded: none.
 ")
 
+
+if(ANO_CRYPTO_RUN_CONSULTATION_CONTACT_READINESS_CHECK)
+    set(_ccr_check_output
+        "${ANO_CRYPTO_EVIDENCE_DIR}/CONSULTATION_CONTACT_READINESS_POLICY_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+            -DANO_CRYPTO_CCR_CHECK_OUTPUT=${_ccr_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_consultation_contact_readiness_policy.cmake"
+        RESULT_VARIABLE _ccr_check_result
+        OUTPUT_VARIABLE _ccr_check_stdout
+        ERROR_VARIABLE _ccr_check_stderr
+        TIMEOUT 300)
+    file(APPEND "${_ccr_check_output}"
+        "
+Command output:
+${_ccr_check_stdout}${_ccr_check_stderr}
+")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "P2-12 consultation contact-readiness policy check result: ${_ccr_check_result}
+")
+    if(NOT _ccr_check_result EQUAL 0)
+        message(FATAL_ERROR "P2-12 consultation contact-readiness policy check failed")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CONSULTATION_CONTACT_READINESS_POLICY_CHECK.txt"
+        "P2-12 consultation contact-readiness policy check was not requested.
+")
+endif()
+
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CONSULTATION_CONTACT_READINESS_NOTES.txt"
+    "AnoCrypto-C P2-12 consultation contact-readiness notes
+"
+    "Policy ID: CCR-P2-12-R1
+"
+    "Status: READY_FOR_OWNER_SELECTION_AFTER_HUMAN_REHEARSAL.
+"
+    "Human rehearsal/owner authorization: NOT_RUN/NOT_RECORDED.
+"
+    "Institution/sender/channel: UNSELECTED/UNASSIGNED/UNSELECTED.
+"
+    "First contact/consultation/responses: NOT_SENT/NOT_CONDUCTED/NOT_RECEIVED.
+"
+    "Runtime integrity/exact OE-01: NOT_IMPLEMENTED/NOT_RUN.
+"
+    "P1-34 hosted lanes/review: NOT_RUN/UNREVIEWED.
+"
+    "Repository signing/handoff/authorization: UNSIGNED/BLOCKED/NO.
+"
+    "Public ABI: 14 headers, 69 symbols, ANOCRYPTO_C_0.
+"
+    "Sensitive values recorded: none.
+")
+
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CSP_ZEROIZATION_REVIEW_NOTES.txt"
     "AnoCrypto-C P2-05 CSP and zeroization review notes\n"
     "Policy ID: CZP-P2-05-R1\n"
@@ -1508,6 +1567,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "P2-09 cumulative closeout policy check: P2_CLOSEOUT_POLICY_CHECK.txt\n"
     "P2-10 assisted rehearsal policy check: LIVE_REHEARSAL_POLICY_CHECK.txt\n"
     "P2-11 human rehearsal handoff policy check: HUMAN_REHEARSAL_HANDOFF_POLICY_CHECK.txt\n"
+    "P2-12 consultation contact-readiness policy check: CONSULTATION_CONTACT_READINESS_POLICY_CHECK.txt\n"
     "Differential/portability policy check: DIFFERENTIAL_PORTABILITY_CHECK.txt\n"
     "AES/CBC implementation policy check: AES_CBC_IMPLEMENTATION_CHECK.txt\n"
     "AES/CBC hardening policy check: AES_HARDENING_CHECK.txt\n"
@@ -1522,9 +1582,9 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P2-11 evidence and scope-review notes\n"
+    "AnoCrypto-C P2-12 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P2-11 engineering scope artifact covering P2 local closeout, scripted and assisted pre-consultation rehearsal, the controlled human-review handoff, the submission skeleton, and retained mechanism gaps; not official validation evidence.\n"
+    "Status: P2-12 engineering scope artifact covering P2 local closeout, scripted and assisted pre-consultation rehearsal, the controlled human-review handoff, the submission skeleton, and retained mechanism gaps; not official validation evidence.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"

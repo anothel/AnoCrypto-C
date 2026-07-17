@@ -388,3 +388,16 @@ Status: `READY_FOR_NAMED_HUMAN_EXECUTION`; reviewer identity is `UNASSIGNED`, re
 ### Exit rule
 
 P2-11 completes preparation only. A real named reviewer must verify the frozen pack, perform the live challenge, retain findings and recommendation, and return the record to the project owner. The project owner must then issue a separate contact decision. No generated artifact, package smoke, or local test result can substitute for those human records.
+\n## P2-12 — External Consultation Contact Readiness
+
+Status: `READY_FOR_OWNER_SELECTION_AFTER_HUMAN_REHEARSAL`.
+
+Outputs:
+
+- dated public-procedure source register;
+- public test-institution candidate matrix without selection;
+- controlled contact plan and status-only request template;
+- channel/data-handling policy and contact readiness checklist;
+- `CCR-P2-12-R1` policy and package smoke.
+
+Exit remains human-controlled: a real independent reviewer must complete P2-11, and the project owner must select an institution, sender, recipient, channel, and exact outbound message. P2-12 does not conduct consultation or authorize P3.

@@ -6,7 +6,7 @@
 | Revision | `0.1` |
 | Status | `COMPLETE_LOCAL_CLOSEOUT` |
 | Policy ID | `P2C-P2-09-R1` |
-| Engineering version | `0.1.0-p2-11-human-rehearsal-handoff` |
+| Engineering version | `0.1.0-p2-12-consultation-contact-readiness` |
 | Candidate boundary | `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` |
 | Formal validation | `NOT_STARTED` |
 | External consultation | `NOT_CONDUCTED` |

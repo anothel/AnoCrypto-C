@@ -166,3 +166,6 @@ The P2-08 rehearsal set is an internal control layer, not an additional institut
 ## P2-11 Human Rehearsal Handoff Mapping
 
 The P2-11 handoff documents are internal review controls, not formal submission documents or institution evidence. The index, execution guide, minutes template, objection register, and authorization record may be retained as configuration/program records. Blank templates, generated package status, and policy PASS do not prove a human review occurred.
+\n## P2-12 Contact-readiness Mapping
+
+The P2-12 public-source register, contact candidate matrix, contact plan, request template, channel policy, and readiness checklist are pre-contact program records. They are not formal submission documents, institution responses, scope acceptance, or proof that a consultation occurred. A later institution request must be dispositioned separately before any controlled or restricted material is disclosed.

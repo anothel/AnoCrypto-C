@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p2-11-human-rehearsal-handoff"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p2-12-consultation-contact-readiness"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)

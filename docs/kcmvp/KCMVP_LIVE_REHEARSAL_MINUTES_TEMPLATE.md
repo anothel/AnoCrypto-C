@@ -7,7 +7,7 @@
 | Handoff policy | `HRH-P2-11-R1` |
 | Pack filename | `TODO` |
 | Pack SHA-256 | `TODO` |
-| Engineering version | `0.1.0-p2-11-human-rehearsal-handoff` |
+| Engineering version | `0.1.0-p2-12-consultation-contact-readiness` |
 | Reviewer name | `UNASSIGNED` |
 | Reviewer role/team | `TODO` |
 | Conflict/independence statement | `NOT_RECORDED` |

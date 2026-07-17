@@ -306,7 +306,7 @@ Local evidence records expected tag metadata but does not claim that a tag exist
 
 ## Retained P1-33 clean rehearsal and hosted-review additions
 
-- Release identity is `0.1.0-p2-11-human-rehearsal-handoff`; public surface remains 14 headers and 69 `ANOCRYPTO_C_0` symbols.
+- Release identity is `0.1.0-p2-12-consultation-contact-readiness`; public surface remains 14 headers and 69 `ANOCRYPTO_C_0` symbols.
 - `VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt`
 - `SELF_TEST_INTEGRITY_POLICY_CHECK.txt` binds the internal candidate ID, selected boundary/environment metadata, public counts, and unchanged P1-34 blocker. It is a policy record, not selected-OE execution evidence.
 - A temporary clean Git repository creates a synthetic local tag and proves expected tag, supplied commit, tag-resolved commit, and `HEAD` equality without tagging the user repository.
@@ -335,3 +335,6 @@ A PASS proves only that the repository's P2-03 design, policy record, code obser
 `HUMAN_REHEARSAL_HANDOFF_POLICY_CHECK.txt` and `HUMAN_REHEARSAL_HANDOFF_NOTES.txt` record only package readiness and pending human/authorization states. They must retain reviewer `UNASSIGNED`, independence `NOT_RECORDED`, live rehearsal `NOT_RUN`, project-owner authorization `NOT_RECORDED`, contact authorization `NO`, hosted `NOT_RUN/UNREVIEWED`, signing `UNSIGNED/BLOCKED`, and unchanged 14/69/`ANOCRYPTO_C_0`.
 
 A PASS proves repository and package consistency only. It is not a reviewer opinion, completed minutes, human finding disposition, institution response, formal submission, or release authorization.
+\n## P2-12 consultation contact-readiness evidence
+
+The evidence collector retains a status-only `CONSULTATION_CONTACT_READINESS_POLICY_CHECK.txt` and notes file. The evidence proves only that public source/date controls, pending human/owner gates, 15-document allowlist, 14/69 ABI boundary, and hosted/signing blockers were checked locally. It does not prove message transmission, consultation, institution acceptance, or formal validation.

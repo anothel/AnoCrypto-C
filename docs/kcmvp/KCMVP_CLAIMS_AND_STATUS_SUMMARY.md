@@ -3,7 +3,7 @@
 | Area | Current status |
 |---|---|
 | Product | `AnoCrypto-C` C99 cryptographic module candidate SDK |
-| Engineering version | `0.1.0-p2-11-human-rehearsal-handoff` |
+| Engineering version | `0.1.0-p2-12-consultation-contact-readiness` |
 | Public boundary | 14 headers, 69 symbols, `ANOCRYPTO_C_0` |
 | Candidate environment | `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` |
 | P2 internal readiness sequence | `COMPLETE_LOCAL_CLOSEOUT` |
@@ -65,3 +65,10 @@ The list is an engineering implementation inventory, not an accepted validation 
 - hardware acceleration/dispatch;
 - automatic VM clone/snapshot or suspend/resume freshness handling;
 - production signing, timestamp, external submission, and release.
+\n## P2-12 status addition
+
+- Public procedure/contact-source refresh: `COMPLETE_LOCAL`
+- Contact-readiness package: `READY_FOR_OWNER_SELECTION_AFTER_HUMAN_REHEARSAL`
+- Selected institution / authorized sender / contact channel: `UNSELECTED` / `UNASSIGNED` / `UNSELECTED`
+- First contact / external consultation / institution responses: `NOT_SENT` / `NOT_CONDUCTED` / `NOT_RECEIVED`
+- This status does not authorize submission, source disclosure, implementation, signing, or release.

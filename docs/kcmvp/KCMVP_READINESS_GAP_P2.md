@@ -7,7 +7,7 @@ Status: P2-09 cumulative local closeout complete under `P2C-P2-09-R1`. The contr
 | Item | Current value |
 |---|---|
 | Product | `AnoCrypto-C` |
-| Work-product version | `0.1.0-p2-11-human-rehearsal-handoff` |
+| Work-product version | `0.1.0-p2-12-consultation-contact-readiness` |
 | Input baseline declared by project owner | `0.1.0-p1-33-release-rehearsal` at `cf0f3c425dd265c7509fb64a6123db97f71055dd` |
 | Public headers | 14 |
 | Exported public symbols | 69 |
@@ -170,3 +170,6 @@ Current disposition:
 - external consultation/institution responses: `NOT_CONDUCTED`/`NOT_RECEIVED`.
 
 This closes only the preparation gap. It does not close runtime integrity, exact OE-01, entropy/CSP/institution decisions, P1-34 hosted evidence, signing, submission, or release gaps.
+\n## P2-12 contact-readiness update
+
+P2-12 freezes `CCR-P2-12-R1`, refreshes official public procedure/contact sources as of 2026-07-17, and prepares a status-only first-contact package. It does not satisfy the P2-11 named-human rehearsal gate, select an institution, authorize a sender, transmit a message, receive an institution response, or start formal validation. Current gate result is `NO_GO_PENDING_HUMAN_REHEARSAL_AND_OWNER_SELECTION`.

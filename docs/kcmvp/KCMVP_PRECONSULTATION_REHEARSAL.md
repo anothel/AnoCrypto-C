@@ -10,7 +10,7 @@
 | Approval | `NO` |
 | Policy ID | `PCR-P2-08-R1` |
 | Candidate ID | `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` |
-| Work-product version | `0.1.0-p2-11-human-rehearsal-handoff` |
+| Work-product version | `0.1.0-p2-12-consultation-contact-readiness` |
 | Scripted internal rehearsal | `COMPLETE_LOCAL_SCRIPTED` |
 | Assisted desk rehearsal | `COMPLETE_LOCAL_ASSISTED` |
 | P2-11 handoff | `READY_FOR_NAMED_HUMAN_EXECUTION` |

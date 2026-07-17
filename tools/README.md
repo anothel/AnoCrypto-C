@@ -289,3 +289,9 @@ The assisted rehearsal is not an independent human review or institution consult
 - `create_human_rehearsal_handoff_package.cmake`: stages the status-only reviewer handoff and writes a SHA-256 manifest/status record.
 - `check_human_rehearsal_handoff_package.cmake`: verifies allowlisted files, hashes, status markers, and source/binary/credential exclusions.
 - `run_human_rehearsal_handoff_package_smoke.cmake`: creates and checks the package without assigning a reviewer or performing a live rehearsal.
+\n## P2-12 consultation contact readiness
+
+- `check_consultation_contact_readiness_policy.cmake`: validates `CCR-P2-12-R1`, dated public-source controls, five unselected institution candidates, pending human/owner/contact states, unchanged 14/69/`ANOCRYPTO_C_0`, and retained hosted/signing blockers.
+- `create_consultation_contact_readiness_package.cmake`: stages the controlled 15-document status-only contact-readiness pack.
+- `check_consultation_contact_readiness_package.cmake`: verifies hashes, file count, pending states, and prohibited artifact/sensitive-marker exclusions.
+- `run_consultation_contact_readiness_package_smoke.cmake`: creates and validates the pack in one test.
