@@ -4,7 +4,7 @@ Status: P1-33 unsigned engineering checklist. Actual tag authorization, hosted-a
 
 ## Configure and static policy
 
-- Configure with release identity `0.1.0-p2-09-closeout-review`.
+- Configure with release identity `0.1.0-p2-10-assisted-rehearsal`.
 - Run `ano_crypto_release_compatibility_policy_check`.
 - Run `ano_crypto_release_provenance_policy_check`.
 - Confirm the clean Release public surface remains 14 headers and 69 ABI-0 symbols.

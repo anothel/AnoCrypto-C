@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-09 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p2-10 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-09")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p2-10")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -136,6 +136,10 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_P2_CLOSEOUT_CHECK)
     set(ANO_CRYPTO_RUN_P2_CLOSEOUT_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_LIVE_REHEARSAL_CHECK)
+    set(ANO_CRYPTO_RUN_LIVE_REHEARSAL_CHECK ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK)
@@ -1339,6 +1343,60 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/P2_CLOSEOUT_NOTES.txt"
     "Sensitive values recorded: none.
 ")
 
+if(ANO_CRYPTO_RUN_LIVE_REHEARSAL_CHECK)
+    set(_live_rehearsal_check_output
+        "${ANO_CRYPTO_EVIDENCE_DIR}/LIVE_REHEARSAL_POLICY_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_BUILD_DIR=${ANO_CRYPTO_BUILD_DIR}
+            -DANO_CRYPTO_LIVE_REHEARSAL_CHECK_OUTPUT=${_live_rehearsal_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_live_rehearsal_policy.cmake"
+        RESULT_VARIABLE _live_rehearsal_check_result
+        OUTPUT_VARIABLE _live_rehearsal_check_stdout
+        ERROR_VARIABLE _live_rehearsal_check_stderr
+        TIMEOUT 300)
+    file(APPEND "${_live_rehearsal_check_output}"
+        "
+Command output:
+${_live_rehearsal_check_stdout}${_live_rehearsal_check_stderr}
+")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "P2-10 assisted rehearsal policy check result: ${_live_rehearsal_check_result}
+")
+    if(NOT _live_rehearsal_check_result EQUAL 0)
+        message(FATAL_ERROR "P2-10 assisted rehearsal policy check failed")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/LIVE_REHEARSAL_POLICY_CHECK.txt"
+        "P2-10 assisted rehearsal policy check was not requested.
+")
+endif()
+
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/LIVE_REHEARSAL_NOTES.txt"
+    "AnoCrypto-C P2-10 assisted pre-consultation rehearsal notes
+"
+    "Policy ID: LAR-P2-10-R1
+"
+    "Status: COMPLETE_LOCAL_ASSISTED.
+"
+    "Independent human live rehearsal: NOT_RUN.
+"
+    "External consultation/institution responses: NOT_CONDUCTED/NOT_RECEIVED.
+"
+    "Institution-contact decision: CONDITIONAL_NO_GO_PENDING_NAMED_AUTHORIZATION.
+"
+    "Runtime integrity/exact OE-01: NOT_IMPLEMENTED/NOT_RUN.
+"
+    "P1-34 hosted lanes/review: NOT_RUN/UNREVIEWED.
+"
+    "Repository signing/handoff/authorization: UNSIGNED/BLOCKED/NO.
+"
+    "Public ABI: 14 headers, 69 symbols, ANOCRYPTO_C_0.
+"
+    "Sensitive values recorded: none.
+")
+
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/CSP_ZEROIZATION_REVIEW_NOTES.txt"
     "AnoCrypto-C P2-05 CSP and zeroization review notes\n"
     "Policy ID: CZP-P2-05-R1\n"
@@ -1388,6 +1446,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "P2-07 submission-document policy check: SUBMISSION_DOCUMENT_POLICY_CHECK.txt\n"
     "P2-08 pre-consultation rehearsal policy check: PRECONSULTATION_REHEARSAL_POLICY_CHECK.txt\n"
     "P2-09 cumulative closeout policy check: P2_CLOSEOUT_POLICY_CHECK.txt\n"
+    "P2-10 assisted rehearsal policy check: LIVE_REHEARSAL_POLICY_CHECK.txt\n"
     "Differential/portability policy check: DIFFERENTIAL_PORTABILITY_CHECK.txt\n"
     "AES/CBC implementation policy check: AES_CBC_IMPLEMENTATION_CHECK.txt\n"
     "AES/CBC hardening policy check: AES_HARDENING_CHECK.txt\n"
@@ -1404,7 +1463,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
     "AnoCrypto-C P2-06 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P2-09 engineering scope artifact covering P2 local closeout, the controlled submission skeleton, scripted pre-consultation rehearsal, and retained mechanism gaps; not official validation evidence.\n"
+    "Status: P2-10 engineering scope artifact covering P2 local closeout, scripted and assisted pre-consultation rehearsal, the controlled submission skeleton, and retained mechanism gaps; not official validation evidence.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"

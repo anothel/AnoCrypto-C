@@ -6,7 +6,7 @@
 | Revision | `0.1` |
 | Status | `COMPLETE_LOCAL_CLOSEOUT` |
 | Policy ID | `P2C-P2-09-R1` |
-| Engineering version | `0.1.0-p2-09-closeout-review` |
+| Engineering version | `0.1.0-p2-10-assisted-rehearsal` |
 | Candidate boundary | `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` |
 | Formal validation | `NOT_STARTED` |
 | External consultation | `NOT_CONDUCTED` |
@@ -103,3 +103,17 @@ Silence, local test success, a generated package, or this closeout review does n
 ## 9. External reference checkpoint
 
 Public KCMVP process and algorithm pages were rechecked on 2026-07-17 for categorization only. Exact current forms, attachment revisions, security-level interpretation, accepted mechanisms, and submission contents remain `EXTERNAL_CONFIRMATION_REQUIRED` and must be confirmed through the controlled pre-consultation process.
+## 10. P2-10 post-closeout assisted rehearsal
+
+P2-10 performed a source-backed assisted desk rehearsal of all ten Priority-1 agenda groups. The exercise produced internal project-position answers, an evidence-anchor scorecard, a nine-entry rehearsal gap register, and a six-precondition institution-contact gate.
+
+Status remains:
+
+- assisted desk rehearsal: `COMPLETE_LOCAL_ASSISTED`;
+- independent human live rehearsal: `NOT_RUN`;
+- institution contact: `CONDITIONAL_NO_GO_PENDING_NAMED_AUTHORIZATION`;
+- external consultation: `NOT_CONDUCTED`;
+- institution responses: `NOT_RECEIVED`;
+- next implementation authorization: `NO`.
+
+P2-10 does not reopen the P2-09 closeout or authorize a P3 feature lane.

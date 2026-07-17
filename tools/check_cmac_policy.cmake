@@ -54,7 +54,7 @@ foreach(_file IN ITEMS
   require_file("${_file}")
 endforeach()
 
-require_text("include/anocrypto/ac_version.h" "0.1.0-p2-09-closeout-review")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p2-10-assisted-rehearsal")
 require_text("include/anocrypto/ac_key.h" "ANO_CRYPTO_KEY_TYPE_CMAC = 7")
 require_text("include/anocrypto/anocrypto.h" "#include <anocrypto/ac_cmac.h>")
 require_text("include/anocrypto/ac_cmac.h" "ANO_CRYPTO_CMAC_TAG_SIZE 16u")

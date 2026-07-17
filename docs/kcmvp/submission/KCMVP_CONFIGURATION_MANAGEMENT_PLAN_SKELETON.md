@@ -14,7 +14,7 @@
 Current controlled identifiers:
 
 - repository: `anocrypto-c`;
-- engineering version: `0.1.0-p2-09-closeout-review`;
+- engineering version: `0.1.0-p2-10-assisted-rehearsal`;
 - public ABI: `ANOCRYPTO_C_0`;
 - public headers: 14;
 - exported symbols: 69;

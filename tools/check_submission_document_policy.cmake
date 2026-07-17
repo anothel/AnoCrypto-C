@@ -83,7 +83,7 @@ require_text("docs/kcmvp/submission/KCMVP_SUBMISSION_PACKAGE_INDEX.md" "P1-34 ac
 require_text("docs/kcmvp/submission/KCMVP_MODULE_BASIC_DESIGN_SKELETON.md" "Runtime integrity verification remains `NOT_IMPLEMENTED`")
 require_text("docs/kcmvp/submission/KCMVP_TEST_DOCUMENT_SET_SKELETON.md" "Institution test result tables remain blank")
 require_text("docs/kcmvp/submission/KCMVP_SUBMISSION_STAGING_AND_HANDLING.md" "submission/external release authorization: `NO`")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p2-09-closeout-review")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p2-10-assisted-rehearsal")
 
 file(STRINGS "${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_SUBMISSION_STAGING_MANIFEST.txt" _manifest_lines)
 set(_manifest_count 0)

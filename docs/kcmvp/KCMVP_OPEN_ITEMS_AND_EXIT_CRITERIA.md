@@ -24,7 +24,8 @@
 
 ### Internal work that remains unexecuted
 
-- named independent live rehearsal;
+- named independent human live rehearsal;
+- project-owner authorization for a named institution/contact purpose;
 - exact OE-01 build/test/compiler-output review;
 - named security reviewer disposition for retained findings;
 - legal/evaluation terms and support scope;
@@ -50,11 +51,12 @@ Required:
 
 - P2-01 through P2-08 local work products present;
 - P2-09 cumulative closeout and claims summary present;
+- P2-10 assisted rehearsal, scorecard, gap register, and contact decision gate present;
 - 14 headers, 69 symbols, and `ANOCRYPTO_C_0` verified;
 - status-only package allowlist and hash validation pass;
 - no source, binary, credential, cryptographic result value, or false claim included.
 
-Gate A does not authorize external contact.
+Gate A does not authorize external contact. P2-10 assisted rehearsal is complete, but independent human rehearsal remains `NOT_RUN`.
 
 ### Gate B — external pre-consultation authorized and conducted
 

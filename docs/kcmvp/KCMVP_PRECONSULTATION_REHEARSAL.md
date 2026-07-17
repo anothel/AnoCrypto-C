@@ -10,8 +10,9 @@
 | Approval | `NO` |
 | Policy ID | `PCR-P2-08-R1` |
 | Candidate ID | `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` |
-| Work-product version | `0.1.0-p2-09-closeout-review` |
+| Work-product version | `0.1.0-p2-10-assisted-rehearsal` |
 | Scripted internal rehearsal | `COMPLETE_LOCAL_SCRIPTED` |
+| Assisted desk rehearsal | `COMPLETE_LOCAL_ASSISTED` |
 | Independent live internal rehearsal | `NOT_RUN` |
 | External consultation | `NOT_CONDUCTED` |
 | Institution response | `NOT_RECEIVED` |
@@ -112,7 +113,7 @@ A consultation session is not complete until:
 
 ## Rehearsal Disposition
 
-The scripted walkthrough, question ownership, evidence-handling rules, decision register, response template, and action-impact routing are ready for an internal live review or approved external pre-consultation.
+The scripted walkthrough and P2-10 assisted desk rehearsal are complete. The pack is ready for a named human internal rehearsal. Institution contact remains conditionally blocked pending the authorization preconditions in `KCMVP_EXTERNAL_CONSULTATION_DECISION_GATE.md`.
 
 The following remain open:
 

@@ -12,7 +12,7 @@
 ## 1. Module identity
 
 - Product: `AnoCrypto-C`.
-- Engineering version: `0.1.0-p2-09-closeout-review`.
+- Engineering version: `0.1.0-p2-10-assisted-rehearsal`.
 - Public C99 ABI: 14 public headers, 69 exported symbols, `ANOCRYPTO_C_0`.
 - Initial candidate: `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`.
 - Candidate module file: `libanocrypto_c.so.0.1.0`.

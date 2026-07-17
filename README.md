@@ -1,6 +1,6 @@
 # AnoCrypto-C
 
-Current status: `0.1.0-p2-09-closeout-review`. P2-01 through P2-09 are complete as local validation-readiness work under closeout policy `P2C-P2-09-R1`. The status-only pre-consultation closeout pack is ready for internal review, but external consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, formal validation is `NOT_STARTED`, runtime integrity is `NOT_IMPLEMENTED`, exact OE-01 is `NOT_RUN`, and P1-34 hosted evidence, signing, submission, next implementation, and external release remain blocked or unauthorized. The public boundary remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
+Current status: `0.1.0-p2-10-assisted-rehearsal`. P2-01 through P2-09 remain complete as local validation-readiness and closeout work, and P2-10 records a source-backed assisted desk rehearsal under policy `LAR-P2-10-R1`. The pack is ready for a named human internal rehearsal, but independent human rehearsal is `NOT_RUN`, external consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, formal validation is `NOT_STARTED`, runtime integrity is `NOT_IMPLEMENTED`, exact OE-01 is `NOT_RUN`, and P1-34 hosted evidence, signing, submission, next implementation, and external release remain blocked or unauthorized. The public boundary remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
 
 Implemented processing scope:
 
@@ -102,6 +102,21 @@ P2-03 freezes internal design and evidence policy without implementing or claimi
 
 The selected candidate is `INT-HMAC-SHA256-SINGLE-SO-R1`, which preserves the P2-02 single-shared-object boundary. It requires explicit consultation/implementation gates, protected integrity-key handling, CSP inventory integration, tamper tests, selected-OE execution, and target-specific review. No integrity verifier, key, tag, or binary metadata record is included in this step. P2-04 froze entropy-provider, direct-source health-test, DRBG limit, process/VM/suspend, and failure-policy responsibility. P2-05 now freezes CSP ownership and zeroization evidence; the integrity verifier remains unimplemented.
 
+## P2-10 assisted pre-consultation rehearsal
+
+P2-10 adds a controlled, status-only assisted rehearsal layer without claiming an independent human or institution review. Controlled outputs are:
+
+- `docs/kcmvp/KCMVP_INTERNAL_ASSISTED_REHEARSAL_REPORT.md`;
+- `docs/kcmvp/KCMVP_ASSISTED_REHEARSAL_TRANSCRIPT.md`;
+- `docs/kcmvp/KCMVP_REHEARSAL_RESPONSE_SCORECARD.md`;
+- `docs/kcmvp/KCMVP_REHEARSAL_GAPS_AND_REMEDIATION.md`;
+- `docs/kcmvp/KCMVP_EXTERNAL_CONSULTATION_DECISION_GATE.md`;
+- `release/ANOCRYPTO_C_LIVE_REHEARSAL_POLICY.cmake`;
+- `tools/check_live_rehearsal_policy.cmake`;
+- status-only assisted rehearsal package smoke.
+
+The assisted rehearsal covers ten Priority-1 agenda groups. It concludes that the pack is ready for a named human internal rehearsal. Institution contact remains `CONDITIONAL_NO_GO_PENDING_NAMED_AUTHORIZATION`.
+
 ## Build
 
 ```sh
@@ -113,8 +128,8 @@ ctest --test-dir build --output-on-failure
 ## Install smoke test
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p2-05
-cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-05
+cmake --install build --prefix /tmp/anocrypto-c-p2-10
+cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-10
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
 ```
@@ -132,8 +147,8 @@ cmake --build build
 Build the example as an installed-package consumer:
 
 ```sh
-cmake --install build --prefix /tmp/anocrypto-c-p2-05
-cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-05
+cmake --install build --prefix /tmp/anocrypto-c-p2-10
+cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-10
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```

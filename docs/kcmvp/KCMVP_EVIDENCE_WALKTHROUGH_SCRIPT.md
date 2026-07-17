@@ -36,7 +36,7 @@ Do not place in ordinary rehearsal packages, screen shares, chat, meeting notes,
 **Presenter statement**
 
 - Product: AnoCrypto-C, C99 private commercial candidate SDK.
-- Version: `0.1.0-p2-09-closeout-review`.
+- Version: `0.1.0-p2-10-assisted-rehearsal`.
 - Candidate: `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`.
 - Public boundary: 14 headers, 69 symbols, `ANOCRYPTO_C_0`.
 - Formal validation/institution review: not completed.

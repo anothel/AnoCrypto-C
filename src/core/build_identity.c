@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p2-09-closeout-review"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p2-10-assisted-rehearsal"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P2-05 CSP ownership and zeroization evidence closure; implemented services remain SHA-256/384/512, matching HMAC variants, HMAC_DRBG-SHA-256, the source-backed random lifecycle, CSP-backed HMAC, AES encryption and dedicated CMAC keys, AES-128/192/256 CBC without padding, and full-tag AES-CMAC. P2-05 retains AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1, P2-03 self-test/state design, EDP-P2-04-R1, the P1-29 public headers, reviewed 69-symbol ABI-0 surface, P1-33 clean synthetic tagged-release rehearsal, and fail-closed hosted-artifact review model. CZP-P2-05-R1 inventories module-owned and caller-owned sensitive state and wipes live module-owned HMAC/AES/CMAC key slots on explicit destroy, orderly shutdown, and locked fatal transition. Caller-owned opaque contexts remain caller-managed through documented final/uninit operations. Exact OE-01 zeroization compiler review and formal CSP classification remain NOT_RUN or EXTERNAL_CONFIRMATION_REQUIRED. The selected integrity candidate INT-HMAC-SHA256-SINGLE-SO-R1 remains NOT IMPLEMENTED. P1-34 actual hosted review remains BLOCKED_EXTERNAL with hosted lanes NOT_RUN and review UNREVIEWED. Target-specific side-channel review, production signing/timestamping, and external release authorization remain TODO or EXTERNAL_CONFIRMATION_REQUIRED";
+    out_identity->notes = "P2-10 assisted pre-consultation rehearsal and decision-gate work product. Public scope remains 14 headers, 69 exported ANOCRYPTO_C_0 symbols, and the existing SHA-2, HMAC-SHA-2, HMAC_DRBG-SHA-256, random, AES-CBC, AES-CMAC, and in-memory CSP services. LAR-P2-10-R1 records a source-backed assisted desk rehearsal of ten Priority-1 agenda groups, with independent human rehearsal NOT_RUN, external consultation NOT_CONDUCTED, institution responses NOT_RECEIVED, formal validation NOT_STARTED, runtime integrity NOT_IMPLEMENTED, exact OE-01 NOT_RUN, P1-34 hosted lanes NOT_RUN and review UNREVIEWED, repository signing UNSIGNED, signing handoff BLOCKED, and external authorization NO. The rehearsal pack is status-only and authorizes neither implementation, submission, signing, timestamping, publication, nor release.";
 
     return ANO_CRYPTO_OK;
 }

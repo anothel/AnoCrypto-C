@@ -51,3 +51,6 @@
 | Approved secure channel | `TODO` |
 | Review date | `TODO` |
 | Authorization | `NO` |
+## P2-10 assisted-rehearsal supplement
+
+The P2-10 status-only supplement adds the assisted report, compact transcript, response scorecard, rehearsal gap register and institution-contact decision gate. It does not replace the P2-09 closeout pack and contains no institution answer, source, binary or credential.

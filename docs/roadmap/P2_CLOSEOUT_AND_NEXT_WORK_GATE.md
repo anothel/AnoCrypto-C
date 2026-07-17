@@ -1,21 +1,23 @@
 # P2 Closeout and Next-work Gate
 
-Status: P2-01 through P2-09 are complete as local validation-readiness work. This document does not create P3 automatically.
+Status: P2-01 through P2-09 are complete as local validation-readiness work. P2-10 assisted rehearsal is complete locally, but independent human rehearsal and institution contact remain unperformed. This document does not create P3 automatically.
 
 ## Current state
 
 - Internal closeout: `COMPLETE_LOCAL_CLOSEOUT`.
 - Controlled pre-consultation pack: `READY_FOR_INTERNAL_REVIEW`.
-- Live internal rehearsal: `NOT_RUN`.
+- Assisted desk rehearsal: `COMPLETE_LOCAL_ASSISTED`.
+- Independent human live rehearsal: `NOT_RUN`.
+- Institution-contact decision: `CONDITIONAL_NO_GO_PENDING_NAMED_AUTHORIZATION`.
 - External consultation: `NOT_CONDUCTED`.
 - Institution answers: `NOT_RECEIVED`.
 - Submission/release authorization: `NO/NO`.
 
 ## Permissible next lanes
 
-### Lane 1 — internal live rehearsal
+### Lane 1 — named human internal rehearsal
 
-Requires explicit authorization, named presenter/reviewer, fixed materials, and retained findings. It must not simulate institution approval.
+P2-10 assisted rehearsal is complete. The remaining internal rehearsal requires explicit authorization, a named presenter/reviewer, fixed materials, and retained findings. It must not simulate institution approval.
 
 ### Lane 2 — external pre-consultation
 
@@ -46,4 +48,4 @@ The next numbered task title must identify its authority source and lane, for ex
 - `P2-OE1: execute approved exact OE-01 evidence plan`;
 - `P1-34R: collect actual hosted artifacts after billing resolution`.
 
-Without one of these authority sources, the project remains at P2 closeout.
+Without one of these authority sources, the project remains at P2 closeout with P2-10 assisted rehearsal complete and no implementation authorization.

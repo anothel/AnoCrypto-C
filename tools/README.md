@@ -273,3 +273,12 @@ ctest --test-dir build -R "csp_(shutdown|fatal|zeroization)" --output-on-failure
 - `create_preconsultation_closeout_package.cmake`: stages the 17-document status-only closeout allowlist and writes a SHA-256 manifest/status record.
 - `check_preconsultation_closeout_package.cmake`: verifies hashes, file count/type, non-disclosure, blocker states, and non-authorization.
 - `run_preconsultation_closeout_package_smoke.cmake`: creates and checks the controlled internal closeout pack.
+
+## P2-10 assisted pre-consultation rehearsal
+
+- `check_live_rehearsal_policy.cmake`: validates `LAR-P2-10-R1`, ten rehearsed agenda groups, nine retained gaps, six institution-contact preconditions, unchanged 14/69/`ANOCRYPTO_C_0`, and retained hosted/signing/authorization blockers.
+- `create_live_rehearsal_package.cmake`: stages only the 13-document status-only assisted-rehearsal allowlist and writes a SHA-256 manifest/status record.
+- `check_live_rehearsal_package.cmake`: verifies hashes, file count/type, non-disclosure, independent-human `NOT_RUN`, external-consultation `NOT_CONDUCTED`, and conditional no-go contact status.
+- `run_live_rehearsal_package_smoke.cmake`: creates and verifies the assisted-rehearsal package.
+
+The assisted rehearsal is not an independent human review or institution consultation. It authorizes neither implementation nor external contact.

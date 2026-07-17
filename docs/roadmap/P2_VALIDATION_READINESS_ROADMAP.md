@@ -1,6 +1,6 @@
 # P2 Validation Readiness Roadmap
 
-Status: P2-01 through P2-09 internal validation-readiness and closeout sequence completed locally. P2-09 closeout is complete under `P2C-P2-09-R1`; the controlled status-only pack is ready for internal review, while external consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, and formal validation is `NOT_STARTED`. P2 remains validation-readiness work, not automatic feature expansion.
+Status: P2-01 through P2-09 internal validation-readiness and closeout sequence completed locally. P2-10 assisted rehearsal is also complete under `LAR-P2-10-R1`; independent human rehearsal remains `NOT_RUN`, institution contact is conditionally blocked pending named authorization, external consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, and formal validation is `NOT_STARTED`. P2 remains validation-readiness work, not automatic feature expansion.
 
 ## Fixed P2 Constraints
 
@@ -25,6 +25,7 @@ Status: P2-01 through P2-09 internal validation-readiness and closeout sequence 
 | P2-07 | `COMPLETE_LOCAL_INTERNAL_SKELETON` | Build controlled submission-document skeleton. | Basic design, detailed design, configuration-management, test, and operator-document skeletons. | No change. |
 | P2-08 | `COMPLETE_LOCAL_SCRIPTED` | Rehearse pre-consultation evidence walkthrough and decision capture. | Scripted walkthrough, Priority-1 owner/recipient map, 20-entry decision register, response template, action-impact routing, and status-only package smoke. | No change. |
 | P2-09 | `COMPLETE_LOCAL_CLOSEOUT` | Consolidate cumulative P2 disposition, claims, blockers, exit criteria, pack index, and next-work gate. | Closeout review, status summary, open-item/exit register, controlled 17-document closeout package, policy/package checks. | No change. |
+| P2-10 | `COMPLETE_LOCAL_ASSISTED` | Rehearse Priority-1 project-position answers and freeze the institution-contact decision gate. | Assisted report/transcript, response scorecard, gap register, six-precondition contact gate, and status-only package. | No change. |
 
 ## P2-01 — Readiness Gap Consolidation
 
@@ -354,3 +355,18 @@ The following remain deferred unless a separate customer/validation scope decisi
 - key export, persistence, wrapping, multi-process sharing, and platform keystore;
 - hardware acceleration/dispatch;
 - C++ convenience wrapper work ahead of readiness closure.
+## P2-10 — Assisted Pre-consultation Rehearsal
+
+Status: `COMPLETE_LOCAL_ASSISTED`; independent human rehearsal is `NOT_RUN` and external consultation is `NOT_CONDUCTED`.
+
+### Deliverables
+
+- assisted rehearsal report and compact project-position transcript;
+- ten-agenda response scorecard;
+- nine-entry rehearsal gap/remediation register;
+- six-precondition institution-contact decision gate;
+- machine-readable policy and status-only package smoke.
+
+### Exit rule
+
+P2-10 authorizes preparation for a named human internal rehearsal only. Institution contact requires named authorization and all six retained preconditions. It does not authorize implementation, formal submission, signing, timestamping, publication, or release.
