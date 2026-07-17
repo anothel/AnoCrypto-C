@@ -52,3 +52,16 @@
 - [ ] Review walkthrough can be completed without showing prohibited material.
 - [ ] Every unresolved answer has an owner and impact field.
 - [ ] No implementation or submission is authorized solely by completing this checklist.
+
+
+## 7. P2-08 internal rehearsal status
+
+- [x] Scripted walkthrough and prohibited-material boundary prepared.
+- [x] Ten Priority-1 agendas have owner roles and intended recipients.
+- [x] Twenty unresolved decisions map to response/action controls.
+- [x] Status-only rehearsal package policy and smoke test are defined.
+- [ ] Named independent live internal rehearsal completed.
+- [ ] Approved external recipient/channel recorded.
+- [ ] External consultation conducted and responses retained.
+
+Checked items above represent internal document preparation only and do not authorize submission.

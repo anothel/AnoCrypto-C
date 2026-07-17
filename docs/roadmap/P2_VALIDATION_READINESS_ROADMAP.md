@@ -1,6 +1,6 @@
 # P2 Validation Readiness Roadmap
 
-Status: P2-07 controlled internal submission-document skeleton completed; P2-08 pre-consultation rehearsal is next. P2 remains validation-readiness work, not automatic feature expansion.
+Status: P2-01 through P2-08 internal validation-readiness sequence completed locally. P2-08 scripted pre-consultation rehearsal is complete under `PCR-P2-08-R1`; external consultation is `NOT_CONDUCTED` and institution responses are `NOT_RECEIVED`. P2 remains validation-readiness work, not automatic feature expansion.
 
 ## Fixed P2 Constraints
 
@@ -23,7 +23,7 @@ Status: P2-07 controlled internal submission-document skeleton completed; P2-08 
 | P2-05 | `COMPLETE_LOCAL_INTERNAL_POLICY` | Close CSP inventory, lifecycle, and zeroization evidence. | Formal CSP inventory, service/operation matrix, zeroization evidence plan, internal shutdown/fatal remediation, compiler capture, and policy check. | No change. |
 | P2-06 | `COMPLETE_LOCAL_WITH_OPEN_FINDINGS` | Perform secure-coding and target side-channel review. | Secure-coding record, side-channel limitations, findings register, compiler/CPU matrix, hardening capture, and policy tests. | No change. |
 | P2-07 | `COMPLETE_LOCAL_INTERNAL_SKELETON` | Build controlled submission-document skeleton. | Basic design, detailed design, configuration-management, test, and operator-document skeletons. | No change. |
-| P2-08 | `NEXT` | Rehearse pre-consultation evidence walkthrough and decision capture. | Mock walkthrough, prioritized questions, unresolved decision register, feedback process. | No change. |
+| P2-08 | `COMPLETE_LOCAL_SCRIPTED` | Rehearse pre-consultation evidence walkthrough and decision capture. | Scripted walkthrough, Priority-1 owner/recipient map, 20-entry decision register, response template, action-impact routing, and status-only package smoke. | No change. |
 
 ## P2-01 — Readiness Gap Consolidation
 
@@ -306,7 +306,14 @@ Completion record: `SDP-P2-07-R1` and the controlled internal skeleton set are c
 - every high-priority question has an owner and intended recipient;
 - sample evidence can be shown without exposing prohibited material;
 - no synthetic/local record is presented as actual hosted or institution evidence;
-- next implementation/document step is selected from retained answers.
+- answer capture and change-impact routing are controlled;
+- the next implementation/document step is selected only from retained answers or explicit authorization.
+
+Completion record: `PCR-P2-08-R1` is complete as a scripted local rehearsal. Priority-1 agendas: 10; unresolved decisions: 20; external consultation: `NOT_CONDUCTED`; institution responses: `NOT_RECEIVED`; live independent internal rehearsal: `NOT_RUN`.
+
+### Post-P2-08 gate
+
+The next numbered work item must be selected from retained institution answers or an explicitly authorized independent blocker-remediation lane. Runtime integrity implementation, exact OE-01 execution, side-channel specialist work, official document conversion, signing, submission, or release do not begin automatically.
 
 ## Parallel Lane — P1-34 Actual Hosted Artifact Review
 

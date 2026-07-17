@@ -1,6 +1,6 @@
 # AnoCrypto-C Source Manifest
 
-Status: P2-07 current manifest
+Status: P2-08 current manifest
 Date: 2026-07-17
 
 ## Purpose

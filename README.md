@@ -1,6 +1,6 @@
 # AnoCrypto-C
 
-Current status: `0.1.0-p2-07-submission-documents`, the P2-07 controlled internal KCMVP submission-document skeleton built from P2-01 through P2-06 engineering inputs. The set adds controlled basic-design, detailed-design, configuration-management, test, operator, traceability, reference, staging, and review documents under policy `SDP-P2-07-R1`. It is not an institution-approved form set or completed submission. Runtime integrity, exact OE-01 execution, institution results, P1-34 hosted evidence, signing, and external authorization remain open or blocked. The public boundary remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
+Current status: `0.1.0-p2-08-preconsultation-rehearsal`, the completed local P2-01 through P2-08 validation-readiness sequence. P2-08 adds policy `PCR-P2-08-R1`, a scripted pre-consultation walkthrough, Priority-1 question ownership, a 20-entry unresolved-decision register, response capture, and controlled post-answer routing. External consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, runtime integrity and exact OE-01 remain `NOT_IMPLEMENTED`/`NOT_RUN`, and P1-34 hosted evidence, signing, submission, and external authorization remain blocked or unapproved. The public boundary remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
 
 Implemented processing scope:
 
@@ -164,7 +164,7 @@ cmake --build build --target ano_crypto_collect_release_evidence
 
 The generated evidence directory is a local engineering draft. It is not official validation evidence and should be reviewed before sharing.
 
-Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, CSP/zeroization policy and compiler-output, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-07/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
+Generated files include public-surface, thread-safety, concurrency/sanitizer, thread-platform, build-identity ABI, SHA-512-family, differential/portability, AES hardening/compiler-output, AES-CMAC implementation, random-service, lifecycle, entropy/health, entropy-operational, CSP/zeroization policy and compiler-output, clean Release exported-symbol, reproducibility, package-smoke, tagged-rehearsal, hosted-review, signing-handoff, and hash-manifest records under `build/evidence/p2-08/`, including `release-provenance/`, `release-signing-handoff/`, and their separately verified bindings. Differential logs retain provider/version/status/comparison-count metadata only.
 
 ## P1-17 entropy failure-injection and health-test skeleton
 
@@ -445,3 +445,14 @@ P2-06 freezes internal policy `SCP-P2-06-R1` without claiming universal constant
 ## P2-07 controlled submission-document skeleton
 
 P2-07 creates the internal document set under `docs/kcmvp/submission/`, controlled by `SDP-P2-07-R1` and `release/ANOCRYPTO_C_SUBMISSION_STAGING_MANIFEST.txt`. Official template conformity, security level, secure delivery channel, institution results, and authorization remain external or unset.
+
+## P2-08 pre-consultation rehearsal
+
+P2-08 completes the planned internal readiness sequence with policy `PCR-P2-08-R1`. It prepares a status-only rehearsal package containing the controlled agenda, evidence walkthrough, question pack, unresolved-decision register, response template, action-impact matrix, readiness register, and submission staging references. The package contains no source, binary, credentials, cryptographic result values, institution answers, or authorization.
+
+```sh
+cmake --build build --target ano_crypto_preconsultation_rehearsal_policy_check
+cmake --build build --target ano_crypto_preconsultation_rehearsal_package_smoke
+```
+
+A captured answer never authorizes code, ABI, algorithm, signing, submission, release, or customer distribution by itself.

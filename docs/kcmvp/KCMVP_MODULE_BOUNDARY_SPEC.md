@@ -8,7 +8,7 @@ Status: P2-02 internally frozen candidate. Formal acceptability remains `EXTERNA
 |---|---|
 | Candidate ID | `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` |
 | Product | `AnoCrypto-C` |
-| Engineering version | `0.1.0-p2-07-submission-documents` |
+| Engineering version | `0.1.0-p2-08-preconsultation-rehearsal` |
 | Module type | Software cryptographic module candidate |
 | Linkage form | Shared library only |
 | Runtime artifact | `libanocrypto_c.so.0.1.0` |

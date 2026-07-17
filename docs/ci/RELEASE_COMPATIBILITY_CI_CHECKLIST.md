@@ -13,7 +13,7 @@ Status: P1-33 engineering checklist. Actual hosted runs remain `NOT_RUN` or `UNR
 ## Tagged-release lane
 
 - Checkout full Git history and tags.
-- Require the rehearsal tag to equal `v0.1.0-p2-07-submission-documents`.
+- Require the rehearsal tag to equal `v0.1.0-p2-08-preconsultation-rehearsal`.
 - When strict tag mode is enabled, provide both actual-tag and actual-commit inputs at configure/review time.
 - Pass the workflow commit and require the tag, supplied commit, and `HEAD` to resolve to one commit.
 - Require a clean checkout; reject dirty state, moved tag, moved `HEAD`, commit mismatch, and ref mismatch.

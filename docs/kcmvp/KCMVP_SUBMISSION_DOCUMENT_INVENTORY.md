@@ -1,6 +1,6 @@
 # KCMVP Submission Document Inventory
 
-Status: P2-07 controlled internal skeleton inventory. Boundary/OE, self-test/integrity, entropy/DRBG, CSP/zeroization, and secure-coding/side-channel records are available as engineering inputs; runtime integrity implementation, exact current templates, selected-OE/external dispositions, and accepted contents remain pending or `EXTERNAL_CONFIRMATION_REQUIRED`.
+Status: P2-08 controlled internal skeleton and pre-consultation routing inventory. Boundary/OE, self-test/integrity, entropy/DRBG, CSP/zeroization, and secure-coding/side-channel records are available as engineering inputs; runtime integrity implementation, exact current templates, selected-OE/external dispositions, and accepted contents remain pending or `EXTERNAL_CONFIRMATION_REQUIRED`.
 
 ## Inventory Categories
 
@@ -157,3 +157,8 @@ Open dependencies remain exact OE-01 compiler/CPU review, named disposition, acc
 ## P2-07 Controlled Skeleton Mapping
 
 The controlled internal set is under `docs/kcmvp/submission/` and uses policy `SDP-P2-07-R1`. Basic design, detailed design, configuration management, test, operator, traceability, reference, staging, document-control, package-index, and review-checklist files are now `CONTROLLED_INTERNAL_SKELETON`. Official forms, security level, exact OE-01 evidence, runtime integrity, institution results, secure delivery, signing, and authorization remain open.
+
+
+## P2-08 Pre-consultation Mapping
+
+The P2-08 rehearsal set is an internal control layer, not an additional institution submission category. It links the controlled P2-07 skeleton to the question pack, evidence walkthrough, 20 unresolved decisions, blank response records, and `ACT-*` change routing. External consultation remains `NOT_CONDUCTED`; no document is approved for submission by this mapping.

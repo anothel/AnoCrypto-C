@@ -57,7 +57,7 @@ foreach(_file IN ITEMS
   require_file("${_file}")
 endforeach()
 
-require_text("include/anocrypto/ac_version.h" "0.1.0-p2-07-submission-documents")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p2-08-preconsultation-rehearsal")
 require_text("src/mac/cmac.c" "One-shot cleanup is unconditional")
 require_text("src/mac/cmac.c" "failed reinitialization is")
 require_text("src/mac/cmac.c" "ano_crypto_cmac_ranges_overlap")

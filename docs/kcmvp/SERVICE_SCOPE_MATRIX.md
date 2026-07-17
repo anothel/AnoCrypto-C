@@ -1,6 +1,6 @@
 # Service Scope Matrix
 
-Status: P2-07 current engineering service inventory bound to OE-01 and internal self-test/state, entropy/DRBG, CSP/zeroization, and secure-coding/side-channel policies; module-byte integrity, exact OE-01 review, and formal classification remain pending.
+Status: P2-08 current engineering service inventory bound to OE-01 and internal self-test/state, entropy/DRBG, CSP/zeroization, and secure-coding/side-channel policies; module-byte integrity, exact OE-01 review, and formal classification remain pending.
 
 | Service | Public surface | Status | Key boundary |
 |---|---|---|---|

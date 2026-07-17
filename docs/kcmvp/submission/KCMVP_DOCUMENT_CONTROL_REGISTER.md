@@ -53,3 +53,16 @@ Every controlled revision must record:
 | Revision | Work item | Summary | Disposition |
 |---|---|---|---|
 | 0.1 | P2-07 | Created controlled internal skeleton and cross-reference set from P2-01 through P2-06. | Internal skeleton only; no submission approval. |
+
+
+## 5. P2-08 controlled rehearsal companions
+
+These files support pre-consultation and are not automatically part of an institution submission package.
+
+| Document ID | File | Status | Approval |
+|---|---|---|---|
+| `AC-KCMVP-PC-001` | `../KCMVP_PRECONSULTATION_REHEARSAL.md` | `CONTROLLED_INTERNAL_REHEARSAL` | `NO` |
+| `AC-KCMVP-EW-001` | `../KCMVP_EVIDENCE_WALKTHROUGH_SCRIPT.md` | `CONTROLLED_INTERNAL_REHEARSAL` | `NO` |
+| `AC-KCMVP-DR-001` | `../KCMVP_UNRESOLVED_DECISION_REGISTER.md` | `CONTROLLED_INTERNAL_REHEARSAL` | `NO` |
+| `AC-KCMVP-RT-001` | `../KCMVP_CONSULTATION_RESPONSE_CAPTURE_TEMPLATE.md` | `CONTROLLED_INTERNAL_REHEARSAL` | `NO` |
+| `AC-KCMVP-AI-001` | `../KCMVP_POST_CONSULTATION_ACTION_IMPACT_MATRIX.md` | `CONTROLLED_INTERNAL_REHEARSAL` | `NO` |

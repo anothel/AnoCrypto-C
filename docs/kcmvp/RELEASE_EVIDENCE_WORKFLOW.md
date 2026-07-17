@@ -1,6 +1,6 @@
 # Release Evidence Workflow
 
-Status: P2-07 unsigned engineering draft retaining the P1-33 release-engineering boundary and the P2-02 through P2-06 policy records. It performs no runtime module-integrity authentication, actual hosted substitution, actual tag creation, production signing, external side-channel validation, or external-release authorization.
+Status: P2-08 unsigned engineering draft retaining the P1-33 release-engineering boundary and the P2-02 through P2-06 policy records. It performs no runtime module-integrity authentication, actual hosted substitution, actual tag creation, production signing, external side-channel validation, or external-release authorization.
 
 ## Purpose
 
@@ -15,15 +15,15 @@ cmake --build build --target ano_crypto_collect_release_evidence
 Default output path:
 
 ```text
-build/evidence/p2-07/
+build/evidence/p2-08/
 ```
 
 The build graph serializes clean Release symbol/runtime-dependency inspection,
 installed-package smoke, customer PoC smoke, tagged-release compatibility,
 compiler-output capture, full CTest, provenance preparation, and key-free
 signing-handoff verification. A predecessor writes a complete hash-bound tree
-under `build/prepared-release-evidence/p2-07/`. Final collection verifies that
-manifest and copies only regular-file content into `build/evidence/p2-07/`; it
+under `build/prepared-release-evidence/p2-08/`. Final collection verifies that
+manifest and copies only regular-file content into `build/evidence/p2-08/`; it
 does not run a configure, build, CTest, package, policy, or status-test process.
 Outer Make/Ninja jobserver variables are removed from nested prerequisite
 processes, and child processes have explicit timeouts.
@@ -306,7 +306,7 @@ Local evidence records expected tag metadata but does not claim that a tag exist
 
 ## Retained P1-33 clean rehearsal and hosted-review additions
 
-- Release identity is `0.1.0-p2-07-submission-documents`; public surface remains 14 headers and 69 `ANOCRYPTO_C_0` symbols.
+- Release identity is `0.1.0-p2-08-preconsultation-rehearsal`; public surface remains 14 headers and 69 `ANOCRYPTO_C_0` symbols.
 - `VALIDATION_CANDIDATE_BOUNDARY_CHECK.txt`
 - `SELF_TEST_INTEGRITY_POLICY_CHECK.txt` binds the internal candidate ID, selected boundary/environment metadata, public counts, and unchanged P1-34 blocker. It is a policy record, not selected-OE execution evidence.
 - A temporary clean Git repository creates a synthetic local tag and proves expected tag, supplied commit, tag-resolved commit, and `HEAD` equality without tagging the user repository.

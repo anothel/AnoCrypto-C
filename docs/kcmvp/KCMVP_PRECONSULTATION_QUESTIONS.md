@@ -1,6 +1,11 @@
 # KCMVP Pre-consultation Questions
 
-Status: P2-07 question pack against frozen boundary candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`, policies `STP-P2-03-R1`, `EDP-P2-04-R1`, `CZP-P2-05-R1`, and secure-coding policy `SCP-P2-06-R1`. All proposed answers remain provisional until retained external confirmation is received.
+Status: P2-08 prioritized question pack against frozen boundary candidate `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1`, policies `STP-P2-03-R1`, `EDP-P2-04-R1`, `CZP-P2-05-R1`, and secure-coding policy `SCP-P2-06-R1`. All proposed answers remain provisional until retained external confirmation is received.
+
+
+## P2-08 Priority and Ownership
+
+Priority-1 blocking groups, internal owner roles, intended recipients, and required retained outputs are defined in `KCMVP_PRECONSULTATION_REHEARSAL.md`. All questions remain unanswered by an institution. A question leaves `EXTERNAL_CONFIRMATION_REQUIRED` only through a completed `KCMVP_CONSULTATION_RESPONSE_CAPTURE_TEMPLATE.md` record and reviewed `DEC-*` disposition.
 
 ## Use and Recording Rule
 

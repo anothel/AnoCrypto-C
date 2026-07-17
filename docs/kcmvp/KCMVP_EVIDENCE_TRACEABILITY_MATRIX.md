@@ -1,6 +1,6 @@
 # KCMVP Evidence Traceability Matrix
 
-Status: P2-07 traceability baseline with frozen boundary/OE, self-test/state, entropy/DRBG, CSP/zeroization, and secure-coding/side-channel engineering policies. Runtime integrity, provider acceptance, formal CSP classification, exact OE-01 review, and external side-channel disposition remain pending.
+Status: P2-08 traceability baseline with frozen P2-02 through P2-07 inputs and controlled pre-consultation rehearsal/decision routing. Runtime integrity, provider acceptance, formal CSP classification, exact OE-01 review, external side-channel disposition, and institution answers remain pending.
 
 ## Matrix Rules
 
@@ -70,7 +70,7 @@ Status: P2-07 traceability baseline with frozen boundary/OE, self-test/state, en
 | TR-BLD-001 | Build representation assumptions fail at configure time. | CMake type-width and endian checks | configure/build; SHA-512 portability test | SHA-512 portability policy | `READY_FOR_INTERNAL_REVIEW` | Actual 32-bit/big-endian target evidence blocked/unselected. |
 | TR-BLD-002 | Installed CMake package builds a clean consumer. | install/export rules; package config | install smoke build-tree and package-smoke targets | SDK integration guide; PoC package manifest | `READY_FOR_INTERNAL_REVIEW` | Target environment/legal packaging review. |
 | TR-BLD-003 | Customer PoC excludes internal hooks/providers/evidence secrets. | `tools/create_poc_package.cmake` | PoC package smoke and policy checks | PoC package/review manifest | `READY_FOR_INTERNAL_REVIEW` | Approved evaluation notice and customer scope. |
-| TR-TST-001 | KAT/negative/differential/policy tests are separated by evidence meaning. | CMake test groups; OpenSSL test-only option; P2 policy targets | 58 ordinary CTest cases when provider is available | differential strategy; KAT plans; P2-03/P2-04/P2-05/P2-06 policy records | `READY_FOR_INTERNAL_REVIEW` | Institution test results remain separate. |
+| TR-TST-001 | KAT/negative/differential/policy tests are separated by evidence meaning. | CMake test groups; OpenSSL test-only option; P2 policy targets | 62 ordinary CTest cases when provider is available | differential strategy; KAT plans; P2-03/P2-04/P2-05/P2-06 policy records | `READY_FOR_INTERNAL_REVIEW` | Institution test results remain separate. |
 | TR-TST-002 | OpenSSL is test-only and absent from runtime/PoC. | differential-only CMake targets | install/PoC/policy checks | OpenSSL provider decision | `READY_FOR_INTERNAL_REVIEW` | Retain dependency scan for selected packages. |
 | TR-TST-003 | Sanitizer, analyzer, and compiler-output evidence are diagnostic only. | sanitizer option; warning/analyzer review; compiler/hardening capture targets | concurrency/sanitizer policy; P2-06 policy and operational reviews | P2-06 secure-coding, side-channel, findings, and compiler/CPU records | `PARTIAL` | Exact OE-01 and named human disposition required. |
 | TR-SC-001 | Portable AES source avoids secret-indexed S-box/T-table arrays and uses fixed-iteration GF operations. | `src/cipher/aes.c` | AES KAT/differential/hardening plus P2-06 source policy | P2-06 side-channel review | `PARTIAL_SOURCE_AND_LOCAL_COMPILER_ONLY` | Exact OE-01 disassembly and any required empirical method remain open. |
@@ -85,13 +85,14 @@ Status: P2-07 traceability baseline with frozen boundary/OE, self-test/state, en
 | TR-CM-001 | Sources and exclusions are traceable. | `cleanroom/SOURCE_MANIFEST.md`; `EXCLUSION_LOG.md` | public-surface and sensitive-artifact scans | clean-room policy; `AC-KCMVP-RF-001`; `AC-KCMVP-SH-001` | `READY_FOR_INTERNAL_REVIEW` | Named reviewer/approval and external delivery disposition remain open. |
 | TR-CM-002 | Configuration/change/release baselines are controlled. | release identity, ABI baseline, hashes, Git/CMake metadata | compatibility/provenance/rehearsal tests | `AC-KCMVP-CM-001`; `AC-KCMVP-DC-001` | `PARTIAL` | Named roles, approved retention, signing and post-baseline retest rules remain open. |
 | TR-DOC-001 | Submission document set maps to implementation/evidence. | P2-01 inventory, P2-02 through P2-06 controlled inputs, and `docs/kcmvp/submission/*` | P2 policy reviews and `check_submission_document_policy.cmake` | `SDP-P2-07-R1`; package index and document register | `READY_FOR_INTERNAL_REVIEW` | Official form conformity, named approval, exact package and institution results remain open. |
+| TR-CONSULT-001 | High-priority external questions, evidence handling, answer capture, and post-answer actions are controlled before consultation. | P2-08 rehearsal, walkthrough, decision register, response template, action-impact matrix | `check_preconsultation_rehearsal_policy.cmake`; rehearsal package smoke | `PCR-P2-08-R1`; status-only package manifest | `READY_FOR_INTERNAL_REVIEW` | Live internal rehearsal, approved channel, external consultation, and institution responses remain open. |
 
-## P2-07 ABI Trace Result
+## P2-08 ABI Trace Result
 
 - Public header file count: 14.
 - Stored exported symbol count: 69.
 - ABI line: `ANOCRYPTO_C_0`.
-- No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01 through P2-07.
-- Version/prerelease metadata changed to `0.1.0-p2-07-submission-documents`; this is intentionally excluded from normalized non-version API equality.
-- P2-07 adds controlled submission documents, staging policy/checks, evidence wiring, and version metadata only; public declarations and symbol baseline remain unchanged.
+- No public function, enum value, public type layout, header, or exported symbol was added or removed by P2-01 through P2-08.
+- Version/prerelease metadata changed to `0.1.0-p2-08-preconsultation-rehearsal`; this is intentionally excluded from normalized non-version API equality.
+- P2-07 adds controlled submission documents; P2-08 adds rehearsal/decision documents, policy/package checks, evidence wiring, and version metadata only. Public declarations and symbol baseline remain unchanged.
 - The selected integrity candidate, policy record, checker, and roadmap documents are internal/build-time assets and add no public symbol.

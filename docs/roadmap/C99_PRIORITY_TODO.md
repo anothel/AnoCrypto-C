@@ -1,6 +1,6 @@
 # C99 Priority TODO
 
-Status: P2-07 controlled internal submission-document skeleton completed locally; P2-08 is next.
+Status: P2-01 through P2-08 internal readiness sequence completed locally. External consultation remains `NOT_CONDUCTED`; institution responses remain `NOT_RECEIVED`.
 
 ## Completed Through P1-33
 
@@ -78,11 +78,18 @@ Do not substitute local or synthetic evidence. Resume only after billing is reso
 - retained exact OE-01, named human disposition, statistical timing/cache, power/EM/fault, runtime integrity, and hosted evidence as open;
 - preserved 14 headers, 69 symbols, `ANOCRYPTO_C_0`, and all release/signing blockers.
 
-## Next Sequence
+## Completed P2-07 and P2-08
 
-1. **P2-07 — Controlled submission-document skeleton**
-2. **P2-08 — Pre-consultation rehearsal and answer capture**
-3. Resume **P1-34** independently only after GitHub billing is resolved.
+- P2-07 created the controlled internal submission-document skeleton under `SDP-P2-07-R1`.
+- P2-08 created the scripted rehearsal, evidence walkthrough, Priority-1 ownership map, 20-entry unresolved-decision register, blank response template, action-impact routing, policy checker, and status-only package smoke under `PCR-P2-08-R1`.
+- External consultation is `NOT_CONDUCTED`; institution responses are `NOT_RECEIVED`; no implementation, ABI, algorithm, signing, submission, or release action is authorized by rehearsal completion.
+
+## Next Selection Gate
+
+1. Conduct an approved internal live rehearsal or external pre-consultation through a controlled channel.
+2. Capture retained answers and map them to `DEC-*` entries and `ACT-*` classes.
+3. Open the next numbered work item only after explicit authorization.
+4. Resume **P1-34** independently only after GitHub billing is resolved.
 
 ## Deferred Until Explicit Scope Gate
 

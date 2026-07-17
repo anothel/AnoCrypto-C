@@ -1,13 +1,13 @@
 # KCMVP Readiness Gap — P2 Consolidated Register
 
-Status: P2-07 controlled internal submission-document skeleton. Runtime integrity implementation, exact operating-environment compiler/CPU review, formal CSP classification, empirical/external side-channel review, formal validation, and hosted evidence remain pending.
+Status: P2-08 scripted pre-consultation rehearsal complete locally under `PCR-P2-08-R1`. External consultation is `NOT_CONDUCTED`, institution responses are `NOT_RECEIVED`, and runtime integrity, exact OE-01, formal CSP classification, specialist side-channel work, formal validation, and hosted evidence remain pending.
 
 ## Baseline and Claims Boundary
 
 | Item | Current value |
 |---|---|
 | Product | `AnoCrypto-C` |
-| Work-product version | `0.1.0-p2-07-submission-documents` |
+| Work-product version | `0.1.0-p2-08-preconsultation-rehearsal` |
 | Input baseline declared by project owner | `0.1.0-p1-33-release-rehearsal` at `cf0f3c425dd265c7509fb64a6123db97f71055dd` |
 | Public headers | 14 |
 | Exported public symbols | 69 |
@@ -71,7 +71,7 @@ This document is an engineering readiness record. It does not establish an accep
 
 ## Test and Evidence Inventory
 
-The ordinary tests-enabled build is expected to register 60 CTest cases when OpenSSL 3.x differential tests are available, including P2-03 through P2-07 policy/operational checks. Coverage includes:
+The ordinary tests-enabled build is expected to register 62 CTest cases when OpenSSL 3.x differential tests are available, including P2-03 through P2-08 policy/operational and package checks. Coverage includes:
 
 - startup/extended KATs and API-negative tests;
 - module state and cryptographic service gating;
@@ -115,7 +115,7 @@ Existing engineering evidence assets include source/archive hashes, SPDX 2.3 sou
 | GAP-023 | Actual hosted evidence | `BLOCKED_EXTERNAL` | Workflow and manifest/review model exist. | Resolve GitHub Actions billing, run on a known commit, hash/download, and perform human review. P1-34 remains incomplete. |
 | GAP-024 | 32-bit and big-endian target evidence | `BLOCKED_EXTERNAL` | Workflow definitions and cross-toolchain seams exist. | No actual hosted runner result exists; confirm whether either environment is in initial scope. |
 | GAP-025 | Reproducibility | `PARTIAL` | Clean rehearsal, source binding, and notes exist. | Decide source and binary reproducibility claims and retain an actual tagged candidate run. |
-| GAP-026 | Submission documents | `PARTIAL` | Many engineering design/evidence fragments exist. | Convert them into controlled basic design, detailed design, configuration-management, and test documents in P2-07. |
+| GAP-026 | Submission documents | `READY_FOR_INTERNAL_REVIEW` | P2-07 controlled skeletons and P2-08 rehearsal routing exist. | Confirm official forms, security level, protected delivery, named approval, and institution-result integration. |
 | GAP-027 | Configuration management | `PARTIAL` | Git/CMake identity, source manifest, ABI baseline, provenance, and hash tooling exist. | Define controlled baselines, roles, change control, build environment, release records, and archival procedure. |
 | GAP-028 | Operator/installation guidance | `PARTIAL` | SDK integration and PoC notes exist. | Produce submitted-configuration installation, startup, error, and secure-operation guidance. |
 | GAP-029 | Source/component inventory | `PARTIAL` | Exact source inventory and source-only SPDX record exist. | Select dependency, license, vulnerability, toolchain/runtime scope with legal and institution input. |
@@ -136,7 +136,9 @@ P2-03 additionally froze the internal self-test/integrity/state/recovery design 
 
 P2-04 freezes `EDP-P2-04-R1` and `ENT-OE01-LINUX-GETRANDOM-R1` as internal policy only. It closes responsibility/limit documentation and local evidence wiring, but leaves provider acceptance, entropy credit, health-test allocation, exact OE-01 execution, and formal conditional-test interpretation externally open.
 
-P2-07 freezes `SDP-P2-07-R1` and creates the controlled internal submission-document set without changing public ABI. Official form conformity, selected security level, named approval, secure delivery, exact OE-01 evidence, runtime integrity, institution results, and P1-34 hosted evidence remain open. P2-08 is next.
+P2-07 freezes `SDP-P2-07-R1` and creates the controlled internal submission-document set without changing public ABI.
+
+P2-08 freezes `PCR-P2-08-R1`, completes the scripted evidence walkthrough, assigns 10 Priority-1 agendas, records 20 unresolved decisions, and adds controlled response/action routing plus a status-only package smoke. External consultation remains `NOT_CONDUCTED`; institution responses remain `NOT_RECEIVED`; official form conformity, selected security level, named approval, secure delivery, exact OE-01 evidence, runtime integrity, institution results, and P1-34 hosted evidence remain open.
 
 ## External Reference Checkpoint
 
