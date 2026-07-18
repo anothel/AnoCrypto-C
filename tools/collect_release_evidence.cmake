@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p3-01 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p3-02 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p3-01")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p3-02")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -152,6 +152,10 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_DOWNSTREAM_REQUIREMENT_ANALYSIS_CHECK)
     set(ANO_CRYPTO_RUN_DOWNSTREAM_REQUIREMENT_ANALYSIS_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_HKDF_SHA256_CHECK)
+    set(ANO_CRYPTO_RUN_HKDF_SHA256_CHECK ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK)
@@ -922,6 +926,29 @@ else()
 ")
 endif()
 
+if(ANO_CRYPTO_RUN_HKDF_SHA256_CHECK)
+    set(_hkdf_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/HKDF_SHA256_POLICY_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_HKDF_POLICY_CHECK_OUTPUT=${_hkdf_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_hkdf_sha256_policy.cmake"
+        RESULT_VARIABLE _hkdf_check_result
+        OUTPUT_VARIABLE _hkdf_check_stdout
+        ERROR_VARIABLE _hkdf_check_stderr
+        TIMEOUT 300)
+    file(APPEND "${_hkdf_check_output}"
+        "\nCommand output:\n${_hkdf_check_stdout}${_hkdf_check_stderr}\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "HKDF-SHA-256 P3-02 policy check result: ${_hkdf_check_result}\n")
+    if(NOT _hkdf_check_result EQUAL 0)
+        message(FATAL_ERROR "HKDF-SHA-256 policy check failed; see ${_hkdf_check_output}")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/HKDF_SHA256_POLICY_CHECK.txt"
+        "HKDF-SHA-256 policy check was not requested. Set ANO_CRYPTO_RUN_HKDF_SHA256_CHECK=ON.\n")
+endif()
+
 if(ANO_CRYPTO_RUN_CMAC_HARDENING_CHECK)
     set(_cmac_hardening_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/AES_CMAC_HARDENING_CHECK.txt")
     execute_process(
@@ -1563,7 +1590,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DOWNSTREAM_REQUIREMENT_ANALYSIS_NOTES.txt
 "
     "Selected implementation: P3-02_HKDF_SHA256.
 "
-    "Current public ABI remains 14 headers, 69 symbols, ANOCRYPTO_C_0.
+    "P3-01 frozen public ABI: 14 headers, 69 symbols, ANOCRYPTO_C_0.
 "
     "Public API/new ABI authorization: P3_02_ONLY/ANOCRYPTO_C_1_ADDITIVE_FOR_P3_02.
 "
@@ -1573,7 +1600,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DOWNSTREAM_REQUIREMENT_ANALYSIS_NOTES.txt
 "
     "Repository signing/external authorization: UNSIGNED/NO.
 "
-    "Public ABI: 14 headers, 69 symbols, ANOCRYPTO_C_0.
+    "P3-01 public ABI: 14 headers, 69 symbols, ANOCRYPTO_C_0.
 "
     "Sensitive values recorded: none.
 ")
@@ -1631,6 +1658,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "P2-11 human rehearsal handoff policy check: HUMAN_REHEARSAL_HANDOFF_POLICY_CHECK.txt\n"
     "P2-12 consultation contact-readiness policy check: CONSULTATION_CONTACT_READINESS_POLICY_CHECK.txt\n"
     "P3-01 downstream requirement analysis policy check: DOWNSTREAM_REQUIREMENT_ANALYSIS_POLICY_CHECK.txt\n"
+    "P3-02 HKDF-SHA-256 policy check: HKDF_SHA256_POLICY_CHECK.txt\n"
     "Differential/portability policy check: DIFFERENTIAL_PORTABILITY_CHECK.txt\n"
     "AES/CBC implementation policy check: AES_CBC_IMPLEMENTATION_CHECK.txt\n"
     "AES/CBC hardening policy check: AES_HARDENING_CHECK.txt\n"
@@ -1645,21 +1673,36 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P3-01 evidence and scope-review notes\n"
+    "AnoCrypto-C P3-02 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P3-01 product-driven downstream requirement analysis artifact. Four source sets are imported, 20 requirement rows and eight AnoCrypto-C gaps are accepted, and P3-02 HKDF-SHA-256 is selected. No public API or ABI change is implemented in P3-01.\n"
+    "Status: P3-02 generic RFC 5869 HKDF-SHA-256 implementation and additive ABI evidence. P3-01 remains the accepted downstream requirement baseline.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"
     "SHA-512-family decision: docs/design/SHA2_384_512_SCOPE_DECISION.md\n"
     "SHA-512-family KAT record: docs/kcmvp/SHA2_384_512_KAT_PLAN.md\n"
     "SHA-512-family implementation check: SHA512_FAMILY_CHECK.txt\n"
-    "Current implemented algorithm slice includes SHA-256/SHA-384/SHA-512, their HMAC variants, and HMAC_DRBG-SHA-256.\n"
+    "Current implemented algorithm slice includes SHA-256/SHA-384/SHA-512, their HMAC variants, HMAC_DRBG-SHA-256, and generic HKDF-SHA-256.\n"
     "The existing platform-provider-backed random service and CSP HMAC key lifecycle remain in the candidate engineering slice.\n"
     "AES-128/192/256, CBC without padding, and full-tag AES-CMAC are implemented. AES-CTR, AEAD, padding helpers, GMAC, hardware dispatch, tag truncation, and additional algorithms remain deferred.\n"
-    "OpenSSL 3.x test-only differential automation covers SHA-2/HMAC, AES-CBC, and AES-CMAC; actual hosted 32-bit, Windows, macOS, big-endian, and target-specific side-channel artifacts remain review items.\n"
+    "OpenSSL 3.x test-only differential automation covers SHA-2/HMAC, HKDF-SHA-256, AES-CBC, and AES-CMAC; actual hosted 32-bit, Windows, macOS, big-endian, and target-specific side-channel artifacts remain review items.\n"
     "Do not include digest values, MAC values, keys, entropy bytes, seed material, DRBG state, generated random bytes, private keys, tokens, customer data, or internal deployment details in scope evidence.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Scope review notes: SCOPE_REVIEW_NOTES.txt\n")
+
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/HKDF_SHA256_REVIEW_NOTES.txt"
+    "AnoCrypto-C P3-02 HKDF-SHA-256 review notes\n"
+    "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
+    "Status: local engineering implementation and compatibility evidence; not formal validation evidence.\n"
+    "Public API: one combined extract-and-expand function in include/anocrypto/ac_kdf.h.\n"
+    "ABI: all 69 ANOCRYPTO_C_0 symbols retained; ano_crypto_hkdf_sha256 added on ANOCRYPTO_C_1; current total 70.\n"
+    "Bounds: output lengths 0 through 8160 accepted; 8161 rejected without partial output.\n"
+    "Semantics: RFC 5869 empty salt, empty IKM, empty info, zero-length output, range, alias, overlap, and failure-clearing rules are documented and tested.\n"
+    "Compatibility: exact AnoSecureKit SKF1 v1 info bytes are covered by a fixed test vector; SKF1 framing and workflow remain AnoSecureKit-owned.\n"
+    "Differential provider: OpenSSL 3.x is test-only and is not linked by the product library.\n"
+    "KCMVP/hosted/signing/external release: DEFERRED/NOT_RUN-UNREVIEWED/UNSIGNED/NO.\n"
+    "Sensitive values recorded in this review note: none.\n")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "HKDF-SHA-256 review notes: HKDF_SHA256_REVIEW_NOTES.txt\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA512_FAMILY_REVIEW_NOTES.txt"
     "AnoCrypto-C SHA-384/SHA-512 family review notes\n"
@@ -1747,9 +1790,10 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Random lifecycle re
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt"
     "AnoCrypto-C exported-symbol baseline review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P1-29 clean Release ABI guardrail; not a complete ABI compatibility claim.\n"
-    "Baseline: abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt\n"
-    "Expected public symbol count: 69\n"
+    "Status: P3-02 additive clean Release ABI guardrail; not a complete ABI compatibility claim.\n"
+    "Retained baseline: abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt\n"
+    "Current manifest: abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt\n"
+    "Expected retained/current symbol counts: 69/70\n"
     "Automated result: EXPORTED_SYMBOL_BASELINE_CHECK.txt\n"
     "The check compares a clean shared Release build with test hooks disabled and internal symbol hiding enabled.\n"
     "Public struct layout, calling convention, type size, semantic compatibility, and platform-specific binary details remain separate review items.\n")
@@ -1762,7 +1806,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RELEASE_COMPATIBILITY_REVIEW_NOTES.txt"
     "Expected tag metadata: ${ANO_CRYPTO_RELEASE_TAG}\n"
     "Baseline: ${ANO_CRYPTO_COMPAT_BASELINE_VERSION}\n"
     "Public headers: ${ANO_CRYPTO_RELEASE_PUBLIC_HEADER_COUNT}\n"
-    "ABI-0 exports: ${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}\n"
+    "Current ABI line / total exports: ${ANO_CRYPTO_RELEASE_ABI_LINE} / ${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}\n"
     "Automated policy: RELEASE_COMPATIBILITY_CHECK.txt\n"
     "Installed consumer smoke: TAGGED_COMPATIBILITY_SMOKE.txt\n"
     "Hosted artifact execution: NOT_RUN; review: UNREVIEWED. Local evidence does not establish Windows, macOS, Linux 32-bit, or big-endian compatibility.\n"
@@ -2030,12 +2074,15 @@ endfunction()
 _ano_crypto_find_evidence_test_executable(
     ano_crypto_sha2_hmac_openssl_differential_tests _sha2_diff_executable)
 _ano_crypto_find_evidence_test_executable(
+    ano_crypto_hkdf_sha256_openssl_differential_tests _hkdf_diff_executable)
+_ano_crypto_find_evidence_test_executable(
     ano_crypto_aes_cbc_openssl_differential_tests _aes_cbc_diff_executable)
 _ano_crypto_find_evidence_test_executable(
     ano_crypto_aes_cmac_openssl_differential_tests _aes_cmac_diff_executable)
 
 if(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE)
     if(NOT (_sha2_diff_executable AND
+            _hkdf_diff_executable AND
             _aes_cbc_diff_executable AND
             _aes_cmac_diff_executable))
         message(FATAL_ERROR
@@ -2045,6 +2092,9 @@ if(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE)
         ano_crypto_sha2_hmac_openssl_differential_tests
         _sha2_diff_result _sha2_diff_stdout _sha2_diff_stderr)
     _ano_crypto_run_evidence_test(
+        ano_crypto_hkdf_sha256_openssl_differential_tests
+        _hkdf_diff_result _hkdf_diff_stdout _hkdf_diff_stderr)
+    _ano_crypto_run_evidence_test(
         ano_crypto_aes_cbc_openssl_differential_tests
         _aes_cbc_diff_result _aes_cbc_diff_stdout _aes_cbc_diff_stderr)
     _ano_crypto_run_evidence_test(
@@ -2053,20 +2103,24 @@ if(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE)
 
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log"
         "${_sha2_diff_stdout}${_sha2_diff_stderr}"
+        "${_hkdf_diff_stdout}${_hkdf_diff_stderr}"
         "${_aes_cbc_diff_stdout}${_aes_cbc_diff_stderr}"
         "${_aes_cmac_diff_stdout}${_aes_cmac_diff_stderr}")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-        "OpenSSL differential validation results: sha2-hmac=${_sha2_diff_result}; aes-cbc=${_aes_cbc_diff_result}; aes-cmac=${_aes_cmac_diff_result}\n")
+        "OpenSSL differential validation results: sha2-hmac=${_sha2_diff_result}; hkdf-sha256=${_hkdf_diff_result}; aes-cbc=${_aes_cbc_diff_result}; aes-cmac=${_aes_cmac_diff_result}\n")
     if(NOT _sha2_diff_result EQUAL 0 OR
+       NOT _hkdf_diff_result EQUAL 0 OR
        NOT _aes_cbc_diff_result EQUAL 0 OR
        NOT _aes_cmac_diff_result EQUAL 0 OR
        NOT _sha2_diff_stdout MATCHES "sha2-hmac-differential status=pass" OR
+       NOT _hkdf_diff_stdout MATCHES "hkdf_sha256_openssl_differential_tests: PASS" OR
        NOT _aes_cbc_diff_stdout MATCHES "AES-CBC OpenSSL differential comparisons passed" OR
        NOT _aes_cmac_diff_stdout MATCHES "OpenSSL 3.x AES-CMAC differential validation passed")
         message(FATAL_ERROR "OpenSSL differential validation failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log")
     endif()
 else()
-    if(_sha2_diff_executable OR _aes_cbc_diff_executable OR _aes_cmac_diff_executable)
+    if(_sha2_diff_executable OR _hkdf_diff_executable OR
+       _aes_cbc_diff_executable OR _aes_cmac_diff_executable)
         message(FATAL_ERROR
             "Stale OpenSSL differential executables are present although the provider is not configured")
     endif()
@@ -2324,7 +2378,9 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `AES_COMPILER_OUTPUT_REVIEW.txt`: compiler/target/library metadata and manual-review boundary.\n"
 "- `AES_COMPILER_OUTPUT_DISASSEMBLY.txt`: internal machine-code artifact for target-specific manual review.\n"
 "- `AES_CBC_REVIEW_NOTES.txt`: AES/CBC scope, context lifecycle, differential boundary, and remaining side-channel review notes.\n"
-"- `AES_CMAC_IMPLEMENTATION_CHECK.txt`: AES-CMAC API, CSP, KAT, differential, package, and 69-symbol policy check.\n"
+"- `AES_CMAC_IMPLEMENTATION_CHECK.txt`: retained AES-CMAC API, CSP, KAT, differential, package, and ABI-0 policy check.\n"
+"- `HKDF_SHA256_POLICY_CHECK.txt`: P3-02 one-function API, RFC 5869 bounds, additive ABI, exact SKF1 info-byte evidence, and blocker-state policy check.\n"
+"- `HKDF_SHA256_REVIEW_NOTES.txt`: P3-02 semantics, compatibility boundary, differential-provider boundary, and retained external-status notes.\n"
 "- `AES_CMAC_HARDENING_CHECK.txt`: P1-29 context, cleanup, lifecycle, concurrency, differential, compiler-review, and unchanged-ABI policy check.\n"
 "- `AES_CMAC_HARDENING_REVIEW.log`: status-only CMAC context, alias, cleanup, and mismatch-position review.\n"
 "- `AES_CMAC_LIFECYCLE_STRESS.log`: 128-iteration CMAC lifecycle and handle-snapshot stress result.\n"
@@ -2333,14 +2389,14 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `AES_CMAC_REVIEW_NOTES.txt`: full-tag CMAC scope, dedicated key-purpose, hardening boundary, and remaining review notes.\n"
 "- `SHA512_FAMILY_CHECK.txt`: SHA-384/SHA-512 family implementation, KAT, negative-test, and package wiring check.\n"
 "- `DIFFERENTIAL_PORTABILITY_CHECK.txt`: OpenSSL test-only provider, deterministic comparison, C99 representation, and portability policy check.\n"
-"- `DIFFERENTIAL_VALIDATION.log`: status-only OpenSSL 3.x SHA-2/HMAC, AES-CBC, and AES-CMAC differential result.\n"
+"- `DIFFERENTIAL_VALIDATION.log`: status-only OpenSSL 3.x SHA-2/HMAC, HKDF-SHA-256, AES-CBC, and AES-CMAC differential result.\n"
 "- `SHA512_PORTABILITY_REVIEW.log`: status-only representation, endian, and unaligned-input review.\n"
 "- `DIFFERENTIAL_PORTABILITY_REVIEW_NOTES.txt`: provider/product boundary and remaining hosted-artifact review notes.\n"
 "- `RANDOM_SERVICE_CHECK.txt`: public random-service implementation policy check.\n"
 "- `RANDOM_SERVICE_REVIEW_NOTES.txt`: random-service implementation review notes.\n"
 "- `RANDOM_LIFECYCLE_HARDENING_CHECK.txt`: P1-26 lifecycle, process-marker, VM policy, hook, and ABI-baseline policy check.\n"
 "- `RANDOM_LIFECYCLE_REVIEW_NOTES.txt`: status-only lifecycle and portability review notes.\n"
-"- `EXPORTED_SYMBOL_BASELINE_CHECK.txt`: clean Release comparison against the stored 69-symbol ABI-0 baseline.\n"
+"- `EXPORTED_SYMBOL_BASELINE_CHECK.txt`: clean Release comparison against the retained 69-symbol ABI-0 baseline and current 70-symbol additive manifest.\n"
 "- `EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt`: exported-symbol guardrail scope and limitations.\n"
 "- `ENTROPY_HEALTH_CHECK.txt`: entropy failure-injection and health-test boundary policy check.\n"
 "- `ENTROPY_HEALTH_REVIEW_NOTES.txt`: health-test state-transition and logging review notes.\n"

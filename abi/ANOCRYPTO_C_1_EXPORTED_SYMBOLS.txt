@@ -1,0 +1,2 @@
+# Additive symbols first introduced on ANOCRYPTO_C_1.
+ano_crypto_hkdf_sha256

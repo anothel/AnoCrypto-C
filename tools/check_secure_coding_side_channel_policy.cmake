@@ -37,6 +37,7 @@ function(require_text _relative _needle)
 endfunction()
 
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/load_public_surface_state.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_VALIDATION_CANDIDATE.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_SECURE_CODING_POLICY.cmake")
 
@@ -86,7 +87,7 @@ require_text("CMakeLists.txt" "_FORTIFY_SOURCE=3")
 require_text("CMakeLists.txt" "-z,relro,-z,now,-z,noexecstack")
 require_text("docs/kcmvp/KCMVP_SECURITY_FINDINGS_REGISTER.md" "P2-06-F-012")
 require_text("tests/operational/secure_coding_policy_review.c" "sensitive_values_printed=0")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p3-01-downstream-requirement-consolidation")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p3-02-hkdf-sha256")
 
 # Product source must avoid common high-risk APIs and dynamic allocation.
 file(GLOB_RECURSE _product_sources LIST_DIRECTORIES false
@@ -107,8 +108,8 @@ if(_aes_source MATCHES "static[ \\t]+const[ \\t]+uint(8|32)_t[^;]*(sbox|SBOX|t_t
     list(APPEND _violations "AES lookup table detected in portable source")
 endif()
 
-file(GLOB _public_headers "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/*.h")
-list(LENGTH _public_headers _public_header_count)
+set(_public_headers "${ANO_CRYPTO_CURRENT_PUBLIC_HEADERS}")
+set(_public_header_count "${ANO_CRYPTO_RETAINED_PUBLIC_HEADER_COUNT}")
 file(STRINGS "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt" _symbol_lines)
 set(_symbol_count 0)
 foreach(_line IN LISTS _symbol_lines)
@@ -118,7 +119,7 @@ foreach(_line IN LISTS _symbol_lines)
     endif()
 endforeach()
 if(NOT _public_header_count EQUAL 14 OR NOT _symbol_count EQUAL 69 OR
-   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_0")
+   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_1")
     list(APPEND _violations
         "public ABI changed: headers=${_public_header_count}, symbols=${_symbol_count}, ABI=${ANO_CRYPTO_RELEASE_ABI_LINE}")
 endif()

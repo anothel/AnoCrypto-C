@@ -45,7 +45,8 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - AES/CBC implementation and hardening policy results
 - AES lifecycle/portability review log
 - AES compiler-output summary and disassembly for manual internal review
-- Clean Release 69-symbol baseline result
+- Clean Release retained 69-symbol ABI-0 and current 70-symbol additive result
+- P3-02 HKDF-SHA-256 policy and implementation review
 
 ## P1 Evidence Notes
 
@@ -104,6 +105,15 @@ Evidence draft:
 ```sh
 cmake --build build --target ano_crypto_collect_release_evidence
 ```
+
+## P3-02 HKDF-SHA-256 Review
+
+Review `HKDF_SHA256_IMPLEMENTATION_REVIEW.md`, `HKDF_SHA256_POLICY_CHECK.txt`,
+`HKDF_SHA256_REVIEW_NOTES.txt`, the RFC 5869 KAT/negative/OpenSSL differential
+results, installed/current/retained consumers, PoC smoke, and ELF symbol-version
+report. Confirm that AnoCrypto-C exposes only the generic primitive, retains all
+69 `ANOCRYPTO_C_0` symbols, places only `ano_crypto_hkdf_sha256` on
+`ANOCRYPTO_C_1`, and does not implement `SKF1` or any other product workflow.
 
 ## TODO
 

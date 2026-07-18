@@ -105,8 +105,8 @@ endif()
 
 if(_missing OR _unexpected)
     file(APPEND "${ANO_CRYPTO_SYMBOL_REPORT}" "Result: FAIL\n")
-    message(FATAL_ERROR "Exported symbols differ from the stored ABI-0 baseline; see ${ANO_CRYPTO_SYMBOL_REPORT}")
+    message(FATAL_ERROR "Exported symbols differ from the stored current additive baseline; see ${ANO_CRYPTO_SYMBOL_REPORT}")
 endif()
 
 file(APPEND "${ANO_CRYPTO_SYMBOL_REPORT}" "Result: PASS\n")
-message(STATUS "AnoCrypto-C exported symbols match ABI-0 baseline (${_actual_count} symbols)")
+message(STATUS "AnoCrypto-C exported symbols match the current additive baseline (${_actual_count} symbols)")

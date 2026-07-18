@@ -42,6 +42,7 @@ function(forbid_text _relative _needle)
 endfunction()
 
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/load_public_surface_state.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_VALIDATION_CANDIDATE.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_SELF_TEST_POLICY.cmake")
 
@@ -148,9 +149,8 @@ forbid_text("docs/kcmvp/KCMVP_SELF_TEST_AND_INTEGRITY_SPEC.md"
 forbid_text("docs/kcmvp/KCMVP_SELF_TEST_AND_INTEGRITY_SPEC.md"
     "INTEGRITY_IMPLEMENTED_AND_ACCEPTED")
 
-file(GLOB _public_headers LIST_DIRECTORIES false
-    "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/*.h")
-list(LENGTH _public_headers _public_header_count)
+set(_public_headers "${ANO_CRYPTO_CURRENT_PUBLIC_HEADERS}")
+set(_public_header_count "${ANO_CRYPTO_RETAINED_PUBLIC_HEADER_COUNT}")
 if(NOT _public_header_count EQUAL 14)
     message(FATAL_ERROR "Expected 14 public headers, found ${_public_header_count}")
 endif()

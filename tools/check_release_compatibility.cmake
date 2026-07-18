@@ -80,14 +80,19 @@ set(_current_include "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto")
 set(_baseline_hashes "${_baseline_root}/PUBLIC_HEADER_SHA256.txt")
 set(_baseline_symbols "${_baseline_root}/EXPORTED_SYMBOLS.txt")
 set(_current_header_hashes "${ANO_CRYPTO_SOURCE_DIR}/release/PUBLIC_HEADERS.sha256")
+set(_current_abi0_symbols
+    "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt")
 set(_current_symbols
-    "${ANO_CRYPTO_SOURCE_DIR}/abi/${ANO_CRYPTO_RELEASE_ABI_LINE}_EXPORTED_SYMBOLS.txt")
+    "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt")
+set(_retained_header_count 14)
+set(_retained_symbol_count 69)
 
 foreach(_path IN ITEMS
         "${_baseline_root}/README.md"
         "${_baseline_hashes}"
         "${_baseline_symbols}"
         "${_current_header_hashes}"
+        "${_current_abi0_symbols}"
         "${_current_symbols}")
     if(NOT EXISTS "${_path}" OR IS_DIRECTORY "${_path}")
         message(FATAL_ERROR "Compatibility input is missing: ${_path}")
@@ -122,6 +127,9 @@ function(_ano_collect_api_manifest _include_dir _manifest_file _prefix)
 
     foreach(_header IN LISTS _headers)
         get_filename_component(_header_name "${_header}" NAME)
+        if(_prefix STREQUAL "CURRENT_RETAINED" AND _header_name STREQUAL "ac_kdf.h")
+            continue()
+        endif()
         list(APPEND _header_names "${_header_name}")
         file(READ "${_header}" _content)
 
@@ -304,46 +312,54 @@ endfunction()
 
 _ano_verify_hash_manifest(
     "${_baseline_root}" "${_baseline_hashes}"
-    "${ANO_CRYPTO_RELEASE_PUBLIC_HEADER_COUNT}" "baseline public header")
+    "${_retained_header_count}" "baseline public header")
 _ano_verify_hash_manifest(
     "${ANO_CRYPTO_SOURCE_DIR}" "${_current_header_hashes}"
     "${ANO_CRYPTO_RELEASE_PUBLIC_HEADER_COUNT}" "current public header")
 
 set(_baseline_manifest "${_output_dir}/P1_29_PUBLIC_API_NORMALIZED.txt")
+set(_current_retained_manifest "${_output_dir}/CURRENT_RETAINED_PUBLIC_API_NORMALIZED.txt")
 set(_current_manifest "${_output_dir}/CURRENT_PUBLIC_API_NORMALIZED.txt")
 _ano_collect_api_manifest("${_baseline_include}" "${_baseline_manifest}" BASELINE)
+_ano_collect_api_manifest("${_current_include}" "${_current_retained_manifest}" CURRENT_RETAINED)
 _ano_collect_api_manifest("${_current_include}" "${_current_manifest}" CURRENT)
-if(NOT "${BASELINE_HEADER_COUNT}" STREQUAL "${ANO_CRYPTO_RELEASE_PUBLIC_HEADER_COUNT}" OR
+if(NOT "${BASELINE_HEADER_COUNT}" STREQUAL "${_retained_header_count}" OR
+   NOT "${CURRENT_RETAINED_HEADER_COUNT}" STREQUAL "${_retained_header_count}" OR
    NOT "${CURRENT_HEADER_COUNT}" STREQUAL "${ANO_CRYPTO_RELEASE_PUBLIC_HEADER_COUNT}")
-    message(FATAL_ERROR "Public header count differs from the release identity")
+    message(FATAL_ERROR "Retained/current public header counts are inconsistent")
 endif()
-if(NOT "${BASELINE_FUNCTION_COUNT}" STREQUAL "${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}" OR
+if(NOT "${BASELINE_FUNCTION_COUNT}" STREQUAL "${_retained_symbol_count}" OR
+   NOT "${CURRENT_RETAINED_FUNCTION_COUNT}" STREQUAL "${_retained_symbol_count}" OR
    NOT "${CURRENT_FUNCTION_COUNT}" STREQUAL "${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}")
-    message(FATAL_ERROR "Public function declaration count differs from the 69-symbol ABI line")
+    message(FATAL_ERROR "Retained/current public function counts are inconsistent")
 endif()
 
 file(READ "${_baseline_manifest}" _baseline_manifest_text)
-file(READ "${_current_manifest}" _current_manifest_text)
+file(READ "${_current_retained_manifest}" _current_retained_manifest_text)
 string(REGEX REPLACE "scope=BASELINE\n" "scope=PUBLIC_API\n"
     _baseline_comparable "${_baseline_manifest_text}")
-string(REGEX REPLACE "scope=CURRENT\n" "scope=PUBLIC_API\n"
-    _current_comparable "${_current_manifest_text}")
+string(REGEX REPLACE "scope=CURRENT_RETAINED\n" "scope=PUBLIC_API\n"
+    _current_comparable "${_current_retained_manifest_text}")
 string(SHA256 _baseline_comparable_hash "${_baseline_comparable}")
 string(SHA256 _current_comparable_hash "${_current_comparable}")
 if(NOT _baseline_comparable_hash STREQUAL _current_comparable_hash)
     message(FATAL_ERROR
-        "Current public declarations/types/constants differ from the P1-29 baseline; compare ${_baseline_manifest} and ${_current_manifest}")
+        "Current public declarations/types/constants differ from the P1-29 baseline; compare ${_baseline_manifest} and ${_current_retained_manifest}")
 endif()
 
 _ano_read_symbol_list("${_baseline_symbols}" _baseline_symbol_list)
+_ano_read_symbol_list("${_current_abi0_symbols}" _current_abi0_symbol_list)
 _ano_read_symbol_list("${_current_symbols}" _current_symbol_list)
 list(LENGTH _baseline_symbol_list _baseline_symbol_count)
+list(LENGTH _current_abi0_symbol_list _current_abi0_symbol_count)
 list(LENGTH _current_symbol_list _current_symbol_count)
-if(NOT _baseline_symbol_list STREQUAL _current_symbol_list)
-    message(FATAL_ERROR "Current ABI-0 symbol list differs from the P1-29 compatibility baseline")
+if(NOT _baseline_symbol_list STREQUAL _current_abi0_symbol_list)
+    message(FATAL_ERROR "Current ANOCRYPTO_C_0 symbols differ from the P1-29 baseline")
 endif()
-if(NOT "${_current_symbol_count}" STREQUAL "${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}")
-    message(FATAL_ERROR "Release identity symbol count does not match the stored ABI list")
+if(NOT "${_baseline_symbol_count}" STREQUAL "${_retained_symbol_count}" OR
+   NOT "${_current_abi0_symbol_count}" STREQUAL "${_retained_symbol_count}" OR
+   NOT "${_current_symbol_count}" STREQUAL "${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}")
+    message(FATAL_ERROR "Retained/current symbol counts are inconsistent")
 endif()
 
 _ano_require_text("include/anocrypto/ac_version.h"
@@ -354,7 +370,7 @@ _ano_require_text("CMakeLists.txt"
     "include(\"\${CMAKE_CURRENT_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake\")")
 _ano_require_text("CMakeLists.txt"
     "COMPATIBILITY \${ANO_CRYPTO_RELEASE_PACKAGE_COMPATIBILITY}")
-_ano_require_text("src/core/build_identity.c" "P2-11 independent human rehearsal handoff work product")
+_ano_require_text("src/core/build_identity.c" "P3-02 adds one generic RFC 5869 HKDF-SHA-256 C API")
 _ano_require_text("README.md" "${ANO_CRYPTO_RELEASE_VERSION}")
 _ano_require_text(".github/workflows/ci.yml" "${ANO_CRYPTO_RELEASE_FINGERPRINT}")
 _ano_require_text(".github/workflows/ci.yml"

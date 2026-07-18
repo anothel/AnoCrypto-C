@@ -1,6 +1,6 @@
 # AnoCrypto-C
 
-Current status: `0.1.0-p3-01-downstream-requirement-consolidation`. P2 remains a retained local validation-readiness snapshot. P3-00 resets the active lane to product-driven downstream requirement intake: exact matched AnoSecureKit and AnoPKI Community/Enterprise revisions are not yet imported, no product requirement or capability gap is approved, no algorithm or public API implementation is selected, and KCMVP consultation work is deferred. Runtime integrity remains `NOT_IMPLEMENTED`, exact OE-01 and P1-34 hosted evidence remain `NOT_RUN`, hosted review remains `UNREVIEWED`, repository signing remains `UNSIGNED`, and external release authorization remains `NO`. The public boundary remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
+Current status: `0.1.0-p3-02-hkdf-sha256`. P3-02 implements one generic RFC 5869 HKDF-SHA-256 C API using the existing HMAC-SHA-256 core, retains all 69 `ANOCRYPTO_C_0` symbols, and adds one `ANOCRYPTO_C_1` symbol. The current boundary is 15 public headers and 70 exported symbols. Exact AnoSecureKit `SKF1` v1 info bytes are covered as compatibility evidence; SKF1 itself remains AnoSecureKit-owned. KCMVP remains `DEFERRED`, P1-34 hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, and external release authorization remains `NO`.
 
 Implemented processing scope:
 
@@ -309,7 +309,7 @@ Controlled outputs are `docs/kcmvp/KCMVP_ENTROPY_AND_DRBG_SPEC.md`, the responsi
 - A dedicated tests-only hook verifies the HMAC_DRBG `2^48` reseed-counter boundary, failed-reseed persistence, recovery, and no-wrap behavior.
 - Known VM snapshot/restore or clone events require inherited contexts to be discarded and each instance independently reinitialized; automatic detection is not implemented.
 - Suspend/resume handling remains a consuming-product policy.
-- `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the current 69-name ABI-0 public symbol baseline.
+- `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the retained 69-name ABI-0 public symbol baseline; `abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt` stores the current 70-name additive surface.
 - Clean Release, evidence, and PoC flows compare shared-library exports with that baseline and keep both internal test-hook options disabled.
 - Hosted CI collects status-only platform review artifacts; actual hosted results still require review.
 

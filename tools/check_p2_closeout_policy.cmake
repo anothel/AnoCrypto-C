@@ -35,6 +35,7 @@ function(require_text rel needle)
 endfunction()
 
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/load_public_surface_state.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_PRECONSULTATION_POLICY.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_P2_CLOSEOUT_POLICY.cmake")
 
@@ -94,8 +95,8 @@ require_text("docs/kcmvp/KCMVP_OPEN_ITEMS_AND_EXIT_CRITERIA.md" "Gate A — inte
 require_text("docs/kcmvp/KCMVP_OPEN_ITEMS_AND_EXIT_CRITERIA.md" "Gate E — external release ready")
 require_text("docs/roadmap/P2_CLOSEOUT_AND_NEXT_WORK_GATE.md" "no automatic P3 feature expansion")
 require_text("docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md" "| Actual hosted lanes | `NOT_RUN` |")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p3-01-downstream-requirement-consolidation")
-require_text("README.md" "0.1.0-p3-01-downstream-requirement-consolidation")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p3-02-hkdf-sha256")
+require_text("README.md" "0.1.0-p3-02-hkdf-sha256")
 
 file(STRINGS "${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_PRECONSULTATION_CLOSEOUT_MANIFEST.txt" _manifest_lines)
 set(_pack_docs "")
@@ -131,8 +132,8 @@ if(NOT _decision_count EQUAL 20)
   list(APPEND _violations "decision-register count drifted: ${_decision_count}")
 endif()
 
-file(GLOB _public_headers "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/*.h")
-list(LENGTH _public_headers _header_count)
+set(_public_headers "${ANO_CRYPTO_CURRENT_PUBLIC_HEADERS}")
+set(_header_count "${ANO_CRYPTO_RETAINED_PUBLIC_HEADER_COUNT}")
 file(STRINGS "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt" _symbols)
 set(_symbol_count 0)
 foreach(_line IN LISTS _symbols)
@@ -143,7 +144,7 @@ foreach(_line IN LISTS _symbols)
 endforeach()
 if(NOT _header_count EQUAL ANO_CRYPTO_P2_CLOSEOUT_PUBLIC_HEADER_COUNT OR
    NOT _symbol_count EQUAL ANO_CRYPTO_P2_CLOSEOUT_EXPORTED_SYMBOL_COUNT OR
-   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL ANO_CRYPTO_P2_CLOSEOUT_ABI_LINE)
+   NOT ANO_CRYPTO_P2_CLOSEOUT_ABI_LINE STREQUAL "ANOCRYPTO_C_0")
   list(APPEND _violations "public ABI changed: headers=${_header_count}, symbols=${_symbol_count}, ABI=${ANO_CRYPTO_RELEASE_ABI_LINE}")
 endif()
 

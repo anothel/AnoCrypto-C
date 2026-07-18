@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p3-01-downstream-requirement-consolidation"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p3-02-hkdf-sha256"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P2-11 independent human rehearsal handoff work product. Public scope remains 14 headers, 69 exported ANOCRYPTO_C_0 symbols, and the existing SHA-2, HMAC-SHA-2, HMAC_DRBG-SHA-256, random, AES-CBC, AES-CMAC, and in-memory CSP services. HRH-P2-11-R1 prepares a status-only 17-document package for a future real named reviewer; reviewer identity is UNASSIGNED, reviewer independence is NOT_RECORDED, independent human rehearsal is NOT_RUN, project-owner authorization is NOT_RECORDED, institution contact authorization is NO, external consultation is NOT_CONDUCTED, institution responses are NOT_RECEIVED, formal validation is NOT_STARTED, runtime integrity is NOT_IMPLEMENTED, exact OE-01 is NOT_RUN, P1-34 hosted lanes are NOT_RUN and review UNREVIEWED, repository signing is UNSIGNED, signing handoff is BLOCKED, and external authorization is NO. The handoff authorizes neither implementation, submission, signing, timestamping, publication, nor release.";
+    out_identity->notes = "P3-02 adds one generic RFC 5869 HKDF-SHA-256 C API on additive ANOCRYPTO_C_1 while retaining all 69 ANOCRYPTO_C_0 symbols and the P1-29 compatibility baseline. AnoSecureKit SKF1 remains product-owned; only its exact 28-byte HKDF info label is retained as compatibility evidence. KCMVP is DEFERRED, P1-34 hosted lanes are NOT_RUN and UNREVIEWED, repository signing is UNSIGNED, external release authorization is NO, and no push, tag, signing, timestamping, publication, or external distribution is authorized.";
 
     return ANO_CRYPTO_OK;
 }

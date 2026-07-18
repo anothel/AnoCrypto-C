@@ -242,7 +242,7 @@ if(NOT _source_public_headers_hash STREQUAL _bundle_public_headers_hash)
     message(FATAL_ERROR "Provenance public-header manifest differs from the source tree")
 endif()
 file(SHA256
-    "${ANO_CRYPTO_SOURCE_DIR}/abi/${ANO_CRYPTO_RELEASE_ABI_LINE}_EXPORTED_SYMBOLS.txt"
+    "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt"
     _source_symbols_hash)
 file(SHA256
     "${ANO_CRYPTO_PROVENANCE_BUNDLE_DIR}/EXPORTED_SYMBOLS.txt" _bundle_symbols_hash)

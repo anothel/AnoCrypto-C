@@ -1,41 +1,31 @@
 # Current / Active / Next
 
-Status: `P3_01_COMPLETE_P3_02_SELECTED`
+Status: `P3_02_COMPLETE_P3_03_NEXT`
 
 ## DONE
 
 - P0/P1 cryptographic core and release engineering.
 - P2 local validation-readiness snapshot.
 - P3-00 downstream intake gate.
-- P3-01 import and analysis of four downstream source sets.
-- product/primitive ownership decisions and eight accepted gaps.
+- P3-01 four-source requirement consolidation and ownership decisions.
+- P3-02 minimal HKDF-SHA-256 API, additive ABI, RFC 5869 tests, OpenSSL
+  differential evidence, exact SKF1 info-byte evidence, install/PoC regression.
 
 ## ACTIVE
 
-`P3-02: HKDF-SHA-256 public C API and downstream compatibility evidence`
-
-The implementation has not started in P3-01. P3-02 must design the minimal C99
-API, add KAT/negative/differential tests, preserve `ANOCRYPTO_C_0`, introduce
-additive `ANOCRYPTO_C_1` symbols and prove the exact AnoSecureKit `SKF1` case.
+P3-02 local closeout and artifact handoff. No push, tag, signing, timestamping,
+publication, or external distribution is authorized.
 
 ## NEXT
 
-1. P3-03 AES-256-GCM one-shot.
-2. P3-04 AES-256-GCM streaming.
-3. P3-05 scrypt fixed-profile API/resource gate.
-4. AnoSecureKit Enterprise adapter parity and no-fallback evidence.
-5. PKI public-key/key-handle architecture gate.
-6. RSA/ECDSA/SHA-1 interoperability slices only after that gate.
+`P3-03: AES-256-GCM one-shot API and authenticated-output-only evidence`
 
-## DEFERRED
+P3-03 requires its own API/ABI gate. It must not be inferred from the HKDF API.
 
-- KCMVP consultation/submission;
-- Ed25519, RSA-PSS, PQC and unsupported algorithm expansion;
-- high-level PKI APIs in AnoCrypto-C;
-- production signing and external release.
+## DEFERRED / BLOCKED
 
-## BLOCKED_EXTERNAL
-
-- P1-34 actual hosted review: GitHub Actions billing;
-- hosted lanes `NOT_RUN`, review `UNREVIEWED`;
-- repository `UNSIGNED`, external release authorization `NO`.
+- KCMVP consultation/submission: `DEFERRED`.
+- P1-34 hosted lanes: `NOT_RUN`; review: `UNREVIEWED`.
+- Repository signing: `UNSIGNED`.
+- External release authorization: `NO`.
+- AnoSecureKit Community identity conflict: open downstream decision.

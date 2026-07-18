@@ -35,6 +35,7 @@ function(require_text rel needle)
 endfunction()
 
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/load_public_surface_state.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_LIVE_REHEARSAL_POLICY.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_HUMAN_REHEARSAL_HANDOFF_POLICY.cmake")
 
@@ -97,8 +98,8 @@ require_text("docs/kcmvp/KCMVP_LIVE_REHEARSAL_MINUTES_TEMPLATE.md" "Reviewer nam
 require_text("docs/kcmvp/KCMVP_REHEARSAL_OBJECTION_AND_DEFECT_REGISTER.md" "No human-review finding exists yet")
 require_text("docs/kcmvp/KCMVP_CONSULTATION_AUTHORIZATION_RECORD.md" "Institution contact authorization | `NO`")
 require_text("docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md" "| Actual hosted lanes | `NOT_RUN` |")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p3-01-downstream-requirement-consolidation")
-require_text("README.md" "0.1.0-p3-01-downstream-requirement-consolidation")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p3-02-hkdf-sha256")
+require_text("README.md" "0.1.0-p3-02-hkdf-sha256")
 
 file(READ "${ANO_CRYPTO_SOURCE_DIR}/docs/kcmvp/KCMVP_NAMED_REVIEWER_EXECUTION_GUIDE.md" _guide)
 string(REGEX MATCHALL "[|] `A-[0-9][0-9]` [|]" _agenda_rows "${_guide}")
@@ -128,8 +129,8 @@ if(NOT _manifest_count EQUAL ANO_CRYPTO_HRH_DOCUMENT_COUNT)
   list(APPEND _violations "human rehearsal handoff allowlist count drifted: ${_manifest_count}")
 endif()
 
-file(GLOB _public_headers "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/*.h")
-list(LENGTH _public_headers _header_count)
+set(_public_headers "${ANO_CRYPTO_CURRENT_PUBLIC_HEADERS}")
+set(_header_count "${ANO_CRYPTO_RETAINED_PUBLIC_HEADER_COUNT}")
 file(STRINGS "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt" _symbols)
 set(_symbol_count 0)
 foreach(_line IN LISTS _symbols)
@@ -140,7 +141,7 @@ foreach(_line IN LISTS _symbols)
 endforeach()
 if(NOT _header_count EQUAL ANO_CRYPTO_HRH_PUBLIC_HEADER_COUNT OR
    NOT _symbol_count EQUAL ANO_CRYPTO_HRH_EXPORTED_SYMBOL_COUNT OR
-   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL ANO_CRYPTO_HRH_ABI_LINE)
+   NOT ANO_CRYPTO_HRH_ABI_LINE STREQUAL "ANOCRYPTO_C_0")
   list(APPEND _violations "public ABI changed: headers=${_header_count}, symbols=${_symbol_count}, ABI=${ANO_CRYPTO_RELEASE_ABI_LINE}")
 endif()
 

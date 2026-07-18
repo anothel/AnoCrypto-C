@@ -1,34 +1,40 @@
 # P3 API and ABI Evolution Gate
 
-Status: `P3_02_ADDITIVE_ABI_APPROVED`
+Status: `P3_02_ADDITIVE_ABI_IMPLEMENTED`
 
 ## Retained baseline
 
-- public headers: 14;
-- exported symbols: 69;
-- existing ABI line: `ANOCRYPTO_C_0`.
+- retained public headers: 14;
+- retained exported symbols: 69;
+- retained ABI line: `ANOCRYPTO_C_0`;
+- retained source/ABI consumer: P1-29.
 
-P3-01 changes no public declaration or exported symbol.
+## P3-02 result
 
-## Approved P3-02 strategy
+The API review froze exactly one new function in one new header:
 
-HKDF-SHA-256 may add a new public header `include/anocrypto/ac_kdf.h` and
-additive symbols under a new symbol-version line `ANOCRYPTO_C_1`.
-`ANOCRYPTO_C_0` symbols and retained P1-29 consumers must remain unchanged.
+- `include/anocrypto/ac_kdf.h`;
+- `ano_crypto_hkdf_sha256`;
+- `ANOCRYPTO_C_1` inherits `ANOCRYPTO_C_0` and contains only that symbol.
 
-The precise function names and count are not approved by this document. P3-02
-must complete API review before implementation and update all baselines only
-after tests pass.
+Current public surface is 15 headers and 70 symbols. No `ANOCRYPTO_C_0`
+declaration or symbol was removed, renamed, or reassigned.
 
-## P3-02 required evidence
+The detailed signature and null/empty/buffer/overlap/failure rules are frozen in
+`docs/design/C99_HKDF_SHA256_API_GATE.md`.
 
-- RFC 5869 KATs and output-length limits 0, 1, 32, 8160 and 8161;
-- empty IKM/salt/info semantics;
-- no partial output and output clearing on failure;
-- integer overflow and alias rules;
-- OpenSSL test-only differential validation;
-- exact `SKF1` v1 info-byte compatibility case;
-- old/current header consumers and symbol-version inspection;
-- install/export/PoC and AnoSecureKit Enterprise adapter integration plan.
+## Evidence
 
-All later AEAD, scrypt and public-key APIs require separate numbered gates.
+- RFC 5869 cases 1, 2, and 3;
+- lengths 0, 1, 32, 8160, and rejected/cleared 8161;
+- empty IKM/salt/info;
+- null, wrapping range, alias and overlap rejection;
+- no partial output and full output clearing on accepted output ranges;
+- OpenSSL 3 test-only differential validation;
+- exact AnoSecureKit SKF1 v1 info bytes;
+- current and retained P1-29 consumers;
+- clean Release export-name and ELF symbol-version inspection;
+- install/export and PoC smoke.
+
+AEAD, scrypt, SHA-1, RSA, ECDSA, public-key architecture, and high-level product
+APIs remain outside this gate.

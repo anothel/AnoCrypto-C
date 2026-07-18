@@ -35,6 +35,7 @@ function(require_text rel needle)
 endfunction()
 
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/load_public_surface_state.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_P2_CLOSEOUT_POLICY.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_LIVE_REHEARSAL_POLICY.cmake")
 
@@ -96,8 +97,8 @@ require_text("docs/kcmvp/KCMVP_REHEARSAL_GAPS_AND_REMEDIATION.md" "| RGH-008 | P
 require_text("docs/kcmvp/KCMVP_EXTERNAL_CONSULTATION_DECISION_GATE.md" "Current decision | `CONDITIONAL_NO_GO_PENDING_NAMED_AUTHORIZATION`")
 require_text("docs/kcmvp/KCMVP_EXTERNAL_CONSULTATION_DECISION_GATE.md" "All six must be retained")
 require_text("docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md" "| Actual hosted lanes | `NOT_RUN` |")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p3-01-downstream-requirement-consolidation")
-require_text("README.md" "0.1.0-p3-01-downstream-requirement-consolidation")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p3-02-hkdf-sha256")
+require_text("README.md" "0.1.0-p3-02-hkdf-sha256")
 
 file(READ "${ANO_CRYPTO_SOURCE_DIR}/docs/kcmvp/KCMVP_INTERNAL_ASSISTED_REHEARSAL_REPORT.md" _report)
 string(REGEX MATCHALL "[|] `A-[0-9][0-9]` " _agenda_rows "${_report}")
@@ -134,8 +135,8 @@ if(NOT _manifest_count EQUAL 13)
   list(APPEND _violations "assisted rehearsal package allowlist count drifted: ${_manifest_count}")
 endif()
 
-file(GLOB _public_headers "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/*.h")
-list(LENGTH _public_headers _header_count)
+set(_public_headers "${ANO_CRYPTO_CURRENT_PUBLIC_HEADERS}")
+set(_header_count "${ANO_CRYPTO_RETAINED_PUBLIC_HEADER_COUNT}")
 file(STRINGS "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt" _symbols)
 set(_symbol_count 0)
 foreach(_line IN LISTS _symbols)
@@ -146,7 +147,7 @@ foreach(_line IN LISTS _symbols)
 endforeach()
 if(NOT _header_count EQUAL ANO_CRYPTO_LIVE_REHEARSAL_PUBLIC_HEADER_COUNT OR
    NOT _symbol_count EQUAL ANO_CRYPTO_LIVE_REHEARSAL_EXPORTED_SYMBOL_COUNT OR
-   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL ANO_CRYPTO_LIVE_REHEARSAL_ABI_LINE)
+   NOT ANO_CRYPTO_LIVE_REHEARSAL_ABI_LINE STREQUAL "ANOCRYPTO_C_0")
   list(APPEND _violations "public ABI changed: headers=${_header_count}, symbols=${_symbol_count}, ABI=${ANO_CRYPTO_RELEASE_ABI_LINE}")
 endif()
 

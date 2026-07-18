@@ -64,6 +64,18 @@ int main(void)
     }
 
     {
+        static const uint8_t ikm[] = { 'i', 'n', 's', 't', 'a', 'l', 'l' };
+        static const uint8_t info[] = { 'p', '3', '-', '0', '2' };
+        uint8_t okm[32];
+        st = ano_crypto_hkdf_sha256(ikm, sizeof(ikm), NULL, 0u, info, sizeof(info), okm, sizeof(okm));
+        if (st != ANO_CRYPTO_OK) {
+            fprintf(stderr, "HKDF-SHA-256 install smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+        (void)ano_crypto_csp_zeroize(okm, sizeof(okm));
+    }
+
+    {
         static const uint8_t msg[] = { 'a', 'b', 'c' };
         static const ano_crypto_hash_algorithm_t algorithms[] = {
             ANO_CRYPTO_HASH_ALG_SHA256,

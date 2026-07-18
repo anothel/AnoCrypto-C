@@ -302,7 +302,13 @@ P3-00 established the fail-closed intake gate and is retained as historical desi
 
 ## P3-01 product-driven requirement analysis
 
-- `check_downstream_requirement_analysis_policy.cmake`: validates four imported source sets, one recorded identity conflict, 20 accepted requirement rows, eight approved AnoCrypto-C gaps, selected P3-02 HKDF-SHA-256 work, unchanged current 14/69/`ANOCRYPTO_C_0`, and retained hosted/signing blockers.
+- `check_downstream_requirement_analysis_policy.cmake`: validates four imported source sets, one recorded identity conflict, 20 accepted requirement rows, eight approved AnoCrypto-C gaps, selected P3-02 HKDF-SHA-256 work, the frozen P3-01 14/69/`ANOCRYPTO_C_0` baseline, and retained hosted/signing blockers.
 - `create_downstream_requirement_analysis_package.cmake`: stages the 14 allowlisted status-only analysis documents and writes a SHA-256 manifest/status record.
 - `check_downstream_requirement_analysis_package.cmake`: verifies the status record, document hashes, file count and source/binary exclusion.
 - `run_downstream_requirement_analysis_package_smoke.cmake`: creates and validates the P3-01 package in one test.
+
+## P3-02 HKDF-SHA-256 additive API/ABI
+
+- `check_hkdf_sha256_policy.cmake`: validates the one-function C99 API, RFC 5869 8160-byte bound, exact AnoSecureKit `SKF1` v1 info-byte fixture, retained 69-symbol `ANOCRYPTO_C_0` line, one-symbol `ANOCRYPTO_C_1` line, current 15-header/70-symbol identity, and unchanged external blockers.
+- `check_symbol_versions.cmake`: verifies ELF default symbol versions for every retained ABI-0 name and the new HKDF ABI-1 name.
+- `load_public_surface_state.cmake`: lets retained P1/P2/P3-01 policy checks preserve their frozen snapshots while current checks validate the P3-02 additive surface.

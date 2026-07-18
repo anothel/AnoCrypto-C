@@ -33,6 +33,7 @@ endfunction()
 
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_VALIDATION_CANDIDATE.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/load_public_surface_state.cmake")
 
 foreach(_required_var IN ITEMS
         ANO_CRYPTO_VALIDATION_CANDIDATE_ID
@@ -80,23 +81,15 @@ if(NOT ANO_CRYPTO_VALIDATION_CANDIDATE_ID STREQUAL
     message(FATAL_ERROR "Frozen P2-02 candidate values have drifted")
 endif()
 
-if(NOT ANO_CRYPTO_VALIDATION_ABI_LINE STREQUAL ANO_CRYPTO_RELEASE_ABI_LINE OR
-   NOT ANO_CRYPTO_VALIDATION_SYMBOL_COUNT STREQUAL ANO_CRYPTO_RELEASE_SYMBOL_COUNT OR
-   NOT ANO_CRYPTO_VALIDATION_PUBLIC_HEADER_COUNT STREQUAL ANO_CRYPTO_RELEASE_PUBLIC_HEADER_COUNT)
-    message(FATAL_ERROR "Validation candidate and release ABI baselines disagree")
+# P2-02 remains a frozen retained candidate on ANOCRYPTO_C_0.  P3 additions
+# change the current release surface, not the historical validation snapshot.
+if(NOT ANO_CRYPTO_VALIDATION_ABI_LINE STREQUAL "ANOCRYPTO_C_0" OR
+   NOT ANO_CRYPTO_VALIDATION_SYMBOL_COUNT EQUAL ANO_CRYPTO_ABI0_SYMBOL_COUNT OR
+   NOT ANO_CRYPTO_VALIDATION_PUBLIC_HEADER_COUNT EQUAL ANO_CRYPTO_RETAINED_PUBLIC_HEADER_COUNT)
+    message(FATAL_ERROR "Frozen P2-02 validation ABI baseline has drifted")
 endif()
-
-file(GLOB _public_headers
-    "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/*.h")
-list(LENGTH _public_headers _public_header_count)
-file(STRINGS
-    "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt"
-    _symbol_lines REGEX "^[A-Za-z_][A-Za-z0-9_]*$")
-list(LENGTH _symbol_lines _symbol_count)
-if(NOT _public_header_count EQUAL 14 OR NOT _symbol_count EQUAL 69)
-    message(FATAL_ERROR
-        "P2-02 public ABI changed: headers=${_public_header_count}, symbols=${_symbol_count}")
-endif()
+set(_public_header_count "${ANO_CRYPTO_RETAINED_PUBLIC_HEADER_COUNT}")
+set(_symbol_count "${ANO_CRYPTO_ABI0_SYMBOL_COUNT}")
 
 require_text("docs/kcmvp/KCMVP_MODULE_BOUNDARY_SPEC.md"
     "AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1")

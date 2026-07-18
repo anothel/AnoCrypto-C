@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P2-03 ABI no-change review for the internally frozen self-test/integrity/state/recovery design.
+Status: P3-02 reviewed additive ABI. The retained P1-29/P3-01 surface remains unchanged on `ANOCRYPTO_C_0`; one generic HKDF-SHA-256 function is added on `ANOCRYPTO_C_1`.
 
 ## Identity
 
@@ -29,6 +29,7 @@ Status: P2-03 ABI no-change review for the internally frozen self-test/integrity
 |---|---|
 | `ac_hash.h` | SHA-256/384/512 one-shot and streaming. |
 | `ac_hmac.h` | HMAC-SHA-2 one-shot/streaming and HMAC-purpose handle path. |
+| `ac_kdf.h` | RFC 5869 HKDF-SHA-256 combined extract-and-expand; one function. |
 | `ac_drbg.h` | Explicit-entropy HMAC_DRBG-SHA-256 core. |
 | `ac_random.h` | Source-backed public random lifecycle on supported provider/process-marker branches. |
 | `ac_cipher.h` | AES-128/192/256 CBC without padding; eight functions. |
@@ -53,7 +54,9 @@ cmake --build build --target ano_crypto_public_surface_check
 cmake --build build --target ano_crypto_cmac_policy_check
 cmake --build build --target ano_crypto_cmac_hardening_policy_check
 cmake --build build --target ano_crypto_cmac_compiler_review
+cmake --build build --target ano_crypto_hkdf_sha256_policy_check
 cmake --build build --target ano_crypto_clean_release_symbol_baseline_check
+cmake --build build --target ano_crypto_symbol_version_check
 cmake --build build --target ano_crypto_poc_package_smoke
 ```
 
@@ -117,3 +120,16 @@ These checks are toolchain-specific guardrails. Calling convention, loader behav
 - `INT-HMAC-SHA256-SINGLE-SO-R1`, its metadata format, policy record, checker, and future injection tooling are internal/build-time assets and do not enter public ABI;
 - version/prerelease/build-fingerprint metadata advances to `0.1.0-p3-01-downstream-requirement-consolidation`;
 - P1-34 actual hosted review remains blocked and is not replaced by local P2-03 checks.
+
+## P3-02 HKDF-SHA-256 additive ABI review
+
+- `include/anocrypto/ac_kdf.h` is the fifteenth public header.
+- The public addition is exactly one combined extract-and-expand function: `ano_crypto_hkdf_sha256`.
+- All 69 retained names remain unchanged on `ANOCRYPTO_C_0`.
+- The new function is the only name on additive line `ANOCRYPTO_C_1`; the current total is 70.
+- No new public context, enum, key type, status code, algorithm selector, high-level format, or product workflow is added.
+- RFC 5869 empty-input behavior, 0/1/32/8160 output lengths, rejected 8161, pointer-range wrap, output/input overlap, and whole-output clearing on failure are part of the frozen API contract.
+- Input ranges may alias each other; a non-empty output range must be disjoint from every non-empty input range.
+- OpenSSL is test-only differential evidence and is not a product dependency.
+- The exact AnoSecureKit `SKF1` v1 info bytes are a compatibility fixture only; `SKF1` remains AnoSecureKit-owned.
+- P1-34 hosted execution/review, repository signing, external release authorization, and KCMVP lane remain `NOT_RUN`/`UNREVIEWED`, `UNSIGNED`, `NO`, and `DEFERRED`.

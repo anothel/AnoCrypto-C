@@ -3,6 +3,8 @@
 
 cmake_minimum_required(VERSION 3.16)
 
+include("${CMAKE_CURRENT_LIST_DIR}/../release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+
 if(NOT DEFINED ANO_CRYPTO_SOURCE_DIR)
   get_filename_component(ANO_CRYPTO_SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/.." ABSOLUTE)
 endif()
@@ -54,7 +56,7 @@ foreach(_file IN ITEMS
   require_file("${_file}")
 endforeach()
 
-require_text("include/anocrypto/ac_version.h" "0.1.0-p3-01-downstream-requirement-consolidation")
+require_text("include/anocrypto/ac_version.h" "${ANO_CRYPTO_RELEASE_VERSION}")
 require_text("include/anocrypto/ac_key.h" "ANO_CRYPTO_KEY_TYPE_CMAC = 7")
 require_text("include/anocrypto/anocrypto.h" "#include <anocrypto/ac_cmac.h>")
 require_text("include/anocrypto/ac_cmac.h" "ANO_CRYPTO_CMAC_TAG_SIZE 16u")

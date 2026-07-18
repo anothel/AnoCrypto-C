@@ -28,7 +28,7 @@ option(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS "Enable internal entropy failure-inj
 option(ANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS "Enable internal random lifecycle/reseed-limit hooks for dedicated test builds" OFF)
 option(ANO_CRYPTO_ENABLE_THREAD_SAFETY "Enable internal locks for module/self-test/CSP global state" ON)
 option(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER "Enable reviewed internal platform entropy provider where supported" ON)
-option(ANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS "Build test-only SHA-2/HMAC, AES-CBC, and AES-CMAC differential checks against OpenSSL 3.x when available" ON)
+option(ANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS "Build test-only SHA-2/HMAC, HKDF-SHA-256, AES-CBC, and AES-CMAC differential checks against OpenSSL 3.x when available" ON)
 option(ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER "Fail configuration when the test-only OpenSSL 3.x differential provider is unavailable" OFF)
 option(ANO_CRYPTO_ENABLE_SIGNING_TEST_FIXTURES "Enable ephemeral OpenSSL signing/timestamp fixtures in a Debug-only test build" OFF)
 set(ANO_CRYPTO_SANITIZER_MODE "none" CACHE STRING "Sanitizer mode: none or address-undefined")
@@ -237,6 +237,7 @@ set(ANO_CRYPTO_PUBLIC_HEADERS
     include/anocrypto/ac_selftest.h
     include/anocrypto/ac_hash.h
     include/anocrypto/ac_hmac.h
+    include/anocrypto/ac_kdf.h
     include/anocrypto/ac_drbg.h
     include/anocrypto/ac_random.h
     include/anocrypto/ac_csp.h
@@ -255,6 +256,7 @@ add_library(anocrypto_c
     src/hash/sha256.c
     src/hash/sha512.c
     src/mac/hmac.c
+    src/kdf/hkdf_sha256.c
     src/mac/cmac.c
     src/cipher/aes.c
     src/cipher/cipher.c
@@ -368,6 +370,16 @@ if(ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS AND NOT MSVC)
     target_compile_options(anocrypto_c PRIVATE -fvisibility=hidden)
 endif()
 
+set(ANO_CRYPTO_ELF_SYMBOL_VERSIONING OFF)
+if(BUILD_SHARED_LIBS AND ANO_CRYPTO_HIDE_INTERNAL_SYMBOLS AND UNIX AND NOT APPLE AND
+   CMAKE_C_COMPILER_ID MATCHES "^(GNU|Clang)$")
+    target_link_options(anocrypto_c PRIVATE
+        "-Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/abi/anocrypto_c.map")
+    set_property(TARGET anocrypto_c APPEND PROPERTY LINK_DEPENDS
+        "${CMAKE_CURRENT_SOURCE_DIR}/abi/anocrypto_c.map")
+    set(ANO_CRYPTO_ELF_SYMBOL_VERSIONING ON)
+endif()
+
 unset(ANO_CRYPTO_SYMBOL_TOOL)
 unset(ANO_CRYPTO_SYMBOL_TOOL CACHE)
 set(ANO_CRYPTO_SYMBOL_STYLE "")
@@ -476,19 +488,36 @@ if(BUILD_SHARED_LIBS AND ANO_CRYPTO_SYMBOL_TOOL)
     add_custom_target(ano_crypto_exported_symbol_baseline_check
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_LIBRARY_FILE=$<TARGET_FILE:anocrypto_c>
-            -DANO_CRYPTO_SYMBOL_BASELINE=${CMAKE_CURRENT_SOURCE_DIR}/abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt
+            -DANO_CRYPTO_SYMBOL_BASELINE=${CMAKE_CURRENT_SOURCE_DIR}/abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt
             -DANO_CRYPTO_SYMBOL_TOOL=${ANO_CRYPTO_SYMBOL_TOOL}
             -DANO_CRYPTO_SYMBOL_STYLE=${ANO_CRYPTO_SYMBOL_STYLE}
             -DANO_CRYPTO_SYMBOL_REPORT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/EXPORTED_SYMBOL_BASELINE_CHECK.txt
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_exported_symbols.cmake
         DEPENDS anocrypto_c
         USES_TERMINAL
-        COMMENT "Comparing clean shared-library exports with the AnoCrypto-C ABI-0 baseline")
+        COMMENT "Comparing clean shared-library exports with the current additive ABI baseline")
 else()
     add_custom_target(ano_crypto_exported_symbol_baseline_check
         COMMAND ${CMAKE_COMMAND} -E echo "No supported exported-symbol tool is configured for this shared-library build"
         COMMAND ${CMAKE_COMMAND} -E false
         COMMENT "Exported-symbol baseline check unavailable")
+endif()
+
+if(ANO_CRYPTO_ELF_SYMBOL_VERSIONING AND ANO_CRYPTO_READELF_TOOL)
+    add_custom_target(ano_crypto_symbol_version_check
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_LIBRARY_FILE=$<TARGET_FILE:anocrypto_c>
+            -DANO_CRYPTO_READELF=${ANO_CRYPTO_READELF_TOOL}
+            -DANO_CRYPTO_ABI0_BASELINE=${CMAKE_CURRENT_SOURCE_DIR}/abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt
+            -DANO_CRYPTO_ABI1_BASELINE=${CMAKE_CURRENT_SOURCE_DIR}/abi/ANOCRYPTO_C_1_EXPORTED_SYMBOLS.txt
+            -DANO_CRYPTO_SYMBOL_VERSION_REPORT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/SYMBOL_VERSION_CHECK.txt
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_symbol_versions.cmake
+        DEPENDS anocrypto_c
+        USES_TERMINAL
+        COMMENT "Checking ANOCRYPTO_C_0 retention and ANOCRYPTO_C_1 additive symbol versions")
+else()
+    add_custom_target(ano_crypto_symbol_version_check
+        COMMAND ${CMAKE_COMMAND} -E echo "ELF symbol-version inspection is not available for this build")
 endif()
 
 add_custom_target(ano_crypto_clean_release_symbol_baseline_check
@@ -520,7 +549,7 @@ add_custom_target(ano_crypto_release_compatibility_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_compatibility.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Checking P3-01 release identity and retained P1-29 public source/ABI compatibility")
+    COMMENT "Checking P3-02 release identity and retained P1-29 public source/ABI compatibility")
 
 add_custom_target(ano_crypto_release_provenance_policy_check
     COMMAND ${CMAKE_COMMAND}
@@ -530,7 +559,7 @@ add_custom_target(ano_crypto_release_provenance_policy_check
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_provenance_policy.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Checking P3-01 retained unsigned release provenance, source SBOM, and signing boundary")
+    COMMENT "Checking P3-02 retained unsigned release provenance, source SBOM, and signing boundary")
 
 add_custom_target(ano_crypto_tagged_release_compatibility_smoke
     COMMAND ${CMAKE_COMMAND} -E env
@@ -547,7 +576,7 @@ add_custom_target(ano_crypto_tagged_release_compatibility_smoke
         -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_tagged_release_compatibility_smoke.cmake
     USES_TERMINAL
     VERBATIM
-    COMMENT "Building installed P3-01 package and running current/P1-29 header compatibility consumers")
+    COMMENT "Building installed P3-02 package and running current/P1-29 header compatibility consumers")
 
 add_custom_target(ano_crypto_public_surface_check
     COMMAND ${CMAKE_COMMAND}
@@ -838,6 +867,14 @@ add_custom_target(ano_crypto_downstream_requirement_analysis_package_smoke
     VERBATIM
     COMMENT "Creating and checking the P3-01 status-only downstream requirement analysis package")
 
+add_custom_target(ano_crypto_hkdf_sha256_policy_check
+    COMMAND ${CMAKE_COMMAND}
+        -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+        -DANO_CRYPTO_HKDF_POLICY_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/HKDF_SHA256_POLICY_CHECK.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_hkdf_sha256_policy.cmake
+    VERBATIM
+    COMMENT "Checking P3-02 HKDF-SHA-256 API, additive ABI, compatibility, and blocker policy")
+
 if(ANO_CRYPTO_BUILD_EXAMPLES)
     add_subdirectory(examples/core_poc)
 endif()
@@ -1077,6 +1114,14 @@ if(ANO_CRYPTO_BUILD_TESTS)
     set_tests_properties(ano_crypto_downstream_requirement_analysis_package_tests PROPERTIES
         LABELS "product;p3;downstream;requirements;package;policy")
 
+    add_test(NAME ano_crypto_hkdf_sha256_policy_tests
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+            -DANO_CRYPTO_HKDF_POLICY_CHECK_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/policy-check/HKDF_SHA256_POLICY_CHECK.txt
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_hkdf_sha256_policy.cmake)
+    set_tests_properties(ano_crypto_hkdf_sha256_policy_tests PROPERTIES
+        LABELS "product;p3;hkdf;abi;compatibility;policy")
+
     add_executable(ano_crypto_service_gate_negative_tests
         tests/negative/crypto_service_gate_tests.c)
     target_link_libraries(ano_crypto_service_gate_negative_tests PRIVATE anocrypto_c)
@@ -1118,6 +1163,18 @@ if(ANO_CRYPTO_BUILD_TESTS)
     target_link_libraries(ano_crypto_hash_hmac_api_negative_tests PRIVATE anocrypto_c)
 
     add_test(NAME ano_crypto_hash_hmac_api_negative_tests COMMAND ano_crypto_hash_hmac_api_negative_tests)
+
+    add_executable(ano_crypto_hkdf_sha256_kat_tests
+        tests/kat/hkdf_sha256_kat_tests.c)
+    target_link_libraries(ano_crypto_hkdf_sha256_kat_tests PRIVATE anocrypto_c)
+    add_test(NAME ano_crypto_hkdf_sha256_kat_tests COMMAND ano_crypto_hkdf_sha256_kat_tests)
+    set_tests_properties(ano_crypto_hkdf_sha256_kat_tests PROPERTIES LABELS "kat;hkdf;sha256;rfc5869;skf1")
+
+    add_executable(ano_crypto_hkdf_sha256_api_negative_tests
+        tests/negative/hkdf_sha256_api_negative_tests.c)
+    target_link_libraries(ano_crypto_hkdf_sha256_api_negative_tests PRIVATE anocrypto_c)
+    add_test(NAME ano_crypto_hkdf_sha256_api_negative_tests COMMAND ano_crypto_hkdf_sha256_api_negative_tests)
+    set_tests_properties(ano_crypto_hkdf_sha256_api_negative_tests PROPERTIES LABELS "negative;hkdf;sha256;boundary")
 
     add_executable(ano_crypto_aes_cbc_kat_tests
         tests/kat/aes_cbc_kat_tests.c)
@@ -1206,6 +1263,15 @@ if(ANO_CRYPTO_BUILD_TESTS)
                 COMMAND ano_crypto_sha2_hmac_openssl_differential_tests)
             set_tests_properties(ano_crypto_sha2_hmac_openssl_differential_tests PROPERTIES
                 LABELS "differential;sha2;hmac;sha512-family")
+            add_executable(ano_crypto_hkdf_sha256_openssl_differential_tests
+                tests/differential/hkdf_sha256_openssl_differential_tests.c)
+            target_link_libraries(ano_crypto_hkdf_sha256_openssl_differential_tests PRIVATE
+                anocrypto_c
+                OpenSSL::Crypto)
+            add_test(NAME ano_crypto_hkdf_sha256_openssl_differential_tests
+                COMMAND ano_crypto_hkdf_sha256_openssl_differential_tests)
+            set_tests_properties(ano_crypto_hkdf_sha256_openssl_differential_tests PROPERTIES
+                LABELS "differential;hkdf;sha256;openssl")
             add_executable(ano_crypto_aes_cbc_openssl_differential_tests
                 tests/differential/aes_cbc_openssl_differential_tests.c)
             target_link_libraries(ano_crypto_aes_cbc_openssl_differential_tests PRIVATE
@@ -1224,7 +1290,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
                 COMMAND ano_crypto_aes_cmac_openssl_differential_tests)
             set_tests_properties(ano_crypto_aes_cmac_openssl_differential_tests PROPERTIES
                 LABELS "differential;aes;cmac")
-            message(STATUS "OpenSSL ${OPENSSL_VERSION} selected for test-only SHA-2/HMAC, AES-CBC, and AES-CMAC differential validation")
+            message(STATUS "OpenSSL ${OPENSSL_VERSION} selected for test-only SHA-2/HMAC, HKDF-SHA-256, AES-CBC, and AES-CMAC differential validation")
         elseif(ANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER)
             message(FATAL_ERROR "OpenSSL 3.x Crypto was required for differential validation but was not found")
         else()
@@ -1448,7 +1514,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
     add_executable(ano_crypto_current_header_compatibility_tests
         tests/compat/p1_29_compatibility_probe.c)
     target_compile_definitions(ano_crypto_current_header_compatibility_tests PRIVATE
-        ANO_CRYPTO_COMPAT_HEADER_MODE="current-p3-01"
+        ANO_CRYPTO_COMPAT_HEADER_MODE="current-p3-02"
         ANO_CRYPTO_EXPECT_CURRENT_HEADER=1
         ANO_CRYPTO_EXPECT_RUNTIME_VERSION="${ANO_CRYPTO_RELEASE_VERSION}")
     target_link_libraries(ano_crypto_current_header_compatibility_tests PRIVATE anocrypto_c)
@@ -1557,6 +1623,8 @@ if(ANO_CRYPTO_BUILD_TESTS)
         ano_crypto_hmac_drbg_boundary_tests
         ano_crypto_hmac_key_handle_kat_tests
         ano_crypto_hash_hmac_api_negative_tests
+        ano_crypto_hkdf_sha256_kat_tests
+        ano_crypto_hkdf_sha256_api_negative_tests
         ano_crypto_aes_cbc_kat_tests
         ano_crypto_cipher_api_negative_tests
         ano_crypto_aes_cmac_kat_tests
@@ -1596,6 +1664,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
 
     foreach(_optional_evidence_test_target IN ITEMS
         ano_crypto_sha2_hmac_openssl_differential_tests
+        ano_crypto_hkdf_sha256_openssl_differential_tests
         ano_crypto_aes_cbc_openssl_differential_tests
         ano_crypto_aes_cmac_openssl_differential_tests
         anocrypto_c_core_poc
@@ -1608,21 +1677,46 @@ if(ANO_CRYPTO_BUILD_TESTS)
         endif()
     endforeach()
 
-    # Run the complete configured CTest set in an independent custom target.
-    # Separating this process from evidence assembly avoids recursive Make/Ninja
-    # runner state leaking into later status-only review programs.
+    # Run the complete configured CTest set as bounded direct child commands.
+    # Avoid wrapping CTest in CMake execute_process(): release-provenance tests
+    # create nested build processes and can keep inherited descriptors alive
+    # after the test itself exits.  Six non-overlapping ranges cover 1..76.
+    set(_ano_crypto_ctest_evidence_dir "${CMAKE_CURRENT_BINARY_DIR}/ctest-evidence")
     add_custom_target(ano_crypto_ctest_evidence
-        COMMAND ${CMAKE_COMMAND} -E env
-            --unset=MAKEFLAGS
-            --unset=MFLAGS
-            --unset=MAKELEVEL
-            ${CMAKE_COMMAND}
-            -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_CTEST_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/ctest-evidence
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${_ano_crypto_ctest_evidence_dir}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${_ano_crypto_ctest_evidence_dir}"
+        COMMAND ${CMAKE_COMMAND} -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
+            ${CMAKE_CTEST_COMMAND} --quiet --output-on-failure --timeout 180 -j 2 -I 1,20
+            --build-config $<CONFIG>
+            --output-log "${_ano_crypto_ctest_evidence_dir}/ctest-1_20.log"
+        COMMAND ${CMAKE_COMMAND} -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
+            ${CMAKE_CTEST_COMMAND} --quiet --output-on-failure --timeout 180 -j 2 -I 21,44
+            --build-config $<CONFIG>
+            --output-log "${_ano_crypto_ctest_evidence_dir}/ctest-21_44.log"
+        COMMAND ${CMAKE_COMMAND} -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
+            ${CMAKE_CTEST_COMMAND} --quiet --output-on-failure --timeout 180 -j 2 -I 45,68
+            --build-config $<CONFIG>
+            --output-log "${_ano_crypto_ctest_evidence_dir}/ctest-45_68.log"
+        COMMAND ${CMAKE_COMMAND} -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
+            ${CMAKE_CTEST_COMMAND} --quiet --output-on-failure --timeout 180 -j 1 -I 69,69
+            --build-config $<CONFIG>
+            --output-log "${_ano_crypto_ctest_evidence_dir}/ctest-69_69.log"
+        COMMAND ${CMAKE_COMMAND} -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
+            ${CMAKE_CTEST_COMMAND} --quiet --output-on-failure --timeout 180 -j 1 -I 70,70
+            --build-config $<CONFIG>
+            --output-log "${_ano_crypto_ctest_evidence_dir}/ctest-70_70.log"
+        COMMAND ${CMAKE_COMMAND} -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
+            ${CMAKE_CTEST_COMMAND} --quiet --output-on-failure --timeout 180 -j 1 -I 71,76
+            --build-config $<CONFIG>
+            --output-log "${_ano_crypto_ctest_evidence_dir}/ctest-71_76.log"
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_CTEST_EVIDENCE_DIR=${_ano_crypto_ctest_evidence_dir}
             -DANO_CRYPTO_BUILD_CONFIG=$<CONFIG>
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/run_ctest_evidence.cmake
+        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
         USES_TERMINAL
-        COMMENT "Capturing AnoCrypto-C P3-01 CTest evidence")
+        VERBATIM
+        COMMENT "Capturing AnoCrypto-C P3-02 CTest evidence")
     add_dependencies(ano_crypto_ctest_evidence ${_ano_crypto_evidence_test_targets})
 
     # Serialize nested build trees before CTest. Direct sibling dependencies can
@@ -1653,7 +1747,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/prepare_release_provenance_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Preparing verified unsigned P3-01 release provenance evidence")
+        COMMENT "Preparing verified unsigned P3-02 release provenance evidence")
     add_dependencies(ano_crypto_release_provenance_evidence
         ano_crypto_ctest_evidence)
 
@@ -1671,7 +1765,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/check_release_signing_handoff.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Creating and checking the key-free P3-01 retained offline-signing handoff")
+        COMMENT "Creating and checking the key-free P3-02 retained offline-signing handoff")
     add_dependencies(ano_crypto_release_signing_handoff_evidence
         ano_crypto_release_provenance_evidence)
 
@@ -1691,7 +1785,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
             ${CMAKE_COMMAND}
             -DANO_CRYPTO_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p3-01
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p3-02
             -DANO_CRYPTO_PREPARED_PROVENANCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-provenance-evidence
             -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_DIR=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff
             -DANO_CRYPTO_PREPARED_SIGNING_HANDOFF_CHECK=${CMAKE_CURRENT_BINARY_DIR}/release-signing-handoff-check.txt
@@ -1730,25 +1824,26 @@ if(ANO_CRYPTO_BUILD_TESTS)
             -DANO_CRYPTO_RUN_HUMAN_REHEARSAL_HANDOFF_CHECK=ON
             -DANO_CRYPTO_RUN_CONSULTATION_CONTACT_READINESS_CHECK=ON
             -DANO_CRYPTO_RUN_DOWNSTREAM_REQUIREMENT_ANALYSIS_CHECK=ON
+            -DANO_CRYPTO_RUN_HKDF_SHA256_CHECK=ON
             -DANO_CRYPTO_RUN_ZEROIZATION_COMPILER_REVIEW=ON
             -DANO_CRYPTO_RUN_SECURE_CODING_COMPILER_REVIEW=ON
             -DANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK=ON
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/collect_release_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Preparing hash-bound P3-01 status evidence")
+        COMMENT "Preparing hash-bound P3-02 status evidence")
     add_dependencies(ano_crypto_prepare_release_status_evidence
         ano_crypto_release_signing_handoff_evidence)
 
     add_custom_target(ano_crypto_collect_release_evidence
         COMMAND ${CMAKE_COMMAND}
             -DANO_CRYPTO_BUILD_DIR=${CMAKE_CURRENT_BINARY_DIR}
-            -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p3-01
-            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p3-01
+            -DANO_CRYPTO_PREPARED_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/prepared-release-evidence/p3-02
+            -DANO_CRYPTO_EVIDENCE_DIR=${CMAKE_CURRENT_BINARY_DIR}/evidence/p3-02
             -P ${CMAKE_CURRENT_SOURCE_DIR}/tools/assemble_release_evidence.cmake
         USES_TERMINAL
         VERBATIM
-        COMMENT "Assembling AnoCrypto-C P3-01 evidence from prepared artifacts")
+        COMMENT "Assembling AnoCrypto-C P3-02 evidence from prepared artifacts")
     add_dependencies(ano_crypto_collect_release_evidence
         ano_crypto_prepare_release_status_evidence)
 endif()

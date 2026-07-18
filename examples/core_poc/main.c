@@ -139,6 +139,25 @@ static int run_hmac_key_handle_smoke(void)
     return 0;
 }
 
+static int run_hkdf_smoke(void)
+{
+    static const uint8_t ikm[] = { 'A', 'n', 'o', 'C', 'r', 'y', 'p', 't', 'o', '-', 'C' };
+    static const uint8_t salt[] = { 'p', 'u', 'b', 'l', 'i', 'c', '-', 'p', 'o', 'c' };
+    static const uint8_t info[] = { 'h', 'k', 'd', 'f', '-', 's', 'h', 'a', '2', '5', '6' };
+    uint8_t okm[32];
+    ano_crypto_status_t status;
+
+    status = ano_crypto_hkdf_sha256(ikm, sizeof(ikm), salt, sizeof(salt),
+                                    info, sizeof(info), okm, sizeof(okm));
+    if (status != ANO_CRYPTO_OK) {
+        (void)ano_crypto_csp_zeroize(okm, sizeof(okm));
+        return fail_status("HKDF-SHA-256", status);
+    }
+    (void)ano_crypto_csp_zeroize(okm, sizeof(okm));
+    printf("- HKDF-SHA-256 smoke: PASS (32 bytes derived; output not printed)\n");
+    return 0;
+}
+
 static int run_drbg_smoke(void)
 {
     uint8_t entropy[ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_ENTROPY_INPUT_SIZE];
@@ -446,6 +465,8 @@ int main(void)
     if (run_hash_smoke() != 0) {
         result = 1;
     } else if (run_hmac_key_handle_smoke() != 0) {
+        result = 1;
+    } else if (run_hkdf_smoke() != 0) {
         result = 1;
     } else if (run_drbg_smoke() != 0) {
         result = 1;

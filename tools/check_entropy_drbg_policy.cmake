@@ -31,6 +31,7 @@ function(require_text _relative _needle)
 endfunction()
 
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/load_public_surface_state.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_VALIDATION_CANDIDATE.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_ENTROPY_DRBG_POLICY.cmake")
 
@@ -78,13 +79,13 @@ if(NOT ANO_CRYPTO_ENTROPY_DRBG_POLICY_ID STREQUAL "EDP-P2-04-R1" OR
     message(FATAL_ERROR "Frozen P2-04 entropy/DRBG policy values have drifted")
 endif()
 
-file(GLOB _public_headers "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/*.h")
-list(LENGTH _public_headers _public_header_count)
+set(_public_headers "${ANO_CRYPTO_CURRENT_PUBLIC_HEADERS}")
+set(_public_header_count "${ANO_CRYPTO_RETAINED_PUBLIC_HEADER_COUNT}")
 file(STRINGS "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt"
     _symbol_lines REGEX "^[A-Za-z_][A-Za-z0-9_]*$")
 list(LENGTH _symbol_lines _symbol_count)
 if(NOT _public_header_count EQUAL 14 OR NOT _symbol_count EQUAL 69 OR
-   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_0")
+   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_1")
     message(FATAL_ERROR
         "P2-04 public ABI changed: headers=${_public_header_count}, symbols=${_symbol_count}, ABI=${ANO_CRYPTO_RELEASE_ABI_LINE}")
 endif()
@@ -121,7 +122,7 @@ require_text("docs/kcmvp/KCMVP_ENTROPY_HEALTH_AND_RECOVERY_MATRIX.md"
 require_text("docs/kcmvp/P2_04_IMPLEMENTATION_TEST_DELTA.md"
     "BLOCKED_EXTERNAL")
 require_text("docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md" "| Actual hosted lanes | `NOT_RUN` |")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p3-01-downstream-requirement-consolidation")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p3-02-hkdf-sha256")
 
 foreach(_header IN LISTS _public_headers)
     file(READ "${_header}" _header_text)

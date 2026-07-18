@@ -31,7 +31,7 @@ endforeach()
 if(NOT ANO_CRYPTO_RELEASE_PROVENANCE_SCHEMA STREQUAL "1" OR
    NOT ANO_CRYPTO_RELEASE_SBOM_FORMAT STREQUAL "SPDX-2.3-JSON" OR
    NOT ANO_CRYPTO_RELEASE_SIGNING_MODE STREQUAL "UNSIGNED")
-    message(FATAL_ERROR "Unexpected P3-01 release provenance identity policy")
+    message(FATAL_ERROR "Unexpected current release provenance identity policy")
 endif()
 
 set(_required_files
@@ -110,7 +110,7 @@ _ano_require_text("tools/create_poc_package.cmake"
     "The internal source archive and source SBOM are not included")
 _ano_require_text("docs/kcmvp/SBOM_SIGNING_PLAN.md" "SPDX 2.3 JSON source inventory")
 _ano_require_text("docs/release/RELEASE_PROVENANCE_AND_SIGNING_POLICY.md"
-    "Status: P2-03 unsigned engineering policy retaining P1-33 controls")
+    "Status: P3-02 unsigned engineering policy retaining P1-33 controls")
 _ano_require_text("docs/release/RELEASE_PROVENANCE_AND_SIGNING_POLICY.md"
     "External release authorized: NO")
 _ano_require_text("docs/ci/RELEASE_PROVENANCE_CI_CHECKLIST.md"
@@ -206,7 +206,7 @@ endif()
 
 string(TIMESTAMP _checked_utc "%Y-%m-%dT%H:%M:%SZ" UTC)
 file(WRITE "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}"
-    "AnoCrypto-C P3-01 release provenance policy check\n"
+    "AnoCrypto-C P3-02 release provenance policy check\n"
     "Checked UTC: ${_checked_utc}\n"
     "Release version: ${ANO_CRYPTO_RELEASE_VERSION}\n"
     "Provenance schema: ${ANO_CRYPTO_RELEASE_PROVENANCE_SCHEMA}\n"
@@ -231,4 +231,4 @@ file(WRITE "${ANO_CRYPTO_RELEASE_PROVENANCE_CHECK_OUTPUT}"
     "External release authorization: NO\n"
     "Result: PASS\n")
 
-message(STATUS "AnoCrypto-C P3-01 release provenance policy check passed")
+message(STATUS "AnoCrypto-C P3-02 release provenance policy check passed")

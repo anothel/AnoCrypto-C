@@ -9,7 +9,7 @@
 #define ANO_CRYPTO_COMPAT_HEADER_MODE "unspecified"
 #endif
 #ifndef ANO_CRYPTO_EXPECT_RUNTIME_VERSION
-#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p3-01-downstream-requirement-consolidation"
+#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p3-02-hkdf-sha256"
 #endif
 
 #define ANO_COMPAT_JOIN_INNER(a, b) a##b
@@ -298,6 +298,17 @@ static unsigned int bind_p1_29_public_surface(void)
     return count;
 }
 
+#if defined(ANO_CRYPTO_EXPECT_CURRENT_HEADER)
+static unsigned int bind_p3_02_additive_surface(void)
+{
+    unsigned int count = 0u;
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_hkdf_sha256,
+                    (const uint8_t *, size_t, const uint8_t *, size_t,
+                     const uint8_t *, size_t, uint8_t *, size_t));
+    return count;
+}
+#endif
+
 static int check_build_identity_layout(void)
 {
     ano_crypto_build_identity_t identity;
@@ -329,9 +340,16 @@ int main(void)
     unsigned int symbol_count;
 
     symbol_count = bind_p1_29_public_surface();
+#if defined(ANO_CRYPTO_EXPECT_CURRENT_HEADER)
+    symbol_count += bind_p3_02_additive_surface();
+    if (symbol_count != 70u) {
+        return 1;
+    }
+#else
     if (symbol_count != 69u) {
         return 1;
     }
+#endif
 
 #if defined(ANO_CRYPTO_EXPECT_P1_29_HEADER_SNAPSHOT)
     if (strcmp(ANO_CRYPTO_VERSION_STRING, "0.1.0-p1-29-cmac-hardening") != 0) {
@@ -366,6 +384,17 @@ int main(void)
         (void)ano_crypto_module_shutdown();
         return 7;
     }
+#if defined(ANO_CRYPTO_EXPECT_CURRENT_HEADER)
+    {
+        static const uint8_t ikm[] = { 'i', 'k', 'm' };
+        uint8_t okm[16];
+        if (ANO_CRYPTO_HKDF_SHA256_MAX_OUTPUT_SIZE != 8160u ||
+            ano_crypto_hkdf_sha256(ikm, sizeof(ikm), NULL, 0u, NULL, 0u, okm, sizeof(okm)) != ANO_CRYPTO_OK) {
+            (void)ano_crypto_module_shutdown();
+            return 8;
+        }
+    }
+#endif
     if (ano_crypto_module_shutdown() != ANO_CRYPTO_OK) {
         return 8;
     }

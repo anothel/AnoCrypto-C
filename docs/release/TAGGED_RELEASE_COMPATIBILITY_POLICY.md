@@ -1,22 +1,22 @@
 # Tagged Release Compatibility Policy
 
-Status: P1-33 engineering policy. This document does not establish universal ABI compatibility or release provenance by itself.
+Status: P3-02 additive-ABI engineering policy. This document does not establish universal ABI compatibility or release provenance by itself.
 
 ## Purpose
 
-P1-33 retains a project-owned compatibility input from `0.1.0-p1-29-cmac-hardening` and checks the next engineering slice without adding public cryptographic services. The policy covers release identity consistency, the retained public C surface, installed-package consumption, isolated synthetic tag rehearsal, and status-only hosted artifacts.
+P3-02 retains the project-owned `0.1.0-p1-29-cmac-hardening` compatibility input while adding one reviewed generic HKDF-SHA-256 function on a new additive ABI line. The policy covers release identity consistency, the unchanged retained C surface, the additive header and symbol, installed-package consumption, isolated synthetic tag rehearsal, and status-only hosted artifacts.
 
 ## Reviewed identity
 
 The authoritative engineering metadata is `release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake`:
 
 - package version: `0.1.0`
-- engineering version: `0.1.0-p3-01-downstream-requirement-consolidation`
-- expected tag metadata: `v0.1.0-p3-01-downstream-requirement-consolidation`
-- ABI line: `ANOCRYPTO_C_0`
+- engineering version: `0.1.0-p3-02-hkdf-sha256`
+- expected tag metadata: `v0.1.0-p3-02-hkdf-sha256`
+- current ABI line: `ANOCRYPTO_C_1`
 - retained baseline: `0.1.0-p1-29-cmac-hardening`
-- public headers: 14
-- public exports: 69
+- retained/current public headers: 14 / 15
+- retained `ANOCRYPTO_C_0` / current total exports: 69 / 70
 - CMake package compatibility: `SameMinorVersion`
 
 The expected tag is metadata until a Git-backed check proves that the tag, supplied commit, and checked-out `HEAD` identify one commit. Tag existence, signer identity, and release authorization remain separate reviews.
@@ -32,16 +32,16 @@ Baseline updates are not automatic. A later intentional public API or ABI change
 `ano_crypto_release_compatibility_policy_check` verifies:
 
 - central release metadata and current version macros agree;
-- the baseline and current public-header hash manifests contain 14 canonical-LF text hashes, independent of checkout/archive line endings;
-- normalized public function declarations, public types, and non-version constants match P1-29;
-- both stored exported-symbol lists contain the same 69 names;
+- the retained baseline manifest contains 14 canonical-LF header hashes and the current manifest contains 15;
+- normalized declarations, public types, and non-version constants for the retained 14 headers match P1-29;
+- `ANOCRYPTO_C_0` still contains the same 69 names, while the current manifest contains exactly 70 and `ANOCRYPTO_C_1` contains only `ano_crypto_hkdf_sha256`;
 - package compatibility generation uses the reviewed policy;
 - release/evidence/CI identity strings are coherent.
 
 `ano_crypto_tagged_release_compatibility_smoke` additionally builds a clean installed package and runs:
 
-- a P1-33-header/P1-33-library consumer;
-- a P1-29-header/P1-33-library consumer that binds all 69 public functions;
+- a P3-02-header/P3-02-library consumer that binds all 70 public functions and exercises HKDF;
+- a P1-29-header/P3-02-library consumer that binds all 69 retained public functions;
 - an exact `find_package(AnoCryptoC 0.1.0 EXACT)` probe;
 - a negative request confirming the 0.1.x package does not satisfy `0.2.0`.
 
@@ -59,7 +59,7 @@ Opaque caller-owned contexts must always be sized through the loaded library and
 
 ## Clean tagged-release rehearsal
 
-The P1-33 rehearsal uses an isolated clean clone or equivalent temporary Git repository. A synthetic local tag may be created there only. The user repository is not tagged or modified.
+The P3-02 rehearsal uses an isolated clean clone or equivalent temporary Git repository. A synthetic local tag may be created there only. The user repository is not tagged or modified.
 
 The rehearsal must prove that the expected tag, supplied commit, tag-resolved commit, and checked-out `HEAD` identify one commit and that the checkout is clean. Dirty worktrees, a moved tag, a moved `HEAD`, ref mismatch, or commit mismatch fail closed. A successful rehearsal is local procedure evidence; it is not proof that an actual release tag exists, is signed, or is authorized.
 
