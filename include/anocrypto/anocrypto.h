@@ -11,6 +11,7 @@
 #include <anocrypto/ac_hash.h>
 #include <anocrypto/ac_hmac.h>
 #include <anocrypto/ac_kdf.h>
+#include <anocrypto/ac_aead.h>
 #include <anocrypto/ac_drbg.h>
 #include <anocrypto/ac_random.h>
 #include <anocrypto/ac_csp.h>

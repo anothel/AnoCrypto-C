@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p3-02-hkdf-sha256"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p3-03-aes256-gcm-oneshot"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P3-02 adds one generic RFC 5869 HKDF-SHA-256 C API on additive ANOCRYPTO_C_1 while retaining all 69 ANOCRYPTO_C_0 symbols and the P1-29 compatibility baseline. AnoSecureKit SKF1 remains product-owned; only its exact 28-byte HKDF info label is retained as compatibility evidence. KCMVP is DEFERRED, P1-34 hosted lanes are NOT_RUN and UNREVIEWED, repository signing is UNSIGNED, external release authorization is NO, and no push, tag, signing, timestamping, publication, or external distribution is authorized.";
+    out_identity->notes = "P3-03 adds a generic AES-256-GCM one-shot C API with authenticated-output-only decryption on additive ANOCRYPTO_C_2, while retaining all 69 ANOCRYPTO_C_0 symbols, the ANOCRYPTO_C_1 HKDF symbol, and the P1-29 compatibility baseline. AnoSecureKit SKT1, SKF1, and SKP1 formats remain product-owned; exact v1 primitive fixtures are compatibility evidence only. KCMVP is DEFERRED, P1-34 hosted lanes are NOT_RUN and UNREVIEWED, repository signing is UNSIGNED, external release authorization is NO, and no push, tag, signing, timestamping, publication, or external distribution is authorized.";
 
     return ANO_CRYPTO_OK;
 }

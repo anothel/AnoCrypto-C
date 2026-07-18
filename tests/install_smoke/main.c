@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <anocrypto/anocrypto.h>
 
 int main(void)
@@ -73,6 +74,51 @@ int main(void)
             return 1;
         }
         (void)ano_crypto_csp_zeroize(okm, sizeof(okm));
+    }
+
+    {
+        static const uint8_t key[ANO_CRYPTO_AES256_GCM_KEY_SIZE] = { 0u };
+        static const uint8_t nonce[ANO_CRYPTO_AES256_GCM_NONCE_SIZE] = { 0u };
+        static const uint8_t message[] = { 'i', 'n', 's', 't', 'a', 'l', 'l', '-', 'g', 'c', 'm' };
+        ano_crypto_csp_handle_t handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+        uint8_t ciphertext[sizeof(message)];
+        uint8_t recovered[sizeof(message)];
+        uint8_t tag[ANO_CRYPTO_AES256_GCM_TAG_SIZE];
+        size_t written = 0u;
+
+        st = ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER,
+                                          key, sizeof(key), ANO_CRYPTO_KEY_FLAG_NONE,
+                                          &handle);
+        if (st != ANO_CRYPTO_OK || handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
+            fprintf(stderr, "AES-256-GCM key import smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+        st = ano_crypto_aes256_gcm_encrypt(handle, nonce, sizeof(nonce),
+                                            NULL, 0u, message, sizeof(message),
+                                            ciphertext, sizeof(ciphertext), &written,
+                                            tag, sizeof(tag));
+        if (st != ANO_CRYPTO_OK || written != sizeof(message)) {
+            (void)ano_crypto_key_destroy(handle);
+            fprintf(stderr, "AES-256-GCM encrypt smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+        st = ano_crypto_aes256_gcm_decrypt(handle, nonce, sizeof(nonce),
+                                            NULL, 0u, ciphertext, sizeof(ciphertext),
+                                            tag, sizeof(tag), recovered, sizeof(recovered),
+                                            &written);
+        if (st != ANO_CRYPTO_OK || written != sizeof(message) ||
+            memcmp(recovered, message, sizeof(message)) != 0) {
+            (void)ano_crypto_key_destroy(handle);
+            fprintf(stderr, "AES-256-GCM decrypt smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+        (void)ano_crypto_csp_zeroize(ciphertext, sizeof(ciphertext));
+        (void)ano_crypto_csp_zeroize(recovered, sizeof(recovered));
+        (void)ano_crypto_csp_zeroize(tag, sizeof(tag));
+        st = ano_crypto_key_destroy(handle);
+        if (st != ANO_CRYPTO_OK) {
+            return 1;
+        }
     }
 
     {

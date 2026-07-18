@@ -1,16 +1,19 @@
 # AnoCrypto-C Capability Gap Register
 
-Status: `8_GAPS_APPROVED_HKDF_SATISFIED`
+Status: `8_GAPS_APPROVED_HKDF_AND_GCM_ONESHOT_SATISFIED`
+
+Retained P3-01/P3-02 policy token: `8_GAPS_APPROVED_HKDF_SATISFIED`.
 
 ## Retained baseline
 
-The current source exposes 15 headers and 70 symbols. All 69 retained symbols remain on
-`ANOCRYPTO_C_0`; the single HKDF symbol is additive on `ANOCRYPTO_C_1`.
+The current source exposes 16 headers and 72 symbols. All 69 retained symbols remain on
+`ANOCRYPTO_C_0`; HKDF remains on `ANOCRYPTO_C_1`; two one-shot AES-256-GCM
+symbols are additive on `ANOCRYPTO_C_2`.
 
 | Gap ID | Requirement authority | Minimal capability | API/ABI expectation | Priority/state |
 |---|---|---|---|---|
 | `AC-GAP-001` | `ASK-004` | RFC 5869 HKDF-SHA-256, 0..8160 output, exact empty-input semantics | new `ac_kdf.h`; additive `ANOCRYPTO_C_1` symbols | `SATISFIED_P3_02` |
-| `AC-GAP-002` | `ASK-005` | AES-256-GCM one-shot, 12-byte nonce, 16-byte tag, arbitrary AAD, no unauthenticated plaintext release | new AEAD API, additive ABI | `APPROVED_AFTER_P3_02` |
+| `AC-GAP-002` | `ASK-005` | AES-256-GCM one-shot, 12-byte nonce, 16-byte tag, arbitrary AAD, no unauthenticated plaintext release | `ac_aead.h`; additive `ANOCRYPTO_C_2` | `SATISFIED_P3_03` |
 | `AC-GAP-003` | `ASK-006` | AES-256-GCM incremental encrypt/decrypt with explicit states | opaque context API, additive ABI | `APPROVED_AFTER_ONE_SHOT` |
 | `AC-GAP-004` | `ASK-007` | scrypt fixed v1 profile with overflow/resource rejection | KDF API design required | `APPROVED_DESIGN_PENDING` |
 | `AC-GAP-005` | `PKI-005` | SHA-1 digest only for OCSP CertID interoperability | restricted algorithm/API policy required | `CONDITIONAL_DEFERRED` |

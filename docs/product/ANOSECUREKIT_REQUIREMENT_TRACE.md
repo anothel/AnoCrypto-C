@@ -13,8 +13,8 @@
 | SHA-256 | `src/backend/crypto_backend.hpp`, `src/hash.cpp` | hash/public-header/CLI tests | present |
 | HMAC-SHA-256 | provider interface | HMAC and CLI tests | present |
 | random/generate key | `src/random.cpp` | random and consumer tests | present |
-| HKDF-SHA-256 | public `hash.hpp`, `src/file_crypto.cpp` | RFC 5869 installed CLI vector; `SKF1` fixtures | gap selected |
-| AES-256-GCM one-shot | provider interface, `file_crypto.cpp` | `SKF1`/`SKP1` positive and corruption fixtures | gap approved |
+| HKDF-SHA-256 | public `hash.hpp`, `src/file_crypto.cpp` | RFC 5869 installed CLI vector; exact `SKF1` fixture | present; P3-02 compatibility verified |
+| AES-256-GCM one-shot | provider interface, `file_crypto.cpp` | exact `SKT1`/`SKF1`/`SKP1` v1 inputs and outputs plus corruption cases | present; P3-03 compatibility verified |
 | AES-256-GCM streaming | `packet_stream.cpp` | packet split/finalize and `SKT1` fixtures | gap approved |
 | scrypt fixed profile | `file_crypto.cpp`, format docs | `SKP1` positive/negative fixtures | gap approved |
 

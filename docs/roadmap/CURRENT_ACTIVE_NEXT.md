@@ -1,6 +1,6 @@
 # Current / Active / Next
 
-Status: `P3_02_COMPLETE_P3_03_NEXT`
+Status: `P3_03_COMPLETE_P3_04_NEXT`
 
 ## DONE
 
@@ -8,19 +8,22 @@ Status: `P3_02_COMPLETE_P3_03_NEXT`
 - P2 local validation-readiness snapshot.
 - P3-00 downstream intake gate.
 - P3-01 four-source requirement consolidation and ownership decisions.
-- P3-02 minimal HKDF-SHA-256 API, additive ABI, RFC 5869 tests, OpenSSL
-  differential evidence, exact SKF1 info-byte evidence, install/PoC regression.
+- P3-02 minimal HKDF-SHA-256 API and additive `ANOCRYPTO_C_1` evidence.
+- P3-03 minimal AES-256-GCM one-shot API, authenticated-output-only decrypt,
+  additive `ANOCRYPTO_C_2`, NIST/differential tests and exact downstream v1
+  primitive fixture evidence.
 
 ## ACTIVE
 
-P3-02 local closeout and artifact handoff. No push, tag, signing, timestamping,
+P3-03 local closeout and artifact handoff. No push, tag, signing, timestamping,
 publication, or external distribution is authorized.
 
 ## NEXT
 
-`P3-03: AES-256-GCM one-shot API and authenticated-output-only evidence`
+`P3-04: AES-256-GCM streaming API and pre-final plaintext policy`
 
-P3-03 requires its own API/ABI gate. It must not be inferred from the HKDF API.
+P3-04 requires its own state-machine and API/ABI gate. It must not expand the
+one-shot API or copy AnoSecureKit packet workflows into AnoCrypto-C.
 
 ## DEFERRED / BLOCKED
 
@@ -28,4 +31,4 @@ P3-03 requires its own API/ABI gate. It must not be inferred from the HKDF API.
 - P1-34 hosted lanes: `NOT_RUN`; review: `UNREVIEWED`.
 - Repository signing: `UNSIGNED`.
 - External release authorization: `NO`.
-- AnoSecureKit Community identity conflict: open downstream decision.
+- AnoSecureKit Community identity conflict: `OPEN_DOWNSTREAM_SYNC_DECISION`.

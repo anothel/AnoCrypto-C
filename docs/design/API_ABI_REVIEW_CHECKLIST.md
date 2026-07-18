@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P3-02 reviewed additive ABI. The retained P1-29/P3-01 surface remains unchanged on `ANOCRYPTO_C_0`; one generic HKDF-SHA-256 function is added on `ANOCRYPTO_C_1`.
+Status: P3-03 reviewed additive ABI. The retained P1-29/P3-01 surface remains unchanged on `ANOCRYPTO_C_0`; P3-02 HKDF-SHA-256 remains on `ANOCRYPTO_C_1`; two generic AES-256-GCM one-shot functions are added on `ANOCRYPTO_C_2`.
 
 ## Identity
 
@@ -30,6 +30,7 @@ Status: P3-02 reviewed additive ABI. The retained P1-29/P3-01 surface remains un
 | `ac_hash.h` | SHA-256/384/512 one-shot and streaming. |
 | `ac_hmac.h` | HMAC-SHA-2 one-shot/streaming and HMAC-purpose handle path. |
 | `ac_kdf.h` | RFC 5869 HKDF-SHA-256 combined extract-and-expand; one function. |
+| `ac_aead.h` | AES-256-GCM one-shot encrypt/decrypt with fixed 12-byte nonce and 16-byte tag. |
 | `ac_drbg.h` | Explicit-entropy HMAC_DRBG-SHA-256 core. |
 | `ac_random.h` | Source-backed public random lifecycle on supported provider/process-marker branches. |
 | `ac_cipher.h` | AES-128/192/256 CBC without padding; eight functions. |
@@ -55,6 +56,7 @@ cmake --build build --target ano_crypto_cmac_policy_check
 cmake --build build --target ano_crypto_cmac_hardening_policy_check
 cmake --build build --target ano_crypto_cmac_compiler_review
 cmake --build build --target ano_crypto_hkdf_sha256_policy_check
+cmake --build build --target ano_crypto_aes256_gcm_policy_check
 cmake --build build --target ano_crypto_clean_release_symbol_baseline_check
 cmake --build build --target ano_crypto_symbol_version_check
 cmake --build build --target ano_crypto_poc_package_smoke
@@ -133,3 +135,16 @@ These checks are toolchain-specific guardrails. Calling convention, loader behav
 - OpenSSL is test-only differential evidence and is not a product dependency.
 - The exact AnoSecureKit `SKF1` v1 info bytes are a compatibility fixture only; `SKF1` remains AnoSecureKit-owned.
 - P1-34 hosted execution/review, repository signing, external release authorization, and KCMVP lane remain `NOT_RUN`/`UNREVIEWED`, `UNSIGNED`, `NO`, and `DEFERRED`.
+
+## P3-03 AES-256-GCM one-shot additive ABI review
+
+- One new header: `ac_aead.h`.
+- Two functions only: `ano_crypto_aes256_gcm_encrypt` and
+  `ano_crypto_aes256_gcm_decrypt`.
+- Existing CSP handle and status types are reused; no new public context or
+  product-format type is exposed.
+- Decryption authenticates before plaintext output and clears accepted output on
+  failure.
+- The two names are the only symbols on additive `ANOCRYPTO_C_2`; current total
+  is 72 and retained ABI-0/1 manifests are unchanged.
+- `SKT1`, `SKF1`, `SKP1`, streaming, scrypt and orchestration remain excluded.

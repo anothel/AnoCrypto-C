@@ -1,9 +1,12 @@
 # AnoCrypto-C
 
-Current status: `0.1.0-p3-02-hkdf-sha256`. P3-02 implements one generic RFC 5869 HKDF-SHA-256 C API using the existing HMAC-SHA-256 core, retains all 69 `ANOCRYPTO_C_0` symbols, and adds one `ANOCRYPTO_C_1` symbol. The current boundary is 15 public headers and 70 exported symbols. Exact AnoSecureKit `SKF1` v1 info bytes are covered as compatibility evidence; SKF1 itself remains AnoSecureKit-owned. KCMVP remains `DEFERRED`, P1-34 hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, and external release authorization remains `NO`.
+Current status: `0.1.0-p3-03-aes256-gcm-oneshot`. P3-03 adds a minimal generic AES-256-GCM one-shot C API with authenticated-output-only decryption. All 69 `ANOCRYPTO_C_0` symbols and the `ANOCRYPTO_C_1` HKDF symbol are retained; two AES-256-GCM symbols are added on `ANOCRYPTO_C_2`. The current boundary is 16 public headers and 72 exported symbols. Exact AnoSecureKit `SKT1`, `SKF1`, and `SKP1` v1 primitive fixtures are compatibility evidence only; those formats and workflows remain AnoSecureKit-owned. KCMVP remains `DEFERRED`, P1-34 hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, external release authorization remains `NO`, and the downstream Community identity conflict remains open.
 
 Implemented processing scope:
 
+- RFC 5869 HKDF-SHA-256 combined extract-and-expand with 0..8160-byte output and exact AnoSecureKit SKF1 info-byte evidence
+- AES-256-GCM one-shot encrypt/decrypt using a 32-byte BLOCK_CIPHER CSP key, fixed 12-byte nonce, fixed 16-byte tag, empty AAD/payload support, exact in-place payload operation, and authenticated-output-only decryption
+- NIST AES-256-GCM KATs, corruption/overlap/output-clearing tests, exact SKT1/SKF1/SKP1 v1 primitive fixtures, and OpenSSL test-only differential coverage
 - SHA-256, SHA-384, and SHA-512 one-shot and streaming APIs
 - HMAC-SHA-256, HMAC-SHA-384, and HMAC-SHA-512 one-shot and streaming APIs
 - HMAC computation for all three SHA-2 variants using an in-memory HMAC key handle
@@ -25,7 +28,7 @@ Implemented processing scope:
 - Process-change detection for source-backed random contexts, requiring explicit reseed before generation
 - Startup self-test KATs for SHA-256/SHA-384/SHA-512, their HMAC variants, and HMAC_DRBG-SHA-256
 - Extended KAT executables for all implemented SHA-2/HMAC variants, HMAC key-handle paths, and HMAC_DRBG-SHA-256 public vectors
-- Deterministic OpenSSL 3.x test-only differential comparisons for SHA-256/384/512, HMAC, AES-CBC, and AES-CMAC paths
+- Deterministic OpenSSL 3.x test-only differential comparisons for SHA-256/384/512, HMAC, HKDF-SHA-256, AES-256-GCM, AES-CBC, and AES-CMAC paths
 - SHA-512-family representation, endian, variable-chunk, and intentionally unaligned-input portability regression
 - CMake C99 representation guard requiring 8-bit bytes, 32-bit `uint32_t`, 64-bit `uint64_t`, and `size_t` no wider than `uint64_t`
 - Negative API tests for hash/HMAC/DRBG/CSP/key argument handling, context lifecycle behavior, handle exhaustion, stale handle rejection, and DRBG helper failure cleanup
@@ -309,7 +312,7 @@ Controlled outputs are `docs/kcmvp/KCMVP_ENTROPY_AND_DRBG_SPEC.md`, the responsi
 - A dedicated tests-only hook verifies the HMAC_DRBG `2^48` reseed-counter boundary, failed-reseed persistence, recovery, and no-wrap behavior.
 - Known VM snapshot/restore or clone events require inherited contexts to be discarded and each instance independently reinitialized; automatic detection is not implemented.
 - Suspend/resume handling remains a consuming-product policy.
-- `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the retained 69-name ABI-0 public symbol baseline; `abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt` stores the current 70-name additive surface.
+- `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the retained 69-name ABI-0 public symbol baseline; `abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt` stores the current 72-name additive surface.
 - Clean Release, evidence, and PoC flows compare shared-library exports with that baseline and keep both internal test-hook options disabled.
 - Hosted CI collects status-only platform review artifacts; actual hosted results still require review.
 

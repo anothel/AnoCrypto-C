@@ -11,8 +11,8 @@ extern "C" {
 #define ANO_CRYPTO_VERSION_MAJOR 0u
 #define ANO_CRYPTO_VERSION_MINOR 1u
 #define ANO_CRYPTO_VERSION_PATCH 0u
-#define ANO_CRYPTO_VERSION_PRERELEASE "p3-02-hkdf-sha256"
-#define ANO_CRYPTO_VERSION_STRING "0.1.0-p3-02-hkdf-sha256"
+#define ANO_CRYPTO_VERSION_PRERELEASE "p3-03-aes256-gcm-oneshot"
+#define ANO_CRYPTO_VERSION_STRING "0.1.0-p3-03-aes256-gcm-oneshot"
 
 /*
  * Version query APIs are allowed in all module states, including error state.

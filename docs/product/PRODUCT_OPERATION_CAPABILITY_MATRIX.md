@@ -1,14 +1,14 @@
 # Product Operation to Capability Matrix
 
-Status: `P3_01_REQUIREMENTS_ACCEPTED`
+Status: `P3_03_HKDF_AND_GCM_ONESHOT_SATISFIED`
 
 | ID | Product operation/contract | Evidence | Candidate capability | Current AnoCrypto-C result | Owner | Decision |
 |---|---|---|---|---|---|---|
 | `ASK-001` | public SHA-256 and format hashing | Community `src/hash.cpp`, provider interface/tests | SHA-256 | supported | AnoCrypto-C primitive | `SATISFIED` |
 | `ASK-002` | public HMAC-SHA-256 | Community provider contract and tests | HMAC-SHA-256 | supported | AnoCrypto-C primitive | `SATISFIED` |
 | `ASK-003` | random bytes and generated 256-bit key | Community `src/random.cpp`; Enterprise native adapter | random service | supported | AnoCrypto-C primitive + Enterprise adapter | `SATISFIED` |
-| `ASK-004` | public HKDF and `SKF1` v1 file-key derivation | `src/file_crypto.cpp`, exact `SKF1` fixture, RFC 5869 CLI test | HKDF-SHA-256 | missing | AnoCrypto-C | `ACCEPTED_GAP_SELECTED_P3_02` |
-| `ASK-005` | `SKF1`/`SKP1` chunk encryption | one-shot provider calls and v1 fixtures | AES-256-GCM one-shot | missing | AnoCrypto-C | `ACCEPTED_GAP` |
+| `ASK-004` | public HKDF and `SKF1` v1 file-key derivation | `src/file_crypto.cpp`, exact `SKF1` fixture, RFC 5869 CLI test | HKDF-SHA-256 | supported in P3-02 | AnoCrypto-C | `SATISFIED_P3_02` |
+| `ASK-005` | `SKF1`/`SKP1` chunk encryption | one-shot provider calls and v1 fixtures | AES-256-GCM one-shot | supported in P3-03 | AnoCrypto-C | `SATISFIED_P3_03` |
 | `ASK-006` | `SKT1` packet streaming and public packet API | `src/packet_stream.cpp`, split-update/fixture tests | AES-256-GCM streaming | missing | AnoCrypto-C | `ACCEPTED_GAP` |
 | `ASK-007` | `SKP1` v1 password derivation | fixed v1 format and negative fixtures | scrypt `N=32768,r=8,p=1`, 32-byte output | missing | AnoCrypto-C | `ACCEPTED_GAP` |
 | `ASK-008` | exact SDK/archive identity | Enterprise package gates | package digest/provenance | partial engineering support; approved artifact absent | Enterprise/release lane | `NOT_A_PRIMITIVE_GAP` |
@@ -28,6 +28,7 @@ Status: `P3_01_REQUIREMENTS_ACCEPTED`
 ## Acceptance count
 
 - accepted product/contract rows: 20;
-- satisfied or non-core-owned rows: 12;
+- satisfied or non-core-owned rows: 14;
 - accepted AnoCrypto-C gaps: 8;
-- selected implementation: 1 (`ASK-004`).
+- completed implementations: 2 (`ASK-004`, `ASK-005`);
+- next selected implementation: `ASK-006` (`P3-04`).

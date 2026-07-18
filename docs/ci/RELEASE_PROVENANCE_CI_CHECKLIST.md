@@ -1,13 +1,13 @@
 # Release Provenance CI Checklist
 
-Status: P3-02 unsigned engineering checklist retaining P1-33 controls. Actual tag authorization, hosted-artifact review, production signing, RFC 3161 timestamping, role approval, and external release remain incomplete.
+Status: P3-03 unsigned engineering checklist retaining P1-33 controls. Actual tag authorization, hosted-artifact review, production signing, RFC 3161 timestamping, role approval, and external release remain incomplete.
 
 ## Configure and static policy
 
-- Configure with release identity `0.1.0-p3-02-hkdf-sha256`.
+- Configure with release identity `0.1.0-p3-03-aes256-gcm-oneshot`.
 - Run `ano_crypto_release_compatibility_policy_check`.
 - Run `ano_crypto_release_provenance_policy_check`.
-- Confirm the clean Release public surface is 15 headers and 70 symbols, with the retained 69 names unchanged on `ANOCRYPTO_C_0` and only HKDF-SHA-256 on `ANOCRYPTO_C_1`.
+- Confirm the clean Release public surface is 16 headers and 72 symbols, with 69 names unchanged on `ANOCRYPTO_C_0`, HKDF-SHA-256 on `ANOCRYPTO_C_1`, and only the two AES-256-GCM names on `ANOCRYPTO_C_2`.
 - Confirm signing state is `UNSIGNED`, handoff readiness is `BLOCKED`, and external authorization is `NO`.
 - Confirm production signer and timestamp records remain explicitly `UNPROVISIONED` until separately approved.
 - Reject key, token, credential, signature, timestamp-request, and timestamp-response artifacts from source/evidence/package paths.
@@ -72,7 +72,7 @@ Require the release-evidence dependency chain to prepare and verify prerequisite
 - full CTest result;
 - prepared provenance bundle/check;
 - key-free signing handoff/check;
-- complete `prepared-release-evidence/p3-02/EVIDENCE_MANIFEST.sha256` status tree.
+- complete `prepared-release-evidence/p3-03/EVIDENCE_MANIFEST.sha256` status tree.
 
 Final evidence must contain:
 
@@ -93,7 +93,7 @@ Confirm evidence manifests cover the copied provenance and handoff directories. 
 - Run the OpenSSL-unavailable Release lane and require product build/tests to pass without OpenSSL differential/fixture tests.
 - Run tests-off, thread-safety-off, sanitizer, install, PoC, and clean symbol lanes required by the release plan.
 - Inspect clean Release runtime dependencies and require no `libcrypto` or `libssl` dependency in the product library.
-- Preserve the 69-symbol ABI-0 baseline and verify the current 70-symbol additive manifest and ELF version nodes where supported.
+- Preserve the 69-symbol ABI-0 baseline and verify the current 72-symbol additive manifest and ELF version nodes where supported.
 
 ## Hosted bundle
 

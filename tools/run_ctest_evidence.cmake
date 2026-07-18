@@ -1,5 +1,5 @@
 # Assemble and validate CTest logs produced by the direct custom-target commands.
-# The target executes six bounded, non-overlapping ranges that cover tests 1..76.
+# The target executes six bounded, non-overlapping ranges that cover tests 1..80.
 
 cmake_minimum_required(VERSION 3.16)
 
@@ -23,15 +23,15 @@ set(_ctest_tokens
     "45_68"
     "69_69"
     "70_70"
-    "71_76")
+    "71_80")
 set(_ctest_ranges
     "1,20"
     "21,44"
     "45,68"
     "69,69"
     "70,70"
-    "71,76")
-set(_ctest_counts 20 24 24 1 1 6)
+    "71,80")
+set(_ctest_counts 20 24 24 1 1 10)
 set(_ctest_log "${ANO_CRYPTO_CTEST_EVIDENCE_DIR}/ctest.log")
 file(WRITE "${_ctest_log}"
     "AnoCrypto-C complete CTest evidence\n"
@@ -63,6 +63,6 @@ file(WRITE "${ANO_CRYPTO_CTEST_EVIDENCE_DIR}/CTEST_EVIDENCE_SUMMARY.txt"
     "Build configuration: ${ANO_CRYPTO_BUILD_CONFIG}\n"
     "Execution mode: deterministic bounded direct ranges\n"
     "Completed ranges: 6/6\n"
-    "Configured tests covered: 76/76\n"
+    "Configured tests covered: 80/80\n"
     "Sensitive cryptographic values logged: no\n")
 message(STATUS "AnoCrypto-C CTest evidence capture passed: ${ANO_CRYPTO_CTEST_EVIDENCE_DIR}")

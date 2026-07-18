@@ -72,6 +72,8 @@ set(_required_package_records
     "CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt"
     "SHA512_FAMILY_PACKAGE_NOTES.txt"
     "DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt"
+    "HKDF_SHA256_PACKAGE_NOTES.txt"
+    "AES256_GCM_PACKAGE_NOTES.txt"
     "AES_CBC_PACKAGE_NOTES.txt"
     "AES_HARDENING_PACKAGE_NOTES.txt"
     "AES_CMAC_PACKAGE_NOTES.txt"
@@ -96,7 +98,7 @@ file(GLOB_RECURSE _poc_package_files LIST_DIRECTORIES false "${_package_dir}/*")
 foreach(_poc_file IN LISTS _poc_package_files)
     string(TOLOWER "${_poc_file}" _poc_file_lower)
     if(_poc_file_lower MATCHES "(^|[/\\])(libcrypto|libssl|openssl)([./\\]|$)" OR
-       _poc_file_lower MATCHES "(sha2_hmac|aes_cbc|aes_cmac)_openssl_differential_tests\.c$" OR
+       _poc_file_lower MATCHES "(sha2_hmac|hkdf_sha256|aes_cbc|aes_cmac|aes256_gcm)_openssl_differential_tests\.c$" OR
        _poc_file_lower MATCHES "sha512_portability_review\.c$" OR
        _poc_file_lower MATCHES "aes_(cbc|cmac)_(hardening_review|lifecycle_stress_tests)\.c$" OR
        _poc_file_lower MATCHES "(aes|cmac)_compiler_output_(review|disassembly)\.txt$" OR
@@ -117,6 +119,14 @@ endif()
 
 if(NOT EXISTS "${_sdk_prefix}/include/anocrypto/ac_cmac.h")
     message(FATAL_ERROR "PoC SDK is missing public AES-CMAC header: ${_sdk_prefix}/include/anocrypto/ac_cmac.h")
+endif()
+
+if(NOT EXISTS "${_sdk_prefix}/include/anocrypto/ac_kdf.h")
+    message(FATAL_ERROR "PoC SDK is missing public HKDF header: ${_sdk_prefix}/include/anocrypto/ac_kdf.h")
+endif()
+
+if(NOT EXISTS "${_sdk_prefix}/include/anocrypto/ac_aead.h")
+    message(FATAL_ERROR "PoC SDK is missing public AES-256-GCM header: ${_sdk_prefix}/include/anocrypto/ac_aead.h")
 endif()
 
 file(GLOB_RECURSE _poc_public_headers LIST_DIRECTORIES false "${_sdk_prefix}/include/*.h")
@@ -205,6 +215,8 @@ file(WRITE "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_PACKAGE_SMOKE_SUMMARY.txt"
     "Concurrency/sanitizer notes: ${_package_dir}/CONCURRENCY_SANITIZER_PACKAGE_NOTES.txt\n"
     "SHA-512-family notes: ${_package_dir}/SHA512_FAMILY_PACKAGE_NOTES.txt\n"
     "Differential/portability notes: ${_package_dir}/DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt\n"
+    "HKDF notes: ${_package_dir}/HKDF_SHA256_PACKAGE_NOTES.txt\n"
+    "AES-256-GCM notes: ${_package_dir}/AES256_GCM_PACKAGE_NOTES.txt\n"
     "AES/CBC notes: ${_package_dir}/AES_CBC_PACKAGE_NOTES.txt\n"
     "AES/CBC hardening notes: ${_package_dir}/AES_HARDENING_PACKAGE_NOTES.txt\n"
     "AES-CMAC notes: ${_package_dir}/AES_CMAC_PACKAGE_NOTES.txt\n"

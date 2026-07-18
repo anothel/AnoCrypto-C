@@ -1,22 +1,22 @@
 # Tagged Release Compatibility Policy
 
-Status: P3-02 additive-ABI engineering policy. This document does not establish universal ABI compatibility or release provenance by itself.
+Status: P3-03 additive-ABI engineering policy. This document does not establish universal ABI compatibility or release provenance by itself.
 
 ## Purpose
 
-P3-02 retains the project-owned `0.1.0-p1-29-cmac-hardening` compatibility input while adding one reviewed generic HKDF-SHA-256 function on a new additive ABI line. The policy covers release identity consistency, the unchanged retained C surface, the additive header and symbol, installed-package consumption, isolated synthetic tag rehearsal, and status-only hosted artifacts.
+P3-03 retains the project-owned `0.1.0-p1-29-cmac-hardening` compatibility input, the P3-02 HKDF symbol on `ANOCRYPTO_C_1`, and adds two reviewed generic AES-256-GCM one-shot functions on `ANOCRYPTO_C_2`. The policy covers release identity consistency, the unchanged retained C surface, the additive header and symbol, installed-package consumption, isolated synthetic tag rehearsal, and status-only hosted artifacts.
 
 ## Reviewed identity
 
 The authoritative engineering metadata is `release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake`:
 
 - package version: `0.1.0`
-- engineering version: `0.1.0-p3-02-hkdf-sha256`
-- expected tag metadata: `v0.1.0-p3-02-hkdf-sha256`
-- current ABI line: `ANOCRYPTO_C_1`
+- engineering version: `0.1.0-p3-03-aes256-gcm-oneshot`
+- expected tag metadata: `v0.1.0-p3-03-aes256-gcm-oneshot`
+- current ABI line: `ANOCRYPTO_C_2`
 - retained baseline: `0.1.0-p1-29-cmac-hardening`
-- retained/current public headers: 14 / 15
-- retained `ANOCRYPTO_C_0` / current total exports: 69 / 70
+- retained/current public headers: 14 / 16
+- retained `ANOCRYPTO_C_0` / current total exports: 69 / 72
 - CMake package compatibility: `SameMinorVersion`
 
 The expected tag is metadata until a Git-backed check proves that the tag, supplied commit, and checked-out `HEAD` identify one commit. Tag existence, signer identity, and release authorization remain separate reviews.
@@ -32,16 +32,16 @@ Baseline updates are not automatic. A later intentional public API or ABI change
 `ano_crypto_release_compatibility_policy_check` verifies:
 
 - central release metadata and current version macros agree;
-- the retained baseline manifest contains 14 canonical-LF header hashes and the current manifest contains 15;
+- the retained baseline manifest contains 14 canonical-LF header hashes and the current manifest contains 16;
 - normalized declarations, public types, and non-version constants for the retained 14 headers match P1-29;
-- `ANOCRYPTO_C_0` still contains the same 69 names, while the current manifest contains exactly 70 and `ANOCRYPTO_C_1` contains only `ano_crypto_hkdf_sha256`;
+- `ANOCRYPTO_C_0` still contains the same 69 names, while the current manifest contains exactly 72, `ANOCRYPTO_C_1` contains only `ano_crypto_hkdf_sha256`, and `ANOCRYPTO_C_2` contains only the two AES-256-GCM one-shot symbols;
 - package compatibility generation uses the reviewed policy;
 - release/evidence/CI identity strings are coherent.
 
 `ano_crypto_tagged_release_compatibility_smoke` additionally builds a clean installed package and runs:
 
-- a P3-02-header/P3-02-library consumer that binds all 70 public functions and exercises HKDF;
-- a P1-29-header/P3-02-library consumer that binds all 69 retained public functions;
+- a P3-03-header/P3-03-library consumer that binds all 72 public functions and exercises HKDF plus AES-256-GCM;
+- a P1-29-header/P3-03-library consumer that binds all 69 retained public functions;
 - an exact `find_package(AnoCryptoC 0.1.0 EXACT)` probe;
 - a negative request confirming the 0.1.x package does not satisfy `0.2.0`.
 
@@ -59,7 +59,7 @@ Opaque caller-owned contexts must always be sized through the loaded library and
 
 ## Clean tagged-release rehearsal
 
-The P3-02 rehearsal uses an isolated clean clone or equivalent temporary Git repository. A synthetic local tag may be created there only. The user repository is not tagged or modified.
+The P3-03 rehearsal uses an isolated clean clone or equivalent temporary Git repository. A synthetic local tag may be created there only. The user repository is not tagged or modified.
 
 The rehearsal must prove that the expected tag, supplied commit, tag-resolved commit, and checked-out `HEAD` identify one commit and that the checkout is clean. Dirty worktrees, a moved tag, a moved `HEAD`, ref mismatch, or commit mismatch fail closed. A successful rehearsal is local procedure evidence; it is not proof that an actual release tag exists, is signed, or is authorized.
 

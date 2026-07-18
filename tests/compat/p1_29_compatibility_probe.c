@@ -9,7 +9,7 @@
 #define ANO_CRYPTO_COMPAT_HEADER_MODE "unspecified"
 #endif
 #ifndef ANO_CRYPTO_EXPECT_RUNTIME_VERSION
-#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p3-02-hkdf-sha256"
+#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p3-03-aes256-gcm-oneshot"
 #endif
 
 #define ANO_COMPAT_JOIN_INNER(a, b) a##b
@@ -299,12 +299,20 @@ static unsigned int bind_p1_29_public_surface(void)
 }
 
 #if defined(ANO_CRYPTO_EXPECT_CURRENT_HEADER)
-static unsigned int bind_p3_02_additive_surface(void)
+static unsigned int bind_current_additive_surface(void)
 {
     unsigned int count = 0u;
     ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_hkdf_sha256,
                     (const uint8_t *, size_t, const uint8_t *, size_t,
                      const uint8_t *, size_t, uint8_t *, size_t));
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_aes256_gcm_encrypt,
+                    (ano_crypto_csp_handle_t, const uint8_t *, size_t,
+                     const uint8_t *, size_t, const uint8_t *, size_t,
+                     uint8_t *, size_t, size_t *, uint8_t *, size_t));
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_aes256_gcm_decrypt,
+                    (ano_crypto_csp_handle_t, const uint8_t *, size_t,
+                     const uint8_t *, size_t, const uint8_t *, size_t,
+                     const uint8_t *, size_t, uint8_t *, size_t, size_t *));
     return count;
 }
 #endif
@@ -341,8 +349,8 @@ int main(void)
 
     symbol_count = bind_p1_29_public_surface();
 #if defined(ANO_CRYPTO_EXPECT_CURRENT_HEADER)
-    symbol_count += bind_p3_02_additive_surface();
-    if (symbol_count != 70u) {
+    symbol_count += bind_current_additive_surface();
+    if (symbol_count != 72u) {
         return 1;
     }
 #else
@@ -394,9 +402,40 @@ int main(void)
             return 8;
         }
     }
+    {
+        static const uint8_t key[ANO_CRYPTO_AES256_GCM_KEY_SIZE] = { 0u };
+        static const uint8_t nonce[ANO_CRYPTO_AES256_GCM_NONCE_SIZE] = { 0u };
+        static const uint8_t message[] = { 'g', 'c', 'm' };
+        ano_crypto_csp_handle_t handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+        uint8_t ciphertext[sizeof(message)];
+        uint8_t plaintext[sizeof(message)];
+        uint8_t tag[ANO_CRYPTO_AES256_GCM_TAG_SIZE];
+        size_t written = 0u;
+        if (ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER,
+                                         key, sizeof(key), ANO_CRYPTO_KEY_FLAG_NONE,
+                                         &handle) != ANO_CRYPTO_OK ||
+            ano_crypto_aes256_gcm_encrypt(handle, nonce, sizeof(nonce),
+                                           NULL, 0u, message, sizeof(message),
+                                           ciphertext, sizeof(ciphertext), &written,
+                                           tag, sizeof(tag)) != ANO_CRYPTO_OK ||
+            written != sizeof(message) ||
+            ano_crypto_aes256_gcm_decrypt(handle, nonce, sizeof(nonce),
+                                           NULL, 0u, ciphertext, sizeof(ciphertext),
+                                           tag, sizeof(tag), plaintext, sizeof(plaintext),
+                                           &written) != ANO_CRYPTO_OK ||
+            written != sizeof(message) ||
+            memcmp(plaintext, message, sizeof(message)) != 0) {
+            if (handle != ANO_CRYPTO_CSP_INVALID_HANDLE) {
+                (void)ano_crypto_key_destroy(handle);
+            }
+            (void)ano_crypto_module_shutdown();
+            return 9;
+        }
+        (void)ano_crypto_key_destroy(handle);
+    }
 #endif
     if (ano_crypto_module_shutdown() != ANO_CRYPTO_OK) {
-        return 8;
+        return 10;
     }
 
     printf("compatibility_baseline=0.1.0-p1-29-cmac-hardening\n");

@@ -38,3 +38,11 @@ The detailed signature and null/empty/buffer/overlap/failure rules are frozen in
 
 AEAD, scrypt, SHA-1, RSA, ECDSA, public-key architecture, and high-level product
 APIs remain outside this gate.
+
+## P3-03 result
+
+- `ac_aead.h` adds exactly two generic AES-256-GCM one-shot functions.
+- all 69 `ANOCRYPTO_C_0` symbols are unchanged;
+- the single `ANOCRYPTO_C_1` HKDF symbol is unchanged;
+- `ANOCRYPTO_C_2` inherits `ANOCRYPTO_C_1` and contains only the two GCM symbols;
+- current public surface is 16 headers and 72 exported symbols.

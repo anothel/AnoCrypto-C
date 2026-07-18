@@ -55,7 +55,7 @@ if(NOT "${_configure_result}" STREQUAL "0")
     message(FATAL_ERROR "Clean Release symbol configure failed; see ${ANO_CRYPTO_SYMBOL_REPORT}")
 endif()
 
-message(STATUS "Building independent clean Release library and checking 70-symbol additive baseline")
+message(STATUS "Building independent clean Release library and checking 72-symbol additive baseline")
 execute_process(
     COMMAND "${CMAKE_COMMAND}" --build "${_build_dir}" --config Release --target ano_crypto_exported_symbol_baseline_check ano_crypto_symbol_version_check --parallel
     RESULT_VARIABLE _build_result

@@ -74,6 +74,12 @@ ANOCRYPTO_C_0 {
 ANOCRYPTO_C_1 {
     global:
         ano_crypto_hkdf_sha256;
+} ANOCRYPTO_C_0;
+
+ANOCRYPTO_C_2 {
+    global:
+        ano_crypto_aes256_gcm_decrypt;
+        ano_crypto_aes256_gcm_encrypt;
     local:
         *;
-} ANOCRYPTO_C_0;
+} ANOCRYPTO_C_1;

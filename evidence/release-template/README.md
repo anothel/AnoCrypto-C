@@ -45,8 +45,9 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - AES/CBC implementation and hardening policy results
 - AES lifecycle/portability review log
 - AES compiler-output summary and disassembly for manual internal review
-- Clean Release retained 69-symbol ABI-0 and current 70-symbol additive result
+- Clean Release retained 69-symbol ABI-0 and current 72-symbol additive result
 - P3-02 HKDF-SHA-256 policy and implementation review
+- P3-03 AES-256-GCM one-shot policy and implementation review
 
 ## P1 Evidence Notes
 

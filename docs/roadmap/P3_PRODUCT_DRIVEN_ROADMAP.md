@@ -1,6 +1,6 @@
 # P3 Product-Driven Roadmap
 
-Status: `P3_02_COMPLETE_P3_03_NEXT`
+Status: `P3_03_COMPLETE_P3_04_NEXT`
 
 ## Completed
 
@@ -19,12 +19,14 @@ Implemented one generic RFC 5869 extract-and-expand function, retained all 69
 `ANOCRYPTO_C_0` symbols, added one `ANOCRYPTO_C_1` symbol, and verified exact
 AnoSecureKit SKF1 v1 info-byte compatibility without implementing SKF1.
 
-## Approved implementation sequence
-
 ### P3-03 — AES-256-GCM one-shot
 
-Authenticated-output-only semantics, KATs, corruption/overlap/zeroization tests
-and downstream fixture evidence. Separate API review required.
+Implemented two generic one-shot functions with a fixed 32-byte key, 12-byte
+nonce and 16-byte tag; authenticated before plaintext output; retained ABI-0/1;
+added two `ANOCRYPTO_C_2` symbols; verified NIST, negative, differential and exact
+downstream v1 primitive fixtures without implementing downstream formats.
+
+## Approved implementation sequence
 
 ### P3-04 — AES-256-GCM streaming
 

@@ -1,0 +1,3 @@
+# Additive symbols first introduced on ANOCRYPTO_C_2.
+ano_crypto_aes256_gcm_decrypt
+ano_crypto_aes256_gcm_encrypt

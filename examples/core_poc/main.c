@@ -231,6 +231,57 @@ static int run_drbg_smoke(void)
     return 0;
 }
 
+static int run_aes256_gcm_smoke(void)
+{
+    static const uint8_t key[ANO_CRYPTO_AES256_GCM_KEY_SIZE] = { 0u };
+    static const uint8_t nonce[ANO_CRYPTO_AES256_GCM_NONCE_SIZE] = { 0u };
+    static const uint8_t aad[] = { 'p', 'o', 'c', '-', 'a', 'a', 'd' };
+    static const uint8_t message[] = { 'p', 'o', 'c', '-', 'g', 'c', 'm' };
+    ano_crypto_csp_handle_t handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+    uint8_t ciphertext[sizeof(message)];
+    uint8_t recovered[sizeof(message)];
+    uint8_t tag[ANO_CRYPTO_AES256_GCM_TAG_SIZE];
+    size_t written = 0u;
+    ano_crypto_status_t status;
+
+    status = ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER,
+                                          key, sizeof(key),
+                                          ANO_CRYPTO_KEY_FLAG_NONE, &handle);
+    if (status != ANO_CRYPTO_OK) {
+        return fail_status("AES-256-GCM demo key import", status);
+    }
+    status = ano_crypto_aes256_gcm_encrypt(handle, nonce, sizeof(nonce),
+                                            aad, sizeof(aad), message, sizeof(message),
+                                            ciphertext, sizeof(ciphertext), &written,
+                                            tag, sizeof(tag));
+    if (status != ANO_CRYPTO_OK || written != sizeof(message)) {
+        (void)ano_crypto_key_destroy(handle);
+        return fail_status("AES-256-GCM encrypt", status);
+    }
+    status = ano_crypto_aes256_gcm_decrypt(handle, nonce, sizeof(nonce),
+                                            aad, sizeof(aad), ciphertext, sizeof(ciphertext),
+                                            tag, sizeof(tag), recovered, sizeof(recovered),
+                                            &written);
+    if (status != ANO_CRYPTO_OK || written != sizeof(message) ||
+        memcmp(recovered, message, sizeof(message)) != 0) {
+        (void)ano_crypto_csp_zeroize(ciphertext, sizeof(ciphertext));
+        (void)ano_crypto_csp_zeroize(recovered, sizeof(recovered));
+        (void)ano_crypto_csp_zeroize(tag, sizeof(tag));
+        (void)ano_crypto_key_destroy(handle);
+        return fail_status("AES-256-GCM decrypt", status);
+    }
+    (void)ano_crypto_csp_zeroize(ciphertext, sizeof(ciphertext));
+    (void)ano_crypto_csp_zeroize(recovered, sizeof(recovered));
+    (void)ano_crypto_csp_zeroize(tag, sizeof(tag));
+    status = ano_crypto_key_destroy(handle);
+    if (status != ANO_CRYPTO_OK) {
+        return fail_status("AES-256-GCM demo key destroy", status);
+    }
+    printf("- AES-256-GCM one-shot smoke: PASS (%lu bytes; values not printed)\n",
+           (unsigned long)sizeof(message));
+    return 0;
+}
+
 static int run_aes_cbc_smoke(void)
 {
     static const uint8_t key[ANO_CRYPTO_CIPHER_AES128_KEY_SIZE] = {
@@ -469,6 +520,8 @@ int main(void)
     } else if (run_hkdf_smoke() != 0) {
         result = 1;
     } else if (run_drbg_smoke() != 0) {
+        result = 1;
+    } else if (run_aes256_gcm_smoke() != 0) {
         result = 1;
     } else if (run_aes_cbc_smoke() != 0) {
         result = 1;
