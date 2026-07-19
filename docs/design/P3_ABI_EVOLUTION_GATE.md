@@ -1,77 +1,75 @@
 # P3 API and ABI Evolution Gate
 
-Status: `P3_05_ADDITIVE_ABI_IMPLEMENTED`
+Status: `P3_07_NO_CHANGE_P3_08_REVIEW_REQUIRED`
 
-## Retained baseline
+## Current retained public surface
 
-- retained public headers: 14;
-- retained exported symbols: 69;
-- retained ABI line: `ANOCRYPTO_C_0`;
-- retained source/ABI consumer: P1-29.
+| ABI line | Added symbols | Scope |
+|---|---:|---|
+| `ANOCRYPTO_C_0` | 69 | retained P1 public surface |
+| `ANOCRYPTO_C_1` | 1 | HKDF-SHA-256 |
+| `ANOCRYPTO_C_2` | 2 | AES-256-GCM one-shot |
+| `ANOCRYPTO_C_3` | 7 | AES-256-GCM streaming |
+| `ANOCRYPTO_C_4` | 1 | fixed-profile scrypt |
+| total | 80 | current exported symbols |
 
-## P3-02 result
+Public headers remain 16 and the retained compatibility baseline remains P1-29.
+Every existing declaration, symbol name, and ABI assignment remains unchanged.
 
-The API review froze exactly one new function in one new header:
+## P3-07 result
 
-- `include/anocrypto/ac_kdf.h`;
-- `ano_crypto_hkdf_sha256`;
-- `ANOCRYPTO_C_1` inherits `ANOCRYPTO_C_0` and contains only that symbol.
+P3-07 is design-only and changes none of the following:
 
-Current public surface is 15 headers and 70 symbols. No `ANOCRYPTO_C_0`
-declaration or symbol was removed, renamed, or reassigned.
+- public headers or header bytes;
+- public types, enum values, constants, or macros;
+- functions or exported symbols;
+- symbol-version map or exported-symbol manifests;
+- release/runtime version identity;
+- CMake targets or installed SDK files;
+- P1-29 source/ABI compatibility baseline.
 
-The detailed signature and null/empty/buffer/overlap/failure rules are frozen in
-`docs/design/C99_HKDF_SHA256_API_GATE.md`.
+`ANOCRYPTO_C_5` is not introduced or reserved.
 
-## Evidence
+## P3-08 candidate budget
 
-- RFC 5869 cases 1, 2, and 3;
-- lengths 0, 1, 32, 8160, and rejected/cleared 8161;
-- empty IKM/salt/info;
-- null, wrapping range, alias and overlap rejection;
-- no partial output and full output clearing on accepted output ranges;
-- OpenSSL 3 test-only differential validation;
-- exact AnoSecureKit SKF1 v1 info bytes;
-- current and retained P1-29 consumers;
-- clean Release export-name and ELF symbol-version inspection;
-- install/export and PoC smoke.
+The architecture review found that the smallest reasonable RSA/key-handle
+candidate is three public functions:
 
-AEAD, scrypt, SHA-1, RSA, ECDSA, public-key architecture, and high-level product
-APIs remain outside this gate.
+1. one RSA public/private component import selected by the existing key role;
+2. one generic message-based signature-sign function;
+3. one generic message-based signature-verify function.
 
-## P3-03 result
+Existing `ano_crypto_key_destroy()`, `ano_crypto_key_get_state()`,
+`ano_crypto_csp_handle_is_valid()`, and `ano_crypto_csp_handle_get_state()` are
+reused. No public asymmetric-metadata query, key-binding query, signature-size,
+raw-RSA, key-generation, export, persistence, or provider-routing symbol is
+justified by current exact product evidence. Certificate/public-key binding is
+performed by supplying the expected public `n/e` together with private
+components and validating the complete relationship during import.
 
-- `ac_aead.h` adds exactly two generic AES-256-GCM one-shot functions.
-- all 69 `ANOCRYPTO_C_0` symbols are unchanged;
-- the single `ANOCRYPTO_C_1` HKDF symbol is unchanged;
-- `ANOCRYPTO_C_2` inherits `ANOCRYPTO_C_1` and contains only the two GCM symbols;
-- current public surface is 16 headers and 72 exported symbols.
+This is a candidate budget, not an approved ABI. P3-08 must independently
+freeze:
 
+- exact names and prototypes;
+- extending `ac_key.h` versus adding one focused public header;
+- exact scheme enum names/values and final function/type/constant count;
+- RSA component representation, accepted sizes/exponents, and resource bounds;
+- message-based sign/verify, SHA-2 ownership, and canonical PKCS#1 v1.5
+  `DigestInfo`/EMSA processing;
+- null, overflow, alias, overlap, size-query, short-buffer, and output-clearing
+  semantics;
+- lifecycle, zeroization, module-state, operation-lease, and concurrency rules;
+- KAT, negative, boundary, differential, current/retained consumer,
+  install/export, PoC, symbol-version, and AnoPKI compatibility evidence;
+- one additive ABI line only after the review passes.
 
-## P3-04 result
+No existing symbol may be renamed, removed, moved, or assigned to another ABI
+line. Candidate names, final count, header placement, and future ABI-line
+identifier remain unapproved until P3-08 closes its API/ABI gate.
 
-- `ac_aead.h` is extended without adding another public header.
-- Exactly seven generic AES-256-GCM streaming functions are added.
-- All 69 `ANOCRYPTO_C_0` symbols, the one `ANOCRYPTO_C_1` HKDF symbol, and the
-  two `ANOCRYPTO_C_2` one-shot GCM symbols are unchanged.
-- `ANOCRYPTO_C_3` inherits `ANOCRYPTO_C_2` and contains only the seven streaming
-  symbols.
-- Current public surface is 16 headers and 79 exported symbols.
-- The opaque context is caller-owned but its layout is private; callers obtain
-  its size at runtime and must not serialize or persist it.
-- Decrypt update output is unverified until decrypt final succeeds. Buffering,
-  withholding, and failure wiping remain caller/product responsibilities.
-- `SKT1` framing, packet policy, nonce composition, and orchestration remain
-  AnoSecureKit-owned.
+## Later additions
 
-
-## P3-05 result
-
-- `ac_kdf.h` is extended without adding another public header.
-- Exactly one generic fixed-profile scrypt function is added.
-- All 69 `ANOCRYPTO_C_0` symbols, the one `ANOCRYPTO_C_1` HKDF symbol, the two `ANOCRYPTO_C_2` one-shot GCM symbols, and the seven `ANOCRYPTO_C_3` streaming symbols are unchanged.
-- `ANOCRYPTO_C_4` inherits `ANOCRYPTO_C_3` and contains only `ano_crypto_scrypt_derive_key`.
-- Current public surface is 16 headers and 80 exported symbols.
-- The fixed resource contract is `N=32768`, `r=8`, `p=1`, 32-byte output, and caller-provided 33,556,544-byte workspace.
-- The production implementation performs no heap allocation and has no OpenSSL dependency.
-- Exact `SKP1` v1 derivation/decryption is compatibility evidence only. File framing, password policy, prompting, storage, and orchestration remain AnoSecureKit-owned.
+A later ECDSA slice may reuse generic sign/verify and add one P-256 import
+function after its own API/ABI gate. A restricted SHA-1 slice requires a separate
+misuse-resistant digest-only gate. P3-07 pre-approves neither public declaration,
+symbol, enum value, nor version line.

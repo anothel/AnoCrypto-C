@@ -731,3 +731,26 @@ P2-06 does not import third-party implementation code, secret-bearing traces, pr
 - The production implementation performs no heap allocation and uses caller-owned, bounded, zeroized workspace.
 - No password, salt, derived key, workspace content, plaintext, ciphertext, tag, customer data, credential, signature, or production deployment material is retained in release logs or customer packages.
 - KCMVP, hosted review, repository signing, timestamping, external release authorization, and the downstream identity conflict remain unchanged and incomplete.
+
+## P3-07 Public-Key Architecture Gate Inputs
+
+| ID | Input | Classification | Use | Boundary |
+|---|---|---|---|---|
+| `SRC-4401` | Exact AnoPKI Community revision `ae3ddee72dd05f274b9bbae1b514cdc4c4de03f5` and source archive SHA-256 `2f5b5750631a4af39293e10a420a6667ff430e682a3ab24bf3f3e54dbc298ac2` | User-supplied downstream source and connected exact-repository evidence | Review CSR, certificate, CRL, OCSP, RSA/ECDSA, key binding, provider, and negative-fixture requirements | Requirements and behavior only; no OpenSSL/PKI implementation source copied into AnoCrypto-C. |
+| `SRC-4402` | AnoPKI Enterprise revision `68b379e7684c9d8b44c53728949774088352a9d9`, source SHA-256 `af5acc349deee69650a4767a51fdc0214cd529561a9ece906a18ab0eebe7033d`, and collection SHA-256 `ed55d2aa2ebdd561dc2549d01d1bd8f3fd0bd2d2144c3ce3b74083d86fb47704` | User-supplied downstream identity/collection evidence | Confirm adapter ownership, explicit profile composition, capability/no-fallback expectations, and exact source identity | Raw source was unavailable in the execution workspace; source-line and executable conclusions remain `EXTERNAL_CONFIRMATION_REQUIRED`. |
+| `DER-4401` | Fresh P3-07 architecture, requirement, ownership, gap, roadmap, ABI, lifecycle, thread-safety, and delta documents | Project-owned documentation | Freeze the public-key boundary without implementation | No public header, source implementation, ABI map, symbol, runtime version, test vector, key, digest, signature, certificate, credential, or customer data added. |
+
+## P3-07 Clean-room Notes
+
+- OpenSSL call sequences and tests were used only to identify current downstream
+  operation requirements and negative contracts.
+- No OpenSSL, BIGNUM, EVP, RSA, EC, PEM, DER, ASN.1, X.509, CRL, OCSP, provider,
+  or key-loading source code was copied into AnoCrypto-C.
+- No private key, certificate, CSR, signature, digest, TBS bytes, token,
+  credential, customer data, or production provider identifier is stored in the
+  P3-07 documents or validation logs.
+- P3-07 contains no algorithm implementation or public API/ABI change.
+- Exact Enterprise adapter source inspection and execution remain
+  `EXTERNAL_CONFIRMATION_REQUIRED`.
+- KCMVP, hosted review, signing, timestamping, provenance acceptance, and
+  external release authorization remain unchanged and incomplete.

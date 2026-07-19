@@ -68,5 +68,30 @@
       "state": "DOWNSTREAM_DOCUMENTATION_DRIFT",
       "impact": "Some selected source-derived documents retain older revision markers. Collection manifests and exact source archive identities remain authority for this intake."
     }
-  ]
+  ],
+  "p3_07_review": {
+    "task": "P3-07 public-key key-handle architecture and AnoPKI contract gate",
+    "state": "COMPLETE_DESIGN_ONLY",
+    "community_revision": "ae3ddee72dd05f274b9bbae1b514cdc4c4de03f5",
+    "community_git_object_review": "VERIFIED_EXACT_COMMIT_AND_RELEVANT_PATHS",
+    "community_source_sha256": "2f5b5750631a4af39293e10a420a6667ff430e682a3ab24bf3f3e54dbc298ac2",
+    "enterprise_revision": "68b379e7684c9d8b44c53728949774088352a9d9",
+    "enterprise_source_sha256": "af5acc349deee69650a4767a51fdc0214cd529561a9ece906a18ab0eebe7033d",
+    "enterprise_collection_sha256": "ed55d2aa2ebdd561dc2549d01d1bd8f3fd0bd2d2144c3ce3b74083d86fb47704",
+    "enterprise_identity_records": "VERIFIED",
+    "enterprise_source_archive_byte_recomputation": "EXTERNAL_CONFIRMATION_REQUIRED",
+    "selected_next_slice": "P3-08 RSA PKCS#1 v1.5 SHA-256/384/512 and RSA key-handle import",
+    "candidate_api_direction": "ONE_ROLE_SELECTED_RSA_IMPORT_PLUS_MESSAGE_SIGN_AND_VERIFY",
+    "candidate_symbol_target": 3,
+    "public_headers": 16,
+    "exported_symbols": 80,
+    "abi_lines": [
+      "ANOCRYPTO_C_0",
+      "ANOCRYPTO_C_1",
+      "ANOCRYPTO_C_2",
+      "ANOCRYPTO_C_3",
+      "ANOCRYPTO_C_4"
+    ],
+    "public_api_abi_change": "NONE"
+  }
 }

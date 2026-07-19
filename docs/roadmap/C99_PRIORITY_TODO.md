@@ -1,15 +1,63 @@
 # C99 Priority TODO
 
-Status: P2-01 through P2-09 internal readiness and closeout sequence completed locally. The status-only closeout pack is ready for internal review; external consultation remains `NOT_CONDUCTED`, institution responses remain `NOT_RECEIVED`, and formal validation is `NOT_STARTED`.
+Status: `P3_07_COMPLETE_P3_08_READY`
 
-## Completed Through P1-33
+## Current public baseline
 
-- C99 repository, clean-room records, stable status/API conventions, module lifecycle, startup self-test/error-state, build identity, install/export package, and customer PoC.
-- SHA-256/384/512, HMAC-SHA-2, HMAC_DRBG-SHA-256, platform-backed random service, AES-128/192/256 CBC without padding, AES-CMAC full tag, and purpose-separated in-memory CSP handles.
-- KAT, negative, lifecycle, concurrency, sanitizer, differential, portability, install, compatibility, source-provenance, source-SPDX, signing-handoff, and clean rehearsal engineering assets.
-- Public boundary frozen at 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
+- runtime version: `0.1.0-p3-05-scrypt-fixed-profile`;
+- public headers: 16;
+- exported symbols: 80;
+- ABI lines: `ANOCRYPTO_C_0` through `ANOCRYPTO_C_4`;
+- retained compatibility baseline: P1-29.
 
-## P1-34 External Blocker — Still Incomplete
+## Completed product-driven sequence
+
+- P3-00 downstream intake gate;
+- P3-01 exact downstream requirement consolidation;
+- P3-02 RFC 5869 HKDF-SHA-256;
+- P3-03 AES-256-GCM one-shot;
+- P3-04 AES-256-GCM streaming;
+- P3-05 fixed-profile scrypt;
+- P3-06 AnoSecureKit Enterprise seven-capability parity/no-fallback checkpoint;
+- P3-07 public-key key-handle architecture and AnoPKI contract gate.
+
+P3-07 approved a common existing opaque handle, module-owned algorithm-native
+components, message-based signature services, module-owned SHA-2 and RSA
+DigestInfo/EMSA, and raw P-256 `r || s` for a later gate. It added no public
+code or ABI.
+
+## Immediate next work
+
+`P3-08: RSA PKCS#1 v1.5 SHA-256/384/512 and public-key handle foundation`
+
+P3-08 must:
+
+1. review and freeze exact component parameters, prototypes, names, and
+   header placement;
+2. freeze RSA modulus/exponent bounds, fixed-pool capacity, memory limits,
+   blinding, CRT fault checks, and temporary zeroization;
+3. preserve all current headers/symbols and add at most the reviewed minimal
+   three-symbol candidate surface on one additive ABI line;
+4. implement one role-selected RSA public/private component import using
+   canonical n/e or n/e/d/p/q with full consistency checks;
+5. implement message-based sign/verify with module-owned SHA-256/384/512 and
+   canonical DigestInfo/EMSA;
+6. define exact null, overflow, alias, overlap, size-query, output-clearing,
+   verification, stale-handle, shutdown/fatal, and concurrency behavior;
+7. add public KAT, negative, boundary, OpenSSL test-only differential, current
+   and retained consumer, install/export, PoC, symbol-version, and exact AnoPKI
+   compatibility evidence;
+8. keep ECDSA, SHA-1, PKI codecs, external provider routing, and high-level PKI
+   workflows out of the slice.
+
+## Later product-driven candidates
+
+- ECDSA P-256 SHA-256, after a separate API/ABI gate;
+- restricted SHA-1 for OCSP CertID only, after a separate narrow policy gate;
+- AnoPKI Enterprise parity/no-fallback after exact Enterprise source and
+  primitive availability.
+
+## P1-34 external blocker — unchanged
 
 ```text
 Status: BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING
@@ -21,86 +69,14 @@ Actual hosted lanes: NOT_RUN
 Actual hosted review: UNREVIEWED
 ```
 
-Do not substitute local or synthetic evidence. Resume only after billing is resolved and actual artifacts are independently reviewed. See `docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md`.
+Local or synthetic evidence must not be substituted for actual hosted review.
 
-## Completed P2-01
+## Deferred / unauthorized
 
-- consolidated current implementation, tests, evidence, packaging, and release-state inventory;
-- created requirement-to-code-to-test-to-evidence traceability;
-- classified readiness gaps with explicit external-confirmation and blocked states;
-- prepared prioritized pre-consultation questions;
-- inventoried submission documents by existing/update/new/after-consultation state;
-- defined P2-02 through P2-08 completion criteria and dependencies;
-- retained P1-34 blocker and release/signing boundaries;
-- preserved public ABI with no algorithm or public API addition.
-
-## Completed P2-02
-
-- froze `AC-P2-02-LINUX-X86_64-GCC13-SHARED-R1` as one internal shared-library candidate;
-- documented physical/logical boundary, runtime source areas, data flows, exclusions, dependencies, and operator assumptions;
-- selected Ubuntu Server 24.04.4 LTS x86_64, GCC 13.3.0, CMake 3.28.3, Release/Unix Makefiles;
-- froze thread safety and Linux OS entropy ON with tests/examples/hooks/OpenSSL/signing fixtures/sanitizers/LTO OFF;
-- classified all other environments as deferred, unsupported for the initial candidate, or externally blocked;
-- added machine-readable candidate metadata, fail-closed CMake enforcement, policy/evidence checks, and unchanged-ABI verification;
-- retained formal boundary/environment acceptance, immutable candidate execution, and P1-34 hosted review as unresolved.
-
-## Completed P2-03
-
-- froze self-test policy `STP-P2-03-R1` and finite-state policy `FSM-P2-03-R1`;
-- selected `INT-HMAC-SHA256-SINGLE-SO-R1` as an internal candidate without claiming implementation or external acceptance;
-- documented startup order, conditional-test ownership, service availability, fatal/recoverable failures, orderly reinitialization, and process-termination recovery;
-- recorded runtime integrity, on-demand state transition, controlled key/tag injection, tamper tests, and exact OE-01 execution as open implementation/evidence work;
-- added machine-readable policy, fail-closed checker, evidence integration, and orderly reinitialization regression;
-- retained 14 headers, 69 symbols, `ANOCRYPTO_C_0`, and all P1-34/release blockers.
-
-## Completed P2-04
-
-- froze `EDP-P2-04-R1` and Linux `getrandom(flags=0)` external-conditioned-provider responsibility for OE-01;
-- recorded entropy/nonce/reseed lengths, request/reseed limits, unsupported prediction resistance, and process/VM/suspend behavior;
-- separated OS-provider responsibility from any future project-owned direct-noise-source health tests;
-- added policy, operational review, responsibility/recovery matrices, evidence integration, and status-only safeguards;
-- retained provider acceptance, entropy credit, exact OE-01 run, and formal conditional-test interpretation as external/open.
-
-## Completed P2-05
-
-- froze `CZP-P2-05-R1` and a conservative inventory of module-owned keys, caller-owned contexts, DRBG state, and sensitive intermediates;
-- remediated module-owned CSP cleanup on orderly shutdown and locked fatal transition without public ABI growth;
-- defined `ZEROIZED` tombstones, explicit destroy, generation-based stale-handle rejection, and caller-owned uninit responsibility;
-- added shutdown/fatal/reinitialization regressions, policy checks, and local compiler-output capture;
-- retained exact OE-01 review, formal CSP classification, OS/process memory controls, integrity-key realization, and lock-failure expectations as open.
-
-## Completed P2-06
-
-- froze secure-coding policy `SCP-P2-06-R1` and build profile `SCB-P2-06-LINUX-ELF-R1`;
-- recorded source review, local GCC/Clang diagnostics, side-channel limitations, findings, and compiler/CPU dispositions;
-- fixed the internal CSP `INVALID` switch coverage gap without public ABI change;
-- enabled Linux GNU/Clang Release hardening and captured ELF hardening/library hashes;
-- retained exact OE-01, named human disposition, statistical timing/cache, power/EM/fault, runtime integrity, and hosted evidence as open;
-- preserved 14 headers, 69 symbols, `ANOCRYPTO_C_0`, and all release/signing blockers.
-
-## Completed P2-07 and P2-08
-
-- P2-07 created the controlled internal submission-document skeleton under `SDP-P2-07-R1`.
-- P2-08 created the scripted rehearsal, evidence walkthrough, Priority-1 ownership map, 20-entry unresolved-decision register, blank response template, action-impact routing, policy checker, and status-only package smoke under `PCR-P2-08-R1`.
-- External consultation is `NOT_CONDUCTED`; institution responses are `NOT_RECEIVED`; no implementation, ABI, algorithm, signing, submission, or release action is authorized by rehearsal completion.
-
-## Completed P2-09
-
-- consolidated the cumulative P2 disposition, claims boundary, open-item/exit criteria, 17-document closeout allowlist, and next-work authority gate under `P2C-P2-09-R1`;
-- marked the closeout pack ready for internal review only; external consultation, institution answers, formal validation, next implementation, submission, signing, and release remain pending, blocked, or unauthorized.
-
-## Next Selection Gate
-
-1. Conduct an approved internal live rehearsal or external pre-consultation through a controlled channel.
-2. Capture retained answers and map them to `DEC-*` entries and `ACT-*` classes.
-3. Open the next numbered work item only after explicit authorization.
-4. Resume **P1-34** independently only after GitHub billing is resolved.
-
-## Deferred Until Explicit Scope Gate
-
-- AES-CTR/GCM/GMAC, generic AEAD, padding helpers, and tag truncation;
-- KDF public APIs and public-key algorithms;
-- key export, persistence, wrapping, multi-process CSP, and platform keystore;
-- hardware acceleration/dispatch and C++ convenience wrapper priority;
-- production signer/TSA provisioning, actual tag/signature/timestamp, and external release;
-- any statement that formal validation or institution review is complete.
+- KCMVP consultation, submission, and validation claims;
+- hosted completion claims;
+- production signer/TSA provisioning, signing, timestamping, or release;
+- PEM/DER/ASN.1/CSR/X.509/CRL/OCSP implementation in core;
+- HSM/KMS/PKCS#11/key_ref routing in core;
+- key persistence/export/wrapping;
+- RSA-PSS, Ed25519, ECDH, PQC, and other algorithms without new exact evidence.

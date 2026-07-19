@@ -1,10 +1,14 @@
 # AnoCrypto-C Development Workflow
 
-Status: P2-01 through P2-09 internal readiness and closeout sequence completed locally; external pre-consultation, institution answers, formal validation, submission, and release remain pending or unauthorized.
+Status: P3-07 public-key architecture gate completed with no public code/ABI change; P3-08 RSA PKCS#1 v1.5 SHA-2 and public-key handle foundation is the next product-driven slice. P2 validation-readiness, hosted, signing, KCMVP, and release lanes remain separate and incomplete.
 
 ## Purpose
 
 This document explains the working flow used for AnoCrypto-C after the C99 reboot. The goal is to keep implementation, public ABI, test evidence, clean-room records, and customer PoC packaging moving in the same order instead of adding algorithms without review gates.
+
+## Current P3 authority
+
+The current product-driven sequence is P3-02 HKDF, P3-03 GCM one-shot, P3-04 GCM streaming, P3-05 fixed-profile scrypt, P3-06 AnoSecureKit Enterprise parity/no-fallback, and P3-07 public-key architecture. P3-08 is selected next. Historical P1/P2 sequence tables below remain records and do not override `docs/roadmap/CURRENT_ACTIVE_NEXT.md` or `docs/roadmap/P3_PRODUCT_DRIVEN_ROADMAP.md`.
 
 ## Current phase map
 

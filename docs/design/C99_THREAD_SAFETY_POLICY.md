@@ -80,4 +80,25 @@ The concurrent test uses public synthetic HMAC/AES/CMAC fixture bytes only and m
 3. Review whether module init should block, reject, or otherwise define concurrent startup races more precisely.
 4. Add per-header guidance only where wording is stable enough for a public support boundary.
 5. Decide if future CSP operations require per-slot locks instead of one global lock.
-6. Define behavior for concurrent destroy versus long-running cryptographic operations for future key types.
+6. Implement and test the P3-07 operation-lease contract for future public-key types in P3-08.
+
+## P3-07 approved future public-key concurrency contract
+
+P3-07 adds no public-key code. For P3-08, the approved external semantics are:
+
+- import, lookup, destroy, state query, and allocation are serialized when the
+  reviewed lock branch is enabled;
+- sign/verify acquires an operation lease/pin before leaving the object-table
+  critical section; the complete private key is not copied as a snapshot;
+- concurrent explicit destroy marks the object closing, rejects new leases,
+  waits for existing leases, and then zeroizes; later stale-handle calls fail;
+- callers must not use destroy as a cancellation mechanism;
+- module shutdown/fatal transition is a barrier: an in-flight operation finishes
+  before state visibility or aborts and clears output;
+- operation-local private material is cleared before return;
+- thread-safety OFF requires caller serialization of all module and public-key
+  handle operations.
+
+The bounded lease/pin implementation, active-operation accounting, shutdown
+waiting, lock-failure behavior, and concurrency limits are `TODO_P3_08`. These rules do not extend the current runtime support matrix until
+P3-08 implementation and tests pass.

@@ -61,10 +61,38 @@ The module does not retain addresses of caller-owned opaque contexts. Callers mu
 ## Explicit exclusions
 
 - key export, persistence, wrapping, recovery, backup, rotation, platform keystore, and multi-process sharing;
-- public/private-key objects;
+- public/private-key objects in the current runtime; P3-07 defines only a future contract;
 - integrity-test key material until the P2-03 verifier is implemented;
 - universal optimizer, physical-remanence, constant-time, or formal-validation claims.
 
 ## Evidence
 
 Retained P2-05 evidence includes explicit-destroy/stale-handle tests, orderly-shutdown and fatal-transition zeroization regressions, a status-only policy review, source/policy checks, local compiler-output capture, install/PoC checks, and sensitive-artifact scanning. P3-04 adds streaming-context final/uninit cleanup and post-handle-snapshot semantics. P3-05 adds caller-workspace scrypt clearing, clean 80-symbol ABI checks, and current/retained consumer regression. Exact OE-01 GCC 13.3.0 human review remains `NOT_RUN`.
+
+## P3-07 approved future public-key lifecycle
+
+P3-07 changes no current CSP implementation. It approves the following contract
+for the P3-08 RSA/key-handle foundation:
+
+- reuse `ano_crypto_csp_handle_t` and the existing public/private key-class
+  values;
+- use a separate bounded module-owned public-key object pool rather than
+  silently enlarging every existing 128-byte symmetric slot;
+- treat copied handle values as aliases to one object, not independent
+  ownership;
+- import immutable algorithm-native components and retain no caller pointer;
+- accept `ANO_CRYPTO_KEY_FLAG_NONE` only in the first slice;
+- make public handles verify-only and private handles sign-only;
+- reuse existing destroy/state/is-valid functions;
+- invalidate every alias on destroy and reject stale generations;
+- clear complete private objects and metadata on destroy, orderly shutdown, and
+  fatal transition;
+- acquire an operation lease/pin rather than copying a complete private-key
+  snapshot; destroy marks the object closing, rejects new leases, waits for
+  active leases, and then zeroizes;
+- require a module-wide shutdown/fatal barrier so no public-key operation emits
+  output after the transition becomes externally visible.
+
+Exact pool capacity, object size, RSA limits, handle-index partition, and
+concurrent-operation ceiling remain `TODO_P3_08_RESOURCE_GATE`. The lease/pin
+semantics are approved, but no public-key object exists in the P3-07 runtime.

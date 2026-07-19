@@ -1,6 +1,12 @@
 # Current / Active / Next
 
-Status: `P3_06_COMPLETE_P3_07_READY`
+Status: `P3_07_COMPLETE_P3_08_READY`
+
+## Retained P3-01 policy compatibility
+
+`P3-02 minimal HKDF-SHA-256 API` is the historical selected-implementation
+token retained for the frozen P3-01 policy checker. P3-02 is complete and is
+not the current task.
 
 ## DONE
 
@@ -8,35 +14,45 @@ Status: `P3_06_COMPLETE_P3_07_READY`
 - P2 local validation-readiness snapshot.
 - P3-00 downstream intake gate.
 - P3-01 four-source requirement consolidation and ownership decisions.
-- P3-02 minimal HKDF-SHA-256 API and additive `ANOCRYPTO_C_1` evidence.
-- P3-03 AES-256-GCM one-shot and additive `ANOCRYPTO_C_2` evidence.
-- P3-04 AES-256-GCM streaming and additive `ANOCRYPTO_C_3` evidence.
-- P3-05 fixed-profile scrypt, caller-owned resource gate, and additive
-  `ANOCRYPTO_C_4` evidence.
-- P3-06 AnoSecureKit Enterprise seven-capability parity and no-fallback
-  engineering checkpoint. P3-06 changed no AnoCrypto-C public header, symbol,
-  or ABI line.
+- P3-02 HKDF-SHA-256.
+- P3-03 AES-256-GCM one-shot.
+- P3-04 AES-256-GCM streaming.
+- P3-05 fixed-profile scrypt.
+- P3-06 AnoSecureKit Enterprise seven-capability parity/no-fallback checkpoint.
+- P3-07 public-key key-handle architecture and AnoPKI contract gate.
+
+P3-07 approved a common internally tagged CSP handle, normalized RSA/P-256
+component import, message-based generic sign/verify, core-owned RSA DigestInfo,
+and raw P-256 `r || s`. It changed no public code or ABI.
 
 ## ACTIVE
 
-`P3-07: Public-key key-handle architecture and AnoPKI contract gate`
+No implementation is active in this artifact.
 
-P3-07 is design-only. It must review exact AnoPKI requirements, freeze ownership
-boundaries, compare handle/import/signature API alternatives, define lifecycle
-and failure contracts, produce a future symbol budget, and select at most one
-subsequent implementation slice.
+## NEXT
 
-P3-07 may not add public code, headers, functions, types, enum values, symbols,
-or `ANOCRYPTO_C_5`. It may not implement SHA-1, RSA, ECDSA, PEM, DER, ASN.1,
-CSR, X.509, CRL, OCSP, HSM, KMS, or PKCS#11 routing.
+`P3-08: RSA PKCS#1 v1.5 SHA-256/384/512 and RSA key-handle import`
 
-## NEXT AFTER THE GATE
+P3-08 must begin with its own API/ABI review. The current candidate target is:
 
-`NOT_SELECTED`.
+- one RSA public/private component import function;
+- one generic message-based sign function;
+- one generic message-based verify function;
+- reuse existing key destroy/state and CSP validity/state functions;
+- at most three new public symbols unless the review proves another symbol is
+  necessary;
+- one additive ABI line only after exact approval.
 
-A later task may implement at most one explicitly approved slice after P3-07.
-RSA, ECDSA, and restricted SHA-1 do not receive implementation authorization
-from this roadmap entry alone.
+P3-08 must freeze RSA key-size/exponent policy, bounded storage, component
+validation, concurrency leases, buffers/failure clearing, KATs, differential
+validation, AnoPKI compatibility, and symbol-version evidence before merge.
+
+## LATER
+
+- P-256 ECDSA implementation using the shared sign/verify contract;
+- restricted SHA-1 only through a separate misuse-resistant OCSP CertID gate;
+- AnoPKI Enterprise public-key parity/no-fallback checkpoint after relevant
+  primitives exist.
 
 ## DEFERRED / BLOCKED
 
@@ -45,6 +61,8 @@ from this roadmap entry alone.
 - Repository signing: `UNSIGNED`.
 - Signing handoff: `BLOCKED`.
 - External release authorization: `NO`.
-- AnoSecureKit content discrepancy: `CLOSED_P3_06`.
-- Original upstream Git-tree reproduction: `EXTERNAL_CONFIRMATION_REQUIRED`.
+- Original AnoSecureKit upstream Git-tree reproduction:
+  `EXTERNAL_CONFIRMATION_REQUIRED`.
+- Exact AnoPKI Enterprise source ZIP byte recomputation for P3-07:
+  `EXTERNAL_CONFIRMATION_REQUIRED`.
 - Trusted release provenance acceptance: `OPEN`.

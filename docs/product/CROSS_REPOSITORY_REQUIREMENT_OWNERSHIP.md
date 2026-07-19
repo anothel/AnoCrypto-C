@@ -1,45 +1,62 @@
 # Cross-Repository Requirement Ownership
 
-Status: `P3_07_ENTRY_BOUNDARIES_APPROVED`
+Status: `P3_07_PUBLIC_KEY_BOUNDARY_APPROVED`
 
-## Fixed decisions
+## Retained P3-01 policy compatibility
+
+The historical P3-01 policy statement remains true: **AnoPKI retains all codec**
+work, object construction, and PKI workflow ownership. P3-07 narrows only the
+generic primitive/key-handle boundary and does not transfer those responsibilities.
+
+## Fixed ownership
 
 | Area | Owner |
 |---|---|
-| Community public API, CLI, format and backend-neutral semantics | corresponding Community repository |
-| Enterprise profile, diagnostics, packaging, capability mask and no-fallback adapter | corresponding Enterprise repository |
-| Generic hash, MAC, KDF, AEAD, public-key primitive, random, CSP/key lifecycle and stable C ABI | AnoCrypto-C, after an explicit gate |
-| `SKT1`, `SKF1`, `SKP1`, file/chunk framing, nonce composition and application output policy | AnoSecureKit |
-| ASN.1, PEM/DER, PKCS#10, X.509, CRL, OCSP, chain/EKU/time policy and normalized operation results | AnoPKI |
-| key-reference parsing, provider selection, HSM/KMS/PKCS#11 routing, signing evidence, retry/idempotency and audit | Enterprise product |
+| Community public API, CLI, format, and backend-neutral semantics | corresponding Community repository |
+| Enterprise profile, diagnostics, packaging, capability mask, and no-fallback adapter | corresponding Enterprise repository |
+| Generic hash, MAC, KDF, AEAD, public-key primitive, random, CSP/key lifecycle, module state, and stable C ABI | AnoCrypto-C after an explicit gate |
+| `SKT1`, `SKF1`, `SKP1`, framing, nonce composition, and application output policy | AnoSecureKit |
+| ASN.1, PEM/DER, PKCS#10, X.509, CRL, OCSP, chain/EKU/time policy, and normalized results | AnoPKI |
+| `key_ref`, provider selection, HSM/KMS/PKCS#11, retries, authorization, signing evidence, and audit | Enterprise product |
 
-## Public-key boundary
+## Approved public-key boundary
 
-| Concern | AnoCrypto-C candidate responsibility | Retained downstream responsibility |
+| Concern | AnoCrypto-C | AnoPKI / Enterprise |
 |---|---|---|
-| key lifecycle | generic in-memory public/private key handle, purpose/algorithm binding, destruction and zeroization | provider routing, authorization, persistence and external non-exportable key custody |
-| key ingress | minimal algorithm-native key components after gate | PEM/DER/ASN.1/PKCS#8/SPKI parsing and validation workflow |
-| sign/verify | generic RSA/ECDSA primitive after separate implementation gates | CSR/certificate/CRL/OCSP object construction and policy |
-| signature encoding | candidate fixed primitive representation only | PKI DER encoding, object embedding and normalized result policy |
-| external key reference | not parsed or routed by core | Enterprise HSM/KMS/PKCS#11 selection, retries, evidence and audit |
+| handle identity | common opaque `ano_crypto_csp_handle_t` with internal role/algorithm/purpose tags | adapters retain only opaque tokens for the local module path |
+| lifecycle | non-exportable in-memory import, stale rejection, destroy, zeroization, module-state, concurrency lease | provider custody, authorization, persistence, recovery, and external provider lifetime |
+| key ingress | normalized RSA and P-256 components | PEM/DER/ASN.1/PKCS#8/SPKI parsing and product policy |
+| binding | mathematical component consistency and private/public material match supplied at import | extract issuer/CSR public material and select the expected binding |
+| sign/verify | generic message-based RSA/ECDSA primitive | exact TBS construction, signatureAlgorithm identifiers, object embedding, result policy |
+| RSA encoding | SHA-2, DigestInfo, EMSA-PKCS1-v1_5 | PKI object identifiers and TBS bytes |
+| ECDSA encoding | raw fixed-width `r || s` | canonical ASN.1 DER conversion |
+| external key | no `key_ref`, HSM, KMS, PKCS#11, retry, evidence, or audit | Enterprise-owned, possibly signing without private-key export |
 
-## P3-07 undecided items
+## Rejected or deferred ownership transfers
 
-- message-based versus digest-based sign/verify API;
-- separate public/private handle types versus a common tagged handle;
-- RSA and EC key-component import shape;
-- ECDSA raw `r || s` representation versus another primitive-level contract;
-- future symbol count and ABI-line assignment.
+- AnoCrypto-C does not parse or emit PKI objects or key containers.
+- AnoCrypto-C does not implement a product key-provider router.
+- AnoPKI does not reimplement RSA/ECDSA/SHA algorithms inside an adapter.
+- Enterprise does not treat a local AnoCrypto-C handle as an HSM/KMS identity.
+- OpenSSL call sequences are implementation evidence, not a core API proposal.
+- No AnoCrypto-C profile silently falls back to OpenSSL.
 
-These items are `TODO` for the P3-07 architecture gate and are not implementation
-authorization.
+## Resolved P3-07 questions
 
-## Boundary consequences
+- common internally tagged handle: `APPROVED`;
+- algorithm-native components: `APPROVED`;
+- message-based sign/verify: `APPROVED`;
+- RSA DigestInfo in core: `APPROVED`;
+- P-256 raw `r || s`: `APPROVED`;
+- candidate RSA budget of three symbols: `APPROVED_CANDIDATE_BUDGET`;
+- next slice RSA: `APPROVED_P3_08_SELECTION`.
 
-- AnoPKI retains all codec, PKI object, and policy semantics.
-- OpenSSL `X509_*`, `OCSP_*`, `PEM_*`, `d2i_*`, and `i2d_*` call sequences are
-  not copied into AnoCrypto-C.
-- AnoSecureKit v1 bytes remain downstream-owned.
-- Provider capability masks remain downstream-owned and must report only real
-  linked services.
-- No operation may fall back to OpenSSL when an AnoCrypto-C profile is selected.
+## Remaining decisions
+
+- exact RSA sizes/exponent policy and final prototypes: `TODO_P3_08`;
+- bounded asymmetric storage design and capacity: `TODO_P3_08`;
+- ECDSA nonce/determinism/low-`s`: `TODO_P3_09`;
+- restricted SHA-1 public API containment: `TODO_LATER_GATE`;
+- exact Enterprise raw archive byte recomputation:
+  `EXTERNAL_CONFIRMATION_REQUIRED`;
+- HSM/KMS/PKCS#11 integration: `DEFERRED_ENTERPRISE_OWNED`.

@@ -41,3 +41,23 @@ tree object, trusted delivery provenance, signing, or customer release approval.
 - A document revision marker that conflicts with its enclosing collection
   manifest does not override the exact archive/collection identity.
 - OpenSSL calls are implementation evidence, not a proposed AnoCrypto-C API.
+
+## P3-07 AnoPKI re-verification
+
+| Field | Value |
+|---|---|
+| Community exact commit | `ae3ddee72dd05f274b9bbae1b514cdc4c4de03f5` |
+| Community Git object and relevant path review | `VERIFIED_P3_07` |
+| Community source archive identity | `2f5b5750631a4af39293e10a420a6667ff430e682a3ab24bf3f3e54dbc298ac2` / supplied exact manifest |
+| Enterprise exact revision | `68b379e7684c9d8b44c53728949774088352a9d9` |
+| Enterprise source archive identity | `af5acc349deee69650a4767a51fdc0214cd529561a9ece906a18ab0eebe7033d` / supplied exact manifest |
+| Enterprise collection identity | `ed55d2aa2ebdd561dc2549d01d1bd8f3fd0bd2d2144c3ce3b74083d86fb47704` |
+| Enterprise source archive byte-level recomputation | `EXTERNAL_CONFIRMATION_REQUIRED` |
+
+The exact Community operation/provider/test paths were re-read at the exact ref.
+Enterprise commit/source/collection identities were cross-checked, but the raw
+Enterprise archive bytes were not mounted in the P3-07 runtime. Source-derived
+Enterprise documents establish ownership/profile direction only; they do not
+establish fresh private implementation or executable evidence. This limitation
+does not transfer provider routing, PKI codecs, or Enterprise behavior into
+AnoCrypto-C.
