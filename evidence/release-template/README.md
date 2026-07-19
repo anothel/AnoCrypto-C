@@ -45,9 +45,10 @@ This directory is a release evidence skeleton. It is not a completed release evi
 - AES/CBC implementation and hardening policy results
 - AES lifecycle/portability review log
 - AES compiler-output summary and disassembly for manual internal review
-- Clean Release retained 69-symbol ABI-0 and current 72-symbol additive result
+- Clean Release retained 69-symbol ABI-0 and current 79-symbol additive result
 - P3-02 HKDF-SHA-256 policy and implementation review
 - P3-03 AES-256-GCM one-shot policy and implementation review
+- P3-04 AES-256-GCM streaming policy and implementation review
 
 ## P1 Evidence Notes
 
@@ -225,7 +226,7 @@ Include and review:
 - `ano_crypto_build_identity_abi_tests` result;
 - actual hosted thread-platform artifacts when available.
 
-Confirm the cross-platform concurrency test uses native Win32 threads or pthreads, the clean Release/PoC sanitizer mode is `none`, the public symbol count remains 53, and build-identity ABI version 1 matches the recorded field order. Clang sanitizer runtime, ThreadSanitizer, and hosted Windows/macOS result review remain TODO until actual artifacts are retained.
+Confirm the cross-platform concurrency test uses native Win32 threads or pthreads, the clean Release/PoC sanitizer mode is `none`, the historical P1-21 surface remains retained inside the current 79-symbol additive surface, and build-identity ABI version 1 matches the recorded field order. Clang sanitizer runtime, ThreadSanitizer, and hosted Windows/macOS result review remain TODO until actual artifacts are retained.
 
 
 ## P1-22 SHA-512 Family Review
@@ -235,7 +236,7 @@ Review `SHA512_FAMILY_CHECK.txt`, `SHA512_FAMILY_REVIEW_NOTES.txt`, startup/exte
 
 ## P1-23 Differential and Portability Review
 
-Review `DIFFERENTIAL_PORTABILITY_CHECK.txt`, `DIFFERENTIAL_VALIDATION.log`, `SHA512_PORTABILITY_REVIEW.log`, and `DIFFERENTIAL_PORTABILITY_REVIEW_NOTES.txt`. Confirm OpenSSL is test-only and absent from product/installed/PoC runtime dependencies, the public symbol count remains 53, and logs retain only provider/version, architecture/representation metadata, comparison count, and status. Actual hosted 32-bit, Windows, macOS, and big-endian artifacts must not be marked reviewed unless the referenced runs completed successfully.
+Review `DIFFERENTIAL_PORTABILITY_CHECK.txt`, `DIFFERENTIAL_VALIDATION.log`, `SHA512_PORTABILITY_REVIEW.log`, and `DIFFERENTIAL_PORTABILITY_REVIEW_NOTES.txt`. Confirm OpenSSL is test-only and absent from product/installed/PoC runtime dependencies, the historical P1-23 surface remains retained inside the current 79-symbol additive surface, and logs retain only provider/version, architecture/representation metadata, comparison count, and status. Actual hosted 32-bit, Windows, macOS, and big-endian artifacts must not be marked reviewed unless the referenced runs completed successfully.
 
 
 ## P1-26 AES/CBC Hardening Review

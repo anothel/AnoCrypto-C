@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p3-03 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p3-04 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p3-03")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p3-04")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -160,6 +160,10 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_AES256_GCM_CHECK)
     set(ANO_CRYPTO_RUN_AES256_GCM_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_AES256_GCM_STREAMING_CHECK)
+    set(ANO_CRYPTO_RUN_AES256_GCM_STREAMING_CHECK ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK)
@@ -976,6 +980,29 @@ else()
         "AES-256-GCM policy check was not requested. Set ANO_CRYPTO_RUN_AES256_GCM_CHECK=ON.\n")
 endif()
 
+if(ANO_CRYPTO_RUN_AES256_GCM_STREAMING_CHECK)
+    set(_aes256_gcm_streaming_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/AES256_GCM_STREAMING_POLICY_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_AES256_GCM_STREAMING_POLICY_CHECK_OUTPUT=${_aes256_gcm_streaming_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_aes256_gcm_streaming_policy.cmake"
+        RESULT_VARIABLE _aes256_gcm_streaming_check_result
+        OUTPUT_VARIABLE _aes256_gcm_streaming_check_stdout
+        ERROR_VARIABLE _aes256_gcm_streaming_check_stderr
+        TIMEOUT 300)
+    file(APPEND "${_aes256_gcm_streaming_check_output}"
+        "\nCommand output:\n${_aes256_gcm_streaming_check_stdout}${_aes256_gcm_streaming_check_stderr}\n")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "AES-256-GCM P3-04 streaming policy check result: ${_aes256_gcm_streaming_check_result}\n")
+    if(NOT _aes256_gcm_streaming_check_result EQUAL 0)
+        message(FATAL_ERROR "AES-256-GCM streaming policy check failed; see ${_aes256_gcm_streaming_check_output}")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES256_GCM_STREAMING_POLICY_CHECK.txt"
+        "AES-256-GCM streaming policy check was not requested. Set ANO_CRYPTO_RUN_AES256_GCM_STREAMING_CHECK=ON.\n")
+endif()
+
 if(ANO_CRYPTO_RUN_CMAC_HARDENING_CHECK)
     set(_cmac_hardening_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/AES_CMAC_HARDENING_CHECK.txt")
     execute_process(
@@ -1615,11 +1642,11 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DOWNSTREAM_REQUIREMENT_ANALYSIS_NOTES.txt
 "
     "Accepted requirements/approved gaps: 20/8.
 "
-    "Selected implementation: P3-02_HKDF_SHA256_COMPLETE; P3-03_AES256_GCM_ONESHOT_COMPLETE.
+    "Selected implementation: P3-02_HKDF_SHA256_COMPLETE; P3-03_AES256_GCM_ONESHOT_COMPLETE; P3-04_AES256_GCM_STREAMING_COMPLETE.
 "
     "P3-01 frozen public ABI: 14 headers, 69 symbols, ANOCRYPTO_C_0.
 "
-    "Public API/new ABI authorization: P3_02_AND_P3_03_ADDITIVE/ANOCRYPTO_C_1_HKDF_AND_ANOCRYPTO_C_2_AES256_GCM.
+    "Public API/new ABI authorization: P3_02_THROUGH_P3_04_ADDITIVE/ANOCRYPTO_C_1_HKDF_ANOCRYPTO_C_2_GCM_ONESHOT_ANOCRYPTO_C_3_GCM_STREAMING.
 "
     "KCMVP active lane: DEFERRED.
 "
@@ -1687,6 +1714,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "P3-01 downstream requirement analysis policy check: DOWNSTREAM_REQUIREMENT_ANALYSIS_POLICY_CHECK.txt\n"
     "P3-02 HKDF-SHA-256 policy check: HKDF_SHA256_POLICY_CHECK.txt\n"
     "P3-03 AES-256-GCM one-shot policy check: AES256_GCM_POLICY_CHECK.txt\n"
+    "P3-04 AES-256-GCM streaming policy check: AES256_GCM_STREAMING_POLICY_CHECK.txt\n"
     "Differential/portability policy check: DIFFERENTIAL_PORTABILITY_CHECK.txt\n"
     "AES/CBC implementation policy check: AES_CBC_IMPLEMENTATION_CHECK.txt\n"
     "AES/CBC hardening policy check: AES_HARDENING_CHECK.txt\n"
@@ -1701,9 +1729,9 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P3-03 evidence and scope-review notes\n"
+    "AnoCrypto-C P3-04 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P3-03 generic AES-256-GCM one-shot implementation and additive ABI evidence. P3-02 HKDF-SHA-256 remains retained; P3-01 remains the accepted downstream requirement baseline.\n"
+    "Status: P3-04 generic AES-256-GCM streaming implementation and additive ABI evidence. P3-03 one-shot and P3-02 HKDF-SHA-256 remain retained; P3-01 remains the accepted downstream requirement baseline.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"
@@ -1722,7 +1750,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/HKDF_SHA256_REVIEW_NOTES.txt"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
     "Status: local engineering implementation and compatibility evidence; not formal validation evidence.\n"
     "Public API: one combined extract-and-expand function in include/anocrypto/ac_kdf.h.\n"
-    "ABI: all 69 ANOCRYPTO_C_0 symbols retained; ano_crypto_hkdf_sha256 remains on ANOCRYPTO_C_1; current total including P3-03 is 72.\n"
+    "ABI: all 69 ANOCRYPTO_C_0 symbols retained; HKDF remains on ANOCRYPTO_C_1; one-shot GCM remains on ANOCRYPTO_C_2; seven streaming symbols are on ANOCRYPTO_C_3; current total is 79.\n"
     "Bounds: output lengths 0 through 8160 accepted; 8161 rejected without partial output.\n"
     "Semantics: RFC 5869 empty salt, empty IKM, empty info, zero-length output, range, alias, overlap, and failure-clearing rules are documented and tested.\n"
     "Compatibility: exact AnoSecureKit SKF1 v1 info bytes are covered by a fixed test vector; SKF1 framing and workflow remain AnoSecureKit-owned.\n"
@@ -1738,7 +1766,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES256_GCM_REVIEW_NOTES.txt"
     "Status: local engineering implementation and compatibility evidence; not formal validation evidence.\n"
     "Public API: two one-shot functions in include/anocrypto/ac_aead.h for encrypt and decrypt.\n"
     "Fixed profile: 32-byte block-cipher CSP key, 12-byte nonce, and 16-byte tag.\n"
-    "ABI: all 69 ANOCRYPTO_C_0 symbols and the ANOCRYPTO_C_1 HKDF symbol retained; two AES-256-GCM symbols added on ANOCRYPTO_C_2; current total 72.\n"
+    "ABI: the P3-03 slice added two AES-256-GCM symbols on ANOCRYPTO_C_2 for a then-current total of 72; P3-04 retains them inside the current 79-symbol surface.\n"
     "Buffer rules: empty AAD/payload valid, exact payload in-place supported, partial overlap rejected, and length/overflow ranges checked.\n"
     "Authentication release rule: decrypt verifies the complete tag before writing plaintext; validation or authentication failure returns no partial output and clears the accepted output range.\n"
     "Compatibility: exact AnoSecureKit SKT1, SKF1, and SKP1 v1 GCM inputs/outputs are covered without implementing product framing, nonce construction, password derivation, or workflows.\n"
@@ -1748,6 +1776,24 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES256_GCM_REVIEW_NOTES.txt"
     "Sensitive values recorded in this review note: none.\n")
 file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
     "AES-256-GCM review notes: AES256_GCM_REVIEW_NOTES.txt\n")
+
+file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES256_GCM_STREAMING_REVIEW_NOTES.txt"
+    "AnoCrypto-C P3-04 AES-256-GCM streaming review notes\n"
+    "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
+    "Status: local engineering implementation and compatibility evidence; not formal validation evidence.\n"
+    "Public API: seven caller-owned opaque-context functions in include/anocrypto/ac_aead.h.\n"
+    "Context storage: malloc/calloc/realloc or equivalent C-object alignment is required; misaligned storage is rejected before internal access.\n"
+    "State model: direction bound at init; AAD before non-empty payload; correct-direction final consumes and clears context.\n"
+    "Decrypt release policy: update output is unverified until final succeeds; caller must buffer, withhold, and wipe it on failure.\n"
+    "Buffer policy: exact payload in-place is supported; partial overlap and out_written overlap with context/input/output are rejected.\n"
+    "ABI: 69 ANOCRYPTO_C_0, one ANOCRYPTO_C_1, two ANOCRYPTO_C_2, and seven ANOCRYPTO_C_3 symbols; current total 79.\n"
+    "Compatibility: exact AnoSecureKit SKT1 v1 primitive bytes and arbitrary chunk boundaries are covered without implementing framing or product workflow.\n"
+    "Differential provider: OpenSSL 3.x is test-only and is not linked by the product library.\n"
+    "KCMVP/hosted/signing/external release: DEFERRED/NOT_RUN-UNREVIEWED/UNSIGNED/NO.\n"
+    "Community dependency identity conflict: OPEN_DOWNSTREAM_SYNC_DECISION.\n"
+    "Sensitive values recorded in this review note: none.\n")
+file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+    "AES-256-GCM streaming review notes: AES256_GCM_STREAMING_REVIEW_NOTES.txt\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SHA512_FAMILY_REVIEW_NOTES.txt"
     "AnoCrypto-C SHA-384/SHA-512 family review notes\n"
@@ -1835,10 +1881,10 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Random lifecycle re
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt"
     "AnoCrypto-C exported-symbol baseline review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P3-03 additive clean Release ABI guardrail; not a complete ABI compatibility claim.\n"
+    "Status: P3-04 additive clean Release ABI guardrail; not a complete ABI compatibility claim.\n"
     "Retained baseline: abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt\n"
     "Current manifest: abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt\n"
-    "Expected retained/current symbol counts: 69/72\n"
+    "Expected retained/current symbol counts: 69/79\n"
     "Automated result: EXPORTED_SYMBOL_BASELINE_CHECK.txt\n"
     "The check compares a clean shared Release build with test hooks disabled and internal symbol hiding enabled.\n"
     "Public struct layout, calling convention, type size, semantic compatibility, and platform-specific binary details remain separate review items.\n")
@@ -2126,13 +2172,17 @@ _ano_crypto_find_evidence_test_executable(
     ano_crypto_aes_cmac_openssl_differential_tests _aes_cmac_diff_executable)
 _ano_crypto_find_evidence_test_executable(
     ano_crypto_aes256_gcm_openssl_differential_tests _aes256_gcm_diff_executable)
+_ano_crypto_find_evidence_test_executable(
+    ano_crypto_aes256_gcm_streaming_openssl_differential_tests
+    _aes256_gcm_streaming_diff_executable)
 
 if(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE)
     if(NOT (_sha2_diff_executable AND
             _hkdf_diff_executable AND
             _aes_cbc_diff_executable AND
             _aes_cmac_diff_executable AND
-            _aes256_gcm_diff_executable))
+            _aes256_gcm_diff_executable AND
+            _aes256_gcm_streaming_diff_executable))
         message(FATAL_ERROR
             "Configured OpenSSL differential validation executables are incomplete")
     endif()
@@ -2151,31 +2201,39 @@ if(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE)
     _ano_crypto_run_evidence_test(
         ano_crypto_aes256_gcm_openssl_differential_tests
         _aes256_gcm_diff_result _aes256_gcm_diff_stdout _aes256_gcm_diff_stderr)
+    _ano_crypto_run_evidence_test(
+        ano_crypto_aes256_gcm_streaming_openssl_differential_tests
+        _aes256_gcm_streaming_diff_result
+        _aes256_gcm_streaming_diff_stdout
+        _aes256_gcm_streaming_diff_stderr)
 
     file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log"
         "${_sha2_diff_stdout}${_sha2_diff_stderr}"
         "${_hkdf_diff_stdout}${_hkdf_diff_stderr}"
         "${_aes_cbc_diff_stdout}${_aes_cbc_diff_stderr}"
         "${_aes_cmac_diff_stdout}${_aes_cmac_diff_stderr}"
-        "${_aes256_gcm_diff_stdout}${_aes256_gcm_diff_stderr}")
+        "${_aes256_gcm_diff_stdout}${_aes256_gcm_diff_stderr}"
+        "${_aes256_gcm_streaming_diff_stdout}${_aes256_gcm_streaming_diff_stderr}")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-        "OpenSSL differential validation results: sha2-hmac=${_sha2_diff_result}; hkdf-sha256=${_hkdf_diff_result}; aes-cbc=${_aes_cbc_diff_result}; aes-cmac=${_aes_cmac_diff_result}; aes256-gcm=${_aes256_gcm_diff_result}\n")
+        "OpenSSL differential validation results: sha2-hmac=${_sha2_diff_result}; hkdf-sha256=${_hkdf_diff_result}; aes-cbc=${_aes_cbc_diff_result}; aes-cmac=${_aes_cmac_diff_result}; aes256-gcm=${_aes256_gcm_diff_result}; aes256-gcm-streaming=${_aes256_gcm_streaming_diff_result}\n")
     if(NOT _sha2_diff_result EQUAL 0 OR
        NOT _hkdf_diff_result EQUAL 0 OR
        NOT _aes_cbc_diff_result EQUAL 0 OR
        NOT _aes_cmac_diff_result EQUAL 0 OR
        NOT _aes256_gcm_diff_result EQUAL 0 OR
+       NOT _aes256_gcm_streaming_diff_result EQUAL 0 OR
        NOT _sha2_diff_stdout MATCHES "sha2-hmac-differential status=pass" OR
        NOT _hkdf_diff_stdout MATCHES "hkdf_sha256_openssl_differential_tests: PASS" OR
        NOT _aes_cbc_diff_stdout MATCHES "AES-CBC OpenSSL differential comparisons passed" OR
        NOT _aes_cmac_diff_stdout MATCHES "OpenSSL 3.x AES-CMAC differential validation passed" OR
-       NOT _aes256_gcm_diff_stdout MATCHES "AES-256-GCM OpenSSL differential comparisons: 640")
+       NOT _aes256_gcm_diff_stdout MATCHES "AES-256-GCM OpenSSL differential comparisons: 640" OR
+       NOT _aes256_gcm_streaming_diff_stdout MATCHES "AES-256-GCM streaming OpenSSL differential comparisons: 256")
         message(FATAL_ERROR "OpenSSL differential validation failed; see ${ANO_CRYPTO_EVIDENCE_DIR}/DIFFERENTIAL_VALIDATION.log")
     endif()
 else()
     if(_sha2_diff_executable OR _hkdf_diff_executable OR
        _aes_cbc_diff_executable OR _aes_cmac_diff_executable OR
-       _aes256_gcm_diff_executable)
+       _aes256_gcm_diff_executable OR _aes256_gcm_streaming_diff_executable)
         message(FATAL_ERROR
             "Stale OpenSSL differential executables are present although the provider is not configured")
     endif()
@@ -2438,6 +2496,8 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `HKDF_SHA256_REVIEW_NOTES.txt`: P3-02 semantics, compatibility boundary, differential-provider boundary, and retained external-status notes.\n"
 "- `AES256_GCM_POLICY_CHECK.txt`: P3-03 two-function API, fixed profile, authenticate-before-release, additive ABI, exact AnoSecureKit compatibility, and blocker-state policy check.\n"
 "- `AES256_GCM_REVIEW_NOTES.txt`: P3-03 semantics, product-boundary compatibility, differential-provider boundary, and retained external-status notes.\n"
+"- `AES256_GCM_STREAMING_POLICY_CHECK.txt`: P3-04 seven-function state-machine, pre-final decrypt policy, additive ABI, exact SKT1 compatibility, and blocker-state policy check.\n"
+"- `AES256_GCM_STREAMING_REVIEW_NOTES.txt`: P3-04 state, caller-buffering, product-boundary, differential-provider, and retained external-status notes.\n"
 "- `AES_CMAC_HARDENING_CHECK.txt`: P1-29 context, cleanup, lifecycle, concurrency, differential, compiler-review, and unchanged-ABI policy check.\n"
 "- `AES_CMAC_HARDENING_REVIEW.log`: status-only CMAC context, alias, cleanup, and mismatch-position review.\n"
 "- `AES_CMAC_LIFECYCLE_STRESS.log`: 128-iteration CMAC lifecycle and handle-snapshot stress result.\n"
@@ -2446,14 +2506,14 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `AES_CMAC_REVIEW_NOTES.txt`: full-tag CMAC scope, dedicated key-purpose, hardening boundary, and remaining review notes.\n"
 "- `SHA512_FAMILY_CHECK.txt`: SHA-384/SHA-512 family implementation, KAT, negative-test, and package wiring check.\n"
 "- `DIFFERENTIAL_PORTABILITY_CHECK.txt`: OpenSSL test-only provider, deterministic comparison, C99 representation, and portability policy check.\n"
-"- `DIFFERENTIAL_VALIDATION.log`: status-only OpenSSL 3.x SHA-2/HMAC, HKDF-SHA-256, AES-CBC, AES-CMAC, and AES-256-GCM differential result.\n"
+"- `DIFFERENTIAL_VALIDATION.log`: status-only OpenSSL 3.x SHA-2/HMAC, HKDF-SHA-256, AES-CBC, AES-CMAC, AES-256-GCM one-shot, and AES-256-GCM streaming differential result.\n"
 "- `SHA512_PORTABILITY_REVIEW.log`: status-only representation, endian, and unaligned-input review.\n"
 "- `DIFFERENTIAL_PORTABILITY_REVIEW_NOTES.txt`: provider/product boundary and remaining hosted-artifact review notes.\n"
 "- `RANDOM_SERVICE_CHECK.txt`: public random-service implementation policy check.\n"
 "- `RANDOM_SERVICE_REVIEW_NOTES.txt`: random-service implementation review notes.\n"
 "- `RANDOM_LIFECYCLE_HARDENING_CHECK.txt`: P1-26 lifecycle, process-marker, VM policy, hook, and ABI-baseline policy check.\n"
 "- `RANDOM_LIFECYCLE_REVIEW_NOTES.txt`: status-only lifecycle and portability review notes.\n"
-"- `EXPORTED_SYMBOL_BASELINE_CHECK.txt`: clean Release comparison against the retained 69-symbol ABI-0 baseline and current 72-symbol additive manifest.\n"
+"- `EXPORTED_SYMBOL_BASELINE_CHECK.txt`: clean Release comparison against the retained 69-symbol ABI-0 baseline and current 79-symbol additive manifest.\n"
 "- `EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt`: exported-symbol guardrail scope and limitations.\n"
 "- `ENTROPY_HEALTH_CHECK.txt`: entropy failure-injection and health-test boundary policy check.\n"
 "- `ENTROPY_HEALTH_REVIEW_NOTES.txt`: health-test state-transition and logging review notes.\n"

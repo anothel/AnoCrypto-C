@@ -1,6 +1,13 @@
-# Current additive exported-symbol baseline (ANOCRYPTO_C_0 + ANOCRYPTO_C_1 + ANOCRYPTO_C_2).
+# Current additive exported-symbol baseline (ANOCRYPTO_C_0 + ANOCRYPTO_C_1 + ANOCRYPTO_C_2 + ANOCRYPTO_C_3).
 ano_crypto_aes256_gcm_decrypt
 ano_crypto_aes256_gcm_encrypt
+ano_crypto_aes256_gcm_stream_aad_update
+ano_crypto_aes256_gcm_stream_context_size
+ano_crypto_aes256_gcm_stream_decrypt_final
+ano_crypto_aes256_gcm_stream_encrypt_final
+ano_crypto_aes256_gcm_stream_init
+ano_crypto_aes256_gcm_stream_uninit
+ano_crypto_aes256_gcm_stream_update
 ano_crypto_build_fingerprint
 ano_crypto_build_identity
 ano_crypto_cipher_algorithm_name

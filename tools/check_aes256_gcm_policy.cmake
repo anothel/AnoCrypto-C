@@ -53,11 +53,12 @@ if(NOT ANO_CRYPTO_AES256_GCM_PUBLIC_FUNCTION_COUNT EQUAL 2 OR
   list(APPEND _violations "frozen AES-256-GCM API/ABI policy values drifted")
 endif()
 if(NOT ANO_CRYPTO_CURRENT_PUBLIC_HEADER_COUNT EQUAL 16 OR
-   NOT ANO_CRYPTO_CURRENT_SYMBOL_COUNT EQUAL 72 OR
+   NOT ANO_CRYPTO_CURRENT_SYMBOL_COUNT EQUAL 79 OR
    NOT ANO_CRYPTO_ABI0_SYMBOL_COUNT EQUAL 69 OR
    NOT ANO_CRYPTO_ABI1_SYMBOL_COUNT EQUAL 1 OR
    NOT ANO_CRYPTO_ABI2_SYMBOL_COUNT EQUAL 2 OR
-   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_2")
+   NOT ANO_CRYPTO_ABI3_SYMBOL_COUNT EQUAL 7 OR
+   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_3")
   list(APPEND _violations "current additive public identity mismatch")
 endif()
 if(NOT ANO_CRYPTO_AES256_GCM_KCMVP_LANE STREQUAL "DEFERRED" OR
@@ -80,10 +81,14 @@ require_text("CMakeLists.txt" "tests/kat/aes256_gcm_kat_tests.c")
 require_text("CMakeLists.txt" "tests/negative/aes256_gcm_api_negative_tests.c")
 require_text("CMakeLists.txt" "tests/differential/aes256_gcm_openssl_differential_tests.c")
 file(READ "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/ac_aead.h" _header)
-string(REGEX MATCHALL "ANO_CRYPTO_API[ \t\r\n]+ano_crypto_status_t[ \t\r\n]+ano_crypto_aes256_gcm_[A-Za-z0-9_]+" _matches "${_header}")
-list(LENGTH _matches _api_count)
+set(_api_count 0)
+foreach(_name IN ITEMS ano_crypto_aes256_gcm_encrypt ano_crypto_aes256_gcm_decrypt)
+  string(REGEX MATCHALL "ANO_CRYPTO_API[ \t\r\n]+ano_crypto_status_t[ \t\r\n]+${_name}[ \t\r\n]*[(]" _matches "${_header}")
+  list(LENGTH _matches _name_count)
+  math(EXPR _api_count "${_api_count} + ${_name_count}")
+endforeach()
 if(NOT _api_count EQUAL 2)
-  list(APPEND _violations "public AES-256-GCM API must contain exactly two functions; found ${_api_count}")
+  list(APPEND _violations "public one-shot AES-256-GCM API must retain exactly two functions; found ${_api_count}")
 endif()
 file(READ "${ANO_CRYPTO_SOURCE_DIR}/src/aead/aes256_gcm.c" _source)
 if(_source MATCHES "openssl/|EVP_|OpenSSL::Crypto" OR _header MATCHES "openssl/|EVP_|OpenSSL::Crypto")

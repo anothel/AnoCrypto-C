@@ -1,12 +1,13 @@
 # AnoCrypto-C
 
-Current status: `0.1.0-p3-03-aes256-gcm-oneshot`. P3-03 adds a minimal generic AES-256-GCM one-shot C API with authenticated-output-only decryption. All 69 `ANOCRYPTO_C_0` symbols and the `ANOCRYPTO_C_1` HKDF symbol are retained; two AES-256-GCM symbols are added on `ANOCRYPTO_C_2`. The current boundary is 16 public headers and 72 exported symbols. Exact AnoSecureKit `SKT1`, `SKF1`, and `SKP1` v1 primitive fixtures are compatibility evidence only; those formats and workflows remain AnoSecureKit-owned. KCMVP remains `DEFERRED`, P1-34 hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, external release authorization remains `NO`, and the downstream Community identity conflict remains open.
+Current status: `0.1.0-p3-04-aes256-gcm-streaming`. P3-04 adds a minimal generic AES-256-GCM streaming C API with explicit AAD/payload/final states and caller-owned opaque contexts. All 69 `ANOCRYPTO_C_0` symbols, the `ANOCRYPTO_C_1` HKDF symbol, and the two `ANOCRYPTO_C_2` one-shot GCM symbols are retained; seven streaming symbols are added on `ANOCRYPTO_C_3`. The current boundary is 16 public headers and 79 exported symbols. Decrypt update bytes are unverified until final authentication and must be buffered, withheld, and wiped by the caller on failure. Exact AnoSecureKit `SKT1`, `SKF1`, and `SKP1` v1 primitive fixtures are compatibility evidence only; those formats and workflows remain AnoSecureKit-owned. KCMVP remains `DEFERRED`, P1-34 hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, external release authorization remains `NO`, and the downstream Community identity conflict remains open.
 
 Implemented processing scope:
 
 - RFC 5869 HKDF-SHA-256 combined extract-and-expand with 0..8160-byte output and exact AnoSecureKit SKF1 info-byte evidence
 - AES-256-GCM one-shot encrypt/decrypt using a 32-byte BLOCK_CIPHER CSP key, fixed 12-byte nonce, fixed 16-byte tag, empty AAD/payload support, exact in-place payload operation, and authenticated-output-only decryption
-- NIST AES-256-GCM KATs, corruption/overlap/output-clearing tests, exact SKT1/SKF1/SKP1 v1 primitive fixtures, and OpenSSL test-only differential coverage
+- AES-256-GCM streaming encrypt/decrypt with caller-owned opaque contexts, explicit AAD/payload/final states, arbitrary chunk boundaries, exact in-place processing, and unverified pre-final decrypt output requiring caller buffering and failure wiping
+- NIST AES-256-GCM KATs, streaming state/chunk/finalization tests, corruption/overlap/output-clearing tests, exact SKT1/SKF1/SKP1 v1 primitive fixtures, and OpenSSL test-only differential coverage
 - SHA-256, SHA-384, and SHA-512 one-shot and streaming APIs
 - HMAC-SHA-256, HMAC-SHA-384, and HMAC-SHA-512 one-shot and streaming APIs
 - HMAC computation for all three SHA-2 variants using an in-memory HMAC key handle
@@ -62,7 +63,7 @@ Skeleton-only / TODO scope:
 - Byte-identical source archive and binary reproducibility rules
 - Dependency/component discovery, vulnerability and license review, production signer/key-custody provisioning, RFC 3161 service/trust-anchor provisioning, actual release signing/timestamping, and external authorization
 - PoC package legal/evaluation notice and customer-specific support boundary
-- Exact OE-01 compiler/CPU and human disposition, approved statistical timing/cache methodology if required, power/EM/fault applicability, CTR counter policy, AEAD, padding helpers, GMAC, and domestic-algorithm decisions
+- Exact OE-01 compiler/CPU and human disposition, approved statistical timing/cache methodology if required, power/EM/fault applicability, padding helpers, GMAC, scrypt, and domestic-algorithm decisions
 
 
 ## P2-01 readiness consolidation
@@ -271,7 +272,7 @@ Controlled outputs are `docs/kcmvp/KCMVP_ENTROPY_AND_DRBG_SPEC.md`, the responsi
 ## Important limitations
 
 - This is not an official validation result.
-- Hash_DRBG is not implemented. AES-128/192/256, CBC without padding, and full-tag AES-CMAC are implemented; CTR, AEAD, padding helpers, GMAC, tag truncation, and additional block ciphers remain outside the current scope.
+- Hash_DRBG is not implemented. AES-128/192/256, CBC without padding, full-tag AES-CMAC, and the reviewed AES-256-GCM one-shot/streaming profile are implemented; generic CTR, padding helpers, GMAC, tag truncation, and additional block ciphers remain outside the current scope.
 - KAT pass results are correctness checks only and do not replace formal validation.
 - The explicit-entropy HMAC_DRBG-SHA-256 API remains caller-managed and separate from the public random service.
 - The entropy callback seam is test/internal plumbing and is not an operational entropy source.
@@ -312,7 +313,7 @@ Controlled outputs are `docs/kcmvp/KCMVP_ENTROPY_AND_DRBG_SPEC.md`, the responsi
 - A dedicated tests-only hook verifies the HMAC_DRBG `2^48` reseed-counter boundary, failed-reseed persistence, recovery, and no-wrap behavior.
 - Known VM snapshot/restore or clone events require inherited contexts to be discarded and each instance independently reinitialized; automatic detection is not implemented.
 - Suspend/resume handling remains a consuming-product policy.
-- `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the retained 69-name ABI-0 public symbol baseline; `abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt` stores the current 72-name additive surface.
+- `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the retained 69-name ABI-0 public symbol baseline; `abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt` stores the current 79-name additive surface.
 - Clean Release, evidence, and PoC flows compare shared-library exports with that baseline and keep both internal test-hook options disabled.
 - Hosted CI collects status-only platform review artifacts; actual hosted results still require review.
 

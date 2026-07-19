@@ -3,7 +3,8 @@
 # Historical P1/P2/P3-01 policy files retain their frozen 14-header,
 # 69-symbol ANOCRYPTO_C_0 snapshot. P3-02 retains ac_kdf.h and one symbol on
 # ANOCRYPTO_C_1. Current checks validate both retained subsets while allowing
-# the reviewed P3-03 ac_aead.h and two AES-256-GCM symbols on ANOCRYPTO_C_2.
+# the reviewed P3-03 one-shot symbols on ANOCRYPTO_C_2 and the P3-04
+# AES-256-GCM streaming symbols on ANOCRYPTO_C_3.
 
 if(NOT DEFINED ANO_CRYPTO_SOURCE_DIR OR ANO_CRYPTO_SOURCE_DIR STREQUAL "")
     message(FATAL_ERROR "ANO_CRYPTO_SOURCE_DIR is required")
@@ -61,6 +62,9 @@ _ano_crypto_count_symbol_manifest(
     "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_2_EXPORTED_SYMBOLS.txt"
     ANO_CRYPTO_ABI2_SYMBOL_COUNT)
 _ano_crypto_count_symbol_manifest(
+    "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_3_EXPORTED_SYMBOLS.txt"
+    ANO_CRYPTO_ABI3_SYMBOL_COUNT)
+_ano_crypto_count_symbol_manifest(
     "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt"
     ANO_CRYPTO_CURRENT_SYMBOL_COUNT)
 
@@ -82,15 +86,16 @@ if(NOT ANO_CRYPTO_ABI1_SYMBOL_COUNT EQUAL 1)
 endif()
 if(NOT ANO_CRYPTO_CURRENT_PUBLIC_HEADER_COUNT EQUAL 16 OR
    NOT ANO_CRYPTO_ABI2_SYMBOL_COUNT EQUAL 2 OR
-   NOT ANO_CRYPTO_CURRENT_SYMBOL_COUNT EQUAL 72)
+   NOT ANO_CRYPTO_ABI3_SYMBOL_COUNT EQUAL 7 OR
+   NOT ANO_CRYPTO_CURRENT_SYMBOL_COUNT EQUAL 79)
     message(FATAL_ERROR
-        "P3-03 additive public surface is inconsistent: headers=${ANO_CRYPTO_CURRENT_PUBLIC_HEADER_COUNT}, ABI2=${ANO_CRYPTO_ABI2_SYMBOL_COUNT}, total=${ANO_CRYPTO_CURRENT_SYMBOL_COUNT}")
+        "P3-04 additive public surface is inconsistent: headers=${ANO_CRYPTO_CURRENT_PUBLIC_HEADER_COUNT}, ABI2=${ANO_CRYPTO_ABI2_SYMBOL_COUNT}, ABI3=${ANO_CRYPTO_ABI3_SYMBOL_COUNT}, total=${ANO_CRYPTO_CURRENT_SYMBOL_COUNT}")
 endif()
 if(NOT ANO_CRYPTO_RELEASE_PUBLIC_HEADER_COUNT EQUAL ANO_CRYPTO_CURRENT_PUBLIC_HEADER_COUNT OR
    NOT ANO_CRYPTO_RELEASE_SYMBOL_COUNT EQUAL ANO_CRYPTO_CURRENT_SYMBOL_COUNT OR
-   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_2")
+   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_3")
     message(FATAL_ERROR
-        "Release identity does not match the P3-03 additive public surface")
+        "Release identity does not match the P3-04 additive public surface")
 endif()
 
 _ano_crypto_load_symbol_manifest(
@@ -108,4 +113,19 @@ set(_ano_crypto_expected_abi2_symbols
     ano_crypto_aes256_gcm_encrypt)
 if(NOT _ano_crypto_abi2_symbols STREQUAL _ano_crypto_expected_abi2_symbols)
     message(FATAL_ERROR "Unexpected ANOCRYPTO_C_2 symbol set: ${_ano_crypto_abi2_symbols}")
+endif()
+
+_ano_crypto_load_symbol_manifest(
+    "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_3_EXPORTED_SYMBOLS.txt"
+    _ano_crypto_abi3_symbols)
+set(_ano_crypto_expected_abi3_symbols
+    ano_crypto_aes256_gcm_stream_aad_update
+    ano_crypto_aes256_gcm_stream_context_size
+    ano_crypto_aes256_gcm_stream_decrypt_final
+    ano_crypto_aes256_gcm_stream_encrypt_final
+    ano_crypto_aes256_gcm_stream_init
+    ano_crypto_aes256_gcm_stream_uninit
+    ano_crypto_aes256_gcm_stream_update)
+if(NOT _ano_crypto_abi3_symbols STREQUAL _ano_crypto_expected_abi3_symbols)
+    message(FATAL_ERROR "Unexpected ANOCRYPTO_C_3 symbol set: ${_ano_crypto_abi3_symbols}")
 endif()

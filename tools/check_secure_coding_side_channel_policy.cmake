@@ -87,7 +87,7 @@ require_text("CMakeLists.txt" "_FORTIFY_SOURCE=3")
 require_text("CMakeLists.txt" "-z,relro,-z,now,-z,noexecstack")
 require_text("docs/kcmvp/KCMVP_SECURITY_FINDINGS_REGISTER.md" "P2-06-F-012")
 require_text("tests/operational/secure_coding_policy_review.c" "sensitive_values_printed=0")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p3-03-aes256-gcm-oneshot")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p3-04-aes256-gcm-streaming")
 
 # Product source must avoid common high-risk APIs and dynamic allocation.
 file(GLOB_RECURSE _product_sources LIST_DIRECTORIES false
@@ -119,7 +119,7 @@ foreach(_line IN LISTS _symbol_lines)
     endif()
 endforeach()
 if(NOT _public_header_count EQUAL 14 OR NOT _symbol_count EQUAL 69 OR
-   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_2")
+   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_3")
     list(APPEND _violations
         "public ABI changed: headers=${_public_header_count}, symbols=${_symbol_count}, ABI=${ANO_CRYPTO_RELEASE_ABI_LINE}")
 endif()

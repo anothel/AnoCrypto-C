@@ -1,12 +1,12 @@
-# C99 CSP / Key Lifecycle — P2-05 Current Design
+# C99 CSP / Key Lifecycle — Current Design
 
 Status: `FROZEN_INTERNAL_POLICY`; formal CSP classification and accepted zeroization evidence remain `EXTERNAL_CONFIRMATION_REQUIRED`.
 
 ## Scope
 
-AnoCrypto-C provides a fixed-size, in-process, module-owned CSP handle table for HMAC, block-cipher, and CMAC secret keys. It also exposes caller-owned opaque HMAC, AES-CBC, AES-CMAC, HMAC_DRBG, and random-service contexts. This is not a persistent key store or a general key-management subsystem.
+AnoCrypto-C provides a fixed-size, in-process, module-owned CSP handle table for HMAC, block-cipher, and CMAC secret keys. It also exposes caller-owned opaque HMAC, AES-CBC, AES-CMAC, AES-256-GCM streaming, HMAC_DRBG, and random-service contexts. This is not a persistent key store or a general key-management subsystem.
 
-Current public surface remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C_0`.
+The current public surface is 16 headers and 79 exported symbols across retained `ANOCRYPTO_C_0`, `ANOCRYPTO_C_1`, `ANOCRYPTO_C_2`, and additive `ANOCRYPTO_C_3`.
 
 ## Module-owned handle table
 
@@ -17,7 +17,7 @@ Current public surface remains 14 headers, 69 exported symbols, and `ANOCRYPTO_C
 - Exportable-candidate requests are rejected.
 - Every allocation receives a generation; stale generations cannot address a reused slot.
 - Cryptographic use requires a live purpose-matching state.
-- The module copies a bounded key snapshot for an operation and clears that snapshot before return.
+- The module copies a bounded key snapshot for an operation. One-shot paths clear it before return; caller-owned cipher, CMAC, and AES-256-GCM streaming contexts retain only their private expanded operation state until finalization or explicit uninit clears the reviewed opaque extent.
 
 ## Handle states
 
@@ -49,7 +49,7 @@ When a fatal transition acquires the global lock, it clears every live module-ow
 
 ### Caller-owned contexts
 
-The module does not retain addresses of caller-owned opaque contexts. Callers must invoke the matching final, uninit, uninstantiate, or random-uninit path. Abandoned contexts, forced process termination, OS copies, swap, core dumps, hibernation, VM snapshots, debugger copies, and hardware remanence are not claimed cleared by module-wide table cleanup.
+The module does not retain addresses of caller-owned opaque contexts. Callers must invoke the matching final, uninit, uninstantiate, or random-uninit path. A streaming AES-256-GCM context snapshots the expanded key schedule during init, so destroying the originating CSP handle prevents new initialization but does not revoke an already initialized context. Abandoned contexts, forced process termination, OS copies, swap, core dumps, hibernation, VM snapshots, debugger copies, and hardware remanence are not claimed cleared by module-wide table cleanup.
 
 ## Thread/process rules
 
@@ -67,4 +67,4 @@ The module does not retain addresses of caller-owned opaque contexts. Callers mu
 
 ## Evidence
 
-P2-05 evidence includes explicit-destroy/stale-handle tests, orderly-shutdown and fatal-transition zeroization regressions, a status-only policy review, source/policy checks, local compiler-output capture, clean 69-symbol ABI checks, install/PoC checks, and sensitive-artifact scanning. Exact OE-01 GCC 13.3.0 human review remains `NOT_RUN`.
+Retained P2-05 evidence includes explicit-destroy/stale-handle tests, orderly-shutdown and fatal-transition zeroization regressions, a status-only policy review, source/policy checks, local compiler-output capture, install/PoC checks, and sensitive-artifact scanning. P3-04 adds streaming-context final/uninit cleanup, post-handle-snapshot semantics, clean 79-symbol ABI checks, and current/retained consumer regression. Exact OE-01 GCC 13.3.0 human review remains `NOT_RUN`.

@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P3-03 reviewed additive ABI. The retained P1-29/P3-01 surface remains unchanged on `ANOCRYPTO_C_0`; P3-02 HKDF-SHA-256 remains on `ANOCRYPTO_C_1`; two generic AES-256-GCM one-shot functions are added on `ANOCRYPTO_C_2`.
+Status: P3-04 reviewed additive ABI. The retained P1-29/P3-01 surface remains unchanged on `ANOCRYPTO_C_0`; P3-02 HKDF-SHA-256 remains on `ANOCRYPTO_C_1`; P3-03 one-shot AES-256-GCM remains on `ANOCRYPTO_C_2`; seven generic streaming functions are added on `ANOCRYPTO_C_3`.
 
 ## Identity
 
@@ -57,6 +57,7 @@ cmake --build build --target ano_crypto_cmac_hardening_policy_check
 cmake --build build --target ano_crypto_cmac_compiler_review
 cmake --build build --target ano_crypto_hkdf_sha256_policy_check
 cmake --build build --target ano_crypto_aes256_gcm_policy_check
+cmake --build build --target ano_crypto_aes256_gcm_streaming_policy_check
 cmake --build build --target ano_crypto_clean_release_symbol_baseline_check
 cmake --build build --target ano_crypto_symbol_version_check
 cmake --build build --target ano_crypto_poc_package_smoke
@@ -148,3 +149,21 @@ These checks are toolchain-specific guardrails. Calling convention, loader behav
 - The two names are the only symbols on additive `ANOCRYPTO_C_2`; current total
   is 72 and retained ABI-0/1 manifests are unchanged.
 - `SKT1`, `SKF1`, `SKP1`, streaming, scrypt and orchestration remain excluded.
+
+
+## P3-04 AES-256-GCM streaming additive ABI review
+
+- No new public header; `ac_aead.h` is extended.
+- Seven functions only: context size, init, AAD update, payload update, encrypt
+  final, decrypt final, and uninit.
+- Direction is bound at init and AAD is accepted only before non-empty payload.
+- Zero-length AAD/payload updates are no-ops and do not advance the phase.
+- Exact in-place payload processing is allowed; partial overlap is rejected.
+- Decrypt update output is explicitly unverified. The caller must buffer and
+  withhold it until decrypt final succeeds and wipe it on failure.
+- Correct-direction finalization consumes the context on success or failure;
+  repeated update/final calls fail closed.
+- The seven names are the only symbols on additive `ANOCRYPTO_C_3`; current total
+  is 79 and retained ABI-0/1/2 manifests are unchanged.
+- OpenSSL is test-only differential evidence. `SKT1` is an exact compatibility
+  fixture only; its framing and workflow are not implemented in AnoCrypto-C.

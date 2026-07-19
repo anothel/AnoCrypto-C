@@ -1,6 +1,6 @@
 # Current / Active / Next
 
-Status: `P3_03_COMPLETE_P3_04_NEXT`
+Status: `P3_04_COMPLETE_P3_05_NEXT`
 
 ## DONE
 
@@ -9,21 +9,23 @@ Status: `P3_03_COMPLETE_P3_04_NEXT`
 - P3-00 downstream intake gate.
 - P3-01 four-source requirement consolidation and ownership decisions.
 - P3-02 minimal HKDF-SHA-256 API and additive `ANOCRYPTO_C_1` evidence.
-- P3-03 minimal AES-256-GCM one-shot API, authenticated-output-only decrypt,
-  additive `ANOCRYPTO_C_2`, NIST/differential tests and exact downstream v1
-  primitive fixture evidence.
+- P3-03 minimal AES-256-GCM one-shot API and additive `ANOCRYPTO_C_2` evidence.
+- P3-04 AES-256-GCM streaming API, explicit state machine, unverified pre-final
+  decrypt-output policy, additive `ANOCRYPTO_C_3`, differential tests, and exact
+  `SKT1` v1 primitive compatibility evidence.
 
 ## ACTIVE
 
-P3-03 local closeout and artifact handoff. No push, tag, signing, timestamping,
+P3-04 local closeout and artifact handoff. No push, tag, signing, timestamping,
 publication, or external distribution is authorized.
 
 ## NEXT
 
-`P3-04: AES-256-GCM streaming API and pre-final plaintext policy`
+`P3-05: scrypt fixed-profile/API/resource gate`
 
-P3-04 requires its own state-machine and API/ABI gate. It must not expand the
-one-shot API or copy AnoSecureKit packet workflows into AnoCrypto-C.
+P3-05 must begin with a separate API/resource gate. It must expose only a
+generic primitive contract and must not implement `SKP1` framing, password
+workflow, storage policy, or product orchestration.
 
 ## DEFERRED / BLOCKED
 

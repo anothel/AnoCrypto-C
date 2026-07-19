@@ -282,6 +282,89 @@ static int run_aes256_gcm_smoke(void)
     return 0;
 }
 
+static int run_aes256_gcm_streaming_smoke(void)
+{
+    static const uint8_t key[ANO_CRYPTO_AES256_GCM_KEY_SIZE] = { 0u };
+    static const uint8_t nonce[ANO_CRYPTO_AES256_GCM_NONCE_SIZE] = { 1u };
+    static const uint8_t aad[] = { 'p', 'o', 'c', '-', 's', 't', 'r', 'e', 'a', 'm' };
+    static const uint8_t message[] = { 'g', 'c', 'm', '-', 's', 't', 'r', 'e', 'a', 'm' };
+    ano_crypto_csp_handle_t handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+    void *enc = NULL;
+    void *dec = NULL;
+    size_t ctx_size = 0u;
+    size_t written = 0u;
+    uint8_t ciphertext[sizeof(message)];
+    uint8_t recovered[sizeof(message)];
+    uint8_t tag[ANO_CRYPTO_AES256_GCM_TAG_SIZE];
+    ano_crypto_status_t status;
+    int result = 1;
+
+    status = ano_crypto_aes256_gcm_stream_context_size(&ctx_size);
+    if (status != ANO_CRYPTO_OK || ctx_size == 0u) {
+        return fail_status("AES-256-GCM stream context size", status);
+    }
+    enc = calloc(1u, ctx_size);
+    dec = calloc(1u, ctx_size);
+    if (enc == NULL || dec == NULL) {
+        free(enc);
+        free(dec);
+        return fail_message("AES-256-GCM stream context allocation failed");
+    }
+    status = ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER,
+                                          key, sizeof(key),
+                                          ANO_CRYPTO_KEY_FLAG_NONE, &handle);
+    if (status != ANO_CRYPTO_OK) {
+        goto cleanup;
+    }
+    status = ano_crypto_aes256_gcm_stream_init(
+        enc, ctx_size, ANO_CRYPTO_AEAD_DIRECTION_ENCRYPT, handle,
+        nonce, sizeof(nonce), ANO_CRYPTO_AES256_GCM_STREAM_FLAG_NONE);
+    if (status != ANO_CRYPTO_OK) goto cleanup;
+    status = ano_crypto_aes256_gcm_stream_aad_update(enc, aad, sizeof(aad));
+    if (status != ANO_CRYPTO_OK) goto cleanup;
+    status = ano_crypto_aes256_gcm_stream_update(
+        enc, message, 3u, ciphertext, sizeof(ciphertext), &written);
+    if (status != ANO_CRYPTO_OK || written != 3u) goto cleanup;
+    status = ano_crypto_aes256_gcm_stream_update(
+        enc, message + 3u, sizeof(message) - 3u,
+        ciphertext + 3u, sizeof(ciphertext) - 3u, &written);
+    if (status != ANO_CRYPTO_OK || written != sizeof(message) - 3u) goto cleanup;
+    status = ano_crypto_aes256_gcm_stream_encrypt_final(enc, tag, sizeof(tag));
+    if (status != ANO_CRYPTO_OK) goto cleanup;
+
+    status = ano_crypto_aes256_gcm_stream_init(
+        dec, ctx_size, ANO_CRYPTO_AEAD_DIRECTION_DECRYPT, handle,
+        nonce, sizeof(nonce), ANO_CRYPTO_AES256_GCM_STREAM_FLAG_NONE);
+    if (status != ANO_CRYPTO_OK) goto cleanup;
+    status = ano_crypto_aes256_gcm_stream_aad_update(dec, aad, sizeof(aad));
+    if (status != ANO_CRYPTO_OK) goto cleanup;
+    status = ano_crypto_aes256_gcm_stream_update(
+        dec, ciphertext, sizeof(ciphertext), recovered, sizeof(recovered), &written);
+    if (status != ANO_CRYPTO_OK || written != sizeof(message)) goto cleanup;
+    /* recovered is intentionally withheld until final succeeds. */
+    status = ano_crypto_aes256_gcm_stream_decrypt_final(dec, tag, sizeof(tag));
+    if (status != ANO_CRYPTO_OK || memcmp(recovered, message, sizeof(message)) != 0) {
+        goto cleanup;
+    }
+    result = 0;
+
+cleanup:
+    if (enc != NULL) (void)ano_crypto_aes256_gcm_stream_uninit(enc, ctx_size);
+    if (dec != NULL) (void)ano_crypto_aes256_gcm_stream_uninit(dec, ctx_size);
+    if (handle != ANO_CRYPTO_CSP_INVALID_HANDLE) (void)ano_crypto_key_destroy(handle);
+    (void)ano_crypto_csp_zeroize(ciphertext, sizeof(ciphertext));
+    (void)ano_crypto_csp_zeroize(recovered, sizeof(recovered));
+    (void)ano_crypto_csp_zeroize(tag, sizeof(tag));
+    free(enc);
+    free(dec);
+    if (result != 0) {
+        return fail_status("AES-256-GCM streaming round-trip", status);
+    }
+    printf("- AES-256-GCM streaming smoke: PASS (%lu bytes; values not printed)\n",
+           (unsigned long)sizeof(message));
+    return 0;
+}
+
 static int run_aes_cbc_smoke(void)
 {
     static const uint8_t key[ANO_CRYPTO_CIPHER_AES128_KEY_SIZE] = {
@@ -522,6 +605,8 @@ int main(void)
     } else if (run_drbg_smoke() != 0) {
         result = 1;
     } else if (run_aes256_gcm_smoke() != 0) {
+        result = 1;
+    } else if (run_aes256_gcm_streaming_smoke() != 0) {
         result = 1;
     } else if (run_aes_cbc_smoke() != 0) {
         result = 1;

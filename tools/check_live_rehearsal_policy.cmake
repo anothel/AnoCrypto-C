@@ -97,8 +97,8 @@ require_text("docs/kcmvp/KCMVP_REHEARSAL_GAPS_AND_REMEDIATION.md" "| RGH-008 | P
 require_text("docs/kcmvp/KCMVP_EXTERNAL_CONSULTATION_DECISION_GATE.md" "Current decision | `CONDITIONAL_NO_GO_PENDING_NAMED_AUTHORIZATION`")
 require_text("docs/kcmvp/KCMVP_EXTERNAL_CONSULTATION_DECISION_GATE.md" "All six must be retained")
 require_text("docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md" "| Actual hosted lanes | `NOT_RUN` |")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p3-03-aes256-gcm-oneshot")
-require_text("README.md" "0.1.0-p3-03-aes256-gcm-oneshot")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p3-04-aes256-gcm-streaming")
+require_text("README.md" "0.1.0-p3-04-aes256-gcm-streaming")
 
 file(READ "${ANO_CRYPTO_SOURCE_DIR}/docs/kcmvp/KCMVP_INTERNAL_ASSISTED_REHEARSAL_REPORT.md" _report)
 string(REGEX MATCHALL "[|] `A-[0-9][0-9]` " _agenda_rows "${_report}")

@@ -1,6 +1,6 @@
 # P3 API and ABI Evolution Gate
 
-Status: `P3_02_ADDITIVE_ABI_IMPLEMENTED`
+Status: `P3_04_ADDITIVE_ABI_IMPLEMENTED`
 
 ## Retained baseline
 
@@ -46,3 +46,20 @@ APIs remain outside this gate.
 - the single `ANOCRYPTO_C_1` HKDF symbol is unchanged;
 - `ANOCRYPTO_C_2` inherits `ANOCRYPTO_C_1` and contains only the two GCM symbols;
 - current public surface is 16 headers and 72 exported symbols.
+
+
+## P3-04 result
+
+- `ac_aead.h` is extended without adding another public header.
+- Exactly seven generic AES-256-GCM streaming functions are added.
+- All 69 `ANOCRYPTO_C_0` symbols, the one `ANOCRYPTO_C_1` HKDF symbol, and the
+  two `ANOCRYPTO_C_2` one-shot GCM symbols are unchanged.
+- `ANOCRYPTO_C_3` inherits `ANOCRYPTO_C_2` and contains only the seven streaming
+  symbols.
+- Current public surface is 16 headers and 79 exported symbols.
+- The opaque context is caller-owned but its layout is private; callers obtain
+  its size at runtime and must not serialize or persist it.
+- Decrypt update output is unverified until decrypt final succeeds. Buffering,
+  withholding, and failure wiping remain caller/product responsibilities.
+- `SKT1` framing, packet policy, nonce composition, and orchestration remain
+  AnoSecureKit-owned.

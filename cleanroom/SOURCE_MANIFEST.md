@@ -696,3 +696,20 @@ P2-04 introduces no public API or algorithm and preserves 14 headers, 69 symbols
 | DER-P206-001 | Locally generated GCC/Clang warning, analyzer, disassembly, ELF, symbol, and hash records | User-owned generated evidence | Internal finding and regression disposition | Status/metadata only; not formal validation evidence. |
 
 P2-06 does not import third-party implementation code, secret-bearing traces, production keys, customer data, or unpublished attack material.
+
+## P3-04 AES-256-GCM Streaming Inputs
+
+| ID | Input | Classification | Use | Boundary |
+|---|---|---|---|---|
+| SRC-4201 | Exact AnoSecureKit Community/Enterprise source revisions and consumed-current pack imported by P3-01 | User-supplied downstream requirement evidence | Confirm generic AES-256-GCM streaming requirements, exact `SKT1` v1 AAD/ciphertext/tag compatibility, and product/core ownership | Requirement and fixture bytes only; no AnoSecureKit framing, workflow, adapter, or product API implementation is copied into AnoCrypto-C. The known Community dependency identity conflict remains open. |
+| SRC-4202 | NIST SP 800-38D public AES-GCM specification and test-vector concepts | Public standard | Validate counter mode, GHASH, tag generation/verification, empty input, and streaming chunk equivalence | Specification concepts and public vectors only; no third-party implementation source is copied. |
+| SRC-4203 | OpenSSL 3.x public EVP GCM interface and separately linked `OpenSSL::Crypto` | Public documentation and test-only dependency | Independent deterministic streaming differential validation | OpenSSL is excluded from the production library, installed SDK, and customer PoC runtime; no OpenSSL implementation source is copied. |
+| DER-4201 | Fresh project-owned C99 streaming state machine, API contract, tests, policy checks, consumer/PoC updates, and evidence records | User/project owned | Provide generic caller-owned AES-256-GCM streaming with additive ABI and fail-closed state handling | AnoSecureKit formats, nonce composition, output release policy, and orchestration stay downstream-owned. Decrypt update bytes remain unverified until final authentication succeeds. |
+
+## P3-04 Clean-room Notes
+
+- The implementation extends the existing project-owned AES/GHASH core and was written fresh for AnoCrypto-C.
+- Exact `SKT1` bytes are retained only as compatibility evidence for generic AAD/payload/tag processing; no `SKT1` parser, serializer, packet workflow, or product API is introduced.
+- OpenSSL is used only by an independently linked test executable for status-only differential evidence.
+- No key, nonce, plaintext, ciphertext, tag, customer data, credential, signature, or production deployment material is retained in release logs or customer packages.
+- KCMVP, hosted review, repository signing, timestamping, and external release authorization remain unchanged and incomplete.

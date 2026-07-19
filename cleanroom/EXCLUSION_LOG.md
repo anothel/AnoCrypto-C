@@ -445,3 +445,15 @@ If excluded material is discovered:
 | EX-4504 | Adding prediction resistance, automatic VM/suspend detection, a direct source, new limits, public API, header, enum, or symbol without a separate scope/ABI gate | Scope and ABI drift | Excluded; P2-04 remains 14/69/`ANOCRYPTO_C_0`. |
 | EX-4505 | Treating local operational review, workflow definitions, or synthetic evidence as actual hosted or exact OE-01 execution | Evidence substitution | Rejected; P1-34 remains `BLOCKED_EXTERNAL`, hosted `NOT_RUN/UNREVIEWED`. |
 | EX-4506 | Push, tag, production signing, timestamping, or external release during P2-04 | Release-integrity risk | Excluded; repository remains `UNSIGNED`, handoff `BLOCKED`, authorization `NO`. |
+
+## P3-04 AES-256-GCM Streaming Exclusions
+
+| ID | Excluded material or behavior | Risk | Disposition | Note |
+|---|---|---|---|---|
+| EX-4201 | Copying AnoSecureKit `SKT1`, `SKF1`, or `SKP1` framing, nonce composition, parsing, output-release policy, or workflow into AnoCrypto-C | Product-boundary and API-coupling risk | Excluded | AnoCrypto-C exposes only the generic AES-256-GCM streaming primitive. Exact `SKT1` bytes are test evidence only. |
+| EX-4202 | Treating decrypt-update output as authenticated plaintext before successful final tag verification | Confidentiality/integrity misuse risk | Rejected | Public documentation requires callers to withhold or securely discard all pre-final decrypt output. Correct-direction final consumes the context on success or failure. |
+| EX-4203 | Linking OpenSSL into the production library or shipping OpenSSL headers, provider code, differential sources/results, internal tests, or implementation internals in the installed SDK/customer PoC | Product-boundary, licensing, and disclosure risk | Excluded | OpenSSL remains a separately linked test-only differential provider. |
+| EX-4204 | Adding generic AEAD negotiation, variable AES key sizes, variable nonce/tag sizes, high-level product APIs, scrypt, SHA-1, RSA, ECDSA, or public-key architecture in P3-04 | Scope and ABI drift | Excluded | P3-04 is limited to fixed AES-256, 12-byte nonce, 16-byte tag streaming. P3-05 remains the next numbered gate. |
+| EX-4205 | Logging or retaining keys, nonces, plaintext, ciphertext, tags, internal state, customer data, credentials, signatures, or production deployment information | Sensitive-material disclosure | Excluded | Tests and evidence retain status, counts, identities, and hashes only. |
+| EX-4206 | Claiming that local compatibility tests resolve the AnoSecureKit Community dependency identity conflict or prove hosted/KCMVP/signing/release completion | Evidence and governance overstatement | Rejected | The conflict remains `OPEN_DOWNSTREAM_SYNC_DECISION`; hosted is `NOT_RUN/UNREVIEWED`, signing is `UNSIGNED`, KCMVP is deferred, and external authorization is `NO`. |
+| EX-4207 | Push, tag creation, production signing, timestamping, or external publication during P3-04 | Repository and release-integrity risk | Excluded | P3-04 produces local engineering artifacts only. |

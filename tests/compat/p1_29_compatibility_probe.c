@@ -3,13 +3,14 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifndef ANO_CRYPTO_COMPAT_HEADER_MODE
 #define ANO_CRYPTO_COMPAT_HEADER_MODE "unspecified"
 #endif
 #ifndef ANO_CRYPTO_EXPECT_RUNTIME_VERSION
-#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p3-03-aes256-gcm-oneshot"
+#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p3-04-aes256-gcm-streaming"
 #endif
 
 #define ANO_COMPAT_JOIN_INNER(a, b) a##b
@@ -115,6 +116,11 @@ ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_CIPHER_CBC_IV_SIZE == 16u);
 ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_CIPHER_FLAG_NONE == 0u);
 ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_CMAC_TAG_SIZE == 16u);
 ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_CMAC_FLAG_NONE == 0u);
+#if defined(ANO_CRYPTO_EXPECT_CURRENT_HEADER)
+ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_AES256_GCM_STREAM_FLAG_NONE == 0u);
+ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_AEAD_DIRECTION_ENCRYPT == 1);
+ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_AEAD_DIRECTION_DECRYPT == 2);
+#endif
 
 /* The ABI-0 build-identity layout is pointer-model dependent but field order is fixed. */
 ANO_COMPAT_STATIC_ASSERT(offsetof(ano_crypto_build_identity_t, abi_version) == 0u);
@@ -313,6 +319,21 @@ static unsigned int bind_current_additive_surface(void)
                     (ano_crypto_csp_handle_t, const uint8_t *, size_t,
                      const uint8_t *, size_t, const uint8_t *, size_t,
                      const uint8_t *, size_t, uint8_t *, size_t, size_t *));
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_aes256_gcm_stream_context_size,
+                    (size_t *));
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_aes256_gcm_stream_init,
+                    (void *, size_t, ano_crypto_aead_direction_t,
+                     ano_crypto_csp_handle_t, const uint8_t *, size_t, uint32_t));
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_aes256_gcm_stream_aad_update,
+                    (void *, const uint8_t *, size_t));
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_aes256_gcm_stream_update,
+                    (void *, const uint8_t *, size_t, uint8_t *, size_t, size_t *));
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_aes256_gcm_stream_encrypt_final,
+                    (void *, uint8_t *, size_t));
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_aes256_gcm_stream_decrypt_final,
+                    (void *, const uint8_t *, size_t));
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_aes256_gcm_stream_uninit,
+                    (void *, size_t));
     return count;
 }
 #endif
@@ -350,7 +371,7 @@ int main(void)
     symbol_count = bind_p1_29_public_surface();
 #if defined(ANO_CRYPTO_EXPECT_CURRENT_HEADER)
     symbol_count += bind_current_additive_surface();
-    if (symbol_count != 72u) {
+    if (symbol_count != 79u) {
         return 1;
     }
 #else
@@ -433,9 +454,68 @@ int main(void)
         }
         (void)ano_crypto_key_destroy(handle);
     }
+    {
+        static const uint8_t key[ANO_CRYPTO_AES256_GCM_KEY_SIZE] = { 0u };
+        static const uint8_t nonce[ANO_CRYPTO_AES256_GCM_NONCE_SIZE] = { 1u };
+        static const uint8_t aad[] = { 's', 't', 'r', 'e', 'a', 'm' };
+        static const uint8_t message[] = { 'a', 'd', 'd', 'i', 't', 'i', 'v', 'e' };
+        ano_crypto_csp_handle_t handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+        void *enc = NULL;
+        void *dec = NULL;
+        size_t ctx_size = 0u;
+        size_t written = 0u;
+        uint8_t ciphertext[sizeof(message)];
+        uint8_t plaintext[sizeof(message)];
+        uint8_t tag[ANO_CRYPTO_AES256_GCM_TAG_SIZE];
+        int failed = 0;
+        if (ano_crypto_aes256_gcm_stream_context_size(&ctx_size) != ANO_CRYPTO_OK || ctx_size == 0u) {
+            failed = 1;
+        }
+        if (!failed) {
+            enc = calloc(1u, ctx_size);
+            dec = calloc(1u, ctx_size);
+            if (enc == NULL || dec == NULL) failed = 1;
+        }
+        if (!failed &&
+            (ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER,
+                                          key, sizeof(key), ANO_CRYPTO_KEY_FLAG_NONE,
+                                          &handle) != ANO_CRYPTO_OK ||
+             ano_crypto_aes256_gcm_stream_init(enc, ctx_size,
+                                               ANO_CRYPTO_AEAD_DIRECTION_ENCRYPT,
+                                               handle, nonce, sizeof(nonce),
+                                               ANO_CRYPTO_AES256_GCM_STREAM_FLAG_NONE) != ANO_CRYPTO_OK ||
+             ano_crypto_aes256_gcm_stream_aad_update(enc, aad, sizeof(aad)) != ANO_CRYPTO_OK ||
+             ano_crypto_aes256_gcm_stream_update(enc, message, sizeof(message),
+                                                 ciphertext, sizeof(ciphertext),
+                                                 &written) != ANO_CRYPTO_OK ||
+             written != sizeof(message) ||
+             ano_crypto_aes256_gcm_stream_encrypt_final(enc, tag, sizeof(tag)) != ANO_CRYPTO_OK ||
+             ano_crypto_aes256_gcm_stream_init(dec, ctx_size,
+                                               ANO_CRYPTO_AEAD_DIRECTION_DECRYPT,
+                                               handle, nonce, sizeof(nonce),
+                                               ANO_CRYPTO_AES256_GCM_STREAM_FLAG_NONE) != ANO_CRYPTO_OK ||
+             ano_crypto_aes256_gcm_stream_aad_update(dec, aad, sizeof(aad)) != ANO_CRYPTO_OK ||
+             ano_crypto_aes256_gcm_stream_update(dec, ciphertext, sizeof(ciphertext),
+                                                 plaintext, sizeof(plaintext),
+                                                 &written) != ANO_CRYPTO_OK ||
+             written != sizeof(message) ||
+             ano_crypto_aes256_gcm_stream_decrypt_final(dec, tag, sizeof(tag)) != ANO_CRYPTO_OK ||
+             memcmp(plaintext, message, sizeof(message)) != 0)) {
+            failed = 1;
+        }
+        if (enc != NULL) (void)ano_crypto_aes256_gcm_stream_uninit(enc, ctx_size);
+        if (dec != NULL) (void)ano_crypto_aes256_gcm_stream_uninit(dec, ctx_size);
+        if (handle != ANO_CRYPTO_CSP_INVALID_HANDLE) (void)ano_crypto_key_destroy(handle);
+        free(enc);
+        free(dec);
+        if (failed) {
+            (void)ano_crypto_module_shutdown();
+            return 10;
+        }
+    }
 #endif
     if (ano_crypto_module_shutdown() != ANO_CRYPTO_OK) {
-        return 10;
+        return 11;
     }
 
     printf("compatibility_baseline=0.1.0-p1-29-cmac-hardening\n");

@@ -212,11 +212,14 @@ set(_doc_files
     docs/design/API_ABI_REVIEW_CHECKLIST.md
     docs/design/C99_HKDF_SHA256_API_GATE.md
     docs/design/C99_AES256_GCM_API_GATE.md
+    docs/design/C99_AES256_GCM_STREAMING_API_GATE.md
     docs/design/P3_ABI_EVOLUTION_GATE.md
     docs/integration/ANOSECUREKIT_SKF1_HKDF_COMPATIBILITY.md
     docs/integration/ANOSECUREKIT_AES256_GCM_COMPATIBILITY.md
+    docs/integration/ANOSECUREKIT_AES256_GCM_STREAMING_COMPATIBILITY.md
     docs/product/P3_02_IMPLEMENTATION_TEST_DELTA.md
     docs/product/P3_03_IMPLEMENTATION_TEST_DELTA.md
+    docs/product/P3_04_IMPLEMENTATION_TEST_DELTA.md
     docs/design/BUILD_IDENTITY_ABI_0_DECISION.md
     docs/design/SHA2_384_512_SCOPE_DECISION.md
     docs/design/SHA512_FAMILY_PORTABILITY_POLICY.md
@@ -293,6 +296,7 @@ file(COPY
     "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/AES_CMAC_HARDENING_REVIEW.md"
     "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/RELEASE_PROVENANCE_REVIEW.md"
     "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/AES256_GCM_IMPLEMENTATION_REVIEW.md"
+    "${ANO_CRYPTO_SOURCE_DIR}/evidence/release-template/AES256_GCM_STREAMING_IMPLEMENTATION_REVIEW.md"
     DESTINATION "${_evidence_dir}")
 
 # The customer package may describe the internal boundary, but it must not
@@ -318,6 +322,7 @@ set(_forbidden_internal_package_paths
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/ANOCRYPTO_C_1_EXPORTED_SYMBOLS.txt"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/ANOCRYPTO_C_2_EXPORTED_SYMBOLS.txt"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/ANOCRYPTO_C_3_EXPORTED_SYMBOLS.txt"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/anocrypto_c.map"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/hkdf_sha256_kat_tests.c"
@@ -326,6 +331,9 @@ set(_forbidden_internal_package_paths
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/aes256_gcm_kat_tests.c"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/aes256_gcm_api_negative_tests.c"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/aes256_gcm_openssl_differential_tests.c"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/aes256_gcm_streaming_tests.c"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/aes256_gcm_streaming_negative_tests.c"
+    "${ANO_CRYPTO_POC_PACKAGE_DIR}/aes256_gcm_streaming_openssl_differential_tests.c"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/sha2_hmac_openssl_differential_tests.c"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/aes_cbc_openssl_differential_tests.c"
     "${ANO_CRYPTO_POC_PACKAGE_DIR}/aes_cbc_hardening_review.c"
@@ -498,7 +506,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/AES_HARDENING_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package AES/CBC hardening notes\n"
     "Generated UTC: ${_created_utc}\n"
     "Status: P1-29 engineering boundary; not official validation evidence.\n"
-    "Public API boundary: the same eight cipher functions remain on the retained 69-symbol ANOCRYPTO_C_0 line; the current additive total is 72.\n"
+    "Public API boundary: the same eight cipher functions remain on the retained 69-symbol ANOCRYPTO_C_0 line; the current additive total is 79.\n"
     "Internal hardening: bounded context integrity metadata, fail-closed reinitialization, lifecycle/unaligned/streaming/concurrency regressions, and expanded test-only differential comparison.\n"
     "Compiler-output capture and full disassembly are internal review evidence and are not included in this customer package. Manual compiler/target review remains required.\n"
     "The package excludes internal AES source/context headers, hardening/lifecycle test source, OpenSSL differential source/provider artifacts, and compiler disassembly.\n"
@@ -508,7 +516,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/AES_CMAC_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package AES-CMAC notes\n"
     "Generated UTC: ${_created_utc}\n"
     "Status: P1-29 engineering implementation and hardening boundary; not official validation evidence.\n"
-    "Public scope: AES-CMAC with AES-128/192/256 dedicated CSP handles, full 16-byte tags, eight public functions on the retained 69-symbol ANOCRYPTO_C_0 line; the current additive total is 72.\n"
+    "Public scope: AES-CMAC with AES-128/192/256 dedicated CSP handles, full 16-byte tags, eight public functions on the retained 69-symbol ANOCRYPTO_C_0 line; the current additive total is 79.\n"
     "Lifecycle policy: successful init owns a copied schedule; failed valid-size reinit clears prior state; final consumes the context.\n"
     "Buffer policy: reviewed context/input/output/output-length overlaps are rejected; short uninit clears the supplied extent and requires a correct-size cleanup retry; oversized uninit does not clear trailing storage.\n"
     "Concurrency policy: separate contexts and shared read-only CMAC handles are covered by engineering regression; one caller context is not concurrently mutable.\n"
@@ -540,7 +548,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RANDOM_LIFECYCLE_PACKAGE_NOTES.txt"
     "Service availability requires a reviewed platform provider and a supported process marker; unsupported process-marker platforms fail closed.\n"
     "VM snapshot/restore and clone events are not detected automatically. Known duplication events require discarding inherited random contexts and independently initializing each resulting instance.\n"
     "The clean package build disables both entropy and random lifecycle test hooks and hides internal symbols.\n"
-    "The clean shared library was checked against the 72-symbol current additive baseline while retaining all 69 ANOCRYPTO_C_0 symbols; see CLEAN_RELEASE_SYMBOL_BASELINE.log.\n"
+    "The clean shared library was checked against the 79-symbol current additive baseline while retaining all 69 ANOCRYPTO_C_0 symbols; see CLEAN_RELEASE_SYMBOL_BASELINE.log.\n"
     "Package records contain status and policy only; generated bytes, entropy, seed material, and DRBG state are excluded.\n")
 
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/ENTROPY_HEALTH_PACKAGE_NOTES.txt"
@@ -577,7 +585,7 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/HKDF_SHA256_PACKAGE_NOTES.txt"
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/AES256_GCM_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package AES-256-GCM one-shot notes\n"
     "Generated UTC: ${_created_utc}\n"
-    "Status: P3-03 local engineering evidence; not official validation or external release evidence.\n"
+    "Status: P3-04 local engineering evidence; not official validation or external release evidence.\n"
     "Public primitive: generic AES-256-GCM one-shot encrypt and decrypt functions in ac_aead.h.\n"
     "Key contract: existing in-memory block-cipher CSP handle with exactly 32 key bytes; 12-byte nonce and 16-byte tag only.\n"
     "Buffer contract: empty AAD and payload are valid; exact payload in-place is supported; partial overlap is rejected.\n"
@@ -585,8 +593,19 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/AES256_GCM_PACKAGE_NOTES.txt"
     "AnoSecureKit SKT1, SKF1, and SKP1 framing, nonce construction, password derivation, workflow, and product policy are not implemented by AnoCrypto-C.\n"
     "Compatibility evidence covers exact AnoSecureKit v1 GCM inputs and outputs only.\n"
     "OpenSSL is used only by internal test executables for differential validation and is not a package runtime dependency.\n"
-    "Current ABI: 69 retained ANOCRYPTO_C_0 symbols, one HKDF symbol on ANOCRYPTO_C_1, and two AES-256-GCM symbols on ANOCRYPTO_C_2; current total 72.\n"
+    "Current ABI: 69 retained ANOCRYPTO_C_0 symbols, one HKDF symbol on ANOCRYPTO_C_1, two one-shot AES-256-GCM symbols on ANOCRYPTO_C_2, and seven streaming symbols on ANOCRYPTO_C_3; current total 79.\n"
     "KCMVP remains deferred; hosted lanes remain NOT_RUN/UNREVIEWED; repository signing remains UNSIGNED; external release authorization remains NO.\n")
+
+file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/AES256_GCM_STREAMING_PACKAGE_NOTES.txt"
+    "AnoCrypto-C P3-04 AES-256-GCM streaming package notes\n"
+    "Public API: seven caller-owned opaque-context functions in ac_aead.h.\n"
+    "Context storage: malloc/calloc/realloc or equivalent alignment is required; misaligned storage is rejected before internal access.\n"
+    "Decrypt output policy: bytes returned by update are unverified until final succeeds; caller must buffer, withhold, and wipe on failure.\n"
+    "Buffer policy: exact in-place payload is supported; partial overlap and out_written overlap with context/input/output are rejected.\n"
+    "ABI: seven additive symbols on ANOCRYPTO_C_3; retained ABI-0/1/2 symbols unchanged; current total 79.\n"
+    "Product boundary: SKT1/SKF1/SKP1 framing and workflows are not implemented.\n"
+    "OpenSSL boundary: test-only differential provider; no product runtime dependency.\n"
+    "External status: KCMVP DEFERRED; hosted NOT_RUN/UNREVIEWED; signing UNSIGNED; release authorization NO.\n")
 
 file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt"
     "AnoCrypto-C PoC package release compatibility notes\n"
@@ -622,11 +641,11 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/PACKAGE_REVIEW_MANIFEST.md"
     "- Confirm `AES256_GCM_PACKAGE_NOTES.txt` records the generic one-shot AEAD boundary, fixed key/nonce/tag sizes, authenticate-before-release rule, exact AnoSecureKit compatibility evidence, and additive ABI line.\n"
     "- Confirm `AES_CBC_PACKAGE_NOTES.txt` records the public AES/CBC scope, internal-source exclusion, and remaining side-channel review.\n"
     "- Confirm `AES_HARDENING_PACKAGE_NOTES.txt` records retained AES/CBC public API, internal hardening, compiler-review boundary, and excluded artifacts.\n"
-    "- Confirm `AES_CMAC_PACKAGE_NOTES.txt` records the full-tag API, dedicated key purpose, hardening lifecycle/alias/cleanup rules, retained 69-symbol ANOCRYPTO_C_0 baseline, current 72-symbol total, and internal/provider exclusions.\n"
+    "- Confirm `AES_CMAC_PACKAGE_NOTES.txt` records the full-tag API, dedicated key purpose, hardening lifecycle/alias/cleanup rules, retained 69-symbol ANOCRYPTO_C_0 baseline, current 79-symbol total, and internal/provider exclusions.\n"
     "- Confirm `RANDOM_SERVICE_PACKAGE_NOTES.txt` matches the current public random-service implementation and stated limitations.\n"
     "- Confirm `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt` records fail-closed process-marker, VM clone/snapshot, suspend/resume, and hook boundaries.\n"
-    "- Confirm `CLEAN_RELEASE_SYMBOL_BASELINE.log` reports the 72-symbol current additive baseline and retained 69-symbol ANOCRYPTO_C_0 match.\n"
-    "- Confirm `RELEASE_COMPATIBILITY_CHECK.log` and `RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt` match the P3-03/P1-29 compatibility policy.\n"
+    "- Confirm `CLEAN_RELEASE_SYMBOL_BASELINE.log` reports the 79-symbol current additive baseline and retained 69-symbol ANOCRYPTO_C_0 match.\n"
+    "- Confirm `RELEASE_COMPATIBILITY_CHECK.log` and `RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt` match the P3-04/P1-29 compatibility policy.\n"
     "- Confirm `RELEASE_PROVENANCE_POLICY_CHECK.log` records a passing unsigned/source-SBOM boundary check without asserting a signature or external approval.\n"
     "- Confirm no retained baseline header tree, compatibility test source, hosted artifact manifest, source archive, source SBOM, signing handoff/policy/request, signer/TSA record, release authorization record, key, token, signature, timestamp response, certificate, trust anchor, or release-internal metadata directory is packaged.\n"
     "- Confirm `ENTROPY_HEALTH_PACKAGE_NOTES.txt` records test hooks OFF and internal symbol hiding ON.\n"
@@ -658,15 +677,16 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/README.md"
 "- `DIFFERENTIAL_PORTABILITY_PACKAGE_NOTES.txt`: test-only OpenSSL provider and portability-review boundary.\n"
 "- `HKDF_SHA256_PACKAGE_NOTES.txt`: P3-02 generic HKDF API, boundary, exact SKF1 compatibility evidence, and additive ABI summary.\n"
 "- `AES256_GCM_PACKAGE_NOTES.txt`: P3-03 generic AES-256-GCM one-shot API, authenticate-before-release boundary, exact AnoSecureKit compatibility evidence, and additive ABI summary.\n"
+"- `AES256_GCM_STREAMING_PACKAGE_NOTES.txt`: P3-04 streaming state model, unverified pre-final decrypt-output rule, additive ABI, and product boundary.\n"
 "- `AES_CBC_PACKAGE_NOTES.txt`: public AES/CBC scope, package boundary, and remaining review notes.\n"
 "- `AES_HARDENING_PACKAGE_NOTES.txt`: unchanged public API, lifecycle hardening, and compiler-review artifact boundary.\n"
-"- `AES_CMAC_PACKAGE_NOTES.txt`: P1-29 AES-CMAC lifecycle, alias, bounded-cleanup, concurrency, compiler-review, dedicated key-purpose, and retained 69-symbol ANOCRYPTO_C_0 boundary and current 72-symbol total.\n"
+"- `AES_CMAC_PACKAGE_NOTES.txt`: P1-29 AES-CMAC lifecycle, alias, bounded-cleanup, concurrency, compiler-review, dedicated key-purpose, and retained 69-symbol ANOCRYPTO_C_0 boundary and current 79-symbol total.\n"
 "- `RANDOM_SERVICE_PACKAGE_NOTES.txt`: P1-29 retained public random-service implementation summary.\n"
 "- `RANDOM_LIFECYCLE_PACKAGE_NOTES.txt`: P1-29 retained lifecycle, process-marker, VM duplication, and clean export-baseline summary.\n"
-"- `CLEAN_RELEASE_SYMBOL_BASELINE.log`: clean shared-library comparison with the current 72-symbol additive baseline and retained 69-symbol ANOCRYPTO_C_0 line.\n"
+"- `CLEAN_RELEASE_SYMBOL_BASELINE.log`: clean shared-library comparison with the current 79-symbol additive baseline and retained 69-symbol ANOCRYPTO_C_0 line.\n"
 "- `RELEASE_COMPATIBILITY_CHECK.log`: current release identity and retained P1-29 public source/symbol compatibility policy result.\n"
 "- `RELEASE_COMPATIBILITY_PACKAGE_NOTES.txt`: customer-facing compatibility scope, exclusions, and provenance limitations.\n"
-"- `RELEASE_PROVENANCE_POLICY_CHECK.log`: status-only P3-03 unsigned/source-SBOM policy result.\n"
+"- `RELEASE_PROVENANCE_POLICY_CHECK.log`: status-only P3-04 unsigned/source-SBOM policy result.\n"
 "- `ENTROPY_HEALTH_PACKAGE_NOTES.txt`: clean-build and internal entropy/test-hook exclusion summary.\n"
 "- `ENTROPY_OPERATIONAL_PACKAGE_NOTES.txt`: OS-provider classification, private process-boundary guard, and implemented random-service summary.\n\n"
 "## Build the PoC example\n\n"

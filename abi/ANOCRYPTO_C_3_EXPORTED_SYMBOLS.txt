@@ -1,0 +1,8 @@
+# Additive symbols first introduced on ANOCRYPTO_C_3.
+ano_crypto_aes256_gcm_stream_aad_update
+ano_crypto_aes256_gcm_stream_context_size
+ano_crypto_aes256_gcm_stream_decrypt_final
+ano_crypto_aes256_gcm_stream_encrypt_final
+ano_crypto_aes256_gcm_stream_init
+ano_crypto_aes256_gcm_stream_uninit
+ano_crypto_aes256_gcm_stream_update

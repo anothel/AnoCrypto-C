@@ -1,6 +1,6 @@
 # P3 Product-Driven Roadmap
 
-Status: `P3_03_COMPLETE_P3_04_NEXT`
+Status: `P3_04_COMPLETE_P3_05_NEXT`
 
 ## Completed
 
@@ -26,16 +26,20 @@ nonce and 16-byte tag; authenticated before plaintext output; retained ABI-0/1;
 added two `ANOCRYPTO_C_2` symbols; verified NIST, negative, differential and exact
 downstream v1 primitive fixtures without implementing downstream formats.
 
-## Approved implementation sequence
-
 ### P3-04 — AES-256-GCM streaming
 
-Explicit AAD/data/final states and defined treatment of pre-final decrypted bytes.
+Implemented a seven-function caller-owned opaque context API with explicit
+AAD/payload/final states, arbitrary chunk boundaries, exact in-place support,
+and additive `ANOCRYPTO_C_3`. Decrypt update output is explicitly unverified
+until final authentication; callers must buffer, withhold, and wipe it on
+failure. Exact `SKT1` v1 byte compatibility is evidence only.
+
+## Approved implementation sequence
 
 ### P3-05 — scrypt profile
 
 Resource/overflow-safe design for `SKP1` v1 fixed parameters. Generic API shape
-requires a separate review.
+requires a separate review before implementation.
 
 ### P3-06 — AnoSecureKit parity checkpoint
 
