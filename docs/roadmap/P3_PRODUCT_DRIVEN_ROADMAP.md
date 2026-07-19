@@ -1,8 +1,8 @@
 # P3 Product-Driven Roadmap
 
-Status: `P3_05_COMPLETE_P3_06_NEXT`
+Status: `P3_06_COMPLETE_P3_07_ACTIVE_GATE`
 
-## Completed
+## Completed core slices
 
 ### P3-00
 
@@ -17,37 +17,73 @@ rows, assigned ownership, approved eight AnoCrypto-C gaps, and selected HKDF.
 
 Implemented one generic RFC 5869 extract-and-expand function, retained all 69
 `ANOCRYPTO_C_0` symbols, added one `ANOCRYPTO_C_1` symbol, and verified exact
-AnoSecureKit SKF1 v1 info-byte compatibility without implementing SKF1.
+AnoSecureKit `SKF1` v1 info-byte compatibility without implementing `SKF1`.
 
 ### P3-03 — AES-256-GCM one-shot
 
-Implemented two generic one-shot functions with a fixed 32-byte key, 12-byte
-nonce and 16-byte tag; authenticated before plaintext output; retained ABI-0/1;
-added two `ANOCRYPTO_C_2` symbols; verified NIST, negative, differential and exact
-downstream v1 primitive fixtures without implementing downstream formats.
+Implemented two generic one-shot functions and added `ANOCRYPTO_C_2` without
+changing earlier ABI lines. Downstream formats remained outside core.
 
 ### P3-04 — AES-256-GCM streaming
 
-Implemented a seven-function caller-owned opaque context API with explicit
-AAD/payload/final states, arbitrary chunk boundaries, exact in-place support,
-and additive `ANOCRYPTO_C_3`. Decrypt update output is explicitly unverified
-until final authentication; callers must buffer, withhold, and wipe it on
-failure. Exact `SKT1` v1 byte compatibility is evidence only.
+Implemented seven caller-owned streaming functions on `ANOCRYPTO_C_3` with
+explicit state and unauthenticated-decrypt-output rules.
 
-### P3-05 — scrypt fixed profile
+### P3-05 — fixed-profile scrypt
 
-Implemented one generic fixed-profile function using `N=32768`, `r=8`, `p=1`, 32-byte output, caller-owned bounded workspace, full workspace zeroization, and additive `ANOCRYPTO_C_4`. Exact `SKP1` v1 key derivation/decryption is evidence only; no downstream format or password workflow is implemented.
+Implemented one generic fixed-profile function on `ANOCRYPTO_C_4` using
+`N=32768`, `r=8`, `p=1`, a 32-byte result, and caller-owned bounded workspace.
 
-## Approved implementation sequence
+## Completed downstream checkpoint
 
-### P3-06 — AnoSecureKit parity checkpoint
+### P3-06 — AnoSecureKit Enterprise parity/no fallback
 
-Downstream adapter work: complete the AnoCrypto-C profile, run public API and
-`SKT1`/`SKF1`/`SKP1` parity, prove no OpenSSL fallback, resolve exact Community
-identity, and pin the SDK artifact.
+Connected SHA-256, HMAC-SHA-256, HKDF-SHA-256, random, fixed-profile scrypt,
+AES-256-GCM one-shot, and AES-256-GCM streaming through the public P3-05 SDK.
+The runtime reports exactly these seven capabilities and does not silently fall
+back to OpenSSL. Exact `SKT1`, `SKF1`, and `SKP1` compatibility evidence passes.
+P3-06 did not change the AnoCrypto-C public surface and does not authorize a
+customer release.
 
-## PKI lane — gated
+## Active gate
 
-Approve public-key key/CSP representation, key ingress, metadata/binding, and
-signature encoding before restricted SHA-1, RSA, or ECDSA implementation.
-AnoPKI retains all codecs and workflows.
+### P3-07 — public-key/key-handle architecture and AnoPKI contract
+
+Design-only work:
+
+1. revalidate exact AnoPKI operation requirements;
+2. freeze repository ownership;
+3. compare key-handle and key-import alternatives;
+4. compare message/digest sign/verify alternatives;
+5. define lifecycle, zeroization, concurrency, buffer, and failure rules;
+6. estimate the smallest future symbol budget;
+7. select at most one later implementation slice.
+
+No public API, ABI line, SHA-1, RSA, or ECDSA implementation is authorized in
+P3-07.
+
+## Later implementation sequence
+
+The exact sequence is `NOT_SELECTED`. Candidate slices remain:
+
+- restricted SHA-1 only if the current OCSP CertID requirement is reconfirmed;
+- RSA PKCS#1 v1.5 SHA-256/384/512 sign/verify after the key gate;
+- ECDSA P-256 SHA-256 sign/verify after the key gate;
+- AnoPKI Enterprise parity/no-fallback checkpoint after relevant primitives.
+
+Each implementation requires its own API/ABI gate and one numbered work item.
+
+## Parallel AnoSecureKit Enterprise qualification lane
+
+P3-06 parity is complete, but hosted qualification, Windows/macOS dependency
+inspection, trusted provenance, signing/attestation intake, support approval,
+and external release authorization remain separate blocked work.
+
+## Deferred or not approved
+
+- high-level PKI APIs in AnoCrypto-C;
+- Ed25519, RSA-PSS and PQC without new product evidence;
+- key persistence/export/wrapping;
+- HSM/KMS/PKCS#11 routing in core;
+- KCMVP consultation/submission;
+- production signing and external release.

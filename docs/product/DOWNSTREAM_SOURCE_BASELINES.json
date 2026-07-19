@@ -1,6 +1,7 @@
 {
   "schema": "anocrypto-c/downstream-source-baselines/v1",
   "status": "IMPORTED_WITH_ONE_IDENTITY_CONFLICT",
+  "current_followup_status": "CONTENT_RECONCILED_PROVENANCE_CONFIRMATION_OPEN",
   "source_sets": [
     {
       "id": "ASK-COMM",
@@ -20,7 +21,7 @@
       "source_sha256": "ebf8a4cbbdda8103f4678cbe28c56b1758da26761ecfcd3f5b6990a22c8f10c5",
       "pack_sha256": "13448abe43fa45307d46f70e8b44b5af7a16c95d2835b1f0c6094a134df694b3",
       "intake_state": "IMPORTED_WITH_DEPENDENCY_IDENTITY_CONFLICT",
-      "identity_note": "Enterprise vendored tree 9b498f... maps to pinned 102965b..., while separate ASK-COMM pack asserts 694459e...."
+      "identity_note": "P3-01 intake recorded a different vendored pin than the separate ASK-COMM source."
     },
     {
       "id": "APKI-COMM",
@@ -40,14 +41,27 @@
       "source_sha256": "af5acc349deee69650a4767a51fdc0214cd529561a9ece906a18ab0eebe7033d",
       "pack_sha256": "ed55d2aa2ebdd561dc2549d01d1bd8f3fd0bd2d2144c3ce3b74083d86fb47704",
       "intake_state": "IMPORTED",
-      "identity_note": "Collection binds Enterprise revision to Community ae3ddee...."
+      "identity_note": "Collection binds Enterprise revision to Community ae3ddee."
     }
   ],
+  "p3_06_checkpoint": {
+    "repository": "AnoSecureKit-Enterprise",
+    "commit": "53824f00ff3460ba05ac866d1dd58d9a0c01ff3c",
+    "artifact_sha256": "db17e4bc4426a45a8bc3bd0e6802e3cec954a800146a69b600d63070049313df",
+    "anocrypto_c_version": "0.1.0-p3-05-scrypt-fixed-profile",
+    "anocrypto_c_commit": "89e16a261ab7696d9489167d7403d9f2c704629e",
+    "anocrypto_c_artifact_sha256": "18aa9050a808e4d541b2a6a10e91aa8e51367b95962b90db2183e26377bdbac1",
+    "normalized_path_match": "182_OF_182",
+    "upstream_git_tree_reproduction": "EXTERNAL_CONFIRMATION_REQUIRED",
+    "release_provenance_acceptance": "OPEN",
+    "external_release_authorization": "NO"
+  },
   "conflicts": [
     {
       "id": "SRC-CONFLICT-ASK-001",
-      "state": "OPEN_DOWNSTREAM_SYNC_DECISION",
-      "impact": "Exact dependency lineage is unresolved. Requirement contract analysis is usable because normalized contract/source comparison differs semantically only in internal secure_wipe export decoration, not provider operations or v1 formats."
+      "historical_state": "OPEN_DOWNSTREAM_SYNC_DECISION",
+      "current_state": "CONTENT_RECONCILED_PROVENANCE_CONFIRMATION_OPEN",
+      "impact": "P3-06 reconciled all 182 transported paths after line-ending normalization. Original upstream Git-tree reproduction and release provenance acceptance remain open."
     },
     {
       "id": "SRC-DRIFT-PKI-001",

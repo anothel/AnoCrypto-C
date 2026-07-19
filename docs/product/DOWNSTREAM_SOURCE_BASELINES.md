@@ -1,8 +1,9 @@
 # Downstream Source Baselines
 
-Status: `4_OF_4_IMPORTED_WITH_ONE_IDENTITY_CONFLICT`
+Status: `P3_01_4_OF_4_IMPORTED_WITH_ONE_IDENTITY_CONFLICT`; P3-06 follow-up:
+`CONTENT_RECONCILED_PROVENANCE_CONFIRMATION_OPEN`
 
-## Accepted archives
+## P3-01 accepted archives
 
 | ID | Repository | Exact revision | Source archive SHA-256 | CURRENT ONLY/collection SHA-256 | Intake state |
 |---|---|---|---|---|---|
@@ -11,11 +12,32 @@ Status: `4_OF_4_IMPORTED_WITH_ONE_IDENTITY_CONFLICT`
 | `APKI-COMM` | AnoPKI Community | `ae3ddee72dd05f274b9bbae1b514cdc4c4de03f5` | `2f5b5750631a4af39293e10a420a6667ff430e682a3ab24bf3f3e54dbc298ac2` | `0c9c9b0a1c9deaf17554ce22770e2fc5c9da426f85ddadccb516e04c91125268` | `IMPORTED` |
 | `APKI-ENT` | AnoPKI Enterprise | `68b379e7684c9d8b44c53728949774088352a9d9` | `af5acc349deee69650a4767a51fdc0214cd529561a9ece906a18ab0eebe7033d` | `ed55d2aa2ebdd561dc2549d01d1bd8f3fd0bd2d2144c3ce3b74083d86fb47704` | `IMPORTED` |
 
-All delivered SHA-256 values were recomputed locally and matched the supplied manifests.
+All delivered P3-01 SHA-256 values were recomputed locally and matched the
+supplied manifests.
+
+## P3-06 downstream follow-up
+
+| Field | Value |
+|---|---|
+| Repository | AnoSecureKit Enterprise |
+| Checkpoint commit | `53824f00ff3460ba05ac866d1dd58d9a0c01ff3c` |
+| Checkpoint artifact SHA-256 | `db17e4bc4426a45a8bc3bd0e6802e3cec954a800146a69b600d63070049313df` |
+| Consumed AnoCrypto-C | `0.1.0-p3-05-scrypt-fixed-profile` / `89e16a261ab7696d9489167d7403d9f2c704629e` |
+| AnoCrypto-C artifact SHA-256 | `18aa9050a808e4d541b2a6a10e91aa8e51367b95962b90db2183e26377bdbac1` |
+| Community content comparison | `182_OF_182_NORMALIZED_MATCH` |
+| Original upstream Git-tree reproduction | `EXTERNAL_CONFIRMATION_REQUIRED` |
+| Trusted release provenance acceptance | `OPEN` |
+| External release authorization | `NO` |
+
+The semantic source-content discrepancy identified during P3-01 is closed in
+the P3-06 downstream checkpoint. This does not prove the original upstream Git
+tree object, trusted delivery provenance, signing, or customer release approval.
 
 ## Authority rule
 
 - Exact source archives are code authority.
 - CURRENT ONLY/collection packs are curated requirement evidence.
-- A document revision marker that conflicts with its enclosing collection manifest does not override the exact archive/collection identity.
+- The P3-06 source is downstream evidence, not a replacement AnoCrypto-C core.
+- A document revision marker that conflicts with its enclosing collection
+  manifest does not override the exact archive/collection identity.
 - OpenSSL calls are implementation evidence, not a proposed AnoCrypto-C API.
