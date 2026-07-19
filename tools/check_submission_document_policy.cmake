@@ -84,7 +84,7 @@ require_text("docs/kcmvp/submission/KCMVP_SUBMISSION_PACKAGE_INDEX.md" "P1-34 ac
 require_text("docs/kcmvp/submission/KCMVP_MODULE_BASIC_DESIGN_SKELETON.md" "Runtime integrity verification remains `NOT_IMPLEMENTED`")
 require_text("docs/kcmvp/submission/KCMVP_TEST_DOCUMENT_SET_SKELETON.md" "Institution test result tables remain blank")
 require_text("docs/kcmvp/submission/KCMVP_SUBMISSION_STAGING_AND_HANDLING.md" "submission/external release authorization: `NO`")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p3-04-aes256-gcm-streaming")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p3-05-scrypt-fixed-profile")
 
 file(STRINGS "${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_SUBMISSION_STAGING_MANIFEST.txt" _manifest_lines)
 set(_manifest_count 0)
@@ -116,7 +116,7 @@ foreach(line IN LISTS _symbols)
     math(EXPR _symbol_count "${_symbol_count}+1")
   endif()
 endforeach()
-if(NOT _header_count EQUAL 14 OR NOT _symbol_count EQUAL 69 OR NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_3")
+if(NOT _header_count EQUAL 14 OR NOT _symbol_count EQUAL 69 OR NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_4")
   list(APPEND _violations "public ABI changed: headers=${_header_count}, symbols=${_symbol_count}, ABI=${ANO_CRYPTO_RELEASE_ABI_LINE}")
 endif()
 

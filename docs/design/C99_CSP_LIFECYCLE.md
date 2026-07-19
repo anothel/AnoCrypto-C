@@ -6,7 +6,7 @@ Status: `FROZEN_INTERNAL_POLICY`; formal CSP classification and accepted zeroiza
 
 AnoCrypto-C provides a fixed-size, in-process, module-owned CSP handle table for HMAC, block-cipher, and CMAC secret keys. It also exposes caller-owned opaque HMAC, AES-CBC, AES-CMAC, AES-256-GCM streaming, HMAC_DRBG, and random-service contexts. This is not a persistent key store or a general key-management subsystem.
 
-The current public surface is 16 headers and 79 exported symbols across retained `ANOCRYPTO_C_0`, `ANOCRYPTO_C_1`, `ANOCRYPTO_C_2`, and additive `ANOCRYPTO_C_3`.
+The current public surface is 16 headers and 80 exported symbols across retained `ANOCRYPTO_C_0`, `ANOCRYPTO_C_1`, `ANOCRYPTO_C_2`, `ANOCRYPTO_C_3`, and additive `ANOCRYPTO_C_4`.
 
 ## Module-owned handle table
 
@@ -67,4 +67,4 @@ The module does not retain addresses of caller-owned opaque contexts. Callers mu
 
 ## Evidence
 
-Retained P2-05 evidence includes explicit-destroy/stale-handle tests, orderly-shutdown and fatal-transition zeroization regressions, a status-only policy review, source/policy checks, local compiler-output capture, install/PoC checks, and sensitive-artifact scanning. P3-04 adds streaming-context final/uninit cleanup, post-handle-snapshot semantics, clean 79-symbol ABI checks, and current/retained consumer regression. Exact OE-01 GCC 13.3.0 human review remains `NOT_RUN`.
+Retained P2-05 evidence includes explicit-destroy/stale-handle tests, orderly-shutdown and fatal-transition zeroization regressions, a status-only policy review, source/policy checks, local compiler-output capture, install/PoC checks, and sensitive-artifact scanning. P3-04 adds streaming-context final/uninit cleanup and post-handle-snapshot semantics. P3-05 adds caller-workspace scrypt clearing, clean 80-symbol ABI checks, and current/retained consumer regression. Exact OE-01 GCC 13.3.0 human review remains `NOT_RUN`.

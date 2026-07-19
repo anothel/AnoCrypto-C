@@ -85,7 +85,7 @@ file(STRINGS "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt"
     _symbol_lines REGEX "^[A-Za-z_][A-Za-z0-9_]*$")
 list(LENGTH _symbol_lines _symbol_count)
 if(NOT _public_header_count EQUAL 14 OR NOT _symbol_count EQUAL 69 OR
-   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_3")
+   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_4")
     message(FATAL_ERROR
         "P2-04 public ABI changed: headers=${_public_header_count}, symbols=${_symbol_count}, ABI=${ANO_CRYPTO_RELEASE_ABI_LINE}")
 endif()
@@ -122,7 +122,7 @@ require_text("docs/kcmvp/KCMVP_ENTROPY_HEALTH_AND_RECOVERY_MATRIX.md"
 require_text("docs/kcmvp/P2_04_IMPLEMENTATION_TEST_DELTA.md"
     "BLOCKED_EXTERNAL")
 require_text("docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md" "| Actual hosted lanes | `NOT_RUN` |")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p3-04-aes256-gcm-streaming")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p3-05-scrypt-fixed-profile")
 
 foreach(_header IN LISTS _public_headers)
     file(READ "${_header}" _header_text)

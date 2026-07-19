@@ -1,6 +1,6 @@
 # Product Operation to Capability Matrix
 
-Status: `P3_04_HKDF_GCM_ONESHOT_AND_STREAMING_SATISFIED`
+Status: `P3_05_HKDF_GCM_AND_SCRYPT_SATISFIED`
 
 | ID | Product operation/contract | Evidence | Candidate capability | Current AnoCrypto-C result | Owner | Decision |
 |---|---|---|---|---|---|---|
@@ -10,7 +10,7 @@ Status: `P3_04_HKDF_GCM_ONESHOT_AND_STREAMING_SATISFIED`
 | `ASK-004` | public HKDF and `SKF1` v1 file-key derivation | `src/file_crypto.cpp`, exact `SKF1` fixture, RFC 5869 CLI test | HKDF-SHA-256 | supported in P3-02 | AnoCrypto-C | `SATISFIED_P3_02` |
 | `ASK-005` | `SKF1`/`SKP1` chunk encryption | one-shot provider calls and v1 fixtures | AES-256-GCM one-shot | supported in P3-03 | AnoCrypto-C | `SATISFIED_P3_03` |
 | `ASK-006` | `SKT1` packet streaming and public packet API | `src/packet_stream.cpp`, split-update/fixture tests | AES-256-GCM streaming | supported in P3-04 | AnoCrypto-C | `SATISFIED_P3_04` |
-| `ASK-007` | `SKP1` v1 password derivation | fixed v1 format and negative fixtures | scrypt `N=32768,r=8,p=1`, 32-byte output | missing | AnoCrypto-C | `ACCEPTED_GAP` |
+| `ASK-007` | `SKP1` v1 password derivation | fixed v1 format and negative fixtures | scrypt `N=32768,r=8,p=1`, 32-byte output | supported in P3-05 | AnoCrypto-C | `SATISFIED_P3_05` |
 | `ASK-008` | exact SDK/archive identity | Enterprise package gates | package digest/provenance | partial engineering support; approved artifact absent | Enterprise/release lane | `NOT_A_PRIMITIVE_GAP` |
 | `ASK-009` | explicit capability mask and no fallback | Enterprise runtime contract/tests | truthful profile capability reporting | Enterprise already owns mask; no runtime fallback | Enterprise | `ADAPTER_OWNED` |
 | `PKI-001` | backend identity/readiness/self-test | Community backend metadata, Enterprise SDK manifest | module version/build/state | supported | AnoCrypto-C + adapter | `SATISFIED_PENDING_REAL_INTEGRATION` |
@@ -28,7 +28,7 @@ Status: `P3_04_HKDF_GCM_ONESHOT_AND_STREAMING_SATISFIED`
 ## Acceptance count
 
 - accepted product/contract rows: 20;
-- satisfied or non-core-owned rows: 15;
+- satisfied or non-core-owned rows: 16;
 - accepted AnoCrypto-C gaps: 8;
-- completed implementations: 3 (`ASK-004`, `ASK-005`, `ASK-006`);
-- next selected implementation: `ASK-007` (`P3-05`).
+- completed implementations: 4 (`ASK-004`, `ASK-005`, `ASK-006`, `ASK-007`);
+- next work: `P3-06` downstream parity/no-fallback checkpoint; no new primitive selected.

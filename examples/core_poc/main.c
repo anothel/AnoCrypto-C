@@ -158,6 +158,30 @@ static int run_hkdf_smoke(void)
     return 0;
 }
 
+static int run_scrypt_smoke(void)
+{
+    static const uint8_t password[] = { 'p', 'u', 'b', 'l', 'i', 'c', '-', 'p', 'o', 'c' };
+    static const uint8_t salt[] = { 's', 'c', 'r', 'y', 'p', 't' };
+    void *workspace = malloc(ANO_CRYPTO_SCRYPT_WORKSPACE_SIZE);
+    uint8_t derived[ANO_CRYPTO_SCRYPT_DERIVED_KEY_SIZE];
+    ano_crypto_status_t status;
+
+    if (workspace == NULL) {
+        return fail_message("scrypt workspace allocation failed");
+    }
+    status = ano_crypto_scrypt_derive_key(password, sizeof(password), salt, sizeof(salt),
+                                           workspace, ANO_CRYPTO_SCRYPT_WORKSPACE_SIZE,
+                                           derived);
+    free(workspace);
+    if (status != ANO_CRYPTO_OK) {
+        (void)ano_crypto_csp_zeroize(derived, sizeof(derived));
+        return fail_status("scrypt fixed profile", status);
+    }
+    (void)ano_crypto_csp_zeroize(derived, sizeof(derived));
+    printf("- scrypt fixed-profile smoke: PASS (32 bytes derived; output not printed)\n");
+    return 0;
+}
+
 static int run_drbg_smoke(void)
 {
     uint8_t entropy[ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_ENTROPY_INPUT_SIZE];
@@ -601,6 +625,8 @@ int main(void)
     } else if (run_hmac_key_handle_smoke() != 0) {
         result = 1;
     } else if (run_hkdf_smoke() != 0) {
+        result = 1;
+    } else if (run_scrypt_smoke() != 0) {
         result = 1;
     } else if (run_drbg_smoke() != 0) {
         result = 1;

@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P3-04 reviewed additive ABI. The retained P1-29/P3-01 surface remains unchanged on `ANOCRYPTO_C_0`; P3-02 HKDF-SHA-256 remains on `ANOCRYPTO_C_1`; P3-03 one-shot AES-256-GCM remains on `ANOCRYPTO_C_2`; seven generic streaming functions are added on `ANOCRYPTO_C_3`.
+Status: P3-05 reviewed additive ABI. The retained P1-29/P3-01 surface remains unchanged on `ANOCRYPTO_C_0`; P3-02 HKDF-SHA-256 remains on `ANOCRYPTO_C_1`; P3-03 one-shot AES-256-GCM remains on `ANOCRYPTO_C_2`; P3-04 streaming remains on `ANOCRYPTO_C_3`; one fixed-profile scrypt function is added on `ANOCRYPTO_C_4`.
 
 ## Identity
 
@@ -29,7 +29,7 @@ Status: P3-04 reviewed additive ABI. The retained P1-29/P3-01 surface remains un
 |---|---|
 | `ac_hash.h` | SHA-256/384/512 one-shot and streaming. |
 | `ac_hmac.h` | HMAC-SHA-2 one-shot/streaming and HMAC-purpose handle path. |
-| `ac_kdf.h` | RFC 5869 HKDF-SHA-256 combined extract-and-expand; one function. |
+| `ac_kdf.h` | RFC 5869 HKDF-SHA-256 plus fixed-profile scrypt with caller-provided workspace; two functions. |
 | `ac_aead.h` | AES-256-GCM one-shot encrypt/decrypt with fixed 12-byte nonce and 16-byte tag. |
 | `ac_drbg.h` | Explicit-entropy HMAC_DRBG-SHA-256 core. |
 | `ac_random.h` | Source-backed public random lifecycle on supported provider/process-marker branches. |
@@ -58,6 +58,7 @@ cmake --build build --target ano_crypto_cmac_compiler_review
 cmake --build build --target ano_crypto_hkdf_sha256_policy_check
 cmake --build build --target ano_crypto_aes256_gcm_policy_check
 cmake --build build --target ano_crypto_aes256_gcm_streaming_policy_check
+cmake --build build --target ano_crypto_scrypt_policy_check
 cmake --build build --target ano_crypto_clean_release_symbol_baseline_check
 cmake --build build --target ano_crypto_symbol_version_check
 cmake --build build --target ano_crypto_poc_package_smoke
@@ -167,3 +168,17 @@ These checks are toolchain-specific guardrails. Calling convention, loader behav
   is 79 and retained ABI-0/1/2 manifests are unchanged.
 - OpenSSL is test-only differential evidence. `SKT1` is an exact compatibility
   fixture only; its framing and workflow are not implemented in AnoCrypto-C.
+
+
+## P3-05 fixed-profile scrypt additive ABI review
+
+- No new public header; `ac_kdf.h` is extended.
+- Exactly one function is added: `ano_crypto_scrypt_derive_key`.
+- The profile is fixed to `N=32768`, `r=8`, `p=1`, and a 32-byte derived key.
+- The caller supplies at least 33,556,544 bytes of malloc-equivalent aligned workspace; the production implementation performs no heap allocation.
+- Empty password and salt are valid primitive inputs. Product password policy remains outside AnoCrypto-C.
+- Password and salt may overlap each other. Output and the reviewed workspace extent must be disjoint from all inputs and from each other.
+- A structurally valid output is cleared on every failure. The reviewed workspace extent is cleared after every derivation attempt that begins using it.
+- The new name is the only symbol on additive `ANOCRYPTO_C_4`; current total is 80 and retained ABI-0/1/2/3 manifests are unchanged.
+- OpenSSL is test-only differential evidence. Exact `SKP1` v1 key derivation and record decryption are compatibility fixtures only; framing and password workflow remain AnoSecureKit-owned.
+- P1-34 hosted execution/review, repository signing, external release authorization, KCMVP, and the downstream identity conflict remain unchanged.

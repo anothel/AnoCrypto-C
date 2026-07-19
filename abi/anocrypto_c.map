@@ -91,6 +91,11 @@ ANOCRYPTO_C_3 {
         ano_crypto_aes256_gcm_stream_init;
         ano_crypto_aes256_gcm_stream_uninit;
         ano_crypto_aes256_gcm_stream_update;
+} ANOCRYPTO_C_2;
+
+ANOCRYPTO_C_4 {
+    global:
+        ano_crypto_scrypt_derive_key;
     local:
         *;
-} ANOCRYPTO_C_2;
+} ANOCRYPTO_C_3;

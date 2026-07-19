@@ -8,5 +8,5 @@ int main(void)
     if (ano_crypto_version_string(&version) != ANO_CRYPTO_OK || version == 0) {
         return 1;
     }
-    return strcmp(version, "0.1.0-p3-04-aes256-gcm-streaming") == 0 ? 0 : 2;
+    return strcmp(version, "0.1.0-p3-05-scrypt-fixed-profile") == 0 ? 0 : 2;
 }

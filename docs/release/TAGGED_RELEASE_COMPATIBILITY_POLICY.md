@@ -1,22 +1,22 @@
 # Tagged Release Compatibility Policy
 
-Status: P3-04 additive-ABI engineering policy. This document does not establish universal ABI compatibility or release provenance by itself.
+Status: P3-05 additive-ABI engineering policy. This document does not establish universal ABI compatibility or release provenance by itself.
 
 ## Purpose
 
-P3-04 retains the project-owned `0.1.0-p1-29-cmac-hardening` compatibility input, the P3-02 HKDF symbol on `ANOCRYPTO_C_1`, the P3-03 one-shot AES-256-GCM symbols on `ANOCRYPTO_C_2`, and adds seven reviewed generic AES-256-GCM streaming functions on `ANOCRYPTO_C_3`. The policy covers release identity consistency, the unchanged retained C surface, the additive header and symbol, installed-package consumption, isolated synthetic tag rehearsal, and status-only hosted artifacts.
+P3-05 retains the project-owned `0.1.0-p1-29-cmac-hardening` compatibility input, the P3-02 HKDF symbol on `ANOCRYPTO_C_1`, the P3-03 one-shot AES-256-GCM symbols on `ANOCRYPTO_C_2`, and the P3-04 streaming symbols on `ANOCRYPTO_C_3`; it adds one reviewed fixed-profile scrypt function on `ANOCRYPTO_C_4`. The policy covers release identity consistency, the unchanged retained C surface, the additive header and symbol, installed-package consumption, isolated synthetic tag rehearsal, and status-only hosted artifacts.
 
 ## Reviewed identity
 
 The authoritative engineering metadata is `release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake`:
 
 - package version: `0.1.0`
-- engineering version: `0.1.0-p3-04-aes256-gcm-streaming`
-- expected tag metadata: `v0.1.0-p3-04-aes256-gcm-streaming`
-- current ABI line: `ANOCRYPTO_C_3`
+- engineering version: `0.1.0-p3-05-scrypt-fixed-profile`
+- expected tag metadata: `v0.1.0-p3-05-scrypt-fixed-profile`
+- current ABI line: `ANOCRYPTO_C_4`
 - retained baseline: `0.1.0-p1-29-cmac-hardening`
 - retained/current public headers: 14 / 16
-- retained `ANOCRYPTO_C_0` / current total exports: 69 / 79
+- retained `ANOCRYPTO_C_0` / current total exports: 69 / 80
 - CMake package compatibility: `SameMinorVersion`
 
 The expected tag is metadata until a Git-backed check proves that the tag, supplied commit, and checked-out `HEAD` identify one commit. Tag existence, signer identity, and release authorization remain separate reviews.
@@ -34,14 +34,14 @@ Baseline updates are not automatic. A later intentional public API or ABI change
 - central release metadata and current version macros agree;
 - the retained baseline manifest contains 14 canonical-LF header hashes and the current manifest contains 16;
 - normalized declarations, public types, and non-version constants for the retained 14 headers match P1-29;
-- `ANOCRYPTO_C_0` still contains the same 69 names, while the current manifest contains exactly 79, `ANOCRYPTO_C_1` contains only `ano_crypto_hkdf_sha256`, `ANOCRYPTO_C_2` contains only the two one-shot GCM symbols, and `ANOCRYPTO_C_3` contains only the seven streaming symbols;
+- `ANOCRYPTO_C_0` still contains the same 69 names, while the current manifest contains exactly 80, `ANOCRYPTO_C_1` contains only `ano_crypto_hkdf_sha256`, `ANOCRYPTO_C_2` contains only the two one-shot GCM symbols, `ANOCRYPTO_C_3` contains only the seven streaming symbols, and `ANOCRYPTO_C_4` contains only `ano_crypto_scrypt_derive_key`;
 - package compatibility generation uses the reviewed policy;
 - release/evidence/CI identity strings are coherent.
 
 `ano_crypto_tagged_release_compatibility_smoke` additionally builds a clean installed package and runs:
 
-- a P3-04-header/P3-04-library consumer that binds all 79 public functions and exercises HKDF plus AES-256-GCM one-shot and streaming;
-- a P1-29-header/P3-04-library consumer that binds all 69 retained public functions;
+- a P3-05-header/P3-05-library consumer that binds all 80 public functions and exercises HKDF, fixed-profile scrypt, and AES-256-GCM one-shot/streaming;
+- a P1-29-header/P3-05-library consumer that binds all 69 retained public functions;
 - an exact `find_package(AnoCryptoC 0.1.0 EXACT)` probe;
 - a negative request confirming the 0.1.x package does not satisfy `0.2.0`.
 
@@ -59,7 +59,7 @@ Opaque caller-owned contexts must always be sized through the loaded library and
 
 ## Clean tagged-release rehearsal
 
-The P3-04 rehearsal uses an isolated clean clone or equivalent temporary Git repository. A synthetic local tag may be created there only. The user repository is not tagged or modified.
+The P3-05 rehearsal uses an isolated clean clone or equivalent temporary Git repository. A synthetic local tag may be created there only. The user repository is not tagged or modified.
 
 The rehearsal must prove that the expected tag, supplied commit, tag-resolved commit, and checked-out `HEAD` identify one commit and that the checkout is clean. Dirty worktrees, a moved tag, a moved `HEAD`, ref mismatch, or commit mismatch fail closed. A successful rehearsal is local procedure evidence; it is not proof that an actual release tag exists, is signed, or is authorized.
 

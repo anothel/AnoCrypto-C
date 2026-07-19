@@ -1,6 +1,6 @@
 # P3 Product-Driven Roadmap
 
-Status: `P3_04_COMPLETE_P3_05_NEXT`
+Status: `P3_05_COMPLETE_P3_06_NEXT`
 
 ## Completed
 
@@ -34,12 +34,11 @@ and additive `ANOCRYPTO_C_3`. Decrypt update output is explicitly unverified
 until final authentication; callers must buffer, withhold, and wipe it on
 failure. Exact `SKT1` v1 byte compatibility is evidence only.
 
+### P3-05 — scrypt fixed profile
+
+Implemented one generic fixed-profile function using `N=32768`, `r=8`, `p=1`, 32-byte output, caller-owned bounded workspace, full workspace zeroization, and additive `ANOCRYPTO_C_4`. Exact `SKP1` v1 key derivation/decryption is evidence only; no downstream format or password workflow is implemented.
+
 ## Approved implementation sequence
-
-### P3-05 — scrypt profile
-
-Resource/overflow-safe design for `SKP1` v1 fixed parameters. Generic API shape
-requires a separate review before implementation.
 
 ### P3-06 — AnoSecureKit parity checkpoint
 

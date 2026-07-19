@@ -1,12 +1,13 @@
 # AnoCrypto-C
 
-Current status: `0.1.0-p3-04-aes256-gcm-streaming`. P3-04 adds a minimal generic AES-256-GCM streaming C API with explicit AAD/payload/final states and caller-owned opaque contexts. All 69 `ANOCRYPTO_C_0` symbols, the `ANOCRYPTO_C_1` HKDF symbol, and the two `ANOCRYPTO_C_2` one-shot GCM symbols are retained; seven streaming symbols are added on `ANOCRYPTO_C_3`. The current boundary is 16 public headers and 79 exported symbols. Decrypt update bytes are unverified until final authentication and must be buffered, withheld, and wiped by the caller on failure. Exact AnoSecureKit `SKT1`, `SKF1`, and `SKP1` v1 primitive fixtures are compatibility evidence only; those formats and workflows remain AnoSecureKit-owned. KCMVP remains `DEFERRED`, P1-34 hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, external release authorization remains `NO`, and the downstream Community identity conflict remains open.
+Current status: `0.1.0-p3-05-scrypt-fixed-profile`. P3-05 adds one generic fixed-profile scrypt C API using `N=32768`, `r=8`, `p=1`, a 32-byte derived key, and caller-owned 33,556,544-byte workspace. All earlier ABI lines remain unchanged; one symbol is added on `ANOCRYPTO_C_4`, producing a current boundary of 16 public headers and 80 exported symbols. The production implementation performs no heap allocation and has no OpenSSL dependency. Exact AnoSecureKit `SKP1` v1 key derivation and record decryption are compatibility evidence only; file framing and password workflow remain AnoSecureKit-owned. KCMVP remains `DEFERRED`, P1-34 hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, external release authorization remains `NO`, and the downstream Community identity conflict remains open.
 
 Implemented processing scope:
 
 - RFC 5869 HKDF-SHA-256 combined extract-and-expand with 0..8160-byte output and exact AnoSecureKit SKF1 info-byte evidence
 - AES-256-GCM one-shot encrypt/decrypt using a 32-byte BLOCK_CIPHER CSP key, fixed 12-byte nonce, fixed 16-byte tag, empty AAD/payload support, exact in-place payload operation, and authenticated-output-only decryption
 - AES-256-GCM streaming encrypt/decrypt with caller-owned opaque contexts, explicit AAD/payload/final states, arbitrary chunk boundaries, exact in-place processing, and unverified pre-final decrypt output requiring caller buffering and failure wiping
+- Fixed-profile scrypt key derivation with `N=32768`, `r=8`, `p=1`, 32-byte output, caller-owned bounded workspace, complete workspace zeroization, and exact `SKP1` v1 primitive compatibility evidence
 - NIST AES-256-GCM KATs, streaming state/chunk/finalization tests, corruption/overlap/output-clearing tests, exact SKT1/SKF1/SKP1 v1 primitive fixtures, and OpenSSL test-only differential coverage
 - SHA-256, SHA-384, and SHA-512 one-shot and streaming APIs
 - HMAC-SHA-256, HMAC-SHA-384, and HMAC-SHA-512 one-shot and streaming APIs
@@ -29,7 +30,7 @@ Implemented processing scope:
 - Process-change detection for source-backed random contexts, requiring explicit reseed before generation
 - Startup self-test KATs for SHA-256/SHA-384/SHA-512, their HMAC variants, and HMAC_DRBG-SHA-256
 - Extended KAT executables for all implemented SHA-2/HMAC variants, HMAC key-handle paths, and HMAC_DRBG-SHA-256 public vectors
-- Deterministic OpenSSL 3.x test-only differential comparisons for SHA-256/384/512, HMAC, HKDF-SHA-256, AES-256-GCM, AES-CBC, and AES-CMAC paths
+- Deterministic OpenSSL 3.x test-only differential comparisons for SHA-256/384/512, HMAC, HKDF-SHA-256, fixed-profile scrypt, AES-256-GCM, AES-CBC, and AES-CMAC paths
 - SHA-512-family representation, endian, variable-chunk, and intentionally unaligned-input portability regression
 - CMake C99 representation guard requiring 8-bit bytes, 32-bit `uint32_t`, 64-bit `uint64_t`, and `size_t` no wider than `uint64_t`
 - Negative API tests for hash/HMAC/DRBG/CSP/key argument handling, context lifecycle behavior, handle exhaustion, stale handle rejection, and DRBG helper failure cleanup
@@ -63,7 +64,7 @@ Skeleton-only / TODO scope:
 - Byte-identical source archive and binary reproducibility rules
 - Dependency/component discovery, vulnerability and license review, production signer/key-custody provisioning, RFC 3161 service/trust-anchor provisioning, actual release signing/timestamping, and external authorization
 - PoC package legal/evaluation notice and customer-specific support boundary
-- Exact OE-01 compiler/CPU and human disposition, approved statistical timing/cache methodology if required, power/EM/fault applicability, padding helpers, GMAC, scrypt, and domestic-algorithm decisions
+- Exact OE-01 compiler/CPU and human disposition, approved statistical timing/cache methodology if required, power/EM/fault applicability, padding helpers, GMAC, additional scrypt profiles, and domestic-algorithm decisions
 
 
 ## P2-01 readiness consolidation
@@ -313,7 +314,7 @@ Controlled outputs are `docs/kcmvp/KCMVP_ENTROPY_AND_DRBG_SPEC.md`, the responsi
 - A dedicated tests-only hook verifies the HMAC_DRBG `2^48` reseed-counter boundary, failed-reseed persistence, recovery, and no-wrap behavior.
 - Known VM snapshot/restore or clone events require inherited contexts to be discarded and each instance independently reinitialized; automatic detection is not implemented.
 - Suspend/resume handling remains a consuming-product policy.
-- `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the retained 69-name ABI-0 public symbol baseline; `abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt` stores the current 79-name additive surface.
+- `abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt` stores the retained 69-name ABI-0 public symbol baseline; `abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt` stores the current 80-name additive surface.
 - Clean Release, evidence, and PoC flows compare shared-library exports with that baseline and keep both internal test-hook options disabled.
 - Hosted CI collects status-only platform review artifacts; actual hosted results still require review.
 

@@ -98,8 +98,8 @@ require_text("docs/kcmvp/KCMVP_LIVE_REHEARSAL_MINUTES_TEMPLATE.md" "Reviewer nam
 require_text("docs/kcmvp/KCMVP_REHEARSAL_OBJECTION_AND_DEFECT_REGISTER.md" "No human-review finding exists yet")
 require_text("docs/kcmvp/KCMVP_CONSULTATION_AUTHORIZATION_RECORD.md" "Institution contact authorization | `NO`")
 require_text("docs/ci/HOSTED_CI_EXTERNAL_BLOCKER.md" "| Actual hosted lanes | `NOT_RUN` |")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p3-04-aes256-gcm-streaming")
-require_text("README.md" "0.1.0-p3-04-aes256-gcm-streaming")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p3-05-scrypt-fixed-profile")
+require_text("README.md" "0.1.0-p3-05-scrypt-fixed-profile")
 
 file(READ "${ANO_CRYPTO_SOURCE_DIR}/docs/kcmvp/KCMVP_NAMED_REVIEWER_EXECUTION_GUIDE.md" _guide)
 string(REGEX MATCHALL "[|] `A-[0-9][0-9]` [|]" _agenda_rows "${_guide}")

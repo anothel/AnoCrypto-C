@@ -77,6 +77,30 @@ int main(void)
     }
 
     {
+        static const uint8_t password[] = { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
+        static const uint8_t salt[] = { 'N', 'a', 'C', 'l' };
+        static const uint8_t expected[ANO_CRYPTO_SCRYPT_DERIVED_KEY_SIZE] = {
+            0x3fu,0xa8u,0x51u,0x18u,0xffu,0xfeu,0x97u,0x32u,0xdau,0x7fu,0x4cu,0x63u,0xefu,0x61u,0xf5u,0xc6u,
+            0x45u,0x81u,0x44u,0xd0u,0x36u,0x40u,0x1fu,0x88u,0x29u,0xddu,0x4eu,0x5bu,0x2cu,0x50u,0xc5u,0x1fu };
+        void *workspace = malloc(ANO_CRYPTO_SCRYPT_WORKSPACE_SIZE);
+        uint8_t derived[ANO_CRYPTO_SCRYPT_DERIVED_KEY_SIZE];
+        if (workspace == NULL) {
+            fprintf(stderr, "scrypt workspace allocation failed\n");
+            return 1;
+        }
+        st = ano_crypto_scrypt_derive_key(password, sizeof(password), salt, sizeof(salt),
+                                           workspace, ANO_CRYPTO_SCRYPT_WORKSPACE_SIZE,
+                                           derived);
+        free(workspace);
+        if (st != ANO_CRYPTO_OK || memcmp(derived, expected, sizeof(derived)) != 0) {
+            (void)ano_crypto_csp_zeroize(derived, sizeof(derived));
+            fprintf(stderr, "scrypt install smoke failed: %s\n", ano_crypto_status_name(st));
+            return 1;
+        }
+        (void)ano_crypto_csp_zeroize(derived, sizeof(derived));
+    }
+
+    {
         static const uint8_t key[ANO_CRYPTO_AES256_GCM_KEY_SIZE] = { 0u };
         static const uint8_t nonce[ANO_CRYPTO_AES256_GCM_NONCE_SIZE] = { 0u };
         static const uint8_t message[] = { 'i', 'n', 's', 't', 'a', 'l', 'l', '-', 'g', 'c', 'm' };

@@ -713,3 +713,21 @@ P2-06 does not import third-party implementation code, secret-bearing traces, pr
 - OpenSSL is used only by an independently linked test executable for status-only differential evidence.
 - No key, nonce, plaintext, ciphertext, tag, customer data, credential, signature, or production deployment material is retained in release logs or customer packages.
 - KCMVP, hosted review, repository signing, timestamping, and external release authorization remain unchanged and incomplete.
+
+## P3-05 Fixed-Profile scrypt Inputs
+
+| ID | Input | Classification | Use | Boundary |
+|---|---|---|---|---|
+| SRC-4301 | Exact AnoSecureKit Community/Enterprise source revisions and consumed-current pack imported by P3-01 | User-supplied downstream requirement evidence | Confirm the fixed `SKP1` v1 scrypt profile, exact salt/key fixture, resource expectation, and product/core ownership | Requirement and fixture bytes only; no `SKP1` parser, serializer, password workflow, or product API is copied into AnoCrypto-C. The known Community dependency identity conflict remains open. |
+| SRC-4302 | RFC 7914 public scrypt specification and public vector concepts | Public standard | Validate PBKDF2-HMAC-SHA-256, Salsa20/8, BlockMix, ROMix, fixed parameters, and derived-key results | Specification concepts and public vectors only; no third-party implementation source is copied. |
+| SRC-4303 | OpenSSL 3.x public `EVP_PBE_scrypt` interface and separately linked `OpenSSL::Crypto` | Public documentation and test-only dependency | Independent fixed-profile differential validation | OpenSSL is excluded from the production library, installed SDK, and customer PoC runtime; no OpenSSL implementation source is copied. |
+| DER-4301 | Fresh project-owned C99 scrypt implementation, API/resource contract, tests, policy checks, consumer/PoC updates, and evidence records | User/project owned | Provide one generic fixed-profile scrypt primitive with caller-owned workspace and additive ABI | Password prompting, normalization, storage, file framing, parameter serialization, and orchestration stay downstream-owned. |
+
+## P3-05 Clean-room Notes
+
+- The PBKDF2-HMAC-SHA-256, Salsa20/8, BlockMix, and ROMix code was written fresh for AnoCrypto-C against public algorithm descriptions and existing project-owned HMAC internals.
+- Exact `SKP1` bytes are retained only as compatibility evidence for the generic fixed profile; no `SKP1` parser, serializer, header model, password workflow, or product API is introduced.
+- OpenSSL is used only by an independently linked test executable for status-only differential evidence.
+- The production implementation performs no heap allocation and uses caller-owned, bounded, zeroized workspace.
+- No password, salt, derived key, workspace content, plaintext, ciphertext, tag, customer data, credential, signature, or production deployment material is retained in release logs or customer packages.
+- KCMVP, hosted review, repository signing, timestamping, external release authorization, and the downstream identity conflict remain unchanged and incomplete.

@@ -10,7 +10,7 @@
 #define ANO_CRYPTO_COMPAT_HEADER_MODE "unspecified"
 #endif
 #ifndef ANO_CRYPTO_EXPECT_RUNTIME_VERSION
-#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p3-04-aes256-gcm-streaming"
+#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p3-05-scrypt-fixed-profile"
 #endif
 
 #define ANO_COMPAT_JOIN_INNER(a, b) a##b
@@ -334,6 +334,9 @@ static unsigned int bind_current_additive_surface(void)
                     (void *, const uint8_t *, size_t));
     ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_aes256_gcm_stream_uninit,
                     (void *, size_t));
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_scrypt_derive_key,
+                    (const uint8_t *, size_t, const uint8_t *, size_t,
+                     void *, size_t, uint8_t *));
     return count;
 }
 #endif
@@ -371,7 +374,7 @@ int main(void)
     symbol_count = bind_p1_29_public_surface();
 #if defined(ANO_CRYPTO_EXPECT_CURRENT_HEADER)
     symbol_count += bind_current_additive_surface();
-    if (symbol_count != 79u) {
+    if (symbol_count != 80u) {
         return 1;
     }
 #else
@@ -455,6 +458,29 @@ int main(void)
         (void)ano_crypto_key_destroy(handle);
     }
     {
+        static const uint8_t password[] = { 'p', 'a', 's', 's', 'w', 'o', 'r', 'd' };
+        static const uint8_t salt[] = { 'N', 'a', 'C', 'l' };
+        static const uint8_t expected[ANO_CRYPTO_SCRYPT_DERIVED_KEY_SIZE] = {
+            0x3fu,0xa8u,0x51u,0x18u,0xffu,0xfeu,0x97u,0x32u,0xdau,0x7fu,0x4cu,0x63u,0xefu,0x61u,0xf5u,0xc6u,
+            0x45u,0x81u,0x44u,0xd0u,0x36u,0x40u,0x1fu,0x88u,0x29u,0xddu,0x4eu,0x5bu,0x2cu,0x50u,0xc5u,0x1fu };
+        void *workspace = malloc(ANO_CRYPTO_SCRYPT_WORKSPACE_SIZE);
+        uint8_t key[ANO_CRYPTO_SCRYPT_DERIVED_KEY_SIZE];
+        int failed = 0;
+        if (workspace == NULL ||
+            ano_crypto_scrypt_derive_key(password, sizeof(password), salt, sizeof(salt),
+                                         workspace, ANO_CRYPTO_SCRYPT_WORKSPACE_SIZE,
+                                         key) != ANO_CRYPTO_OK ||
+            memcmp(key, expected, sizeof(key)) != 0) {
+            failed = 1;
+        }
+        (void)ano_crypto_csp_zeroize(key, sizeof(key));
+        free(workspace);
+        if (failed) {
+            (void)ano_crypto_module_shutdown();
+            return 10;
+        }
+    }
+    {
         static const uint8_t key[ANO_CRYPTO_AES256_GCM_KEY_SIZE] = { 0u };
         static const uint8_t nonce[ANO_CRYPTO_AES256_GCM_NONCE_SIZE] = { 1u };
         static const uint8_t aad[] = { 's', 't', 'r', 'e', 'a', 'm' };
@@ -510,12 +536,12 @@ int main(void)
         free(dec);
         if (failed) {
             (void)ano_crypto_module_shutdown();
-            return 10;
+            return 11;
         }
     }
 #endif
     if (ano_crypto_module_shutdown() != ANO_CRYPTO_OK) {
-        return 11;
+        return 12;
     }
 
     printf("compatibility_baseline=0.1.0-p1-29-cmac-hardening\n");

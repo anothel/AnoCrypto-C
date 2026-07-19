@@ -1,6 +1,6 @@
 # P3 API and ABI Evolution Gate
 
-Status: `P3_04_ADDITIVE_ABI_IMPLEMENTED`
+Status: `P3_05_ADDITIVE_ABI_IMPLEMENTED`
 
 ## Retained baseline
 
@@ -63,3 +63,15 @@ APIs remain outside this gate.
   withholding, and failure wiping remain caller/product responsibilities.
 - `SKT1` framing, packet policy, nonce composition, and orchestration remain
   AnoSecureKit-owned.
+
+
+## P3-05 result
+
+- `ac_kdf.h` is extended without adding another public header.
+- Exactly one generic fixed-profile scrypt function is added.
+- All 69 `ANOCRYPTO_C_0` symbols, the one `ANOCRYPTO_C_1` HKDF symbol, the two `ANOCRYPTO_C_2` one-shot GCM symbols, and the seven `ANOCRYPTO_C_3` streaming symbols are unchanged.
+- `ANOCRYPTO_C_4` inherits `ANOCRYPTO_C_3` and contains only `ano_crypto_scrypt_derive_key`.
+- Current public surface is 16 headers and 80 exported symbols.
+- The fixed resource contract is `N=32768`, `r=8`, `p=1`, 32-byte output, and caller-provided 33,556,544-byte workspace.
+- The production implementation performs no heap allocation and has no OpenSSL dependency.
+- Exact `SKP1` v1 derivation/decryption is compatibility evidence only. File framing, password policy, prompting, storage, and orchestration remain AnoSecureKit-owned.

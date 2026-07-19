@@ -1,0 +1,2 @@
+# Additive symbols first introduced on ANOCRYPTO_C_4.
+ano_crypto_scrypt_derive_key
