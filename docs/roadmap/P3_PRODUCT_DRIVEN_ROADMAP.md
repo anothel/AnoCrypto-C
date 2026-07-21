@@ -1,6 +1,6 @@
 # P3 Product-Driven Roadmap
 
-Status: `P3_08_COMPLETE_P3_09_NEXT`
+Status: `P3_09_COMPLETE_P3_10_RESTRICTED_SHA1_GATE_NEXT`
 
 ## Completed core slices
 
@@ -9,38 +9,35 @@ Status: `P3_08_COMPLETE_P3_09_NEXT`
 3. P3-04 AES-256-GCM streaming — `ANOCRYPTO_C_3`;
 4. P3-05 fixed-profile scrypt — `ANOCRYPTO_C_4`;
 5. P3-07 public-key architecture gate — no public delta;
-6. P3-08 RSA-2048 PKCS#1 v1.5 SHA-2 and component import —
-   `ANOCRYPTO_C_5`.
+6. P3-08 RSA-2048 PKCS#1 v1.5 SHA-2 — `ANOCRYPTO_C_5`;
+7. P3-09 ECDSA P-256 SHA-256 component import — `ANOCRYPTO_C_6`.
 
-P3-08 froze a three-symbol public delta, bounded CSP storage, public/private
-role enforcement, message-based SHA-2 signatures, canonical DigestInfo,
-CRT exponent blinding, public fault checking, failure clearing, and current/
-retained consumer evidence.
+P3-09 reuses the generic message sign/verify contract, emits fixed 64-byte raw
+`r || s`, uses RFC 6979 HMAC-SHA-256 nonces, validates `d*G == Q`, and leaves
+DER conversion and every PKI workflow in AnoPKI.
 
 ## Completed downstream checkpoint
 
 P3-06 connected all seven required AnoSecureKit capabilities with no OpenSSL
 fallback. It remains engineering-only and release-blocked.
 
-## Next core slice
+## Next core gate
 
-### P3-09 — ECDSA P-256 SHA-256
+### P3-10 — restricted SHA-1 for OCSP CertID interoperability
 
-Required entry sequence:
+Required sequence:
 
-1. freeze P-256 component sizes and key validation;
-2. review whether existing import/sign/verify functions can be reused without
-   semantic ambiguity;
-3. retain raw 64-byte `r || s` in core and DER in AnoPKI;
-4. freeze nonce generation and failure policy;
-5. add KAT, negative, differential, lifecycle, consumer, ABI, and exact AnoPKI
-   compatibility evidence;
-6. add an ABI line only if independently reviewed public symbols are required.
+1. re-freeze the exact AnoPKI OCSP CertID byte inputs and output length;
+2. compare a dedicated restricted service with any generic hash-enum extension;
+3. prohibit SHA-1 certificate/CRL/OCSP signatures and HMAC-SHA-1;
+4. define misuse-resistant naming, null/alias/output-clearing, and module-state rules;
+5. add RFC/NIST vectors, OpenSSL test-only differential, exact AnoPKI fixture,
+   consumer, install, policy, and ABI evidence;
+6. add an ABI line only if independently reviewed symbols require one.
 
 ## Later
 
-- restricted SHA-1 OCSP CertID gate;
-- AnoPKI Enterprise public-key parity/no-fallback checkpoint;
+- AnoPKI Enterprise RSA/ECDSA adapter parity/no-fallback checkpoint;
 - hosted/provenance/signing/release governance.
 
 ## Not approved

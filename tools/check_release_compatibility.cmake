@@ -379,7 +379,7 @@ _ano_require_text("CMakeLists.txt"
     "include(\"\${CMAKE_CURRENT_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake\")")
 _ano_require_text("CMakeLists.txt"
     "COMPATIBILITY \${ANO_CRYPTO_RELEASE_PACKAGE_COMPATIBILITY}")
-_ano_require_text("src/core/build_identity.c" "P3-08 adds RSA-2048 PKCS#1 v1.5 SHA-256/384/512")
+_ano_require_text("src/core/build_identity.c" "P3-09 adds ECDSA P-256 SHA-256")
 _ano_require_text("README.md" "${ANO_CRYPTO_RELEASE_VERSION}")
 _ano_require_text(".github/workflows/ci.yml" "${ANO_CRYPTO_RELEASE_FINGERPRINT}")
 _ano_require_text(".github/workflows/ci.yml"

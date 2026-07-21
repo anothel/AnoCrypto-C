@@ -309,23 +309,23 @@ P3-00 established the fail-closed intake gate and is retained as historical desi
 
 ## P3-02 HKDF-SHA-256 additive API/ABI
 
-- `check_hkdf_sha256_policy.cmake`: preserves the frozen P3-02 one-function C99/RFC 5869/`SKF1` evidence while also confirming that its ABI-0/1 symbols remain intact in the current 17-header/83-symbol P3-08 surface and external blockers remain unchanged.
+- `check_hkdf_sha256_policy.cmake`: preserves the frozen P3-02 one-function C99/RFC 5869/`SKF1` evidence while also confirming that its ABI-0/1 symbols remain intact in the current 17-header/84-symbol P3-09 surface and external blockers remain unchanged.
 - `check_symbol_versions.cmake`: verifies ELF default symbol versions for every retained ABI-0 name and the new HKDF ABI-1 name.
 - `load_public_surface_state.cmake`: lets retained P1/P2/P3-01 policy checks preserve their frozen snapshots while current checks validate the P3-02 additive surface.
 
 ## P3-03 AES-256-GCM one-shot additive API/ABI
 
-- `check_aes256_gcm_policy.cmake`: validates the two-function C99 API, fixed AES-256/12-byte nonce/16-byte tag profile, authenticate-before-release and failure-clearing rules, exact AnoSecureKit v1 compatibility fixtures, retained ABI-0/1 lines, two-symbol `ANOCRYPTO_C_2` line, current 17-header/83-symbol P3-08 identity, and unchanged external blockers.
+- `check_aes256_gcm_policy.cmake`: validates the two-function C99 API, fixed AES-256/12-byte nonce/16-byte tag profile, authenticate-before-release and failure-clearing rules, exact AnoSecureKit v1 compatibility fixtures, retained ABI-0/1 lines, two-symbol `ANOCRYPTO_C_2` line, current 17-header/84-symbol P3-09 identity, and unchanged external blockers.
 - `check_symbol_versions.cmake`: verifies ELF default symbol versions for all retained ABI-0/1 names and the two new ABI-2 names.
 - `load_public_surface_state.cmake`: preserves frozen P1/P2/P3-01 and P3-02 snapshots while current checks validate the P3-05 additive surface.
 
 
 ## P3-04 AES-256-GCM streaming additive API/ABI
 
-- `check_aes256_gcm_streaming_policy.cmake`: validates the seven-function opaque-context API, explicit state transitions, unverified pre-final decrypt-output policy, exact SKT1 primitive compatibility, retained ABI-0/1/2 lines, seven-symbol `ANOCRYPTO_C_3` line, current 17-header/83-symbol identity, and unchanged blockers.
-- `load_public_surface_state.cmake`: validates the retained `ANOCRYPTO_C_3` snapshot within the current `ANOCRYPTO_C_5` surface.
+- `check_aes256_gcm_streaming_policy.cmake`: validates the seven-function opaque-context API, explicit state transitions, unverified pre-final decrypt-output policy, exact SKT1 primitive compatibility, retained ABI-0/1/2 lines, seven-symbol `ANOCRYPTO_C_3` line, current 17-header/84-symbol identity, and unchanged blockers.
+- `load_public_surface_state.cmake`: validates the retained `ANOCRYPTO_C_3` snapshot within the current `ANOCRYPTO_C_6` surface.
 
 ## P3-05 fixed-profile scrypt additive API/ABI
 
-- `check_scrypt_policy.cmake`: validates the one-function fixed-profile API, caller-owned bounded workspace, zeroization rules, exact SKP1 primitive evidence, one-symbol `ANOCRYPTO_C_4`, current 17-header/83-symbol identity, and unchanged blockers.
-- `load_public_surface_state.cmake`: validates retained ABI-0/1/2/3 lines and the current `ANOCRYPTO_C_5` surface.
+- `check_scrypt_policy.cmake`: validates the one-function fixed-profile API, caller-owned bounded workspace, zeroization rules, exact SKP1 primitive evidence, one-symbol `ANOCRYPTO_C_4`, current 17-header/84-symbol identity, and unchanged blockers.
+- `load_public_surface_state.cmake`: validates retained ABI-0/1/2/3 lines and the current `ANOCRYPTO_C_6` surface.

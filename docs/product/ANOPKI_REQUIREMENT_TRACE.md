@@ -1,6 +1,6 @@
 # AnoPKI Requirement Trace
 
-Status: `P3_08_RSA_CORE_COMPLETE_ADAPTER_PENDING`
+Status: `P3_09_RSA_ECDSA_CORE_COMPLETE_ADAPTER_PENDING`
 
 ## Authority and verification
 
@@ -32,9 +32,9 @@ summaries.
 | `APKI-PK-05` | OCSP request/issuer inspect | DER, nonce, CertID composition and normalized fields | SHA-1/SHA-2 digest only | `APPROVED_SPLIT` |
 | `APKI-PK-06` | OCSP response and responder validation | BasicResponse/status/time/EKU/issuer policy and DER | SHA-256 RSA/ECDSA sign/verify | `APPROVED_SPLIT` |
 | `APKI-PK-07` | RSA provider fixtures | RSA-2048 positive cert/CRL/OCSP, deterministic certificate DER, SHA-2 scheme selection | RSA PKCS#1 v1.5 SHA-256/384/512 | `SATISFIED_P3_08_CORE_ADAPTER_PENDING` |
-| `APKI-PK-08` | ECDSA provider fixtures | P-256 positive cert/CRL/OCSP, TBS equivalence, DER signature object | P-256 SHA-256 raw primitive signature | `REQUIRED_NOT_SELECTED` |
+| `APKI-PK-08` | ECDSA provider fixtures | P-256 positive cert/CRL/OCSP, TBS equivalence, DER signature object | P-256 SHA-256 raw primitive signature | `SATISFIED_P3_09_CORE_ADAPTER_PENDING` |
 | `APKI-PK-09` | key-provider failures | reference parsing, exportability, provider routing, evidence, no fallback | role/algorithm/binding checks only; routing stays downstream | `BOUNDARY_APPROVED` |
-| `APKI-PK-10` | OCSP CertID default | empty digest selection and exact fixture use SHA-1 | restricted SHA-1 digest | `RECONFIRMED_DEFERRED` |
+| `APKI-PK-10` | OCSP CertID default | empty digest selection and exact fixture use SHA-1 | restricted SHA-1 digest | `SELECTED_P3_10_API_ABI_GATE` |
 
 ## Positive fixture requirements
 
@@ -65,8 +65,9 @@ summaries.
 - core-owned SHA-2 and RSA DigestInfo;
 - raw fixed-width P-256 `r || s`, with DER in AnoPKI;
 - existing key/CSP lifecycle functions reused;
-- implemented RSA slice: three new symbols on ANOCRYPTO_C_5;
-- no ABI line reserved.
+- implemented RSA slice: three symbols on `ANOCRYPTO_C_5`;
+- implemented P-256 import: one symbol on `ANOCRYPTO_C_6`;
+- generic sign/verify reused for deterministic SHA-256 raw `r || s`.
 
 Detailed decisions are in
 `docs/design/C99_PUBLIC_KEY_KEY_HANDLE_ARCHITECTURE_GATE.md` and exact product
@@ -74,7 +75,7 @@ extraction is in `docs/product/P3_07_PUBLIC_KEY_REQUIREMENT_REVIEW.md`.
 
 ## Current parity state
 
-AnoPKI Enterprise public-key operations remain `unsupported_pending` until a
-real later SDK and adapter path execute. P3-07 changes no public API/ABI and does
-not claim public-key parity, hosted completion, signing, KCMVP validation, or
-release authorization.
+AnoPKI Enterprise public-key operations remain `unsupported_pending` until the
+P3-08/P3-09 SDK is connected through a separately reviewed adapter path. Core
+primitive compatibility is complete; product parity, hosted completion, signing,
+KCMVP validation, and release authorization are not claimed.

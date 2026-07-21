@@ -1,6 +1,6 @@
 # AnoCrypto-C
 
-Current runtime baseline: `0.1.0-p3-08-rsa-pkcs1-v15-sha2`, with 17 public headers and 83 exported symbols across `ANOCRYPTO_C_0` through `ANOCRYPTO_C_5`. P3-08 adds RSA-2048/e=65537 PKCS#1 v1.5 SHA-256/384/512 component import, sign, and verify as a three-symbol additive ABI slice. AnoPKI retains PKI codecs/workflows and Enterprise retains provider routing/evidence. KCMVP remains `DEFERRED`, hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, and external release authorization remains `NO`.
+Current runtime baseline: `0.1.0-p3-09-ecdsa-p256-sha256`, with 17 public headers and 84 exported symbols across `ANOCRYPTO_C_0` through `ANOCRYPTO_C_6`. P3-09 adds P-256 public/private component import as one additive ABI symbol and reuses the generic message sign/verify service for deterministic RFC 6979 ECDSA-SHA-256 raw `r || s` signatures. AnoPKI retains PKI codecs/workflows and Enterprise retains provider routing/evidence. KCMVP remains `DEFERRED`, hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, and external release authorization remains `NO`.
 
 Implemented processing scope:
 
@@ -9,6 +9,8 @@ Implemented processing scope:
 - AES-256-GCM streaming encrypt/decrypt with caller-owned opaque contexts, explicit AAD/payload/final states, arbitrary chunk boundaries, exact in-place processing, and unverified pre-final decrypt output requiring caller buffering and failure wiping
 - Fixed-profile scrypt key derivation with `N=32768`, `r=8`, `p=1`, 32-byte output, caller-owned bounded workspace, complete workspace zeroization, and exact `SKP1` v1 primitive compatibility evidence
 - NIST AES-256-GCM KATs, streaming state/chunk/finalization tests, corruption/overlap/output-clearing tests, exact SKT1/SKF1/SKP1 v1 primitive fixtures, and OpenSSL test-only differential coverage
+- RSA-2048/e=65537 PKCS#1 v1.5 message signing and verification with SHA-256/384/512, algorithm-native component import, CRT exponent blinding, public fault check, and additive ABI-5
+- ECDSA P-256 SHA-256 message signing and verification with fixed-width component import, deterministic RFC 6979 nonces, raw 64-byte `r || s` signatures, and additive ABI-6
 - SHA-256, SHA-384, and SHA-512 one-shot and streaming APIs
 - HMAC-SHA-256, HMAC-SHA-384, and HMAC-SHA-512 one-shot and streaming APIs
 - HMAC computation for all three SHA-2 variants using an in-memory HMAC key handle
@@ -30,7 +32,7 @@ Implemented processing scope:
 - Process-change detection for source-backed random contexts, requiring explicit reseed before generation
 - Startup self-test KATs for SHA-256/SHA-384/SHA-512, their HMAC variants, and HMAC_DRBG-SHA-256
 - Extended KAT executables for all implemented SHA-2/HMAC variants, HMAC key-handle paths, and HMAC_DRBG-SHA-256 public vectors
-- Deterministic OpenSSL 3.x test-only differential comparisons for SHA-256/384/512, HMAC, HKDF-SHA-256, fixed-profile scrypt, AES-256-GCM, AES-CBC, and AES-CMAC paths
+- Deterministic OpenSSL 3.x test-only differential comparisons for SHA-256/384/512, HMAC, HKDF-SHA-256, fixed-profile scrypt, AES-256-GCM, AES-CBC, AES-CMAC, RSA, and P-256 ECDSA paths
 - SHA-512-family representation, endian, variable-chunk, and intentionally unaligned-input portability regression
 - CMake C99 representation guard requiring 8-bit bytes, 32-bit `uint32_t`, 64-bit `uint64_t`, and `size_t` no wider than `uint64_t`
 - Negative API tests for hash/HMAC/DRBG/CSP/key argument handling, context lifecycle behavior, handle exhaustion, stale handle rejection, and DRBG helper failure cleanup

@@ -37,6 +37,7 @@ ano_crypto_drbg_instantiate
 ano_crypto_drbg_reseed
 ano_crypto_drbg_state_name
 ano_crypto_drbg_uninstantiate
+ano_crypto_ec_p256_key_import
 ano_crypto_hash_algorithm_name
 ano_crypto_hash_context_size
 ano_crypto_hash_digest

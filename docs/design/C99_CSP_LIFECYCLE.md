@@ -4,15 +4,15 @@ Status: `FROZEN_INTERNAL_POLICY`; formal CSP classification and accepted zeroiza
 
 ## Scope
 
-AnoCrypto-C provides a fixed-size, in-process, module-owned CSP handle table for HMAC, block-cipher, and CMAC secret keys. It also exposes caller-owned opaque HMAC, AES-CBC, AES-CMAC, AES-256-GCM streaming, HMAC_DRBG, and random-service contexts. This is not a persistent key store or a general key-management subsystem.
+AnoCrypto-C provides fixed-size, in-process, module-owned CSP handle tables for symmetric keys and reviewed RSA/P-256 public-key objects. It also exposes caller-owned opaque HMAC, AES-CBC, AES-CMAC, AES-256-GCM streaming, HMAC_DRBG, and random-service contexts. This is not a persistent key store or a general key-management subsystem.
 
-The current public surface is 17 headers and 83 exported symbols across retained `ANOCRYPTO_C_0` through `ANOCRYPTO_C_4` and additive `ANOCRYPTO_C_5`. RSA public/private keys reuse the same opaque CSP handle with internal role and purpose binding.
+The current public surface is 17 headers and 84 exported symbols across retained `ANOCRYPTO_C_0` through `ANOCRYPTO_C_5` and additive `ANOCRYPTO_C_6`. RSA and P-256 public/private keys reuse the same opaque CSP handle with internal role, algorithm, and purpose binding.
 
 ## Module-owned handle table
 
 - Capacity: 16 slots.
 - Maximum secret per slot: 128 bytes.
-- Supported purposes: HMAC, block cipher, and CMAC.
+- Supported symmetric purposes: HMAC, block cipher, and CMAC. Separate bounded public-key slots hold RSA-2048 or P-256 objects.
 - Import validates type, size, flags, and module operational state.
 - Exportable-candidate requests are rejected.
 - Every allocation receives a generation; stale generations cannot address a reused slot.
@@ -61,18 +61,17 @@ The module does not retain addresses of caller-owned opaque contexts. Callers mu
 ## Explicit exclusions
 
 - key export, persistence, wrapping, recovery, backup, rotation, platform keystore, and multi-process sharing;
-- public/private-key objects in the current runtime; P3-07 defines only a future contract;
+- additional public-key algorithms, general key generation, key export, or external-provider objects beyond the reviewed RSA-2048 and P-256 profiles;
 - integrity-test key material until the P2-03 verifier is implemented;
 - universal optimizer, physical-remanence, constant-time, or formal-validation claims.
 
 ## Evidence
 
-Retained P2-05 evidence includes explicit-destroy/stale-handle tests, orderly-shutdown and fatal-transition zeroization regressions, a status-only policy review, source/policy checks, local compiler-output capture, install/PoC checks, and sensitive-artifact scanning. P3-04 adds streaming-context final/uninit cleanup and post-handle-snapshot semantics. P3-05 adds caller-workspace scrypt clearing, clean 80-symbol ABI checks, and current/retained consumer regression. Exact OE-01 GCC 13.3.0 human review remains `NOT_RUN`.
+Retained P2-05 evidence includes explicit-destroy/stale-handle tests, orderly-shutdown and fatal-transition zeroization regressions, a status-only policy review, source/policy checks, local compiler-output capture, install/PoC checks, and sensitive-artifact scanning. P3-04 adds streaming-context final/uninit cleanup and post-handle-snapshot semantics. P3-05 adds caller-workspace scrypt clearing and clean 80-symbol ABI checks. P3-08 adds RSA object leases and P3-09 adds P-256 object leases, key binding, deterministic signing, and clean 84-symbol regression. Exact OE-01 GCC 13.3.0 human review remains `NOT_RUN`.
 
-## P3-07 approved future public-key lifecycle
+## P3-07 architecture and P3-08/P3-09 implemented public-key lifecycle
 
-P3-07 changes no current CSP implementation. It approves the following contract
-for the P3-08 RSA/key-handle foundation:
+P3-07 approved the following contract. P3-08 implements it for RSA-2048 and P3-09 reuses it for P-256:
 
 - reuse `ano_crypto_csp_handle_t` and the existing public/private key-class
   values;
@@ -93,6 +92,4 @@ for the P3-08 RSA/key-handle foundation:
 - require a module-wide shutdown/fatal barrier so no public-key operation emits
   output after the transition becomes externally visible.
 
-Exact pool capacity, object size, RSA limits, handle-index partition, and
-concurrent-operation ceiling remain `TODO_P3_08_RESOURCE_GATE`. The lease/pin
-semantics are approved, but no public-key object exists in the P3-07 runtime.
+The implemented public-key pool has 16 bounded slots. RSA is restricted to 2048-bit modulus/e=65537 and P-256 uses fixed 32-byte components. Import copies validated components, operations hold a lease, destroy blocks new leases and clears the object after active leases leave, and stale generations fail closed. Target-specific timing/cache/fault review remains separate engineering evidence and is not implied by lifecycle correctness.

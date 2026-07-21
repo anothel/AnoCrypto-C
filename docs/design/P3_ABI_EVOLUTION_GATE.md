@@ -1,6 +1,6 @@
 # P3 API and ABI Evolution Gate
 
-Status: `P3_08_RSA_ADDITIVE_ABI_APPROVED_IMPLEMENTED`
+Status: `P3_09_ECDSA_ADDITIVE_ABI_APPROVED_IMPLEMENTED`
 
 ## Current public surface
 
@@ -12,9 +12,10 @@ Status: `P3_08_RSA_ADDITIVE_ABI_APPROVED_IMPLEMENTED`
 | `ANOCRYPTO_C_3` | 7 | AES-256-GCM streaming |
 | `ANOCRYPTO_C_4` | 1 | fixed-profile scrypt |
 | `ANOCRYPTO_C_5` | 3 | RSA import/sign/verify |
-| total | 83 | current exported symbols |
+| `ANOCRYPTO_C_6` | 1 | P-256 public/private component import |
+| total | 84 | current exported symbols |
 
-Public headers: 17. Compatibility baseline: P1-29. Every ABI-0 through ABI-4
+Public headers: 17. Compatibility baseline: P1-29. Every ABI-0 through ABI-5
 name and assignment remains unchanged.
 
 ## P3-08 approval
@@ -33,9 +34,14 @@ exponent blinding, and public fault checking.
 No public metadata query, raw RSA, key generation, key export, persistence,
 provider routing, PKI codec, or format/workflow API is approved.
 
+## P3-09 approval
+
+P3-09 adds only `ano_crypto_ec_p256_key_import` and reuses the P3-08 generic
+sign/verify symbols. It freezes 32-byte affine coordinates/scalar, P-256 with
+SHA-256, RFC 6979 HMAC-SHA-256 nonce derivation, and 64-byte raw `r || s`. DER
+conversion remains AnoPKI-owned.
+
 ## Next gate
 
-P3-09 may evaluate P-256 import and reuse of generic sign/verify. It must not
-change the three P3-08 symbols or infer that another ABI line is required.
-ECDSA representation, nonce policy, validation, exact symbol count, and ABI
-impact require separate review.
+P3-10 may evaluate restricted SHA-1 interoperability for OCSP CertID only. No
+function, enum, symbol count, or ABI line is pre-approved.

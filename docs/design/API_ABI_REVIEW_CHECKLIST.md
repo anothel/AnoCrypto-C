@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P3-08 reviewed additive ABI. ABI-0 through ABI-4 remain unchanged; RSA-2048/e=65537 component import and generic message sign/verify are the only three symbols on `ANOCRYPTO_C_5`. Current surface: 17 headers and 83 symbols.
+Status: P3-09 reviewed additive ABI. ABI-0 through ABI-5 remain unchanged; P-256 key import is the only symbol on `ANOCRYPTO_C_6`. RSA import and generic message sign/verify remain on `ANOCRYPTO_C_5`. Current surface: 17 headers and 84 symbols.
 
 ## Identity
 
@@ -35,8 +35,8 @@ Status: P3-08 reviewed additive ABI. ABI-0 through ABI-4 remain unchanged; RSA-2
 | `ac_random.h` | Source-backed public random lifecycle on supported provider/process-marker branches. |
 | `ac_cipher.h` | AES-128/192/256 CBC without padding; eight functions. |
 | `ac_cmac.h` | AES-CMAC full-tag compute/verify/streaming; eight functions. |
-| `ac_key.h` | Existing secret-key purposes plus RSA-2048 public/private algorithm-native component import. |
-| `ac_signature.h` | RSA PKCS#1 v1.5 SHA-256/384/512 message sign/verify. |
+| `ac_key.h` | Existing secret-key purposes plus RSA-2048 and P-256 public/private algorithm-native component import. |
+| `ac_signature.h` | RSA PKCS#1 v1.5 SHA-256/384/512 and ECDSA P-256 SHA-256 message sign/verify. |
 
 ## P1-28/P1-29 symbol decision
 
@@ -61,6 +61,7 @@ cmake --build build --target ano_crypto_aes256_gcm_policy_check
 cmake --build build --target ano_crypto_aes256_gcm_streaming_policy_check
 cmake --build build --target ano_crypto_scrypt_policy_check
 cmake --build build --target ano_crypto_rsa_pkcs1_v15_policy_check
+cmake --build build --target ano_crypto_ecdsa_p256_policy_check
 cmake --build build --target ano_crypto_clean_release_symbol_baseline_check
 cmake --build build --target ano_crypto_symbol_version_check
 cmake --build build --target ano_crypto_poc_package_smoke
@@ -181,7 +182,7 @@ These checks are toolchain-specific guardrails. Calling convention, loader behav
 - Empty password and salt are valid primitive inputs. Product password policy remains outside AnoCrypto-C.
 - Password and salt may overlap each other. Output and the reviewed workspace extent must be disjoint from all inputs and from each other.
 - A structurally valid output is cleared on every failure. The reviewed workspace extent is cleared after every derivation attempt that begins using it.
-- The new name is the only symbol on additive `ANOCRYPTO_C_4`; current total is 83 and retained ABI-0/1/2/3 manifests are unchanged.
+- The new name is the only symbol on additive `ANOCRYPTO_C_4`; the P3-05 total was 80. P3-09 retains it inside the current 84-symbol surface, and retained ABI-0/1/2/3 manifests are unchanged.
 - OpenSSL is test-only differential evidence. Exact `SKP1` v1 key derivation and record decryption are compatibility fixtures only; framing and password workflow remain AnoSecureKit-owned.
 - P1-34 hosted execution/review, repository signing, external release authorization, KCMVP, and the downstream identity conflict remain unchanged.
 
@@ -194,3 +195,16 @@ These checks are toolchain-specific guardrails. Calling convention, loader behav
 - ABI-0 through ABI-4 manifests remain byte-for-byte retained.
 - `ANOCRYPTO_C_5` contains only import, sign, and verify.
 - Current/retained consumers, install, PoC, clean export, ELF symbol version, KAT, negative, differential, concurrency, and sanitizer evidence are required.
+
+
+## P3-09 ECDSA additive ABI review
+
+- No new public header and exactly one new symbol: `ano_crypto_ec_p256_key_import`.
+- P-256 fixed-width 32-byte big-endian public coordinates and private scalar only.
+- Existing generic `ano_crypto_signature_sign` and `ano_crypto_signature_verify` are reused with `ANO_CRYPTO_SIGNATURE_ECDSA_P256_SHA256`.
+- Signatures are fixed 64-byte raw `r || s`; PKI DER conversion remains AnoPKI-owned.
+- Signing uses deterministic RFC 6979 HMAC-SHA-256 nonce derivation.
+- ABI-0 through ABI-5 manifests remain retained.
+- `ANOCRYPTO_C_6` contains only P-256 key import; the current total is 84.
+- KAT, negative, OpenSSL multi-key differential, concurrency, current/retained consumer, install, PoC, sanitizer, clean export, and symbol-version evidence are required.
+- This slice does not claim a complete target-specific constant-time verdict; compiler, microarchitecture, and physical side-channel review remain separate evidence.

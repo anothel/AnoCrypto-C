@@ -1,11 +1,11 @@
 # Current / Active / Next
 
-Status: `P3_08_COMPLETE_P3_09_ECDSA_GATE_NEXT`
+Status: `P3_09_COMPLETE_P3_10_RESTRICTED_SHA1_GATE_NEXT`
 
 ## Retained policy compatibility
 
-Historical P3-01/P3-02 tokens remain only where frozen policy regression tests
-require them. Retained token: `P3-02 minimal HKDF-SHA-256 API`. They are not current work.
+Historical P3-01/P3-02 tokens remain only for frozen policy regression tests.
+Retained token: `P3-02 minimal HKDF-SHA-256 API`. It is not current work.
 
 ## DONE
 
@@ -18,31 +18,32 @@ require them. Retained token: `P3-02 minimal HKDF-SHA-256 API`. They are not cur
 - P3-05 fixed-profile scrypt;
 - P3-06 AnoSecureKit Enterprise parity/no-fallback checkpoint;
 - P3-07 public-key/key-handle architecture gate;
-- P3-08 RSA-2048 PKCS#1 v1.5 SHA-256/384/512 and RSA key-handle import.
+- P3-08 RSA-2048 PKCS#1 v1.5 SHA-256/384/512;
+- P3-09 ECDSA P-256 SHA-256 and component import.
 
-P3-08 adds one header and three symbols on `ANOCRYPTO_C_5`. The current surface
-is 17 headers and 83 symbols. ABI-0 through ABI-4 and P1-29 consumers remain
-unchanged.
+P3-09 adds one symbol on `ANOCRYPTO_C_6` and reuses the generic sign/verify
+functions on `ANOCRYPTO_C_5`. The current surface is 17 headers and 84 symbols.
+ABI-0 through ABI-5 and P1-29 consumers remain unchanged.
 
 ## ACTIVE
 
-P3-08 local closeout and evidence packaging.
+P3-09 local closeout, full evidence, and packaging.
 
 ## NEXT
 
-`P3-09: ECDSA P-256 SHA-256 API/ABI and AnoPKI compatibility gate`
+`P3-10: restricted SHA-1 interoperability API/ABI gate for OCSP CertID`
 
-P3-09 must independently review exact component import, reuse of the generic
-message sign/verify contract, raw 64-byte `r || s`, deterministic/random nonce
-policy, side-channel controls, additive ABI impact, and AnoPKI DER conversion.
-It must not silently broaden to other curves, digest variants, ECDH, EdDSA, or
-PKI codecs.
+The exact AnoPKI operation review confirms that SHA-1 remains needed for legacy
+OCSP CertID issuer-name/key hashing. P3-10 must determine a misuse-resistant
+primitive boundary without enabling SHA-1 certificate signatures, HMAC-SHA-1,
+issuance policy, or general product workflows. No public enum, function, symbol,
+or ABI line is pre-approved.
 
 ## LATER
 
-- restricted SHA-1 through a misuse-resistant OCSP CertID-only gate;
 - AnoPKI Enterprise RSA/ECDSA adapter parity and no-fallback checkpoint;
-- separate hosted/provenance/signing/release qualification.
+- hosted/provenance/signing/release qualification;
+- future algorithms only after new product evidence.
 
 ## DEFERRED / BLOCKED
 

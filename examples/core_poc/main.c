@@ -182,6 +182,69 @@ static int run_scrypt_smoke(void)
     return 0;
 }
 
+static int run_ecdsa_p256_smoke(void)
+{
+    /* RFC 6979 public test key; never use this private scalar operationally. */
+    static const uint8_t d[ANO_CRYPTO_EC_P256_COMPONENT_SIZE] = {
+        0xc9,0xaf,0xa9,0xd8,0x45,0xba,0x75,0x16,0x6b,0x5c,0x21,0x57,0x67,0xb1,0xd6,0x93,
+        0x4e,0x50,0xc3,0xdb,0x36,0xe8,0x9b,0x12,0x7b,0x8a,0x62,0x2b,0x12,0x0f,0x67,0x21
+    };
+    static const uint8_t x[ANO_CRYPTO_EC_P256_COMPONENT_SIZE] = {
+        0x60,0xfe,0xd4,0xba,0x25,0x5a,0x9d,0x31,0xc9,0x61,0xeb,0x74,0xc6,0x35,0x6d,0x68,
+        0xc0,0x49,0xb8,0x92,0x3b,0x61,0xfa,0x6c,0xe6,0x69,0x62,0x2e,0x60,0xf2,0x9f,0xb6
+    };
+    static const uint8_t y[ANO_CRYPTO_EC_P256_COMPONENT_SIZE] = {
+        0x79,0x03,0xfe,0x10,0x08,0xb8,0xbc,0x99,0xa4,0x1a,0xe9,0xe9,0x56,0x28,0xbc,0x64,
+        0xf2,0xf1,0xb2,0x0c,0x2d,0x7e,0x9f,0x51,0x77,0xa3,0xc2,0x94,0xd4,0x46,0x22,0x99
+    };
+    static const uint8_t message[] = { 'p','o','c','-','e','c','d','s','a' };
+    ano_crypto_csp_handle_t private_key = ANO_CRYPTO_CSP_INVALID_HANDLE;
+    ano_crypto_csp_handle_t public_key = ANO_CRYPTO_CSP_INVALID_HANDLE;
+    uint8_t signature[ANO_CRYPTO_ECDSA_P256_SIGNATURE_SIZE];
+    size_t written = 0u;
+    ano_crypto_status_t status;
+
+    status = ano_crypto_ec_p256_key_import(x, sizeof(x), y, sizeof(y),
+                                            d, sizeof(d), ANO_CRYPTO_KEY_FLAG_NONE,
+                                            &private_key);
+    if (status != ANO_CRYPTO_OK) {
+        return fail_status("ECDSA P-256 private key import", status);
+    }
+    status = ano_crypto_ec_p256_key_import(x, sizeof(x), y, sizeof(y),
+                                            NULL, 0u, ANO_CRYPTO_KEY_FLAG_NONE,
+                                            &public_key);
+    if (status != ANO_CRYPTO_OK) {
+        (void)ano_crypto_key_destroy(private_key);
+        return fail_status("ECDSA P-256 public key import", status);
+    }
+    status = ano_crypto_signature_sign(private_key,
+                                        ANO_CRYPTO_SIGNATURE_ECDSA_P256_SHA256,
+                                        message, sizeof(message),
+                                        signature, sizeof(signature), &written);
+    if (status != ANO_CRYPTO_OK || written != sizeof(signature)) {
+        (void)ano_crypto_csp_zeroize(signature, sizeof(signature));
+        (void)ano_crypto_key_destroy(public_key);
+        (void)ano_crypto_key_destroy(private_key);
+        return fail_status("ECDSA P-256 sign", status);
+    }
+    status = ano_crypto_signature_verify(public_key,
+                                          ANO_CRYPTO_SIGNATURE_ECDSA_P256_SHA256,
+                                          message, sizeof(message),
+                                          signature, sizeof(signature));
+    (void)ano_crypto_csp_zeroize(signature, sizeof(signature));
+    if (status != ANO_CRYPTO_OK) {
+        (void)ano_crypto_key_destroy(public_key);
+        (void)ano_crypto_key_destroy(private_key);
+        return fail_status("ECDSA P-256 verify", status);
+    }
+    if (ano_crypto_key_destroy(public_key) != ANO_CRYPTO_OK ||
+        ano_crypto_key_destroy(private_key) != ANO_CRYPTO_OK) {
+        return fail_message("ECDSA P-256 key destroy failed");
+    }
+    printf("- ECDSA P-256 SHA-256 smoke: PASS (raw signature not printed)\n");
+    return 0;
+}
+
 static int run_drbg_smoke(void)
 {
     uint8_t entropy[ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_ENTROPY_INPUT_SIZE];
@@ -627,6 +690,8 @@ int main(void)
     } else if (run_hkdf_smoke() != 0) {
         result = 1;
     } else if (run_scrypt_smoke() != 0) {
+        result = 1;
+    } else if (run_ecdsa_p256_smoke() != 0) {
         result = 1;
     } else if (run_drbg_smoke() != 0) {
         result = 1;

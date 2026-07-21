@@ -14,7 +14,7 @@ extern "C" {
  * Key/CSP lifecycle surface.
  *
  * The module retains purpose-separated in-memory secret-key handles and the
- * P3-08 RSA-2048 public/private component-import path. It does not export,
+ * P3-08 RSA-2048 and P3-09 P-256 public/private component-import paths. It does not export,
  * print, persist, wrap, or parse encoded key containers.
  */
 typedef enum ano_crypto_key_type_e {
@@ -35,6 +35,7 @@ typedef enum ano_crypto_key_type_e {
 
 #define ANO_CRYPTO_RSA2048_MODULUS_SIZE 256u
 #define ANO_CRYPTO_RSA2048_PRIME_SIZE 128u
+#define ANO_CRYPTO_EC_P256_COMPONENT_SIZE 32u
 
 
 
@@ -61,6 +62,22 @@ ANO_CRYPTO_API ano_crypto_status_t ano_crypto_rsa_key_import(
     size_t exponent2_len,
     const uint8_t *coefficient,
     size_t coefficient_len,
+    uint32_t flags,
+    ano_crypto_csp_handle_t *out_handle);
+
+/*
+ * Import one P-256 public or private key from fixed-width unsigned big-endian
+ * affine coordinates and an optional private scalar. Public keys provide x/y
+ * and no private scalar. Private keys provide x/y/d; import verifies d*G == Q.
+ * SEC1, SPKI, PKCS#8, PEM, DER, and ASN.1 remain downstream-owned.
+ */
+ANO_CRYPTO_API ano_crypto_status_t ano_crypto_ec_p256_key_import(
+    const uint8_t *public_x,
+    size_t public_x_len,
+    const uint8_t *public_y,
+    size_t public_y_len,
+    const uint8_t *private_scalar,
+    size_t private_scalar_len,
     uint32_t flags,
     ano_crypto_csp_handle_t *out_handle);
 

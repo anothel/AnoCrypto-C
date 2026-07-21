@@ -1,6 +1,6 @@
 # Cross-Repository Requirement Ownership
 
-Status: `P3_07_PUBLIC_KEY_BOUNDARY_APPROVED`
+Status: `P3_09_PUBLIC_KEY_SOFTWARE_CORE_IMPLEMENTED`
 
 ## Retained P3-01 policy compatibility
 
@@ -49,14 +49,17 @@ generic primitive/key-handle boundary and does not transfer those responsibiliti
 - RSA DigestInfo in core: `APPROVED`;
 - P-256 raw `r || s`: `APPROVED`;
 - RSA budget of three symbols: `IMPLEMENTED_P3_08_ANOCRYPTO_C_5`;
-- RSA slice: `COMPLETE_P3_08_CORE_ADAPTER_PENDING`.
+- RSA slice: `COMPLETE_P3_08_CORE_ADAPTER_PENDING`;
+- ECDSA P-256 slice: `COMPLETE_P3_09_CORE_ADAPTER_PENDING`;
+- P-256 budget: one import symbol on `ANOCRYPTO_C_6`; generic sign/verify reused.
 
 ## Remaining decisions
 
 - RSA-2048/e=65537 and final prototypes: `APPROVED_IMPLEMENTED_P3_08`;
-- bounded asymmetric storage design and capacity: `TODO_P3_08`;
-- ECDSA nonce/determinism/low-`s`: `TODO_P3_09`;
-- restricted SHA-1 public API containment: `TODO_LATER_GATE`;
+- bounded software asymmetric storage and operation lease: `APPROVED_IMPLEMENTED`;
+- ECDSA P-256/SHA-256, RFC 6979, raw `r || s`: `APPROVED_IMPLEMENTED_P3_09`;
+- low-`s` normalization: `DEFERRED_NOT_REQUIRED_FOR_CURRENT_ANOPKI_COMPATIBILITY`;
+- restricted SHA-1 public API containment: `TODO_P3_10_GATE`;
 - exact Enterprise raw archive byte recomputation:
   `EXTERNAL_CONFIRMATION_REQUIRED`;
 - HSM/KMS/PKCS#11 integration: `DEFERRED_ENTERPRISE_OWNED`.

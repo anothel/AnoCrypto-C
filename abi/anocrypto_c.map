@@ -103,6 +103,11 @@ ANOCRYPTO_C_5 {
         ano_crypto_rsa_key_import;
         ano_crypto_signature_sign;
         ano_crypto_signature_verify;
+} ANOCRYPTO_C_4;
+
+ANOCRYPTO_C_6 {
+    global:
+        ano_crypto_ec_p256_key_import;
     local:
         *;
-} ANOCRYPTO_C_4;
+} ANOCRYPTO_C_5;

@@ -1,10 +1,10 @@
 # Release Provenance and Signing Policy
 
-Status: P3-08 unsigned engineering policy retaining P1-33 controls. External release authorized: NO. The repository is `UNSIGNED`; the offline-signing handoff is `BLOCKED` because the production signer, RFC 3161 timestamp policy, required role identities, actual tag/hosted review, and product release authorization are not provisioned or completed.
+Status: P3-09 unsigned engineering policy retaining P1-33 controls. External release authorized: NO. The repository is `UNSIGNED`; the offline-signing handoff is `BLOCKED` because the production signer, RFC 3161 timestamp policy, required role identities, actual tag/hosted review, and product release authorization are not provisioned or completed.
 
 ## Purpose
 
-P3-08 retains the P1-33/P1-32 key-free offline-signing and provenance controls, binds the reviewed source archive and additive public compatibility inputs through `ANOCRYPTO_C_5` into a self-contained provenance bundle, and rehearses tag identity only in an isolated synthetic checkout. The generators and verifiers make missing, stale, or tampered metadata visible. They do not create an actual tag, sign a release, or authorize distribution.
+P3-09 retains the P1-33/P1-32 key-free offline-signing and provenance controls, binds the reviewed source archive and additive public compatibility inputs through `ANOCRYPTO_C_6` into a self-contained provenance bundle, and rehearses tag identity only in an isolated synthetic checkout. The generators and verifiers make missing, stale, or tampered metadata visible. They do not create an actual tag, sign a release, or authorize distribution.
 
 The generated records are engineering evidence. They are not substitutes for:
 
@@ -36,7 +36,7 @@ release-provenance/
   RELEASE_ARTIFACTS.sha256
 ```
 
-`RELEASE_ARTIFACTS.sha256` covers every other file in the provenance bundle. It is the only detached-signature subject. The provenance checker requires complete manifest coverage, safe relative paths, current release identity, source-archive/SBOM agreement, 17 public headers, the current 83-symbol manifest with all retained 69 ABI-0 symbols unchanged, `UNSIGNED` signing state, and external authorization `NO`.
+`RELEASE_ARTIFACTS.sha256` covers every other file in the provenance bundle. It is the only detached-signature subject. The provenance checker requires complete manifest coverage, safe relative paths, current release identity, source-archive/SBOM agreement, 17 public headers, the current 84-symbol manifest with all retained 69 ABI-0 symbols unchanged, `UNSIGNED` signing state, and external authorization `NO`.
 
 ## Source SBOM boundary
 
