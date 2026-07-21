@@ -1,6 +1,6 @@
 # AnoCrypto-C
 
-Current runtime baseline: `0.1.0-p3-05-scrypt-fixed-profile` at reviewed implementation commit `89e16a261ab7696d9489167d7403d9f2c704629e`, with 16 public headers and 80 exported symbols across `ANOCRYPTO_C_0` through `ANOCRYPTO_C_4`. P3-06 completed the AnoSecureKit Enterprise seven-capability parity/no-fallback engineering checkpoint without changing the core surface. P3-07 completed the design-only public-key/key-handle architecture and AnoPKI contract gate without changing code, public API, ABI, or runtime version. It selected `P3-08` RSA PKCS#1 v1.5 SHA-256/384/512 and public-key handle foundation as the next separately reviewed implementation slice. Exact AnoPKI Enterprise adapter source execution remains `EXTERNAL_CONFIRMATION_REQUIRED`. KCMVP remains `DEFERRED`, P1-34 hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, and external release authorization remains `NO`.
+Current runtime baseline: `0.1.0-p3-08-rsa-pkcs1-v15-sha2`, with 17 public headers and 83 exported symbols across `ANOCRYPTO_C_0` through `ANOCRYPTO_C_5`. P3-08 adds RSA-2048/e=65537 PKCS#1 v1.5 SHA-256/384/512 component import, sign, and verify as a three-symbol additive ABI slice. AnoPKI retains PKI codecs/workflows and Enterprise retains provider routing/evidence. KCMVP remains `DEFERRED`, hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, and external release authorization remains `NO`.
 
 Implemented processing scope:
 

@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p3-05-scrypt-fixed-profile"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p3-08-rsa-pkcs1-v15-sha2"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P3-05 adds a fixed-resource generic scrypt key-derivation C API on additive ANOCRYPTO_C_4, while retaining all 69 ANOCRYPTO_C_0 symbols, the ANOCRYPTO_C_1 HKDF symbol, the two ANOCRYPTO_C_2 one-shot GCM symbols, and the P1-29 compatibility baseline. Decrypt update bytes are unverified until final authentication and require caller buffering, withholding, and failure wiping. AnoSecureKit SKT1, SKF1, and SKP1 formats remain product-owned; exact v1 primitive fixtures are compatibility evidence only. KCMVP is DEFERRED, P1-34 hosted lanes are NOT_RUN and UNREVIEWED, repository signing is UNSIGNED, external release authorization is NO, and no push, tag, signing, timestamping, publication, or external distribution is authorized.";
+    out_identity->notes = "P3-08 adds RSA-2048 PKCS#1 v1.5 SHA-256/384/512 component import, message signing, and verification with public exponent e=65537 on additive ANOCRYPTO_C_5 while retaining ABI lines ANOCRYPTO_C_0 through ANOCRYPTO_C_4 and the P1-29 compatibility baseline. PEM, DER, ASN.1, PKCS#8, SPKI, CSR, X.509, CRL, OCSP, key_ref routing, and external-provider policy remain downstream-owned. KCMVP is DEFERRED, P1-34 hosted lanes are NOT_RUN and UNREVIEWED, repository signing is UNSIGNED, external release authorization is NO, and no push, tag, signing, timestamping, publication, or external distribution is authorized.";
 
     return ANO_CRYPTO_OK;
 }

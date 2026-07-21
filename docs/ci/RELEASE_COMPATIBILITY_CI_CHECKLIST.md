@@ -4,16 +4,16 @@ Status: P3-05 engineering checklist retaining the P1-33 release controls. Actual
 
 ## Every supported build lane
 
-- Configure with the P3-05 release fingerprint.
+- Configure with the P3-08 release fingerprint.
 - Build and run the configured CTest set.
 - Run `ano_crypto_release_compatibility_policy_check`.
-- Preserve all 14 retained headers and 69 `ANOCRYPTO_C_0` exports; verify the current 16-header/80-export additive surface.
+- Preserve all 14 retained headers and 69 `ANOCRYPTO_C_0` exports; verify the current 17-header/83-export additive surface.
 - Do not enable entropy/random test hooks in Release-like configurations.
 
 ## Tagged-release lane
 
 - Checkout full Git history and tags.
-- Require the rehearsal tag to equal `v0.1.0-p3-05-scrypt-fixed-profile`.
+- Require the rehearsal tag to equal `v0.1.0-p3-08-rsa-pkcs1-v15-sha2`.
 - When strict tag mode is enabled, provide both actual-tag and actual-commit inputs at configure/review time.
 - Pass the workflow commit and require the tag, supplied commit, and `HEAD` to resolve to one commit.
 - Require a clean checkout; reject dirty state, moved tag, moved `HEAD`, commit mismatch, and ref mismatch.

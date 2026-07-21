@@ -1,6 +1,6 @@
 # AnoCrypto-C API/ABI Review Checklist
 
-Status: P3-05 reviewed additive ABI. The retained P1-29/P3-01 surface remains unchanged on `ANOCRYPTO_C_0`; P3-02 HKDF-SHA-256 remains on `ANOCRYPTO_C_1`; P3-03 one-shot AES-256-GCM remains on `ANOCRYPTO_C_2`; P3-04 streaming remains on `ANOCRYPTO_C_3`; one fixed-profile scrypt function is added on `ANOCRYPTO_C_4`.
+Status: P3-08 reviewed additive ABI. ABI-0 through ABI-4 remain unchanged; RSA-2048/e=65537 component import and generic message sign/verify are the only three symbols on `ANOCRYPTO_C_5`. Current surface: 17 headers and 83 symbols.
 
 ## Identity
 
@@ -35,7 +35,8 @@ Status: P3-05 reviewed additive ABI. The retained P1-29/P3-01 surface remains un
 | `ac_random.h` | Source-backed public random lifecycle on supported provider/process-marker branches. |
 | `ac_cipher.h` | AES-128/192/256 CBC without padding; eight functions. |
 | `ac_cmac.h` | AES-CMAC full-tag compute/verify/streaming; eight functions. |
-| `ac_key.h` | In-memory HMAC, block-cipher, and CMAC key purposes; export/persistence deferred. |
+| `ac_key.h` | Existing secret-key purposes plus RSA-2048 public/private algorithm-native component import. |
+| `ac_signature.h` | RSA PKCS#1 v1.5 SHA-256/384/512 message sign/verify. |
 
 ## P1-28/P1-29 symbol decision
 
@@ -59,6 +60,7 @@ cmake --build build --target ano_crypto_hkdf_sha256_policy_check
 cmake --build build --target ano_crypto_aes256_gcm_policy_check
 cmake --build build --target ano_crypto_aes256_gcm_streaming_policy_check
 cmake --build build --target ano_crypto_scrypt_policy_check
+cmake --build build --target ano_crypto_rsa_pkcs1_v15_policy_check
 cmake --build build --target ano_crypto_clean_release_symbol_baseline_check
 cmake --build build --target ano_crypto_symbol_version_check
 cmake --build build --target ano_crypto_poc_package_smoke
@@ -179,6 +181,16 @@ These checks are toolchain-specific guardrails. Calling convention, loader behav
 - Empty password and salt are valid primitive inputs. Product password policy remains outside AnoCrypto-C.
 - Password and salt may overlap each other. Output and the reviewed workspace extent must be disjoint from all inputs and from each other.
 - A structurally valid output is cleared on every failure. The reviewed workspace extent is cleared after every derivation attempt that begins using it.
-- The new name is the only symbol on additive `ANOCRYPTO_C_4`; current total is 80 and retained ABI-0/1/2/3 manifests are unchanged.
+- The new name is the only symbol on additive `ANOCRYPTO_C_4`; current total is 83 and retained ABI-0/1/2/3 manifests are unchanged.
 - OpenSSL is test-only differential evidence. Exact `SKP1` v1 key derivation and record decryption are compatibility fixtures only; framing and password workflow remain AnoSecureKit-owned.
 - P1-34 hosted execution/review, repository signing, external release authorization, KCMVP, and the downstream identity conflict remain unchanged.
+
+## P3-08 RSA additive ABI review
+
+- One new public header and exactly three new symbols.
+- RSA-2048 and exponent 65537 only.
+- SHA-256/384/512 message-based PKCS#1 v1.5 only.
+- Existing key/CSP lifecycle APIs are reused.
+- ABI-0 through ABI-4 manifests remain byte-for-byte retained.
+- `ANOCRYPTO_C_5` contains only import, sign, and verify.
+- Current/retained consumers, install, PoC, clean export, ELF symbol version, KAT, negative, differential, concurrency, and sanitizer evidence are required.

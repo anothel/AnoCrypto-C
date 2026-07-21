@@ -10,7 +10,7 @@
 #define ANO_CRYPTO_COMPAT_HEADER_MODE "unspecified"
 #endif
 #ifndef ANO_CRYPTO_EXPECT_RUNTIME_VERSION
-#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p3-05-scrypt-fixed-profile"
+#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p3-08-rsa-pkcs1-v15-sha2"
 #endif
 
 #define ANO_COMPAT_JOIN_INNER(a, b) a##b
@@ -120,6 +120,13 @@ ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_CMAC_FLAG_NONE == 0u);
 ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_AES256_GCM_STREAM_FLAG_NONE == 0u);
 ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_AEAD_DIRECTION_ENCRYPT == 1);
 ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_AEAD_DIRECTION_DECRYPT == 2);
+ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_RSA2048_MODULUS_SIZE == 256u);
+ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_RSA2048_PRIME_SIZE == 128u);
+ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_RSA2048_SIGNATURE_SIZE == 256u);
+ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_SIGNATURE_RSA_PKCS1_V15_SHA256 == 1);
+ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_SIGNATURE_RSA_PKCS1_V15_SHA384 == 2);
+ANO_COMPAT_STATIC_ASSERT(ANO_CRYPTO_SIGNATURE_RSA_PKCS1_V15_SHA512 == 3);
+ANO_COMPAT_STATIC_ASSERT(sizeof(ano_crypto_signature_algorithm_t) == sizeof(int));
 #endif
 
 /* The ABI-0 build-identity layout is pointer-model dependent but field order is fixed. */
@@ -337,6 +344,18 @@ static unsigned int bind_current_additive_surface(void)
     ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_scrypt_derive_key,
                     (const uint8_t *, size_t, const uint8_t *, size_t,
                      void *, size_t, uint8_t *));
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_rsa_key_import,
+                    (const uint8_t *, size_t, const uint8_t *, size_t,
+                     const uint8_t *, size_t, const uint8_t *, size_t,
+                     const uint8_t *, size_t, const uint8_t *, size_t,
+                     const uint8_t *, size_t, const uint8_t *, size_t,
+                     uint32_t, ano_crypto_csp_handle_t *));
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_signature_sign,
+                    (ano_crypto_csp_handle_t, ano_crypto_signature_algorithm_t,
+                     const uint8_t *, size_t, uint8_t *, size_t, size_t *));
+    ANO_COMPAT_BIND(ano_crypto_status_t, ano_crypto_signature_verify,
+                    (ano_crypto_csp_handle_t, ano_crypto_signature_algorithm_t,
+                     const uint8_t *, size_t, const uint8_t *, size_t));
     return count;
 }
 #endif
@@ -374,7 +393,7 @@ int main(void)
     symbol_count = bind_p1_29_public_surface();
 #if defined(ANO_CRYPTO_EXPECT_CURRENT_HEADER)
     symbol_count += bind_current_additive_surface();
-    if (symbol_count != 80u) {
+    if (symbol_count != 83u) {
         return 1;
     }
 #else

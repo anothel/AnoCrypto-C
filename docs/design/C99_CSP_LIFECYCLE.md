@@ -6,7 +6,7 @@ Status: `FROZEN_INTERNAL_POLICY`; formal CSP classification and accepted zeroiza
 
 AnoCrypto-C provides a fixed-size, in-process, module-owned CSP handle table for HMAC, block-cipher, and CMAC secret keys. It also exposes caller-owned opaque HMAC, AES-CBC, AES-CMAC, AES-256-GCM streaming, HMAC_DRBG, and random-service contexts. This is not a persistent key store or a general key-management subsystem.
 
-The current public surface is 16 headers and 80 exported symbols across retained `ANOCRYPTO_C_0`, `ANOCRYPTO_C_1`, `ANOCRYPTO_C_2`, `ANOCRYPTO_C_3`, and additive `ANOCRYPTO_C_4`.
+The current public surface is 17 headers and 83 exported symbols across retained `ANOCRYPTO_C_0` through `ANOCRYPTO_C_4` and additive `ANOCRYPTO_C_5`. RSA public/private keys reuse the same opaque CSP handle with internal role and purpose binding.
 
 ## Module-owned handle table
 

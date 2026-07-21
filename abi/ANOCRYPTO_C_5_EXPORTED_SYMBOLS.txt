@@ -1,0 +1,3 @@
+ano_crypto_rsa_key_import
+ano_crypto_signature_sign
+ano_crypto_signature_verify

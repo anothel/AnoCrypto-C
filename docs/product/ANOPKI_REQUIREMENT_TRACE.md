@@ -1,6 +1,6 @@
 # AnoPKI Requirement Trace
 
-Status: `P3_07_REVIEW_COMPLETE_RSA_P3_08_SELECTED`
+Status: `P3_08_RSA_CORE_COMPLETE_ADAPTER_PENDING`
 
 ## Authority and verification
 
@@ -31,7 +31,7 @@ summaries.
 | `APKI-PK-04` | CRL generate/inspect | TBSCertList, entries, reasons, times, PEM/DER | SHA-256 RSA/ECDSA sign | `APPROVED_SPLIT` |
 | `APKI-PK-05` | OCSP request/issuer inspect | DER, nonce, CertID composition and normalized fields | SHA-1/SHA-2 digest only | `APPROVED_SPLIT` |
 | `APKI-PK-06` | OCSP response and responder validation | BasicResponse/status/time/EKU/issuer policy and DER | SHA-256 RSA/ECDSA sign/verify | `APPROVED_SPLIT` |
-| `APKI-PK-07` | RSA provider fixtures | RSA-2048 positive cert/CRL/OCSP, deterministic certificate DER, SHA-2 scheme selection | RSA PKCS#1 v1.5 SHA-256/384/512 | `SELECTED_P3_08` |
+| `APKI-PK-07` | RSA provider fixtures | RSA-2048 positive cert/CRL/OCSP, deterministic certificate DER, SHA-2 scheme selection | RSA PKCS#1 v1.5 SHA-256/384/512 | `SATISFIED_P3_08_CORE_ADAPTER_PENDING` |
 | `APKI-PK-08` | ECDSA provider fixtures | P-256 positive cert/CRL/OCSP, TBS equivalence, DER signature object | P-256 SHA-256 raw primitive signature | `REQUIRED_NOT_SELECTED` |
 | `APKI-PK-09` | key-provider failures | reference parsing, exportability, provider routing, evidence, no fallback | role/algorithm/binding checks only; routing stays downstream | `BOUNDARY_APPROVED` |
 | `APKI-PK-10` | OCSP CertID default | empty digest selection and exact fixture use SHA-1 | restricted SHA-1 digest | `RECONFIRMED_DEFERRED` |
@@ -65,7 +65,7 @@ summaries.
 - core-owned SHA-2 and RSA DigestInfo;
 - raw fixed-width P-256 `r || s`, with DER in AnoPKI;
 - existing key/CSP lifecycle functions reused;
-- candidate RSA slice budget: three new symbols;
+- implemented RSA slice: three new symbols on ANOCRYPTO_C_5;
 - no ABI line reserved.
 
 Detailed decisions are in

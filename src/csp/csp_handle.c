@@ -6,6 +6,7 @@
 #include "ac_csp_internal.h"
 #include "ac_internal.h"
 #include "ac_thread_internal.h"
+#include "ac_rsa_internal.h"
 
 #define ANO_CRYPTO_CSP_HANDLE_INDEX_MASK 0xffffffffULL
 
@@ -16,6 +17,7 @@ typedef struct ano_crypto_csp_slot_s {
     uint32_t flags;
     size_t key_len;
     uint8_t key_material[ANO_CRYPTO_INTERNAL_CSP_MAX_SECRET_BYTES];
+    ano_crypto_rsa_key_internal_t rsa_key;
 } ano_crypto_csp_slot_t;
 
 static ano_crypto_csp_slot_t g_csp_slots[ANO_CRYPTO_INTERNAL_CSP_TABLE_CAPACITY];
@@ -122,6 +124,7 @@ void ano_crypto_internal_csp_zeroize_all_unlocked(void)
         }
 
         ano_crypto_internal_zeroize(slot->key_material, sizeof(slot->key_material));
+        ano_crypto_internal_zeroize(&slot->rsa_key, sizeof(slot->rsa_key));
         slot->key_len = 0u;
         slot->key_type = 0u;
         slot->flags = 0u;
@@ -209,6 +212,96 @@ ano_crypto_status_t ano_crypto_internal_csp_import_secret(
     return ANO_CRYPTO_OK;
 }
 
+ano_crypto_status_t ano_crypto_internal_csp_import_rsa(
+    const ano_crypto_rsa_key_internal_t *key,
+    ano_crypto_key_type_t key_type,
+    uint32_t flags,
+    ano_crypto_csp_handle_t *out_handle)
+{
+    size_t index = 0u;
+    ano_crypto_csp_slot_t *slot;
+    ano_crypto_status_t st;
+
+    if (key == 0 || out_handle == 0 ||
+        (key_type != ANO_CRYPTO_KEY_TYPE_PUBLIC_KEY &&
+         key_type != ANO_CRYPTO_KEY_TYPE_PRIVATE_KEY)) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+    *out_handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+    if (flags != ANO_CRYPTO_KEY_FLAG_NONE) {
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+    }
+    if ((key_type == ANO_CRYPTO_KEY_TYPE_PUBLIC_KEY &&
+         key->kind != ANO_CRYPTO_RSA_KEY_KIND_PUBLIC) ||
+        (key_type == ANO_CRYPTO_KEY_TYPE_PRIVATE_KEY &&
+         key->kind != ANO_CRYPTO_RSA_KEY_KIND_PRIVATE)) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+
+    st = ano_crypto_internal_global_lock();
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+    st = find_free_slot_unlocked(&index);
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_internal_global_unlock();
+        return st;
+    }
+    slot = &g_csp_slots[index];
+    ano_crypto_internal_zeroize(slot, sizeof(*slot));
+    slot->generation = next_generation_unlocked();
+    slot->state = (uint32_t)ANO_CRYPTO_CSP_STATE_ALLOCATED;
+    slot->key_type = (uint32_t)key_type;
+    slot->flags = flags;
+    memcpy(&slot->rsa_key, key, sizeof(slot->rsa_key));
+    slot->state = (uint32_t)ANO_CRYPTO_CSP_STATE_ACTIVE;
+    *out_handle = make_handle(index, slot->generation);
+    ano_crypto_internal_global_unlock();
+    return ANO_CRYPTO_OK;
+}
+
+ano_crypto_status_t ano_crypto_internal_csp_lock_rsa(
+    ano_crypto_csp_handle_t handle,
+    int require_private,
+    const ano_crypto_rsa_key_internal_t **out_key)
+{
+    const ano_crypto_csp_slot_t *slot;
+    ano_crypto_status_t st;
+    if (out_key == 0 || handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+    *out_key = 0;
+    st = ano_crypto_internal_global_lock();
+    if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+    slot = const_slot_from_handle_unlocked(handle);
+    if (slot == 0 || !slot_state_is_live(slot->state)) {
+        ano_crypto_internal_global_unlock();
+        return ANO_CRYPTO_ERR_INVALID_ARGUMENT;
+    }
+    if (require_private != 0) {
+        if (slot->key_type != (uint32_t)ANO_CRYPTO_KEY_TYPE_PRIVATE_KEY ||
+            slot->rsa_key.kind != ANO_CRYPTO_RSA_KEY_KIND_PRIVATE) {
+            ano_crypto_internal_global_unlock();
+            return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+        }
+    } else if ((slot->key_type != (uint32_t)ANO_CRYPTO_KEY_TYPE_PUBLIC_KEY &&
+                slot->key_type != (uint32_t)ANO_CRYPTO_KEY_TYPE_PRIVATE_KEY) ||
+               (slot->rsa_key.kind != ANO_CRYPTO_RSA_KEY_KIND_PUBLIC &&
+                slot->rsa_key.kind != ANO_CRYPTO_RSA_KEY_KIND_PRIVATE)) {
+        ano_crypto_internal_global_unlock();
+        return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+    }
+    *out_key = &slot->rsa_key;
+    return ANO_CRYPTO_OK;
+}
+
+void ano_crypto_internal_csp_unlock_rsa(void)
+{
+    ano_crypto_internal_global_unlock();
+}
+
 ano_crypto_status_t ano_crypto_internal_csp_destroy(
     ano_crypto_csp_handle_t handle)
 {
@@ -235,6 +328,7 @@ ano_crypto_status_t ano_crypto_internal_csp_destroy(
     /* A ZEROIZED tombstone may be explicitly destroyed after module shutdown
      * or fatal transition without restoring or exposing key material. */
     ano_crypto_internal_zeroize(slot->key_material, sizeof(slot->key_material));
+    ano_crypto_internal_zeroize(&slot->rsa_key, sizeof(slot->rsa_key));
     slot->key_len = 0u;
     slot->key_type = 0u;
     slot->flags = 0u;

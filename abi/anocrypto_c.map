@@ -96,6 +96,13 @@ ANOCRYPTO_C_3 {
 ANOCRYPTO_C_4 {
     global:
         ano_crypto_scrypt_derive_key;
+} ANOCRYPTO_C_3;
+
+ANOCRYPTO_C_5 {
+    global:
+        ano_crypto_rsa_key_import;
+        ano_crypto_signature_sign;
+        ano_crypto_signature_verify;
     local:
         *;
-} ANOCRYPTO_C_3;
+} ANOCRYPTO_C_4;

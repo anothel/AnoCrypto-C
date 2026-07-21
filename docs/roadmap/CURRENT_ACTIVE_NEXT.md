@@ -1,68 +1,55 @@
 # Current / Active / Next
 
-Status: `P3_07_COMPLETE_P3_08_READY`
+Status: `P3_08_COMPLETE_P3_09_ECDSA_GATE_NEXT`
 
-## Retained P3-01 policy compatibility
+## Retained policy compatibility
 
-`P3-02 minimal HKDF-SHA-256 API` is the historical selected-implementation
-token retained for the frozen P3-01 policy checker. P3-02 is complete and is
-not the current task.
+Historical P3-01/P3-02 tokens remain only where frozen policy regression tests
+require them. Retained token: `P3-02 minimal HKDF-SHA-256 API`. They are not current work.
 
 ## DONE
 
-- P0/P1 cryptographic core and release engineering.
-- P2 local validation-readiness snapshot.
-- P3-00 downstream intake gate.
-- P3-01 four-source requirement consolidation and ownership decisions.
-- P3-02 HKDF-SHA-256.
-- P3-03 AES-256-GCM one-shot.
-- P3-04 AES-256-GCM streaming.
-- P3-05 fixed-profile scrypt.
-- P3-06 AnoSecureKit Enterprise seven-capability parity/no-fallback checkpoint.
-- P3-07 public-key key-handle architecture and AnoPKI contract gate.
+- P0/P1 core and release engineering;
+- P2 local validation-readiness snapshot;
+- P3-00/P3-01 downstream intake, ownership, and gap consolidation;
+- P3-02 HKDF-SHA-256;
+- P3-03 AES-256-GCM one-shot;
+- P3-04 AES-256-GCM streaming;
+- P3-05 fixed-profile scrypt;
+- P3-06 AnoSecureKit Enterprise parity/no-fallback checkpoint;
+- P3-07 public-key/key-handle architecture gate;
+- P3-08 RSA-2048 PKCS#1 v1.5 SHA-256/384/512 and RSA key-handle import.
 
-P3-07 approved a common internally tagged CSP handle, normalized RSA/P-256
-component import, message-based generic sign/verify, core-owned RSA DigestInfo,
-and raw P-256 `r || s`. It changed no public code or ABI.
+P3-08 adds one header and three symbols on `ANOCRYPTO_C_5`. The current surface
+is 17 headers and 83 symbols. ABI-0 through ABI-4 and P1-29 consumers remain
+unchanged.
 
 ## ACTIVE
 
-No implementation is active in this artifact.
+P3-08 local closeout and evidence packaging.
 
 ## NEXT
 
-`P3-08: RSA PKCS#1 v1.5 SHA-256/384/512 and RSA key-handle import`
+`P3-09: ECDSA P-256 SHA-256 API/ABI and AnoPKI compatibility gate`
 
-P3-08 must begin with its own API/ABI review. The current candidate target is:
-
-- one RSA public/private component import function;
-- one generic message-based sign function;
-- one generic message-based verify function;
-- reuse existing key destroy/state and CSP validity/state functions;
-- at most three new public symbols unless the review proves another symbol is
-  necessary;
-- one additive ABI line only after exact approval.
-
-P3-08 must freeze RSA key-size/exponent policy, bounded storage, component
-validation, concurrency leases, buffers/failure clearing, KATs, differential
-validation, AnoPKI compatibility, and symbol-version evidence before merge.
+P3-09 must independently review exact component import, reuse of the generic
+message sign/verify contract, raw 64-byte `r || s`, deterministic/random nonce
+policy, side-channel controls, additive ABI impact, and AnoPKI DER conversion.
+It must not silently broaden to other curves, digest variants, ECDH, EdDSA, or
+PKI codecs.
 
 ## LATER
 
-- P-256 ECDSA implementation using the shared sign/verify contract;
-- restricted SHA-1 only through a separate misuse-resistant OCSP CertID gate;
-- AnoPKI Enterprise public-key parity/no-fallback checkpoint after relevant
-  primitives exist.
+- restricted SHA-1 through a misuse-resistant OCSP CertID-only gate;
+- AnoPKI Enterprise RSA/ECDSA adapter parity and no-fallback checkpoint;
+- separate hosted/provenance/signing/release qualification.
 
 ## DEFERRED / BLOCKED
 
-- KCMVP consultation/submission: `DEFERRED`.
-- P1-34 hosted lanes: `NOT_RUN`; review: `UNREVIEWED`.
-- Repository signing: `UNSIGNED`.
-- Signing handoff: `BLOCKED`.
-- External release authorization: `NO`.
-- Original AnoSecureKit upstream Git-tree reproduction:
+- KCMVP: `DEFERRED`;
+- hosted lanes/review: `NOT_RUN` / `UNREVIEWED`;
+- repository signing/handoff: `UNSIGNED` / `BLOCKED`;
+- external release authorization: `NO`;
+- trusted provenance acceptance: `OPEN`;
+- exact unavailable downstream archive recomputation:
   `EXTERNAL_CONFIRMATION_REQUIRED`.
-- Exact AnoPKI Enterprise source ZIP byte recomputation for P3-07:
-  `EXTERNAL_CONFIRMATION_REQUIRED`.
-- Trusted release provenance acceptance: `OPEN`.

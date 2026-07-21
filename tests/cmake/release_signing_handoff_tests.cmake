@@ -174,6 +174,12 @@ ano_crypto_detect_sensitive_signing_material_file(
 if(_sensitive_reason)
     message(FATAL_ERROR "CTest entropy label-time metadata was incorrectly rejected")
 endif()
+file(WRITE "${_sensitive_fixture}" "signature = 0.12 sec*proc (3 tests)\n")
+ano_crypto_detect_sensitive_signing_material_file(
+    "${_sensitive_fixture}" ON _sensitive_reason)
+if(_sensitive_reason)
+    message(FATAL_ERROR "CTest signature label-time metadata was incorrectly rejected")
+endif()
 file(WRITE "${_sensitive_fixture}" "entropy = fixture-only\n")
 ano_crypto_detect_sensitive_signing_material_file(
     "${_sensitive_fixture}" ON _sensitive_reason)

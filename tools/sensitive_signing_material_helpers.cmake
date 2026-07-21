@@ -75,11 +75,11 @@ function(ano_crypto_detect_sensitive_signing_material_text
                 set(_status_value "${CMAKE_MATCH_3}")
                 string(STRIP "${_status_value}" _status_value)
                 # CTest emits label-time summary rows such as
-                # `entropy = 0.09 sec*proc (2 tests)`. This is duration metadata,
-                # not entropy material, so retain the evidence log while keeping
-                # all other non-placeholder assignments fail-closed.
-                if(_status_key_match STREQUAL "entropy" AND
-                   _status_value MATCHES "^[0-9]+([.][0-9]+)?[ \t]+sec[*]proc[ \t]+[(][0-9]+[ \t]+tests?[)]$")
+                # `signature = 0.09 sec*proc (2 tests)`. This is duration
+                # metadata, not cryptographic material, so retain the evidence
+                # log while keeping every other non-placeholder assignment
+                # fail-closed.
+                if(_status_value MATCHES "^[0-9]+([.][0-9]+)?[ \t]+sec[*]proc[ \t]+[(][0-9]+[ \t]+tests?[)]$")
                     continue()
                 endif()
                 if(NOT _status_value MATCHES

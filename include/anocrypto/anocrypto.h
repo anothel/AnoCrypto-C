@@ -16,6 +16,7 @@
 #include <anocrypto/ac_random.h>
 #include <anocrypto/ac_csp.h>
 #include <anocrypto/ac_key.h>
+#include <anocrypto/ac_signature.h>
 #include <anocrypto/ac_cipher.h>
 #include <anocrypto/ac_cmac.h>
 

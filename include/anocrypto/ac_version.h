@@ -11,8 +11,8 @@ extern "C" {
 #define ANO_CRYPTO_VERSION_MAJOR 0u
 #define ANO_CRYPTO_VERSION_MINOR 1u
 #define ANO_CRYPTO_VERSION_PATCH 0u
-#define ANO_CRYPTO_VERSION_PRERELEASE "p3-05-scrypt-fixed-profile"
-#define ANO_CRYPTO_VERSION_STRING "0.1.0-p3-05-scrypt-fixed-profile"
+#define ANO_CRYPTO_VERSION_PRERELEASE "p3-08-rsa-pkcs1-v15-sha2"
+#define ANO_CRYPTO_VERSION_STRING "0.1.0-p3-08-rsa-pkcs1-v15-sha2"
 
 /*
  * Version query APIs are allowed in all module states, including error state.

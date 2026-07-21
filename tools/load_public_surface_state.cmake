@@ -4,8 +4,8 @@
 # 69-symbol ANOCRYPTO_C_0 snapshot. P3-02 retains ac_kdf.h and one symbol on
 # ANOCRYPTO_C_1. Current checks validate both retained subsets while allowing
 # the reviewed P3-03 one-shot symbols on ANOCRYPTO_C_2, the P3-04
-# AES-256-GCM streaming symbols on ANOCRYPTO_C_3, and the P3-05 fixed-profile
-# scrypt symbol on ANOCRYPTO_C_4.
+# AES-256-GCM streaming symbols on ANOCRYPTO_C_3, the P3-05 fixed-profile
+# scrypt symbol on ANOCRYPTO_C_4, and the P3-08 RSA symbols on ANOCRYPTO_C_5.
 
 if(NOT DEFINED ANO_CRYPTO_SOURCE_DIR OR ANO_CRYPTO_SOURCE_DIR STREQUAL "")
     message(FATAL_ERROR "ANO_CRYPTO_SOURCE_DIR is required")
@@ -45,12 +45,14 @@ list(LENGTH ANO_CRYPTO_CURRENT_PUBLIC_HEADERS ANO_CRYPTO_CURRENT_PUBLIC_HEADER_C
 set(ANO_CRYPTO_RETAINED_PUBLIC_HEADERS "${ANO_CRYPTO_CURRENT_PUBLIC_HEADERS}")
 list(REMOVE_ITEM ANO_CRYPTO_RETAINED_PUBLIC_HEADERS
     "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/ac_kdf.h"
-    "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/ac_aead.h")
+    "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/ac_aead.h"
+    "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/ac_signature.h")
 list(LENGTH ANO_CRYPTO_RETAINED_PUBLIC_HEADERS ANO_CRYPTO_RETAINED_PUBLIC_HEADER_COUNT)
 
 set(ANO_CRYPTO_P3_02_PUBLIC_HEADERS "${ANO_CRYPTO_CURRENT_PUBLIC_HEADERS}")
 list(REMOVE_ITEM ANO_CRYPTO_P3_02_PUBLIC_HEADERS
-    "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/ac_aead.h")
+    "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/ac_aead.h"
+    "${ANO_CRYPTO_SOURCE_DIR}/include/anocrypto/ac_signature.h")
 list(LENGTH ANO_CRYPTO_P3_02_PUBLIC_HEADERS ANO_CRYPTO_P3_02_PUBLIC_HEADER_COUNT)
 
 _ano_crypto_count_symbol_manifest(
@@ -68,6 +70,9 @@ _ano_crypto_count_symbol_manifest(
 _ano_crypto_count_symbol_manifest(
     "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_4_EXPORTED_SYMBOLS.txt"
     ANO_CRYPTO_ABI4_SYMBOL_COUNT)
+_ano_crypto_count_symbol_manifest(
+    "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_5_EXPORTED_SYMBOLS.txt"
+    ANO_CRYPTO_ABI5_SYMBOL_COUNT)
 _ano_crypto_count_symbol_manifest(
     "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt"
     ANO_CRYPTO_CURRENT_SYMBOL_COUNT)
@@ -88,19 +93,20 @@ if(NOT ANO_CRYPTO_ABI1_SYMBOL_COUNT EQUAL 1)
     message(FATAL_ERROR
         "ANOCRYPTO_C_1 retained symbol baseline changed: ${ANO_CRYPTO_ABI1_SYMBOL_COUNT}")
 endif()
-if(NOT ANO_CRYPTO_CURRENT_PUBLIC_HEADER_COUNT EQUAL 16 OR
+if(NOT ANO_CRYPTO_CURRENT_PUBLIC_HEADER_COUNT EQUAL 17 OR
    NOT ANO_CRYPTO_ABI2_SYMBOL_COUNT EQUAL 2 OR
    NOT ANO_CRYPTO_ABI3_SYMBOL_COUNT EQUAL 7 OR
    NOT ANO_CRYPTO_ABI4_SYMBOL_COUNT EQUAL 1 OR
-   NOT ANO_CRYPTO_CURRENT_SYMBOL_COUNT EQUAL 80)
+   NOT ANO_CRYPTO_ABI5_SYMBOL_COUNT EQUAL 3 OR
+   NOT ANO_CRYPTO_CURRENT_SYMBOL_COUNT EQUAL 83)
     message(FATAL_ERROR
-        "P3-05 additive public surface is inconsistent: headers=${ANO_CRYPTO_CURRENT_PUBLIC_HEADER_COUNT}, ABI2=${ANO_CRYPTO_ABI2_SYMBOL_COUNT}, ABI3=${ANO_CRYPTO_ABI3_SYMBOL_COUNT}, ABI4=${ANO_CRYPTO_ABI4_SYMBOL_COUNT}, total=${ANO_CRYPTO_CURRENT_SYMBOL_COUNT}")
+        "P3-08 additive public surface is inconsistent: headers=${ANO_CRYPTO_CURRENT_PUBLIC_HEADER_COUNT}, ABI2=${ANO_CRYPTO_ABI2_SYMBOL_COUNT}, ABI3=${ANO_CRYPTO_ABI3_SYMBOL_COUNT}, ABI4=${ANO_CRYPTO_ABI4_SYMBOL_COUNT}, ABI5=${ANO_CRYPTO_ABI5_SYMBOL_COUNT}, total=${ANO_CRYPTO_CURRENT_SYMBOL_COUNT}")
 endif()
 if(NOT ANO_CRYPTO_RELEASE_PUBLIC_HEADER_COUNT EQUAL ANO_CRYPTO_CURRENT_PUBLIC_HEADER_COUNT OR
    NOT ANO_CRYPTO_RELEASE_SYMBOL_COUNT EQUAL ANO_CRYPTO_CURRENT_SYMBOL_COUNT OR
-   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_4")
+   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_5")
     message(FATAL_ERROR
-        "Release identity does not match the P3-05 additive public surface")
+        "Release identity does not match the P3-08 additive public surface")
 endif()
 
 _ano_crypto_load_symbol_manifest(
@@ -140,4 +146,15 @@ _ano_crypto_load_symbol_manifest(
     _ano_crypto_abi4_symbols)
 if(NOT _ano_crypto_abi4_symbols STREQUAL "ano_crypto_scrypt_derive_key")
     message(FATAL_ERROR "Unexpected ANOCRYPTO_C_4 symbol set: ${_ano_crypto_abi4_symbols}")
+endif()
+
+_ano_crypto_load_symbol_manifest(
+    "${ANO_CRYPTO_SOURCE_DIR}/abi/ANOCRYPTO_C_5_EXPORTED_SYMBOLS.txt"
+    _ano_crypto_abi5_symbols)
+set(_ano_crypto_expected_abi5_symbols
+    ano_crypto_rsa_key_import
+    ano_crypto_signature_sign
+    ano_crypto_signature_verify)
+if(NOT _ano_crypto_abi5_symbols STREQUAL _ano_crypto_expected_abi5_symbols)
+    message(FATAL_ERROR "Unexpected ANOCRYPTO_C_5 symbol set: ${_ano_crypto_abi5_symbols}")
 endif()

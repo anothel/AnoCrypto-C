@@ -1,13 +1,13 @@
 # C99 Priority TODO
 
-Status: `P3_07_COMPLETE_P3_08_READY`
+Status: `P3_08_COMPLETE_P3_09_READY`
 
 ## Current public baseline
 
-- runtime version: `0.1.0-p3-05-scrypt-fixed-profile`;
-- public headers: 16;
-- exported symbols: 80;
-- ABI lines: `ANOCRYPTO_C_0` through `ANOCRYPTO_C_4`;
+- runtime version: `0.1.0-p3-08-rsa-pkcs1-v15-sha2`;
+- public headers: 17;
+- exported symbols: 83;
+- ABI lines: `ANOCRYPTO_C_0` through `ANOCRYPTO_C_5`;
 - retained compatibility baseline: P1-29.
 
 ## Completed product-driven sequence

@@ -11,11 +11,11 @@ extern "C" {
 #endif
 
 /*
- * Key/CSP lifecycle skeleton.
+ * Key/CSP lifecycle surface.
  *
- * Raw key material is accepted only as caller-provided input to future import
- * operations. P1-33 retains the P1-29 in-memory HMAC, AES block-cipher, and dedicated AES-CMAC key-handle paths.
- * It does not export, print, persist, or test with operational secret material.
+ * The module retains purpose-separated in-memory secret-key handles and the
+ * P3-08 RSA-2048 public/private component-import path. It does not export,
+ * print, persist, wrap, or parse encoded key containers.
  */
 typedef enum ano_crypto_key_type_e {
     ANO_CRYPTO_KEY_TYPE_SECRET_BYTES = 1,
@@ -32,6 +32,37 @@ typedef enum ano_crypto_key_type_e {
 #define ANO_CRYPTO_KEY_FLAG_VALIDATION_TARGET_CANDIDATE 0x00000002u
 
 #define ANO_CRYPTO_KEY_MAX_SECRET_BYTES 128u
+
+#define ANO_CRYPTO_RSA2048_MODULUS_SIZE 256u
+#define ANO_CRYPTO_RSA2048_PRIME_SIZE 128u
+
+
+
+/*
+ * Import one RSA-2048 public or CRT private key from unsigned big-endian
+ * algorithm-native components. A public key supplies only modulus/exponent.
+ * A private key supplies every component. Public exponent 65537 is required.
+ * Encoded key containers remain the responsibility of the caller/downstream.
+ */
+ANO_CRYPTO_API ano_crypto_status_t ano_crypto_rsa_key_import(
+    const uint8_t *modulus,
+    size_t modulus_len,
+    const uint8_t *public_exponent,
+    size_t public_exponent_len,
+    const uint8_t *private_exponent,
+    size_t private_exponent_len,
+    const uint8_t *prime1,
+    size_t prime1_len,
+    const uint8_t *prime2,
+    size_t prime2_len,
+    const uint8_t *exponent1,
+    size_t exponent1_len,
+    const uint8_t *exponent2,
+    size_t exponent2_len,
+    const uint8_t *coefficient,
+    size_t coefficient_len,
+    uint32_t flags,
+    ano_crypto_csp_handle_t *out_handle);
 
 ANO_CRYPTO_API ano_crypto_status_t ano_crypto_key_import_secret(
     ano_crypto_key_type_t key_type,

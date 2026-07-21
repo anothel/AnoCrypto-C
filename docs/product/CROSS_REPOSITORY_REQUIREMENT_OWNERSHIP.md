@@ -48,12 +48,12 @@ generic primitive/key-handle boundary and does not transfer those responsibiliti
 - message-based sign/verify: `APPROVED`;
 - RSA DigestInfo in core: `APPROVED`;
 - P-256 raw `r || s`: `APPROVED`;
-- candidate RSA budget of three symbols: `APPROVED_CANDIDATE_BUDGET`;
-- next slice RSA: `APPROVED_P3_08_SELECTION`.
+- RSA budget of three symbols: `IMPLEMENTED_P3_08_ANOCRYPTO_C_5`;
+- RSA slice: `COMPLETE_P3_08_CORE_ADAPTER_PENDING`.
 
 ## Remaining decisions
 
-- exact RSA sizes/exponent policy and final prototypes: `TODO_P3_08`;
+- RSA-2048/e=65537 and final prototypes: `APPROVED_IMPLEMENTED_P3_08`;
 - bounded asymmetric storage design and capacity: `TODO_P3_08`;
 - ECDSA nonce/determinism/low-`s`: `TODO_P3_09`;
 - restricted SHA-1 public API containment: `TODO_LATER_GATE`;

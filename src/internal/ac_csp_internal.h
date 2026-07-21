@@ -6,6 +6,7 @@
 #include <anocrypto/ac_csp.h>
 #include <anocrypto/ac_key.h>
 #include <anocrypto/ac_status.h>
+#include "ac_rsa_internal.h"
 
 #define ANO_CRYPTO_INTERNAL_CSP_MAX_SECRET_BYTES 128u
 #define ANO_CRYPTO_INTERNAL_CSP_TABLE_CAPACITY 16u

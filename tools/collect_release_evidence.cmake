@@ -2,7 +2,7 @@
 # Usage:
 #   cmake -DANO_CRYPTO_SOURCE_DIR=. \
 #         -DANO_CRYPTO_BUILD_DIR=build \
-#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p3-05 \
+#         -DANO_CRYPTO_EVIDENCE_DIR=build/evidence/p3-08 \
 #         -DANO_CRYPTO_RUN_CTEST=OFF \
 #         -DANO_CRYPTO_CREATE_SOURCE_ARCHIVE=ON \
 #         -DANO_CRYPTO_RUN_INSTALL_SMOKE=ON \
@@ -23,7 +23,7 @@ if(NOT DEFINED ANO_CRYPTO_BUILD_DIR)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_EVIDENCE_DIR)
-    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p3-05")
+    set(ANO_CRYPTO_EVIDENCE_DIR "${ANO_CRYPTO_BUILD_DIR}/evidence/p3-08")
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CTEST)
@@ -168,6 +168,10 @@ endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_SCRYPT_CHECK)
     set(ANO_CRYPTO_RUN_SCRYPT_CHECK ON)
+endif()
+
+if(NOT DEFINED ANO_CRYPTO_RUN_RSA_PKCS1_V15_CHECK)
+    set(ANO_CRYPTO_RUN_RSA_PKCS1_V15_CHECK ON)
 endif()
 
 if(NOT DEFINED ANO_CRYPTO_RUN_CONCURRENCY_SANITIZER_CHECK)
@@ -1030,6 +1034,34 @@ else()
         "scrypt policy check was not requested. Set ANO_CRYPTO_RUN_SCRYPT_CHECK=ON.\n")
 endif()
 
+if(ANO_CRYPTO_RUN_RSA_PKCS1_V15_CHECK)
+    set(_rsa_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/RSA_PKCS1_V15_POLICY_CHECK.txt")
+    execute_process(
+        COMMAND "${CMAKE_COMMAND}"
+            -DANO_CRYPTO_SOURCE_DIR=${ANO_CRYPTO_SOURCE_DIR}
+            -DANO_CRYPTO_RSA_POLICY_CHECK_OUTPUT=${_rsa_check_output}
+            -P "${ANO_CRYPTO_SOURCE_DIR}/tools/check_rsa_pkcs1_v15_policy.cmake"
+        RESULT_VARIABLE _rsa_check_result
+        OUTPUT_VARIABLE _rsa_check_stdout
+        ERROR_VARIABLE _rsa_check_stderr
+        TIMEOUT 300)
+    file(APPEND "${_rsa_check_output}"
+        "
+Command output:
+${_rsa_check_stdout}${_rsa_check_stderr}
+")
+    file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
+        "RSA PKCS#1 v1.5 P3-08 policy check result: ${_rsa_check_result}
+")
+    if(NOT _rsa_check_result EQUAL 0)
+        message(FATAL_ERROR "RSA PKCS#1 v1.5 policy check failed; see ${_rsa_check_output}")
+    endif()
+else()
+    file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/RSA_PKCS1_V15_POLICY_CHECK.txt"
+        "RSA PKCS#1 v1.5 policy check was not requested. Set ANO_CRYPTO_RUN_RSA_PKCS1_V15_CHECK=ON.
+")
+endif()
+
 if(ANO_CRYPTO_RUN_CMAC_HARDENING_CHECK)
     set(_cmac_hardening_check_output "${ANO_CRYPTO_EVIDENCE_DIR}/AES_CMAC_HARDENING_CHECK.txt")
     execute_process(
@@ -1669,11 +1701,11 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/DOWNSTREAM_REQUIREMENT_ANALYSIS_NOTES.txt
 "
     "Accepted requirements/approved gaps: 20/8.
 "
-    "Selected implementation: P3-02_HKDF_SHA256_COMPLETE; P3-03_AES256_GCM_ONESHOT_COMPLETE; P3-04_AES256_GCM_STREAMING_COMPLETE; P3-05_SCRYPT_FIXED_PROFILE_COMPLETE.
+    "Selected implementation: P3-02_HKDF_SHA256_COMPLETE; P3-03_AES256_GCM_ONESHOT_COMPLETE; P3-04_AES256_GCM_STREAMING_COMPLETE; P3-05_SCRYPT_FIXED_PROFILE_COMPLETE; P3-08_RSA_PKCS1_V15_SHA2_COMPLETE.
 "
     "P3-01 frozen public ABI: 14 headers, 69 symbols, ANOCRYPTO_C_0.
 "
-    "Public API/new ABI authorization: P3_02_THROUGH_P3_05_ADDITIVE/ANOCRYPTO_C_1_HKDF_ANOCRYPTO_C_2_GCM_ONESHOT_ANOCRYPTO_C_3_GCM_STREAMING_ANOCRYPTO_C_4_SCRYPT.
+    "Public API/new ABI authorization: P3_02_THROUGH_P3_08_ADDITIVE/ANOCRYPTO_C_1_HKDF_ANOCRYPTO_C_2_GCM_ONESHOT_ANOCRYPTO_C_3_GCM_STREAMING_ANOCRYPTO_C_4_SCRYPT_ANOCRYPTO_C_5_RSA.
 "
     "KCMVP active lane: DEFERRED.
 "
@@ -1757,9 +1789,9 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/REPRODUCIBLE_BUILD_NOTES.txt"
     "TODO: pin generator, compiler, locale, timezone, debug-info, and path-prefix-map policies for release-candidate builds.\n")
 
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCOPE_REVIEW_NOTES.txt"
-    "AnoCrypto-C P3-05 evidence and scope-review notes\n"
+    "AnoCrypto-C P3-08 evidence and scope-review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P3-05 fixed-profile scrypt implementation, resource gate, and additive ABI evidence. P3-04 streaming, P3-03 one-shot, and P3-02 HKDF-SHA-256 remain retained; P3-01 remains the accepted downstream requirement baseline.\n"
+    "Status: P3-08 RSA PKCS#1 v1.5 SHA-2 implementation, key-handle gate, and additive ABI evidence. P3-04 streaming, P3-03 one-shot, and P3-02 HKDF-SHA-256 remain retained; P3-01 remains the accepted downstream requirement baseline.\n"
     "Development workflow: docs/roadmap/DEVELOPMENT_WORKFLOW.md\n"
     "Service scope matrix: docs/kcmvp/SERVICE_SCOPE_MATRIX.md\n"
     "Algorithm scope: docs/kcmvp/KCMVP_ALGORITHM_SCOPE.md\n"
@@ -1778,7 +1810,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/HKDF_SHA256_REVIEW_NOTES.txt"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
     "Status: local engineering implementation and compatibility evidence; not formal validation evidence.\n"
     "Public API: one combined extract-and-expand function in include/anocrypto/ac_kdf.h.\n"
-    "ABI: all 69 ANOCRYPTO_C_0 symbols retained; HKDF remains on ANOCRYPTO_C_1; one-shot GCM remains on ANOCRYPTO_C_2; seven streaming symbols remain on ANOCRYPTO_C_3; fixed-profile scrypt is on ANOCRYPTO_C_4; current total is 80.\n"
+    "ABI: all 69 ANOCRYPTO_C_0 symbols retained; HKDF remains on ANOCRYPTO_C_1; one-shot GCM remains on ANOCRYPTO_C_2; seven streaming symbols remain on ANOCRYPTO_C_3; fixed-profile scrypt is on ANOCRYPTO_C_4; RSA import/sign/verify are on ANOCRYPTO_C_5; current total is 83.\n"
     "Bounds: output lengths 0 through 8160 accepted; 8161 rejected without partial output.\n"
     "Semantics: RFC 5869 empty salt, empty IKM, empty info, zero-length output, range, alias, overlap, and failure-clearing rules are documented and tested.\n"
     "Compatibility: exact AnoSecureKit SKF1 v1 info bytes are covered by a fixed test vector; SKF1 framing and workflow remain AnoSecureKit-owned.\n"
@@ -1794,7 +1826,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES256_GCM_REVIEW_NOTES.txt"
     "Status: local engineering implementation and compatibility evidence; not formal validation evidence.\n"
     "Public API: two one-shot functions in include/anocrypto/ac_aead.h for encrypt and decrypt.\n"
     "Fixed profile: 32-byte block-cipher CSP key, 12-byte nonce, and 16-byte tag.\n"
-    "ABI: the P3-03 slice added two AES-256-GCM symbols on ANOCRYPTO_C_2 for a then-current total of 72; P3-05 retains them inside the current 80-symbol surface.\n"
+    "ABI: the P3-03 slice added two AES-256-GCM symbols on ANOCRYPTO_C_2 for a then-current total of 72; P3-08 retains them inside the current 83-symbol surface.\n"
     "Buffer rules: empty AAD/payload valid, exact payload in-place supported, partial overlap rejected, and length/overflow ranges checked.\n"
     "Authentication release rule: decrypt verifies the complete tag before writing plaintext; validation or authentication failure returns no partial output and clears the accepted output range.\n"
     "Compatibility: exact AnoSecureKit SKT1, SKF1, and SKP1 v1 GCM inputs/outputs are covered without implementing product framing, nonce construction, password derivation, or workflows.\n"
@@ -1814,7 +1846,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/AES256_GCM_STREAMING_REVIEW_NOTES.txt"
     "State model: direction bound at init; AAD before non-empty payload; correct-direction final consumes and clears context.\n"
     "Decrypt release policy: update output is unverified until final succeeds; caller must buffer, withhold, and wipe it on failure.\n"
     "Buffer policy: exact payload in-place is supported; partial overlap and out_written overlap with context/input/output are rejected.\n"
-    "ABI: 69 ANOCRYPTO_C_0, one ANOCRYPTO_C_1, two ANOCRYPTO_C_2, seven ANOCRYPTO_C_3, and one ANOCRYPTO_C_4 symbol; current total 80.\n"
+    "ABI: 69 ANOCRYPTO_C_0, one ANOCRYPTO_C_1, two ANOCRYPTO_C_2, seven ANOCRYPTO_C_3, one ANOCRYPTO_C_4, and three ANOCRYPTO_C_5 symbols; current total 83.\n"
     "Compatibility: exact AnoSecureKit SKT1 v1 primitive bytes and arbitrary chunk boundaries are covered without implementing framing or product workflow.\n"
     "Differential provider: OpenSSL 3.x is test-only and is not linked by the product library.\n"
     "KCMVP/hosted/signing/external release: DEFERRED/NOT_RUN-UNREVIEWED/UNSIGNED/NO.\n"
@@ -1831,7 +1863,7 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/SCRYPT_REVIEW_NOTES.txt"
     "Profile: N=32768, r=8, p=1, 32-byte output, and 33,556,544-byte caller workspace.\n"
     "Resource boundary: no production heap allocation; undersized or misaligned workspace and all prohibited overlaps fail closed.\n"
     "Clearing: accepted output is cleared on failure and the complete reviewed workspace extent is cleared after every derivation attempt that begins using it.\n"
-    "ABI: one symbol on ANOCRYPTO_C_4; retained ABI-0/1/2/3 lines unchanged; current total 80.\n"
+    "ABI: one symbol on ANOCRYPTO_C_4; retained ABI-0/1/2/3 lines unchanged; RSA adds three symbols on ANOCRYPTO_C_5; current total 83.\n"
     "Compatibility: exact AnoSecureKit SKP1 v1 key derivation and record decryption are covered without implementing framing, prompting, password policy, storage, or workflow.\n"
     "Differential provider: OpenSSL 3.x EVP_PBE_scrypt is test-only and is not linked by the product library.\n"
     "KCMVP/hosted/signing/external release: DEFERRED/NOT_RUN-UNREVIEWED/UNSIGNED/NO.\n"
@@ -1926,10 +1958,10 @@ file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt" "Random lifecycle re
 file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt"
     "AnoCrypto-C exported-symbol baseline review notes\n"
     "Generated UTC: ${ANO_CRYPTO_EVIDENCE_UTC}\n"
-    "Status: P3-05 additive clean Release ABI guardrail; not a complete ABI compatibility claim.\n"
+    "Status: P3-08 additive clean Release ABI guardrail; not a complete ABI compatibility claim.\n"
     "Retained baseline: abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt\n"
     "Current manifest: abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt\n"
-    "Expected retained/current symbol counts: 69/80\n"
+    "Expected retained/current symbol counts: 69/83\n"
     "Automated result: EXPORTED_SYMBOL_BASELINE_CHECK.txt\n"
     "The check compares a clean shared Release build with test hooks disabled and internal symbol hiding enabled.\n"
     "Public struct layout, calling convention, type size, semantic compatibility, and platform-specific binary details remain separate review items.\n")
@@ -2214,6 +2246,8 @@ _ano_crypto_find_evidence_test_executable(
 _ano_crypto_find_evidence_test_executable(
     ano_crypto_scrypt_openssl_differential_tests _scrypt_diff_executable)
 _ano_crypto_find_evidence_test_executable(
+    ano_crypto_rsa_openssl_differential_tests _rsa_diff_executable)
+_ano_crypto_find_evidence_test_executable(
     ano_crypto_aes_cbc_openssl_differential_tests _aes_cbc_diff_executable)
 _ano_crypto_find_evidence_test_executable(
     ano_crypto_aes_cmac_openssl_differential_tests _aes_cmac_diff_executable)
@@ -2227,6 +2261,7 @@ if(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE)
     if(NOT (_sha2_diff_executable AND
             _hkdf_diff_executable AND
             _scrypt_diff_executable AND
+            _rsa_diff_executable AND
             _aes_cbc_diff_executable AND
             _aes_cmac_diff_executable AND
             _aes256_gcm_diff_executable AND
@@ -2243,6 +2278,9 @@ if(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE)
     _ano_crypto_run_evidence_test(
         ano_crypto_scrypt_openssl_differential_tests
         _scrypt_diff_result _scrypt_diff_stdout _scrypt_diff_stderr)
+    _ano_crypto_run_evidence_test(
+        ano_crypto_rsa_openssl_differential_tests
+        _rsa_diff_result _rsa_diff_stdout _rsa_diff_stderr)
     _ano_crypto_run_evidence_test(
         ano_crypto_aes_cbc_openssl_differential_tests
         _aes_cbc_diff_result _aes_cbc_diff_stdout _aes_cbc_diff_stderr)
@@ -2262,15 +2300,17 @@ if(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE)
         "${_sha2_diff_stdout}${_sha2_diff_stderr}"
         "${_hkdf_diff_stdout}${_hkdf_diff_stderr}"
         "${_scrypt_diff_stdout}${_scrypt_diff_stderr}"
+        "${_rsa_diff_stdout}${_rsa_diff_stderr}"
         "${_aes_cbc_diff_stdout}${_aes_cbc_diff_stderr}"
         "${_aes_cmac_diff_stdout}${_aes_cmac_diff_stderr}"
         "${_aes256_gcm_diff_stdout}${_aes256_gcm_diff_stderr}"
         "${_aes256_gcm_streaming_diff_stdout}${_aes256_gcm_streaming_diff_stderr}")
     file(APPEND "${ANO_CRYPTO_EVIDENCE_DIR}/BUILD_METADATA.txt"
-        "OpenSSL differential validation results: sha2-hmac=${_sha2_diff_result}; hkdf-sha256=${_hkdf_diff_result}; scrypt=${_scrypt_diff_result}; aes-cbc=${_aes_cbc_diff_result}; aes-cmac=${_aes_cmac_diff_result}; aes256-gcm=${_aes256_gcm_diff_result}; aes256-gcm-streaming=${_aes256_gcm_streaming_diff_result}\n")
+        "OpenSSL differential validation results: sha2-hmac=${_sha2_diff_result}; hkdf-sha256=${_hkdf_diff_result}; scrypt=${_scrypt_diff_result}; rsa=${_rsa_diff_result}; aes-cbc=${_aes_cbc_diff_result}; aes-cmac=${_aes_cmac_diff_result}; aes256-gcm=${_aes256_gcm_diff_result}; aes256-gcm-streaming=${_aes256_gcm_streaming_diff_result}\n")
     if(NOT _sha2_diff_result EQUAL 0 OR
        NOT _hkdf_diff_result EQUAL 0 OR
        NOT _scrypt_diff_result EQUAL 0 OR
+       NOT _rsa_diff_result EQUAL 0 OR
        NOT _aes_cbc_diff_result EQUAL 0 OR
        NOT _aes_cmac_diff_result EQUAL 0 OR
        NOT _aes256_gcm_diff_result EQUAL 0 OR
@@ -2278,6 +2318,7 @@ if(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE)
        NOT _sha2_diff_stdout MATCHES "sha2-hmac-differential status=pass" OR
        NOT _hkdf_diff_stdout MATCHES "hkdf_sha256_openssl_differential_tests: PASS" OR
        NOT _scrypt_diff_stdout MATCHES "scrypt_openssl_differential_tests: PASS" OR
+       NOT _rsa_diff_stdout MATCHES "OpenSSL RSA differential comparisons passed: 36" OR
        NOT _aes_cbc_diff_stdout MATCHES "AES-CBC OpenSSL differential comparisons passed" OR
        NOT _aes_cmac_diff_stdout MATCHES "OpenSSL 3.x AES-CMAC differential validation passed" OR
        NOT _aes256_gcm_diff_stdout MATCHES "AES-256-GCM OpenSSL differential comparisons: 640" OR
@@ -2286,7 +2327,7 @@ if(ANO_CRYPTO_OPENSSL_DIFFERENTIAL_AVAILABLE)
     endif()
 else()
     if(_sha2_diff_executable OR _hkdf_diff_executable OR
-       _scrypt_diff_executable OR _aes_cbc_diff_executable OR _aes_cmac_diff_executable OR
+       _scrypt_diff_executable OR _rsa_diff_executable OR _aes_cbc_diff_executable OR _aes_cmac_diff_executable OR
        _aes256_gcm_diff_executable OR _aes256_gcm_streaming_diff_executable)
         message(FATAL_ERROR
             "Stale OpenSSL differential executables are present although the provider is not configured")
@@ -2562,14 +2603,14 @@ file(WRITE "${ANO_CRYPTO_EVIDENCE_DIR}/README.md"
 "- `AES_CMAC_REVIEW_NOTES.txt`: full-tag CMAC scope, dedicated key-purpose, hardening boundary, and remaining review notes.\n"
 "- `SHA512_FAMILY_CHECK.txt`: SHA-384/SHA-512 family implementation, KAT, negative-test, and package wiring check.\n"
 "- `DIFFERENTIAL_PORTABILITY_CHECK.txt`: OpenSSL test-only provider, deterministic comparison, C99 representation, and portability policy check.\n"
-"- `DIFFERENTIAL_VALIDATION.log`: status-only OpenSSL 3.x SHA-2/HMAC, HKDF-SHA-256, AES-CBC, AES-CMAC, AES-256-GCM one-shot/streaming, and fixed-profile scrypt differential result.\n"
+"- `DIFFERENTIAL_VALIDATION.log`: status-only OpenSSL 3.x SHA-2/HMAC, HKDF-SHA-256, AES-CBC, AES-CMAC, AES-256-GCM one-shot/streaming, and fixed-profile scrypt, and RSA PKCS#1 v1.5 SHA-2 differential result.\n"
 "- `SHA512_PORTABILITY_REVIEW.log`: status-only representation, endian, and unaligned-input review.\n"
 "- `DIFFERENTIAL_PORTABILITY_REVIEW_NOTES.txt`: provider/product boundary and remaining hosted-artifact review notes.\n"
 "- `RANDOM_SERVICE_CHECK.txt`: public random-service implementation policy check.\n"
 "- `RANDOM_SERVICE_REVIEW_NOTES.txt`: random-service implementation review notes.\n"
 "- `RANDOM_LIFECYCLE_HARDENING_CHECK.txt`: P1-26 lifecycle, process-marker, VM policy, hook, and ABI-baseline policy check.\n"
 "- `RANDOM_LIFECYCLE_REVIEW_NOTES.txt`: status-only lifecycle and portability review notes.\n"
-"- `EXPORTED_SYMBOL_BASELINE_CHECK.txt`: clean Release comparison against the retained 69-symbol ABI-0 baseline and current 80-symbol additive manifest.\n"
+"- `EXPORTED_SYMBOL_BASELINE_CHECK.txt`: clean Release comparison against the retained 69-symbol ABI-0 baseline and current 83-symbol additive manifest.\n"
 "- `EXPORTED_SYMBOL_BASELINE_REVIEW_NOTES.txt`: exported-symbol guardrail scope and limitations.\n"
 "- `ENTROPY_HEALTH_CHECK.txt`: entropy failure-injection and health-test boundary policy check.\n"
 "- `ENTROPY_HEALTH_REVIEW_NOTES.txt`: health-test state-transition and logging review notes.\n"

@@ -1,75 +1,41 @@
 # P3 API and ABI Evolution Gate
 
-Status: `P3_07_NO_CHANGE_P3_08_REVIEW_REQUIRED`
+Status: `P3_08_RSA_ADDITIVE_ABI_APPROVED_IMPLEMENTED`
 
-## Current retained public surface
+## Current public surface
 
 | ABI line | Added symbols | Scope |
 |---|---:|---|
-| `ANOCRYPTO_C_0` | 69 | retained P1 public surface |
+| `ANOCRYPTO_C_0` | 69 | retained P1 surface |
 | `ANOCRYPTO_C_1` | 1 | HKDF-SHA-256 |
 | `ANOCRYPTO_C_2` | 2 | AES-256-GCM one-shot |
 | `ANOCRYPTO_C_3` | 7 | AES-256-GCM streaming |
 | `ANOCRYPTO_C_4` | 1 | fixed-profile scrypt |
-| total | 80 | current exported symbols |
+| `ANOCRYPTO_C_5` | 3 | RSA import/sign/verify |
+| total | 83 | current exported symbols |
 
-Public headers remain 16 and the retained compatibility baseline remains P1-29.
-Every existing declaration, symbol name, and ABI assignment remains unchanged.
+Public headers: 17. Compatibility baseline: P1-29. Every ABI-0 through ABI-4
+name and assignment remains unchanged.
 
-## P3-07 result
+## P3-08 approval
 
-P3-07 is design-only and changes none of the following:
+The independently reviewed minimum RSA surface is:
 
-- public headers or header bytes;
-- public types, enum values, constants, or macros;
-- functions or exported symbols;
-- symbol-version map or exported-symbol manifests;
-- release/runtime version identity;
-- CMake targets or installed SDK files;
-- P1-29 source/ABI compatibility baseline.
+1. `ano_crypto_rsa_key_import` in `ac_key.h`;
+2. `ano_crypto_signature_sign` in new `ac_signature.h`;
+3. `ano_crypto_signature_verify` in new `ac_signature.h`.
 
-`ANOCRYPTO_C_5` is not introduced or reserved.
+P3-08 freezes RSA-2048/e=65537, SHA-256/384/512, message-based input,
+core-owned DigestInfo/EMSA-PKCS1-v1_5, 256-byte signatures, bounded CSP
+storage, role binding, size-query/failure clearing, operation leases, CRT
+exponent blinding, and public fault checking.
 
-## P3-08 candidate budget
+No public metadata query, raw RSA, key generation, key export, persistence,
+provider routing, PKI codec, or format/workflow API is approved.
 
-The architecture review found that the smallest reasonable RSA/key-handle
-candidate is three public functions:
+## Next gate
 
-1. one RSA public/private component import selected by the existing key role;
-2. one generic message-based signature-sign function;
-3. one generic message-based signature-verify function.
-
-Existing `ano_crypto_key_destroy()`, `ano_crypto_key_get_state()`,
-`ano_crypto_csp_handle_is_valid()`, and `ano_crypto_csp_handle_get_state()` are
-reused. No public asymmetric-metadata query, key-binding query, signature-size,
-raw-RSA, key-generation, export, persistence, or provider-routing symbol is
-justified by current exact product evidence. Certificate/public-key binding is
-performed by supplying the expected public `n/e` together with private
-components and validating the complete relationship during import.
-
-This is a candidate budget, not an approved ABI. P3-08 must independently
-freeze:
-
-- exact names and prototypes;
-- extending `ac_key.h` versus adding one focused public header;
-- exact scheme enum names/values and final function/type/constant count;
-- RSA component representation, accepted sizes/exponents, and resource bounds;
-- message-based sign/verify, SHA-2 ownership, and canonical PKCS#1 v1.5
-  `DigestInfo`/EMSA processing;
-- null, overflow, alias, overlap, size-query, short-buffer, and output-clearing
-  semantics;
-- lifecycle, zeroization, module-state, operation-lease, and concurrency rules;
-- KAT, negative, boundary, differential, current/retained consumer,
-  install/export, PoC, symbol-version, and AnoPKI compatibility evidence;
-- one additive ABI line only after the review passes.
-
-No existing symbol may be renamed, removed, moved, or assigned to another ABI
-line. Candidate names, final count, header placement, and future ABI-line
-identifier remain unapproved until P3-08 closes its API/ABI gate.
-
-## Later additions
-
-A later ECDSA slice may reuse generic sign/verify and add one P-256 import
-function after its own API/ABI gate. A restricted SHA-1 slice requires a separate
-misuse-resistant digest-only gate. P3-07 pre-approves neither public declaration,
-symbol, enum value, nor version line.
+P3-09 may evaluate P-256 import and reuse of generic sign/verify. It must not
+change the three P3-08 symbols or infer that another ABI line is required.
+ECDSA representation, nonce policy, validation, exact symbol count, and ABI
+impact require separate review.

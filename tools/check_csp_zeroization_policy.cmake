@@ -86,7 +86,7 @@ require_text("docs/kcmvp/KCMVP_CSP_INVENTORY.md" "CSP-104")
 require_text("docs/kcmvp/KCMVP_ZEROIZATION_EVIDENCE.md" "Selected OE review status")
 require_text("tests/operational/csp_zeroization_policy_review.c" "sensitive_values_printed=0")
 require_text("tools/capture_zeroization_compiler_review.cmake" "Automated proof of effective zeroization: no")
-require_text("include/anocrypto/ac_version.h" "0.1.0-p3-05-scrypt-fixed-profile")
+require_text("include/anocrypto/ac_version.h" "0.1.0-p3-08-rsa-pkcs1-v15-sha2")
 
 set(_public_headers "${ANO_CRYPTO_CURRENT_PUBLIC_HEADERS}")
 set(_public_header_count "${ANO_CRYPTO_RETAINED_PUBLIC_HEADER_COUNT}")
@@ -99,7 +99,7 @@ foreach(_line IN LISTS _symbol_lines)
     endif()
 endforeach()
 if(NOT _public_header_count EQUAL 14 OR NOT _symbol_count EQUAL 69 OR
-   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_4")
+   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_5")
     list(APPEND _violations
         "public ABI changed: headers=${_public_header_count}, symbols=${_symbol_count}, ABI=${ANO_CRYPTO_RELEASE_ABI_LINE}")
 endif()

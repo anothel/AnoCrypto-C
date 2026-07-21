@@ -128,11 +128,19 @@ function(_ano_collect_api_manifest _include_dir _manifest_file _prefix)
     foreach(_header IN LISTS _headers)
         get_filename_component(_header_name "${_header}" NAME)
         if(_prefix STREQUAL "CURRENT_RETAINED" AND
-           (_header_name STREQUAL "ac_kdf.h" OR _header_name STREQUAL "ac_aead.h"))
+           (_header_name STREQUAL "ac_kdf.h" OR _header_name STREQUAL "ac_aead.h" OR
+            _header_name STREQUAL "ac_signature.h"))
             continue()
         endif()
         list(APPEND _header_names "${_header_name}")
-        file(READ "${_header}" _content)
+        set(_read_header "${_header}")
+        # ac_key.h is a retained P1-29 header that receives additive key APIs.
+        # For the retained comparison, parse the exact P1-29 snapshot while the
+        # full current manifest still parses the installed current header.
+        if(_prefix STREQUAL "CURRENT_RETAINED" AND _header_name STREQUAL "ac_key.h")
+            set(_read_header "${_baseline_include}/ac_key.h")
+        endif()
+        file(READ "${_read_header}" _content)
 
         # Remove comments and preprocessor directives before declaration parsing.
         # This avoids counting ANO_CRYPTO_API macro definitions as functions.
@@ -172,7 +180,7 @@ function(_ano_collect_api_manifest _include_dir _manifest_file _prefix)
             _ano_append_safe(_types "${_normalized}")
         endforeach()
 
-        file(STRINGS "${_header}" _define_lines REGEX "^[ \t]*#define[ \t]+ANO_CRYPTO_")
+        file(STRINGS "${_read_header}" _define_lines REGEX "^[ \t]*#define[ \t]+ANO_CRYPTO_")
         foreach(_line IN LISTS _define_lines)
             _ano_normalize("${_line}" _normalized)
             if(_normalized MATCHES "^#define ANO_CRYPTO_API($| )")
@@ -371,7 +379,7 @@ _ano_require_text("CMakeLists.txt"
     "include(\"\${CMAKE_CURRENT_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake\")")
 _ano_require_text("CMakeLists.txt"
     "COMPATIBILITY \${ANO_CRYPTO_RELEASE_PACKAGE_COMPATIBILITY}")
-_ano_require_text("src/core/build_identity.c" "P3-05 adds a fixed-resource generic scrypt key-derivation C API")
+_ano_require_text("src/core/build_identity.c" "P3-08 adds RSA-2048 PKCS#1 v1.5 SHA-256/384/512")
 _ano_require_text("README.md" "${ANO_CRYPTO_RELEASE_VERSION}")
 _ano_require_text(".github/workflows/ci.yml" "${ANO_CRYPTO_RELEASE_FINGERPRINT}")
 _ano_require_text(".github/workflows/ci.yml"
