@@ -53,8 +53,8 @@ if(NOT ANO_CRYPTO_ECDSA_PUBLIC_FUNCTION_COUNT EQUAL 1 OR
    NOT ANO_CRYPTO_ECDSA_CURRENT_ABI_LINE STREQUAL "ANOCRYPTO_C_6")
   list(APPEND _violations "frozen ECDSA API/algorithm/ABI policy values drifted")
 endif()
-if(NOT ANO_CRYPTO_CURRENT_PUBLIC_HEADER_COUNT EQUAL 17 OR
-   NOT ANO_CRYPTO_CURRENT_SYMBOL_COUNT EQUAL 84 OR
+if(NOT ANO_CRYPTO_CURRENT_PUBLIC_HEADER_COUNT EQUAL 18 OR
+   NOT ANO_CRYPTO_CURRENT_SYMBOL_COUNT EQUAL 85 OR
    NOT ANO_CRYPTO_ABI0_SYMBOL_COUNT EQUAL 69 OR
    NOT ANO_CRYPTO_ABI1_SYMBOL_COUNT EQUAL 1 OR
    NOT ANO_CRYPTO_ABI2_SYMBOL_COUNT EQUAL 2 OR
@@ -62,7 +62,7 @@ if(NOT ANO_CRYPTO_CURRENT_PUBLIC_HEADER_COUNT EQUAL 17 OR
    NOT ANO_CRYPTO_ABI4_SYMBOL_COUNT EQUAL 1 OR
    NOT ANO_CRYPTO_ABI5_SYMBOL_COUNT EQUAL 3 OR
    NOT ANO_CRYPTO_ABI6_SYMBOL_COUNT EQUAL 1 OR
-   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_6")
+   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_7")
   list(APPEND _violations "current additive public identity mismatch")
 endif()
 if(NOT ANO_CRYPTO_ECDSA_KCMVP_LANE STREQUAL "DEFERRED" OR
@@ -87,7 +87,7 @@ foreach(_text IN ITEMS
   require_text("include/anocrypto/ac_signature.h" "${_text}")
 endforeach()
 require_text("abi/ANOCRYPTO_C_6_EXPORTED_SYMBOLS.txt" "ano_crypto_ec_p256_key_import")
-require_text("abi/anocrypto_c.map" "ANOCRYPTO_C_6")
+require_text("abi/anocrypto_c.map" "ANOCRYPTO_C_7")
 require_text("tests/kat/ecdsa_p256_sha256_kat_tests.c" "ECDSA RFC6979 signature mismatch")
 require_text("tests/differential/ecdsa_p256_openssl_differential_tests.c" "CSR proof-of-possession")
 require_text("tests/differential/ecdsa_p256_openssl_differential_tests.c" "OCSP response signing TBS")

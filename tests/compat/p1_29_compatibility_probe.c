@@ -10,7 +10,7 @@
 #define ANO_CRYPTO_COMPAT_HEADER_MODE "unspecified"
 #endif
 #ifndef ANO_CRYPTO_EXPECT_RUNTIME_VERSION
-#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p3-09-ecdsa-p256-sha256"
+#define ANO_CRYPTO_EXPECT_RUNTIME_VERSION "0.1.0-p3-10-restricted-sha1-ocsp-certid"
 #endif
 
 #define ANO_COMPAT_JOIN_INNER(a, b) a##b

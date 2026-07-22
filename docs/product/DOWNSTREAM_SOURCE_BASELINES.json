@@ -80,7 +80,7 @@
     "enterprise_collection_sha256": "ed55d2aa2ebdd561dc2549d01d1bd8f3fd0bd2d2144c3ce3b74083d86fb47704",
     "enterprise_identity_records": "VERIFIED",
     "enterprise_source_archive_byte_recomputation": "EXTERNAL_CONFIRMATION_REQUIRED",
-    "selected_next_slice": "P3-10 RSA PKCS#1 v1.5 SHA-256/384/512 and RSA key-handle import",
+    "selected_next_slice": "P3-08 RSA PKCS#1 v1.5 SHA-256/384/512 and RSA key-handle import",
     "candidate_api_direction": "ONE_ROLE_SELECTED_RSA_IMPORT_PLUS_MESSAGE_SIGN_AND_VERIFY",
     "candidate_symbol_target": 3,
     "public_headers": 16,

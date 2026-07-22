@@ -1,6 +1,6 @@
 # Cross-Repository Requirement Ownership
 
-Status: `P3_09_PUBLIC_KEY_SOFTWARE_CORE_IMPLEMENTED`
+Status: `P3_10_APPROVED_SOFTWARE_CORE_GAPS_IMPLEMENTED`
 
 ## Retained P3-01 policy compatibility
 
@@ -51,7 +51,9 @@ generic primitive/key-handle boundary and does not transfer those responsibiliti
 - RSA budget of three symbols: `IMPLEMENTED_P3_08_ANOCRYPTO_C_5`;
 - RSA slice: `COMPLETE_P3_08_CORE_ADAPTER_PENDING`;
 - ECDSA P-256 slice: `COMPLETE_P3_09_CORE_ADAPTER_PENDING`;
+- restricted OCSP CertID SHA-1: `COMPLETE_P3_10_CORE_ADAPTER_PENDING`;
 - P-256 budget: one import symbol on `ANOCRYPTO_C_6`; generic sign/verify reused.
+- restricted SHA-1 budget: one dedicated symbol on `ANOCRYPTO_C_7`; no generic enum.
 
 ## Remaining decisions
 

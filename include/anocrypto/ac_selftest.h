@@ -17,7 +17,7 @@ extern "C" {
  * Runs the current internal self-test sequence.
  *
  * The P2-03 implementation retains build/KAT-manifest structural checks,
- * SHA-2/HMAC KATs, AES-128/192/256 and CBC-path KATs, a full-tag AES-CMAC
+ * restricted OCSP CertID SHA-1, SHA-2/HMAC KATs, AES-128/192/256 and CBC-path KATs, a full-tag AES-CMAC
  * KAT, and an HMAC_DRBG-SHA-256 KAT.
  *
  * ANO_CRYPTO_SELFTEST_FLAG_INTEGRITY_PLACEHOLDER is an ABI-retained legacy

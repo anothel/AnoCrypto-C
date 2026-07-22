@@ -1,6 +1,6 @@
 # P3 API and ABI Evolution Gate
 
-Status: `P3_09_ECDSA_ADDITIVE_ABI_APPROVED_IMPLEMENTED`
+Status: `P3_10_RESTRICTED_SHA1_ADDITIVE_ABI_APPROVED_IMPLEMENTED`
 
 ## Current public surface
 
@@ -13,35 +13,21 @@ Status: `P3_09_ECDSA_ADDITIVE_ABI_APPROVED_IMPLEMENTED`
 | `ANOCRYPTO_C_4` | 1 | fixed-profile scrypt |
 | `ANOCRYPTO_C_5` | 3 | RSA import/sign/verify |
 | `ANOCRYPTO_C_6` | 1 | P-256 public/private component import |
-| total | 84 | current exported symbols |
+| `ANOCRYPTO_C_7` | 1 | restricted OCSP CertID SHA-1 digest |
+| total | 85 | current exported symbols |
 
-Public headers: 17. Compatibility baseline: P1-29. Every ABI-0 through ABI-5
+Public headers: 18. Compatibility baseline: P1-29. Every ABI-0 through ABI-6
 name and assignment remains unchanged.
 
-## P3-08 approval
+## P3-10 approval
 
-The independently reviewed minimum RSA surface is:
-
-1. `ano_crypto_rsa_key_import` in `ac_key.h`;
-2. `ano_crypto_signature_sign` in new `ac_signature.h`;
-3. `ano_crypto_signature_verify` in new `ac_signature.h`.
-
-P3-08 freezes RSA-2048/e=65537, SHA-256/384/512, message-based input,
-core-owned DigestInfo/EMSA-PKCS1-v1_5, 256-byte signatures, bounded CSP
-storage, role binding, size-query/failure clearing, operation leases, CRT
-exponent blinding, and public fault checking.
-
-No public metadata query, raw RSA, key generation, key export, persistence,
-provider routing, PKI codec, or format/workflow API is approved.
-
-## P3-09 approval
-
-P3-09 adds only `ano_crypto_ec_p256_key_import` and reuses the P3-08 generic
-sign/verify symbols. It freezes 32-byte affine coordinates/scalar, P-256 with
-SHA-256, RFC 6979 HMAC-SHA-256 nonce derivation, and 64-byte raw `r || s`. DER
-conversion remains AnoPKI-owned.
+P3-10 adds only `ano_crypto_ocsp_certid_sha1_digest` to existing `ac_hash.h`.
+The service is one-shot, emits exactly 20 bytes, and accepts only caller-selected
+bytes for OCSP CertID issuerNameHash or issuerKeyHash compatibility. It does not
+add SHA-1 to the generic hash enum and does not authorize SHA-1 streaming,
+signatures, HMAC, KDF, password processing, or PKI workflows.
 
 ## Next gate
 
-P3-10 may evaluate restricted SHA-1 interoperability for OCSP CertID only. No
-function, enum, symbol count, or ABI line is pre-approved.
+P3-11 is a downstream adapter parity checkpoint and may not add another
+AnoCrypto-C ABI line without a separately approved primitive requirement.

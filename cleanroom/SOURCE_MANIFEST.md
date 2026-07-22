@@ -754,3 +754,16 @@ P2-06 does not import third-party implementation code, secret-bearing traces, pr
   `EXTERNAL_CONFIRMATION_REQUIRED`.
 - KCMVP, hosted review, signing, timestamping, provenance acceptance, and
   external release authorization remain unchanged and incomplete.
+
+## P3-10 Restricted SHA-1 OCSP CertID Inputs
+
+| ID | Input | Classification | Usage | Notes |
+|---|---|---|---|---|
+| SRC-P3-10-01 | FIPS PUB 180-4 SHA-1 algorithm specification | Public standard | Fresh C99 SHA-1 compression, padding, and digest implementation | Restricted to OCSP CertID interoperability; no validation claim. |
+| SRC-P3-10-02 | RFC 6960 OCSP CertID definition | Public RFC | Defines issuerNameHash and issuerKeyHash interoperability purpose and byte selection boundary | AnoPKI remains responsible for ASN.1/DER and OCSP object construction. |
+| SRC-P3-10-03 | OpenSSL test-only `OCSP_cert_to_id` and EVP SHA-1 behavior | Test-only differential reference | Exact issuer Name DER and subjectPublicKey BIT STRING content comparison | No OpenSSL implementation code or production dependency imported. |
+| DER-P3-10-01 | Fresh C99 restricted API, KAT, negative, and differential tests | User-owned generated source | One-shot API, misuse containment, output clearing, and compatibility evidence | No general-purpose SHA-1 API, signature, HMAC, KDF, or password service. |
+
+P3-10 uses no secret operational material. Public KATs and generated issuer
+fixtures are test-only. This engineering evidence is not KCMVP validation or a
+production-release authorization.

@@ -1,6 +1,6 @@
 # P3 Product-Driven Roadmap
 
-Status: `P3_09_COMPLETE_P3_10_RESTRICTED_SHA1_GATE_NEXT`
+Status: `P3_10_CORE_SEQUENCE_COMPLETE_P3_11_ANOPKI_PARITY_NEXT`
 
 ## Completed core slices
 
@@ -10,39 +10,34 @@ Status: `P3_09_COMPLETE_P3_10_RESTRICTED_SHA1_GATE_NEXT`
 4. P3-05 fixed-profile scrypt — `ANOCRYPTO_C_4`;
 5. P3-07 public-key architecture gate — no public delta;
 6. P3-08 RSA-2048 PKCS#1 v1.5 SHA-2 — `ANOCRYPTO_C_5`;
-7. P3-09 ECDSA P-256 SHA-256 component import — `ANOCRYPTO_C_6`.
+7. P3-09 ECDSA P-256 SHA-256 component import — `ANOCRYPTO_C_6`;
+8. P3-10 restricted SHA-1 for OCSP CertID — `ANOCRYPTO_C_7`.
 
-P3-09 reuses the generic message sign/verify contract, emits fixed 64-byte raw
-`r || s`, uses RFC 6979 HMAC-SHA-256 nonces, validates `d*G == Q`, and leaves
-DER conversion and every PKI workflow in AnoPKI.
+P3-10 adds no generic SHA-1 algorithm enum. It exposes one dedicated one-shot
+service for exact OCSP CertID issuer Name DER and subjectPublicKey BIT STRING
+content hashing. SHA-1 signatures, streaming, HMAC, KDF, password use, and
+certificate issuance remain prohibited.
 
 ## Completed downstream checkpoint
 
 P3-06 connected all seven required AnoSecureKit capabilities with no OpenSSL
 fallback. It remains engineering-only and release-blocked.
 
-## Next core gate
+## Next downstream checkpoint
 
-### P3-10 — restricted SHA-1 for OCSP CertID interoperability
+### P3-11 — AnoPKI Enterprise RSA/ECDSA/OCSP parity and no fallback
 
-Required sequence:
-
-1. re-freeze the exact AnoPKI OCSP CertID byte inputs and output length;
-2. compare a dedicated restricted service with any generic hash-enum extension;
-3. prohibit SHA-1 certificate/CRL/OCSP signatures and HMAC-SHA-1;
-4. define misuse-resistant naming, null/alias/output-clearing, and module-state rules;
-5. add RFC/NIST vectors, OpenSSL test-only differential, exact AnoPKI fixture,
-   consumer, install, policy, and ABI evidence;
-6. add an ABI line only if independently reviewed symbols require one.
-
-## Later
-
-- AnoPKI Enterprise RSA/ECDSA adapter parity/no-fallback checkpoint;
-- hosted/provenance/signing/release governance.
+1. consume exact P3-10 AnoCrypto-C SDK identity;
+2. connect RSA sign/verify and P-256 sign/verify below AnoPKI codecs;
+3. connect restricted SHA-1 only for OCSP CertID issuer hashes;
+4. preserve DER ECDSA encoding and all PKI object construction in AnoPKI;
+5. report truthful capabilities and fail closed for unsupported paths;
+6. prove no silent OpenSSL fallback and inspect runtime dependencies;
+7. retain hosted, provenance, signing, and release blockers.
 
 ## Not approved
 
 PEM/DER/ASN.1/PKCS#8/SPKI/CSR/X.509/CRL/OCSP implementation in core;
 HSM/KMS/PKCS#11 or `key_ref` routing in core; key persistence/export/wrapping;
-RSA-PSS, Ed25519, ECDH, other curves, and PQC without new evidence; KCMVP
-submission; production signing; external release.
+general-purpose SHA-1; RSA-PSS, Ed25519, ECDH, other curves, and PQC without
+new evidence; KCMVP submission; production signing; external release.

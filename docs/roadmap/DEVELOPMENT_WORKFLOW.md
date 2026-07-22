@@ -1,6 +1,6 @@
 # AnoCrypto-C Development Workflow
 
-Status: P3-09 ECDSA P-256 SHA-256 is the current completed product-driven slice after P3-08 RSA. P3-10 restricted SHA-1 for OCSP CertID is selected next, subject to its own narrow API/ABI gate. P2 validation-readiness, hosted, signing, KCMVP, and release lanes remain separate and incomplete.
+Status: P3-10 restricted SHA-1 for OCSP CertID is the current completed product-driven core slice after P3-09 ECDSA. P3-11 AnoPKI Enterprise parity/no-fallback is selected next. P2 validation-readiness, hosted, signing, KCMVP, and release lanes remain separate and incomplete.
 
 ## Purpose
 
@@ -8,7 +8,7 @@ This document explains the working flow used for AnoCrypto-C after the C99 reboo
 
 ## Current P3 authority
 
-The current product-driven sequence is P3-02 HKDF, P3-03 GCM one-shot, P3-04 GCM streaming, P3-05 fixed-profile scrypt, P3-06 AnoSecureKit Enterprise parity/no-fallback, P3-07 public-key architecture, P3-08 RSA PKCS#1 v1.5 SHA-2, and P3-09 ECDSA P-256 SHA-256. P3-10 restricted SHA-1 for OCSP CertID is selected next. Historical P1/P2 sequence tables below remain records and do not override `docs/roadmap/CURRENT_ACTIVE_NEXT.md` or `docs/roadmap/P3_PRODUCT_DRIVEN_ROADMAP.md`.
+The current product-driven sequence is P3-02 HKDF, P3-03 GCM one-shot, P3-04 GCM streaming, P3-05 fixed-profile scrypt, P3-06 AnoSecureKit Enterprise parity/no-fallback, P3-07 public-key architecture, P3-08 RSA PKCS#1 v1.5 SHA-2, P3-09 ECDSA P-256 SHA-256, and P3-10 restricted SHA-1 for OCSP CertID. P3-11 AnoPKI Enterprise parity/no-fallback is selected next. Historical P1/P2 sequence tables below remain records and do not override `docs/roadmap/CURRENT_ACTIVE_NEXT.md` or `docs/roadmap/P3_PRODUCT_DRIVEN_ROADMAP.md`.
 
 ## Current phase map
 

@@ -69,6 +69,29 @@ static int run_hash_smoke(void)
     return 0;
 }
 
+static int run_restricted_sha1_ocsp_certid_smoke(void)
+{
+    static const uint8_t input[] = { 'a', 'b', 'c' };
+    static const uint8_t expected[ANO_CRYPTO_OCSP_CERTID_SHA1_DIGEST_SIZE] = {
+        0xa9,0x99,0x3e,0x36,0x47,0x06,0x81,0x6a,0xba,0x3e,
+        0x25,0x71,0x78,0x50,0xc2,0x6c,0x9c,0xd0,0xd8,0x9d
+    };
+    uint8_t digest[ANO_CRYPTO_OCSP_CERTID_SHA1_DIGEST_SIZE];
+    size_t written = 0u;
+    ano_crypto_status_t status;
+
+    status = ano_crypto_ocsp_certid_sha1_digest(
+        input, sizeof(input), digest, sizeof(digest), &written);
+    if (status != ANO_CRYPTO_OK || written != sizeof(digest) ||
+        memcmp(digest, expected, sizeof(digest)) != 0) {
+        (void)ano_crypto_csp_zeroize(digest, sizeof(digest));
+        return fail_status("restricted SHA-1 OCSP CertID", status);
+    }
+    (void)ano_crypto_csp_zeroize(digest, sizeof(digest));
+    printf("- restricted SHA-1 OCSP CertID smoke: PASS (digest not printed)\n");
+    return 0;
+}
+
 static int run_hmac_key_handle_smoke(void)
 {
     /* Public demo bytes only. This is not operational secret material. */
@@ -684,6 +707,8 @@ int main(void)
     }
 
     if (run_hash_smoke() != 0) {
+        result = 1;
+    } else if (run_restricted_sha1_ocsp_certid_smoke() != 0) {
         result = 1;
     } else if (run_hmac_key_handle_smoke() != 0) {
         result = 1;

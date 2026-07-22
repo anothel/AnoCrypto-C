@@ -4,16 +4,16 @@ Status: P3-09 additive-ABI engineering policy. This document does not establish 
 
 ## Purpose
 
-P3-09 retains the project-owned `0.1.0-p1-29-cmac-hardening` compatibility input and every additive ABI slice through fixed-profile scrypt, retains the three reviewed RSA-2048/e=65537 PKCS#1 v1.5 SHA-2 functions on `ANOCRYPTO_C_5`, and adds one reviewed P-256 key-import function on `ANOCRYPTO_C_6` while reusing generic sign/verify. The policy covers release identity consistency, the unchanged retained C surface, additive headers and symbols, installed-package consumption, isolated synthetic tag rehearsal, and status-only hosted artifacts.
+P3-10 retains the project-owned `0.1.0-p1-29-cmac-hardening` compatibility input and every additive ABI slice through fixed-profile scrypt, retains the three reviewed RSA-2048/e=65537 PKCS#1 v1.5 SHA-2 functions on `ANOCRYPTO_C_5`, and adds one reviewed P-256 key-import function on `ANOCRYPTO_C_6`, and adds one restricted OCSP CertID SHA-1 function on `ANOCRYPTO_C_7`. The policy covers release identity consistency, the unchanged retained C surface, additive headers and symbols, installed-package consumption, isolated synthetic tag rehearsal, and status-only hosted artifacts.
 
 ## Reviewed identity
 
 The authoritative engineering metadata is `release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake`:
 
 - package version: `0.1.0`;
-- engineering version: `0.1.0-p3-09-ecdsa-p256-sha256`;
-- expected tag metadata: `v0.1.0-p3-09-ecdsa-p256-sha256`;
-- current ABI line: `ANOCRYPTO_C_6`;
+- engineering version: `0.1.0-p3-10-restricted-sha1-ocsp-certid`;
+- expected tag metadata: `v0.1.0-p3-10-restricted-sha1-ocsp-certid`;
+- current ABI line: `ANOCRYPTO_C_7`;
 - retained baseline: `0.1.0-p1-29-cmac-hardening`;
 - retained/current public headers: 14 / 17;
 - retained `ANOCRYPTO_C_0` / current total exports: 69 / 84;
@@ -34,7 +34,7 @@ Baseline updates are not automatic. A later intentional public API or ABI change
 - central release metadata and current version macros agree;
 - the retained baseline manifest contains 14 canonical-LF header hashes and the current manifest contains 17;
 - normalized declarations, public types, and non-version constants for the retained 14 headers match P1-29;
-- `ANOCRYPTO_C_0` retains 69 names; `ANOCRYPTO_C_1` contains HKDF; `ANOCRYPTO_C_2` contains two one-shot GCM symbols; `ANOCRYPTO_C_3` contains seven streaming symbols; `ANOCRYPTO_C_4` contains fixed-profile scrypt; and `ANOCRYPTO_C_5` contains only RSA import, sign, and verify; `ANOCRYPTO_C_6` contains only P-256 import, for 84 exports total;
+- `ANOCRYPTO_C_0` retains 69 names; `ANOCRYPTO_C_1` contains HKDF; `ANOCRYPTO_C_2` contains two one-shot GCM symbols; `ANOCRYPTO_C_3` contains seven streaming symbols; `ANOCRYPTO_C_4` contains fixed-profile scrypt; and `ANOCRYPTO_C_5` contains only RSA import, sign, and verify; `ANOCRYPTO_C_6` contains only P-256 import; `ANOCRYPTO_C_7` contains only restricted OCSP CertID SHA-1, for 85 exports total;
 - package compatibility generation uses the reviewed policy;
 - release/evidence/CI identity strings are coherent.
 

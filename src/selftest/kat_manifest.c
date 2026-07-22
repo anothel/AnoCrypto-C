@@ -16,6 +16,12 @@
  */
 static const ano_crypto_internal_kat_manifest_entry_t g_kat_manifest[] = {
     {
+        "hash.sha1.ocsp-certid.abc",
+        "SHA-1 restricted to OCSP CertID interoperability",
+        "SRC-1001: NIST FIPS 180-4 SHA-1 example digest; use restricted by P3-10 policy",
+        "p3-10-implemented-startup-restricted"
+    },
+    {
         "mac.aes-cmac.aes128.nist-example2",
         "AES-128-CMAC",
         "SRC-1501: NIST AES-CMAC Example 2 associated with SP 800-38B",

@@ -1,5 +1,5 @@
 # Assemble and validate logs produced by bounded CTest ranges and exact direct
-# commands for nested-process tests. Nine non-overlapping ranges cover 1..98.
+# commands for nested-process tests. Ten non-overlapping ranges cover 1..102.
 
 cmake_minimum_required(VERSION 3.16)
 
@@ -81,27 +81,29 @@ set(_ctest_tokens
     "45_68"
     "69_84"
     "85_90"
-    "91_91"
-    "92_92"
-    "93_95"
-    "96_98")
+    "91_94"
+    "95_95"
+    "96_96"
+    "97_99"
+    "100_102")
 set(_ctest_ranges
     "1,20"
     "21,44"
     "45,68"
     "69,84"
     "85,90"
-    "91,91"
-    "92,92"
-    "93,95"
-    "96,98")
-set(_ctest_counts 20 24 24 16 6 1 1 3 3)
+    "91,94"
+    "95,95"
+    "96,96"
+    "97,99"
+    "100,102")
+set(_ctest_counts 20 24 24 16 6 4 1 1 3 3)
 set(_ctest_log "${ANO_CRYPTO_CTEST_EVIDENCE_DIR}/ctest.log")
 file(WRITE "${_ctest_log}"
     "AnoCrypto-C complete CTest evidence\n"
     "Execution mode: deterministic bounded direct ranges\n\n")
 
-foreach(_index RANGE 0 8)
+foreach(_index RANGE 0 9)
     list(GET _ctest_tokens ${_index} _token)
     list(GET _ctest_ranges ${_index} _range)
     list(GET _ctest_counts ${_index} _count)
@@ -127,7 +129,7 @@ file(WRITE "${ANO_CRYPTO_CTEST_EVIDENCE_DIR}/CTEST_EVIDENCE_SUMMARY.txt"
     "Configured command evidence result: 0\n"
     "Build configuration: ${ANO_CRYPTO_BUILD_CONFIG}\n"
     "Execution mode: bounded CTest ranges plus exact direct commands for nested-process tests\n"
-    "Completed ranges: 9/9\n"
-    "Configured tests covered: 98/98\n"
+    "Completed ranges: 10/10\n"
+    "Configured tests covered: 102/102\n"
     "Sensitive cryptographic values logged: no\n")
 message(STATUS "AnoCrypto-C CTest evidence capture passed: ${ANO_CRYPTO_CTEST_EVIDENCE_DIR}")

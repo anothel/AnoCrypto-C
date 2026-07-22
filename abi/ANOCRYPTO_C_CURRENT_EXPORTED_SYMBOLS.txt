@@ -63,6 +63,7 @@ ano_crypto_module_init
 ano_crypto_module_require_operational
 ano_crypto_module_shutdown
 ano_crypto_module_state_name
+ano_crypto_ocsp_certid_sha1_digest
 ano_crypto_random_context_size
 ano_crypto_random_generate
 ano_crypto_random_init

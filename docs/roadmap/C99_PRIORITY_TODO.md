@@ -1,29 +1,22 @@
 # C99 Priority TODO
 
-Status: `P3_09_COMPLETE_P3_10_NEXT`
+Status: `P3_10_COMPLETE_P3_11_ANOPKI_PARITY_NEXT`
 
-## Current baseline
+## Current core
 
-- runtime version: `0.1.0-p3-09-ecdsa-p256-sha256`;
-- public headers: 17;
-- exported symbols: 84;
-- ABI lines: `ANOCRYPTO_C_0` through `ANOCRYPTO_C_6`;
-- retained compatibility: P1-29.
+- version: `0.1.0-p3-10-restricted-sha1-ocsp-certid`;
+- public headers: 18;
+- exported symbols: 85;
+- ABI lines: `ANOCRYPTO_C_0` through `ANOCRYPTO_C_7`;
+- P1-29 compatibility retained.
 
-## Completed product-driven sequence
+## Next
 
-- P3-02 HKDF-SHA-256;
-- P3-03 AES-256-GCM one-shot;
-- P3-04 AES-256-GCM streaming;
-- P3-05 fixed-profile scrypt;
-- P3-06 AnoSecureKit parity/no-fallback;
-- P3-07 public-key architecture;
-- P3-08 RSA PKCS#1 v1.5 SHA-2;
-- P3-09 ECDSA P-256 SHA-256.
+1. consume P3-10 in AnoPKI Enterprise;
+2. connect RSA, P-256 ECDSA, and restricted OCSP CertID SHA-1;
+3. preserve downstream codecs, DER signature representation, provider routing,
+   evidence, and audit ownership;
+4. prove truthful capability reporting and no OpenSSL fallback;
+5. keep external release blockers unchanged.
 
-## Highest priority
-
-`P3-10 restricted SHA-1 interoperability gate for OCSP CertID`.
-
-Do not implement SHA-1 signatures, HMAC-SHA-1, PKI codecs, provider routing,
-production signing, KCMVP submission, or external release in that slice.
+No new AnoCrypto-C algorithm is selected.

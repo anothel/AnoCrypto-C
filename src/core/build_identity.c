@@ -18,7 +18,7 @@
 #endif
 
 #ifndef ANO_CRYPTO_BUILD_FINGERPRINT
-#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p3-09-ecdsa-p256-sha256"
+#define ANO_CRYPTO_BUILD_FINGERPRINT "AnoCrypto-C-p3-10-restricted-sha1-ocsp-certid"
 #endif
 
 ano_crypto_status_t ano_crypto_version_string(const char **out_version)
@@ -60,7 +60,7 @@ ano_crypto_status_t ano_crypto_build_identity(
     out_identity->build_type = ANO_CRYPTO_BUILD_TYPE;
     out_identity->compiler = ANO_CRYPTO_BUILD_COMPILER;
     out_identity->target = ANO_CRYPTO_BUILD_TARGET;
-    out_identity->notes = "P3-09 adds ECDSA P-256 SHA-256 fixed-width key import and RFC 6979 message signing/verification on additive ANOCRYPTO_C_6 while retaining RSA on ANOCRYPTO_C_5, ABI lines ANOCRYPTO_C_0 through ANOCRYPTO_C_4, and the P1-29 compatibility baseline. PEM, DER, ASN.1, PKCS#8, SPKI, CSR, X.509, CRL, OCSP, key_ref routing, and external-provider policy remain downstream-owned. KCMVP is DEFERRED, P1-34 hosted lanes are NOT_RUN and UNREVIEWED, repository signing is UNSIGNED, external release authorization is NO, and no push, tag, signing, timestamping, publication, or external distribution is authorized.";
+    out_identity->notes = "P3-10 adds restricted SHA-1 OCSP CertID interoperability as one dedicated digest service on additive ANOCRYPTO_C_7 while retaining P3-09 ECDSA on ANOCRYPTO_C_6, P3-08 RSA on ANOCRYPTO_C_5, ABI lines ANOCRYPTO_C_0 through ANOCRYPTO_C_4, and the P1-29 compatibility baseline. PEM, DER, ASN.1, PKCS#8, SPKI, CSR, X.509, CRL, OCSP, key_ref routing, and external-provider policy remain downstream-owned. KCMVP is DEFERRED, P1-34 hosted lanes are NOT_RUN and UNREVIEWED, repository signing is UNSIGNED, external release authorization is NO, and no push, tag, signing, timestamping, publication, or external distribution is authorized.";
 
     return ANO_CRYPTO_OK;
 }

@@ -1,49 +1,38 @@
 # Current / Active / Next
 
-Status: `P3_09_COMPLETE_P3_10_RESTRICTED_SHA1_GATE_NEXT`
+Status: `P3_10_COMPLETE_P3_11_ANOPKI_PARITY_NEXT`
 
-## Retained policy compatibility
-
-Historical P3-01/P3-02 tokens remain only for frozen policy regression tests.
-Retained token: `P3-02 minimal HKDF-SHA-256 API`. It is not current work.
+Retained historical policy token: `P3-02 minimal HKDF-SHA-256 API`. It is not current work.
 
 ## DONE
 
-- P0/P1 core and release engineering;
-- P2 local validation-readiness snapshot;
-- P3-00/P3-01 downstream intake, ownership, and gap consolidation;
-- P3-02 HKDF-SHA-256;
-- P3-03 AES-256-GCM one-shot;
-- P3-04 AES-256-GCM streaming;
-- P3-05 fixed-profile scrypt;
+- P3-02 HKDF-SHA-256 (`ANOCRYPTO_C_1`);
+- P3-03 AES-256-GCM one-shot (`ANOCRYPTO_C_2`);
+- P3-04 AES-256-GCM streaming (`ANOCRYPTO_C_3`);
+- P3-05 fixed-profile scrypt (`ANOCRYPTO_C_4`);
 - P3-06 AnoSecureKit Enterprise parity/no-fallback checkpoint;
 - P3-07 public-key/key-handle architecture gate;
-- P3-08 RSA-2048 PKCS#1 v1.5 SHA-256/384/512;
-- P3-09 ECDSA P-256 SHA-256 and component import.
+- P3-08 RSA-2048 PKCS#1 v1.5 SHA-256/384/512 (`ANOCRYPTO_C_5`);
+- P3-09 ECDSA P-256 SHA-256 component import (`ANOCRYPTO_C_6`);
+- P3-10 restricted SHA-1 for OCSP CertID (`ANOCRYPTO_C_7`).
 
-P3-09 adds one symbol on `ANOCRYPTO_C_6` and reuses the generic sign/verify
-functions on `ANOCRYPTO_C_5`. The current surface is 17 headers and 84 symbols.
-ABI-0 through ABI-5 and P1-29 consumers remain unchanged.
+The current core surface is 18 public headers and 85 exported symbols. ABI-0
+through ABI-6 remain unchanged; the only ABI-7 symbol is
+`ano_crypto_ocsp_certid_sha1_digest`.
 
 ## ACTIVE
 
-P3-09 local closeout, full evidence, and packaging.
+`P3-11: AnoPKI Enterprise RSA/ECDSA/OCSP primitive parity and no-fallback checkpoint` — `READY_TO_START`
+
+P3-11 is downstream integration work. It must consume the P3-10 public SDK and
+connect RSA, P-256 ECDSA, and restricted OCSP CertID SHA-1 without adding a new
+AnoCrypto-C primitive or silently falling back to OpenSSL. AnoPKI retains all
+ASN.1, PEM/DER, CSR, X.509, CRL, OCSP, signature-DER, provider-routing,
+evidence, and audit behavior.
 
 ## NEXT
 
-`P3-10: restricted SHA-1 interoperability API/ABI gate for OCSP CertID`
-
-The exact AnoPKI operation review confirms that SHA-1 remains needed for legacy
-OCSP CertID issuer-name/key hashing. P3-10 must determine a misuse-resistant
-primitive boundary without enabling SHA-1 certificate signatures, HMAC-SHA-1,
-issuance policy, or general product workflows. No public enum, function, symbol,
-or ABI line is pre-approved.
-
-## LATER
-
-- AnoPKI Enterprise RSA/ECDSA adapter parity and no-fallback checkpoint;
-- hosted/provenance/signing/release qualification;
-- future algorithms only after new product evidence.
+No post-P3-11 core algorithm or release task is selected.
 
 ## DEFERRED / BLOCKED
 
@@ -51,6 +40,4 @@ or ABI line is pre-approved.
 - hosted lanes/review: `NOT_RUN` / `UNREVIEWED`;
 - repository signing/handoff: `UNSIGNED` / `BLOCKED`;
 - external release authorization: `NO`;
-- trusted provenance acceptance: `OPEN`;
-- exact unavailable downstream archive recomputation:
-  `EXTERNAL_CONFIRMATION_REQUIRED`.
+- trusted provenance acceptance: `OPEN`.

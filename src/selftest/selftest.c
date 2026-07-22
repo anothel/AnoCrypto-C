@@ -9,6 +9,7 @@
 #include "ac_hmac_internal.h"
 #include "ac_internal.h"
 #include "ac_kat_manifest.h"
+#include "ac_sha1_internal.h"
 #include "ac_sha256_internal.h"
 #include "ac_sha512_internal.h"
 #include "ac_thread_internal.h"
@@ -102,6 +103,25 @@ static ano_crypto_status_t ano_crypto_selftest_check_kat_manifest(void)
         }
     }
 
+    return ANO_CRYPTO_OK;
+}
+
+static ano_crypto_status_t ano_crypto_selftest_restricted_sha1_ocsp_kat(void)
+{
+    static const uint8_t message[] = {'a', 'b', 'c'};
+    static const uint8_t expected[ANO_CRYPTO_SHA1_DIGEST_SIZE] = {
+        0xa9u,0x99u,0x3eu,0x36u,0x47u,0x06u,0x81u,0x6au,0xbau,0x3eu,
+        0x25u,0x71u,0x78u,0x50u,0xc2u,0x6cu,0x9cu,0xd0u,0xd8u,0x9du
+    };
+    uint8_t output[ANO_CRYPTO_SHA1_DIGEST_SIZE];
+    ano_crypto_status_t status;
+
+    status = ano_crypto_internal_sha1_digest(message, sizeof(message), output);
+    if (status != ANO_CRYPTO_OK || !bytes_equal(output, expected, sizeof(output))) {
+        ano_crypto_internal_zeroize(output, sizeof(output));
+        return ANO_CRYPTO_ERR_SELF_TEST_FAILED;
+    }
+    ano_crypto_internal_zeroize(output, sizeof(output));
     return ANO_CRYPTO_OK;
 }
 
@@ -643,6 +663,13 @@ ano_crypto_status_t ano_crypto_selftest_run(uint32_t flags)
     }
 
     st = ano_crypto_selftest_sha256_kat();
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_selftest_set_last_status(st);
+        ano_crypto_internal_module_mark_error(st);
+        return st;
+    }
+
+    st = ano_crypto_selftest_restricted_sha1_ocsp_kat();
     if (st != ANO_CRYPTO_OK) {
         ano_crypto_selftest_set_last_status(st);
         ano_crypto_internal_module_mark_error(st);

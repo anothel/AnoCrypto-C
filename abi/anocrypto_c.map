@@ -108,6 +108,11 @@ ANOCRYPTO_C_5 {
 ANOCRYPTO_C_6 {
     global:
         ano_crypto_ec_p256_key_import;
+} ANOCRYPTO_C_5;
+
+ANOCRYPTO_C_7 {
+    global:
+        ano_crypto_ocsp_certid_sha1_digest;
     local:
         *;
-} ANOCRYPTO_C_5;
+} ANOCRYPTO_C_6;

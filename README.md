@@ -1,6 +1,6 @@
 # AnoCrypto-C
 
-Current runtime baseline: `0.1.0-p3-09-ecdsa-p256-sha256`, with 17 public headers and 84 exported symbols across `ANOCRYPTO_C_0` through `ANOCRYPTO_C_6`. P3-09 adds P-256 public/private component import as one additive ABI symbol and reuses the generic message sign/verify service for deterministic RFC 6979 ECDSA-SHA-256 raw `r || s` signatures. AnoPKI retains PKI codecs/workflows and Enterprise retains provider routing/evidence. KCMVP remains `DEFERRED`, hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, and external release authorization remains `NO`.
+Current runtime baseline: `0.1.0-p3-10-restricted-sha1-ocsp-certid`, with 18 public headers and 85 exported symbols across `ANOCRYPTO_C_0` through `ANOCRYPTO_C_7`. P3-10 adds one dedicated restricted SHA-1 digest symbol for OCSP CertID issuer-name/key interoperability; P3-09 P-256 and P3-08 RSA services remain unchanged. AnoPKI retains PKI codecs/workflows and Enterprise retains provider routing/evidence. KCMVP remains `DEFERRED`, hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, and external release authorization remains `NO`.
 
 Implemented processing scope:
 
@@ -33,6 +33,7 @@ Implemented processing scope:
 - Startup self-test KATs for SHA-256/SHA-384/SHA-512, their HMAC variants, and HMAC_DRBG-SHA-256
 - Extended KAT executables for all implemented SHA-2/HMAC variants, HMAC key-handle paths, and HMAC_DRBG-SHA-256 public vectors
 - Deterministic OpenSSL 3.x test-only differential comparisons for SHA-256/384/512, HMAC, HKDF-SHA-256, fixed-profile scrypt, AES-256-GCM, AES-CBC, AES-CMAC, RSA, and P-256 ECDSA paths
+- Restricted one-shot SHA-1 for OCSP CertID issuer Name DER and subjectPublicKey BIT STRING content only, with startup KAT, misuse-containment policy, and exact OpenSSL test-only OCSP comparison
 - SHA-512-family representation, endian, variable-chunk, and intentionally unaligned-input portability regression
 - CMake C99 representation guard requiring 8-bit bytes, 32-bit `uint32_t`, 64-bit `uint64_t`, and `size_t` no wider than `uint64_t`
 - Negative API tests for hash/HMAC/DRBG/CSP/key argument handling, context lifecycle behavior, handle exhaustion, stale handle rejection, and DRBG helper failure cleanup

@@ -9,6 +9,7 @@
 #include <anocrypto/ac_module.h>
 #include <anocrypto/ac_selftest.h>
 #include <anocrypto/ac_hash.h>
+#include <anocrypto/ac_ocsp_certid_hash.h>
 #include <anocrypto/ac_hmac.h>
 #include <anocrypto/ac_kdf.h>
 #include <anocrypto/ac_aead.h>

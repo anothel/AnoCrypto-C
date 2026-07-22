@@ -129,7 +129,8 @@ function(_ano_collect_api_manifest _include_dir _manifest_file _prefix)
         get_filename_component(_header_name "${_header}" NAME)
         if(_prefix STREQUAL "CURRENT_RETAINED" AND
            (_header_name STREQUAL "ac_kdf.h" OR _header_name STREQUAL "ac_aead.h" OR
-            _header_name STREQUAL "ac_signature.h"))
+            _header_name STREQUAL "ac_signature.h" OR
+            _header_name STREQUAL "ac_ocsp_certid_hash.h"))
             continue()
         endif()
         list(APPEND _header_names "${_header_name}")
@@ -379,7 +380,7 @@ _ano_require_text("CMakeLists.txt"
     "include(\"\${CMAKE_CURRENT_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake\")")
 _ano_require_text("CMakeLists.txt"
     "COMPATIBILITY \${ANO_CRYPTO_RELEASE_PACKAGE_COMPATIBILITY}")
-_ano_require_text("src/core/build_identity.c" "P3-09 adds ECDSA P-256 SHA-256")
+_ano_require_text("src/core/build_identity.c" "P3-10 adds restricted SHA-1 OCSP CertID interoperability")
 _ano_require_text("README.md" "${ANO_CRYPTO_RELEASE_VERSION}")
 _ano_require_text(".github/workflows/ci.yml" "${ANO_CRYPTO_RELEASE_FINGERPRINT}")
 _ano_require_text(".github/workflows/ci.yml"

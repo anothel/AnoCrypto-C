@@ -37,7 +37,7 @@ list(LENGTH _headers _header_count)
 foreach(_pair IN ITEMS
   "abi/ANOCRYPTO_C_0_EXPORTED_SYMBOLS.txt|69"
   "abi/ANOCRYPTO_C_1_EXPORTED_SYMBOLS.txt|1"
-  "abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt|84")
+  "abi/ANOCRYPTO_C_CURRENT_EXPORTED_SYMBOLS.txt|85")
   string(REPLACE "|" ";" _parts "${_pair}")
   list(GET _parts 0 _path)
   list(GET _parts 1 _expected)
@@ -53,8 +53,8 @@ foreach(_pair IN ITEMS
     list(APPEND _violations "${_path} count ${_count}, expected ${_expected}")
   endif()
 endforeach()
-if(NOT _header_count EQUAL 17 OR NOT ANO_CRYPTO_RELEASE_SYMBOL_COUNT STREQUAL "84" OR
-   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_6")
+if(NOT _header_count EQUAL 18 OR NOT ANO_CRYPTO_RELEASE_SYMBOL_COUNT STREQUAL "85" OR
+   NOT ANO_CRYPTO_RELEASE_ABI_LINE STREQUAL "ANOCRYPTO_C_7")
   list(APPEND _violations "current public identity mismatch")
 endif()
 if(NOT ANO_CRYPTO_HKDF_PUBLIC_FUNCTION_COUNT EQUAL 1 OR

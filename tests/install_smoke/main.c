@@ -434,6 +434,26 @@ int main(void)
         }
     }
 
+    {
+        static const uint8_t input[] = { 'a', 'b', 'c' };
+        static const uint8_t expected[ANO_CRYPTO_OCSP_CERTID_SHA1_DIGEST_SIZE] = {
+            0xa9,0x99,0x3e,0x36,0x47,0x06,0x81,0x6a,0xba,0x3e,
+            0x25,0x71,0x78,0x50,0xc2,0x6c,0x9c,0xd0,0xd8,0x9d
+        };
+        uint8_t digest[ANO_CRYPTO_OCSP_CERTID_SHA1_DIGEST_SIZE];
+        size_t written = 0u;
+        st = ano_crypto_ocsp_certid_sha1_digest(
+            input, sizeof(input), digest, sizeof(digest), &written);
+        if (st != ANO_CRYPTO_OK || written != sizeof(digest) ||
+            memcmp(digest, expected, sizeof(digest)) != 0) {
+            (void)ano_crypto_csp_zeroize(digest, sizeof(digest));
+            fprintf(stderr, "restricted SHA-1 OCSP CertID install smoke failed: %s\n",
+                    ano_crypto_status_name(st));
+            return 1;
+        }
+        (void)ano_crypto_csp_zeroize(digest, sizeof(digest));
+    }
+
     st = ano_crypto_module_shutdown();
     if (st != ANO_CRYPTO_OK) {
         fprintf(stderr, "module shutdown failed: %s\n", ano_crypto_status_name(st));
