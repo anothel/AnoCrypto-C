@@ -1,63 +1,39 @@
 # Downstream Source Baselines
 
-Status: `P3_01_4_OF_4_IMPORTED_WITH_ONE_IDENTITY_CONFLICT`; P3-06 follow-up:
-`CONTENT_RECONCILED_PROVENANCE_CONFIRMATION_OPEN`
+Status: `PHASE_1_CLOSED_PROVENANCE_OPEN`
 
-## P3-01 accepted archives
+## Retained P3-01 policy compatibility
 
-| ID | Repository | Exact revision | Source archive SHA-256 | CURRENT ONLY/collection SHA-256 | Intake state |
-|---|---|---|---|---|---|
-| `ASK-COMM` | AnoSecureKit Community | `694459ebe497d15ba75ef76a52fa7c36ddd7bcce` | `951f523d9444450e3894f72fae5a45594441530b559dc3d7b4766258ee414484` | `dc5d27afbf19b903105057aac4a47f07e2f6f8c499b1d251314104c9b83ede2c` | `IMPORTED` |
-| `ASK-ENT` | AnoSecureKit Enterprise | `3a62318fce27985d091bb5445fc59d0fca7033a2` | `ebf8a4cbbdda8103f4678cbe28c56b1758da26761ecfcd3f5b6990a22c8f10c5` | `13448abe43fa45307d46f70e8b44b5af7a16c95d2835b1f0c6094a134df694b3` | `IMPORTED_WITH_DEPENDENCY_IDENTITY_CONFLICT` |
-| `APKI-COMM` | AnoPKI Community | `ae3ddee72dd05f274b9bbae1b514cdc4c4de03f5` | `2f5b5750631a4af39293e10a420a6667ff430e682a3ab24bf3f3e54dbc298ac2` | `0c9c9b0a1c9deaf17554ce22770e2fc5c9da426f85ddadccb516e04c91125268` | `IMPORTED` |
-| `APKI-ENT` | AnoPKI Enterprise | `68b379e7684c9d8b44c53728949774088352a9d9` | `af5acc349deee69650a4767a51fdc0214cd529561a9ece906a18ab0eebe7033d` | `ed55d2aa2ebdd561dc2549d01d1bd8f3fd0bd2d2144c3ce3b74083d86fb47704` | `IMPORTED` |
+Historical intake token: `4_OF_4_IMPORTED_WITH_ONE_IDENTITY_CONFLICT`. The
+content conflict was later reconciled; trusted provenance remains open.
 
-All delivered P3-01 SHA-256 values were recomputed locally and matched the
-supplied manifests.
+## Final Phase 1 integration baselines
 
-## P3-06 downstream follow-up
+| Lane | Repository/baseline | AnoCrypto-C input | Result |
+|---|---|---|---|
+| AnoSecureKit | Enterprise `53824f00ff3460ba05ac866d1dd58d9a0c01ff3c`, Community `694459ebe497d15ba75ef76a52fa7c36ddd7bcce` | P3-05 `89e16a261ab7696d9489167d7403d9f2c704629e` | local seven-capability parity and no fallback complete |
+| AnoPKI | Enterprise `c1e0bbbefa2003657c7fefdf5924f964c4bab3ec`, Community `ab9d76597df93ac1ac8b7938f4d25ba64f59f8dc` | P3-10 `98f544a574f70b387c300f171243b4e87174937a` and pinned DLL `7dd56b00f38699509e90a62968ec0ff2c37a2735e4479c0df4a2c60f8b2e26cd` | local eight-operation parity and no fallback complete |
 
-| Field | Value |
+## AnoPKI artifact bindings
+
+| Artifact | SHA-256 |
 |---|---|
-| Repository | AnoSecureKit Enterprise |
-| Checkpoint commit | `53824f00ff3460ba05ac866d1dd58d9a0c01ff3c` |
-| Checkpoint artifact SHA-256 | `db17e4bc4426a45a8bc3bd0e6802e3cec954a800146a69b600d63070049313df` |
-| Consumed AnoCrypto-C | `0.1.0-p3-05-scrypt-fixed-profile` / `89e16a261ab7696d9489167d7403d9f2c704629e` |
-| AnoCrypto-C artifact SHA-256 | `18aa9050a808e4d541b2a6a10e91aa8e51367b95962b90db2183e26377bdbac1` |
-| Community content comparison | `182_OF_182_NORMALIZED_MATCH` |
-| Original upstream Git-tree reproduction | `EXTERNAL_CONFIRMATION_REQUIRED` |
-| Trusted release provenance acceptance | `OPEN` |
-| External release authorization | `NO` |
+| P3-11 source ZIP | `fefae0c7c3fa340c782010ef4ca46cf8db6b923f437497cc6a7d4e1b54a798d2` |
+| P3-11 patch | `c822f58dc497d78f4173a43f8b8d8eef8e4c06c54db8f52745fa01a2183f66ac` |
+| P3-11 validation | `ee3060381cd19d52c4bc78b55cfbcb93d9d04c44cd61dcdf18df10146774d837` |
+| P3-12 closeout Markdown | `1fb6fb3d6b85886ad5acf21ff994adb9177b90d10c0823dd0356e67629a2da58` |
+| P3-12 validation JSON | `6f150022f604a623300f6d495cfab4d337bc5d30e57345525205d0ec5188b9c9` |
 
-The semantic source-content discrepancy identified during P3-01 is closed in
-the P3-06 downstream checkpoint. This does not prove the original upstream Git
-tree object, trusted delivery provenance, signing, or customer release approval.
+## Authority and limitations
 
-## Authority rule
-
-- Exact source archives are code authority.
-- CURRENT ONLY/collection packs are curated requirement evidence.
-- The P3-06 source is downstream evidence, not a replacement AnoCrypto-C core.
-- A document revision marker that conflicts with its enclosing collection
-  manifest does not override the exact archive/collection identity.
-- OpenSSL calls are implementation evidence, not a proposed AnoCrypto-C API.
-
-## P3-07 AnoPKI re-verification
-
-| Field | Value |
-|---|---|
-| Community exact commit | `ae3ddee72dd05f274b9bbae1b514cdc4c4de03f5` |
-| Community Git object and relevant path review | `VERIFIED_P3_07` |
-| Community source archive identity | `2f5b5750631a4af39293e10a420a6667ff430e682a3ab24bf3f3e54dbc298ac2` / supplied exact manifest |
-| Enterprise exact revision | `68b379e7684c9d8b44c53728949774088352a9d9` |
-| Enterprise source archive identity | `af5acc349deee69650a4767a51fdc0214cd529561a9ece906a18ab0eebe7033d` / supplied exact manifest |
-| Enterprise collection identity | `ed55d2aa2ebdd561dc2549d01d1bd8f3fd0bd2d2144c3ce3b74083d86fb47704` |
-| Enterprise source archive byte-level recomputation | `EXTERNAL_CONFIRMATION_REQUIRED` |
-
-The exact Community operation/provider/test paths were re-read at the exact ref.
-Enterprise commit/source/collection identities were cross-checked, but the raw
-Enterprise archive bytes were not mounted in the P3-07 runtime. Source-derived
-Enterprise documents establish ownership/profile direction only; they do not
-establish fresh private implementation or executable evidence. This limitation
-does not transfer provider routing, PKI codecs, or Enterprise behavior into
-AnoCrypto-C.
+- AnoPKI Enterprise exact Git commit `c1e0bbbefa2003657c7fefdf5924f964c4bab3ec` is the canonical source tree.
+- Community exact baseline is `ab9d76597df93ac1ac8b7938f4d25ba64f59f8dc`; mutable checkout changes were not
+  used.
+- P3-11 convenience Source ZIP is retained for handoff but is not canonical for
+  line-ending-sensitive files.
+- The pinned SDK DLL is the exact final Enterprise validation artifact. A
+  functionally equivalent rebuild is not identical artifact evidence.
+- AnoSecureKit P3-06 was not rerun against the later P3-10 binary; the required
+  P3-05 ABI subset remains retained, and no P3-10 Kit qualification is claimed.
+- trusted delivery provenance, hosted qualification, signing, timestamping and
+  customer release remain open/blocked.

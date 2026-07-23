@@ -1,6 +1,6 @@
 # AnoCrypto-C
 
-Current runtime baseline: `0.1.0-p3-10-restricted-sha1-ocsp-certid`, with 18 public headers and 85 exported symbols across `ANOCRYPTO_C_0` through `ANOCRYPTO_C_7`. P3-10 adds one dedicated restricted SHA-1 digest symbol for OCSP CertID issuer-name/key interoperability; P3-09 P-256 and P3-08 RSA services remain unchanged. AnoPKI retains PKI codecs/workflows and Enterprise retains provider routing/evidence. KCMVP remains `DEFERRED`, hosted evidence remains `NOT_RUN/UNREVIEWED`, repository signing remains `UNSIGNED`, and external release authorization remains `NO`.
+Current runtime baseline: `0.1.0-p3-10-restricted-sha1-ocsp-certid`, source commit `98f544a574f70b387c300f171243b4e87174937a`, with 18 public headers and 85 exported symbols across `ANOCRYPTO_C_0` through `ANOCRYPTO_C_7`. Engineering Phase 1 is closed after local AnoSecureKit and AnoPKI Enterprise parity/no-fallback checkpoints. Commercialization is `UNDECIDED`; customer/external release remains `BLOCKED`/`NOT_AUTHORIZED`; hosted qualification is `NOT_RUN/UNREVIEWED`; repository signing remains `UNSIGNED`; KCMVP remains `DEFERRED` and not validated. No next product implementation is selected.
 
 Implemented processing scope:
 

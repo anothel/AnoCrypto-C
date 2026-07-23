@@ -1,7 +1,7 @@
 {
   "schema": "anocrypto-c/downstream-source-baselines/v1",
-  "status": "IMPORTED_WITH_ONE_IDENTITY_CONFLICT",
-  "current_followup_status": "CONTENT_RECONCILED_PROVENANCE_CONFIRMATION_OPEN",
+  "status": "PHASE1_CLOSED_PROVENANCE_OPEN",
+  "current_followup_status": "ENGINEERING_PHASE_1_COMPLETE",
   "source_sets": [
     {
       "id": "ASK-COMM",
@@ -93,5 +93,60 @@
       "ANOCRYPTO_C_4"
     ],
     "public_api_abi_change": "NONE"
+  },
+  "phase1_closeout": {
+    "decision": {
+      "p3_11": "COMPLETE",
+      "p3_12": "COMPLETE",
+      "phase_1": "CLOSED",
+      "customer_release": "BLOCKED",
+      "commercialization": "UNDECIDED",
+      "future_work": "NOT_SELECTED"
+    },
+    "anocrypto_c": {
+      "version": "0.1.0-p3-10-restricted-sha1-ocsp-certid",
+      "commit": "98f544a574f70b387c300f171243b4e87174937a",
+      "source_zip_sha256": "913979ceea9110de5dbfe9e6702c634071102b00901840763367ca83e15d59c4",
+      "public_headers": 18,
+      "exported_symbols": 85,
+      "abi_lines": [
+        "ANOCRYPTO_C_0",
+        "ANOCRYPTO_C_1",
+        "ANOCRYPTO_C_2",
+        "ANOCRYPTO_C_3",
+        "ANOCRYPTO_C_4",
+        "ANOCRYPTO_C_5",
+        "ANOCRYPTO_C_6",
+        "ANOCRYPTO_C_7"
+      ]
+    },
+    "anosecurekit": {
+      "enterprise_checkpoint_commit": "53824f00ff3460ba05ac866d1dd58d9a0c01ff3c",
+      "community_commit": "694459ebe497d15ba75ef76a52fa7c36ddd7bcce",
+      "consumed_anocrypto_c_commit": "89e16a261ab7696d9489167d7403d9f2c704629e",
+      "state": "LOCAL_PARITY_COMPLETE_RELEASE_BLOCKED",
+      "p3_10_rerun": "NOT_RUN_NOT_REQUIRED_FOR_PHASE1"
+    },
+    "anopki": {
+      "enterprise_commit": "c1e0bbbefa2003657c7fefdf5924f964c4bab3ec",
+      "enterprise_parent": "c3f7b679782f52c90311b7b7670b577ee972c1f6",
+      "community_commit": "ab9d76597df93ac1ac8b7938f4d25ba64f59f8dc",
+      "community_source_zip_sha256": "3a2a47573c3c9c8f5dac4e6c6eaa932bd7ab8580f64268d888a30ced5262e9c4",
+      "p3_11_source_zip_sha256": "fefae0c7c3fa340c782010ef4ca46cf8db6b923f437497cc6a7d4e1b54a798d2",
+      "p3_11_patch_sha256": "c822f58dc497d78f4173a43f8b8d8eef8e4c06c54db8f52745fa01a2183f66ac",
+      "p3_11_validation_sha256": "ee3060381cd19d52c4bc78b55cfbcb93d9d04c44cd61dcdf18df10146774d837",
+      "p3_12_closeout_sha256": "1fb6fb3d6b85886ad5acf21ff994adb9177b90d10c0823dd0356e67629a2da58",
+      "p3_12_validation_sha256": "6f150022f604a623300f6d495cfab4d337bc5d30e57345525205d0ec5188b9c9",
+      "pinned_sdk_dll_sha256": "7dd56b00f38699509e90a62968ec0ff2c37a2735e4479c0df4a2c60f8b2e26cd",
+      "state": "LOCAL_PARITY_COMPLETE_PHASE1_CLOSED"
+    },
+    "claim_limits": {
+      "hosted_qualification": "NOT_RUN",
+      "race_clean": false,
+      "trusted_provenance": "OPEN",
+      "production_signing": "NOT_PERFORMED",
+      "external_release": "NOT_AUTHORIZED",
+      "kcmvp": "NOT_VALIDATED"
+    }
   }
 }

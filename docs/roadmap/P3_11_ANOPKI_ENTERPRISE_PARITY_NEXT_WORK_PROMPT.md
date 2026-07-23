@@ -1,5 +1,9 @@
 # Next Work Prompt — P3-11 AnoPKI Enterprise Parity
 
+Status: `COMPLETE_HISTORICAL_DO_NOT_RUN`
+
+P3-11 completed at AnoPKI Enterprise commit `c1e0bbbefa2003657c7fefdf5924f964c4bab3ec` and was closed by P3-12. This prompt is retained only as a historical execution record. Do not run it as current work.
+
 Continue from AnoCrypto-C `0.1.0-p3-10-restricted-sha1-ocsp-certid` with 18
 public headers, 85 symbols, and ABI lines `ANOCRYPTO_C_0` through
 `ANOCRYPTO_C_7`.

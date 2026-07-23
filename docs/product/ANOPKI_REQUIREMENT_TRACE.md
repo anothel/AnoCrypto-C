@@ -1,82 +1,45 @@
 # AnoPKI Requirement Trace
 
-Status: `P3_10_RSA_ECDSA_OCSP_HASH_CORE_COMPLETE_ADAPTER_PENDING`
+Status: `P3_11_LOCAL_PARITY_COMPLETE_PHASE_1_CLOSED`
 
-## Authority and verification
+## Final authority
 
-- Community exact commit:
-  `ae3ddee72dd05f274b9bbae1b514cdc4c4de03f5` — directly re-read at the exact
-  revision during P3-07.
-- Community source SHA-256:
-  `2f5b5750631a4af39293e10a420a6667ff430e682a3ab24bf3f3e54dbc298ac2`.
-- Enterprise exact commit:
-  `68b379e7684c9d8b44c53728949774088352a9d9`.
-- Enterprise source SHA-256:
-  `af5acc349deee69650a4767a51fdc0214cd529561a9ece906a18ab0eebe7033d`.
-- Enterprise collection SHA-256:
-  `ed55d2aa2ebdd561dc2549d01d1bd8f3fd0bd2d2144c3ce3b74083d86fb47704`.
-- Enterprise raw ZIP byte recomputation in the P3-07 runtime:
-  `EXTERNAL_CONFIRMATION_REQUIRED`.
+| Item | Frozen identity |
+|---|---|
+| AnoPKI Enterprise | `c1e0bbbefa2003657c7fefdf5924f964c4bab3ec` |
+| Enterprise parent | `c3f7b679782f52c90311b7b7670b577ee972c1f6` |
+| AnoPKI Community baseline | `ab9d76597df93ac1ac8b7938f4d25ba64f59f8dc` |
+| Community source ZIP SHA-256 | `3a2a47573c3c9c8f5dac4e6c6eaa932bd7ab8580f64268d888a30ced5262e9c4` |
+| AnoCrypto-C source | `98f544a574f70b387c300f171243b4e87174937a` / `0.1.0-p3-10-restricted-sha1-ocsp-certid` |
+| AnoCrypto-C source ZIP SHA-256 | `913979ceea9110de5dbfe9e6702c634071102b00901840763367ca83e15d59c4` |
+| Pinned AnoCrypto-C DLL SHA-256 | `7dd56b00f38699509e90a62968ec0ff2c37a2735e4479c0df4a2c60f8b2e26cd` |
 
-Exact source and tests override stale embedded labels and generic OpenSSL call
-summaries.
+The exact Git commit tree is the Enterprise source authority. The convenience
+P3-11 Source ZIP is a handoff artifact and has a known CRLF conversion issue in
+`tests/fixtures/backend-parity/manifest.txt`; it is not the canonical byte-level
+source baseline.
 
 ## Operation trace
 
-| ID | AnoPKI operation/evidence | AnoPKI-owned behavior | AnoCrypto-C primitive consequence | P3-07 disposition |
-|---|---|---|---|---|
-| `APKI-PK-01` | CSR inspect and issue-time proof-of-possession | PEM/DER parse, subject/SAN/extensions, exact CertificationRequestInfo bytes | RSA/ECDSA verify | `APPROVED_SPLIT` |
-| `APKI-PK-02` | certificate issue | profile/extensions/serial/TBSCertificate/signatureAlgorithm/PEM | RSA/ECDSA sign and key binding | `APPROVED_SPLIT` |
-| `APKI-PK-03` | certificate inspect/issuer validation | X.509 parse, CA/key-usage/name/time/chain policy | signature verify only below policy | `APPROVED_SPLIT` |
-| `APKI-PK-04` | CRL generate/inspect | TBSCertList, entries, reasons, times, PEM/DER | SHA-256 RSA/ECDSA sign | `APPROVED_SPLIT` |
-| `APKI-PK-05` | OCSP request/issuer inspect | DER, nonce, CertID composition and normalized fields | SHA-1/SHA-2 digest only | `APPROVED_SPLIT` |
-| `APKI-PK-06` | OCSP response and responder validation | BasicResponse/status/time/EKU/issuer policy and DER | SHA-256 RSA/ECDSA sign/verify | `APPROVED_SPLIT` |
-| `APKI-PK-07` | RSA provider fixtures | RSA-2048 positive cert/CRL/OCSP, deterministic certificate DER, SHA-2 scheme selection | RSA PKCS#1 v1.5 SHA-256/384/512 | `SATISFIED_P3_08_CORE_ADAPTER_PENDING` |
-| `APKI-PK-08` | ECDSA provider fixtures | P-256 positive cert/CRL/OCSP, TBS equivalence, DER signature object | P-256 SHA-256 raw primitive signature | `SATISFIED_P3_09_CORE_ADAPTER_PENDING` |
-| `APKI-PK-09` | key-provider failures | reference parsing, exportability, provider routing, evidence, no fallback | role/algorithm/binding checks only; routing stays downstream | `BOUNDARY_APPROVED` |
-| `APKI-PK-10` | OCSP CertID default | empty digest selection and exact fixture use SHA-1 | restricted SHA-1 digest | `SATISFIED_P3_10_CORE_ADAPTER_PENDING` |
+| Operation | AnoPKI-owned behavior | AnoCrypto-C primitive use | Phase 1 result |
+|---|---|---|---|
+| CSR inspect/PoP | PEM/DER parsing, CertificationRequestInfo extraction and policy | RSA/P-256 import and verify | PASS |
+| certificate issue | profile, TBS, AlgorithmIdentifier, PEM/DER | RSA SHA-2 or P-256 sign | PASS |
+| CRL generate/inspect | CRL construction, DER/PEM and policy | RSA/P-256 sign/verify | PASS |
+| OCSP request inspect | request/nonce/CertID parsing | restricted CertID digest when required | PASS |
+| OCSP issuer inspect | issuer Name/SPKI extraction and result formatting | dedicated restricted SHA-1 | PASS |
+| OCSP response generate | response structure, status, nonce and DER | RSA/P-256 sign | PASS |
+| OCSP responder validate | X.509/EKU/constraint policy | RSA/P-256 verify | PASS |
 
-## Positive fixture requirements
+Eight Enterprise/AnoCrypto-C capabilities were reported truthfully and tested
+with no OpenSSL fallback. RSA-PSS, generic SHA-1, P-384, unsupported providers,
+malformed keys, mismatched bindings, and failed evidence paths remain
+fail-closed.
 
-- RSA-2048 and P-256 issuer keys must sign certificate, CRL, and OCSP paths.
-- CSR proof-of-possession must be verified before issue.
-- RSA direct/provider signatures must preserve exact deterministic certificate
-  DER where inputs are identical.
-- ECDSA provider paths must preserve TBS bytes, use `ecdsa-with-SHA256`, and
-  verify successfully.
-- OCSP CertID SHA-1 interoperability must remain distinguishable from signature
-  algorithm policy.
+## Limits retained
 
-## Negative fixture requirements
-
-- malformed, encrypted, missing, or unavailable key sources fail closed;
-- algorithm/key mismatch and certificate/private-key mismatch remain distinct;
-- unsupported provider references do not retry through another provider;
-- production exportable file keys are rejected;
-- invalid CSR proof-of-possession and invalid signatures fail without output or
-  fallback;
-- raw key references, paths, passwords, key bytes, and signatures are not logged.
-
-## Frozen P3-07 contract direction
-
-- common opaque CSP token with internal public/private role and algorithm tags;
-- normalized algorithm-native component import only;
-- message-based sign/verify;
-- core-owned SHA-2 and RSA DigestInfo;
-- raw fixed-width P-256 `r || s`, with DER in AnoPKI;
-- existing key/CSP lifecycle functions reused;
-- implemented RSA slice: three symbols on `ANOCRYPTO_C_5`;
-- implemented P-256 import: one symbol on `ANOCRYPTO_C_6`;
-- implemented restricted OCSP CertID SHA-1: one symbol on `ANOCRYPTO_C_7`;
-- generic sign/verify reused for deterministic SHA-256 raw `r || s`.
-
-Detailed decisions are in
-`docs/design/C99_PUBLIC_KEY_KEY_HANDLE_ARCHITECTURE_GATE.md` and exact product
-extraction is in `docs/product/P3_07_PUBLIC_KEY_REQUIREMENT_REVIEW.md`.
-
-## Current parity state
-
-AnoPKI Enterprise public-key operations remain `unsupported_pending` until the
-P3-10 SDK is connected through a separately reviewed adapter path. Core
-primitive compatibility is complete; product parity, hosted completion, signing,
-KCMVP validation, and release authorization are not claimed.
+- local file keys are development/test only;
+- no production HSM/KMS/PKCS#11 qualification;
+- no hosted-success claim;
+- no race-clean claim;
+- no customer release, production-ready, KCMVP, signing, or timestamp claim.
