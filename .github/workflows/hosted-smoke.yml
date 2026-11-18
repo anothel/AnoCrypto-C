@@ -1,0 +1,31 @@
+name: Hosted smoke regression
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package-smoke:
+    name: ${{ matrix.os }} / ${{ matrix.config }} / installed SDK
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        config: [Debug, Release]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Full tests and installed SDK regression
+        run: cmake -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }} -DANO_CRYPTO_BUILD_CONFIG=${{ matrix.config }} -P tests/cmake/hosted_smoke_regression.cmake
+      - name: Retain package diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-regression-${{ runner.os }}-${{ matrix.config }}
+          path: |
+            build-hosted-smoke/Testing/Temporary/LastTest.log
+            build-hosted-smoke/smoke-diagnostics-tests/**/*.log
+            build-hosted-smoke/install-package-smoke/*.log
+            build-hosted-smoke/poc-package-smoke/**/*.log
+          if-no-files-found: error

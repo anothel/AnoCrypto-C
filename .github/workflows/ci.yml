@@ -225,11 +225,27 @@ jobs:
 
       - name: Run install smoke on Windows
         if: runner.os == 'Windows'
-        run: .\build-install-smoke\${{ matrix.build_type }}\anocrypto_c_install_smoke.exe
+        shell: pwsh
+        run: |
+          $env:PATH = "${{ github.workspace }}/install-prefix/bin;$env:PATH"
+          & .\build-install-smoke\${{ matrix.build_type }}\anocrypto_c_install_smoke.exe
+          $nativeExit = $LASTEXITCODE
+          Write-Host "Installed smoke native exit code: $nativeExit"
+          exit $nativeExit
 
       - name: PoC package smoke on Linux thread-safety ON
         if: runner.os == 'Linux' && matrix.thread_safety == 'ON'
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_poc_package_smoke
+
+      - name: Upload package smoke failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-smoke-failure-${{ runner.os }}-thread-safety-${{ matrix.thread_safety }}
+          path: |
+            build/poc-package-smoke/**/*.log
+            build/install-package-smoke/*.log
+          if-no-files-found: warn
 
   differential-validation:
     name: Linux OpenSSL 3.x differential validation

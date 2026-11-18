@@ -64,7 +64,8 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/CLEAN_BUILD_CONFIGURE.log"
     "# Sanitizer mode: none\n"
     "# Result: ${_configure_result}\n\n"
     "${_configure_stdout}${_configure_stderr}")
-if(NOT _configure_result EQUAL 0)
+if(NOT "${_configure_result}" STREQUAL "0")
+    message("Native result: ${_configure_result}\n${_configure_stdout}${_configure_stderr}")
     message(FATAL_ERROR "Clean PoC SDK configure failed; see ${ANO_CRYPTO_POC_PACKAGE_DIR}/CLEAN_BUILD_CONFIGURE.log")
 endif()
 
@@ -80,7 +81,8 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/CLEAN_BUILD.log"
     "# Build clean AnoCrypto-C PoC SDK\n"
     "# Result: ${_build_result}\n\n"
     "${_build_stdout}${_build_stderr}")
-if(NOT _build_result EQUAL 0)
+if(NOT "${_build_result}" STREQUAL "0")
+    message("Native result: ${_build_result}\n${_build_stdout}${_build_stderr}")
     message(FATAL_ERROR "Clean PoC SDK build failed; see ${ANO_CRYPTO_POC_PACKAGE_DIR}/CLEAN_BUILD.log")
 endif()
 
@@ -97,7 +99,8 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/CLEAN_RELEASE_SYMBOL_BASELINE.log"
     "# Expected public symbols: ${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}\n"
     "# Result: ${_symbol_result}\n\n"
     "${_symbol_stdout}${_symbol_stderr}")
-if(NOT _symbol_result EQUAL 0)
+if(NOT "${_symbol_result}" STREQUAL "0")
+    message("Native result: ${_symbol_result}\n${_symbol_stdout}${_symbol_stderr}")
     message(FATAL_ERROR "Clean PoC SDK exported-symbol baseline check failed; see ${ANO_CRYPTO_POC_PACKAGE_DIR}/CLEAN_RELEASE_SYMBOL_BASELINE.log")
 endif()
 
@@ -115,7 +118,8 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_COMPATIBILITY_CHECK.log"
     "# Expected public symbols: ${ANO_CRYPTO_RELEASE_SYMBOL_COUNT}\n"
     "# Result: ${_release_compat_result}\n\n"
     "${_release_compat_stdout}${_release_compat_stderr}")
-if(NOT _release_compat_result EQUAL 0)
+if(NOT "${_release_compat_result}" STREQUAL "0")
+    message("Native result: ${_release_compat_result}\n${_release_compat_stdout}${_release_compat_stderr}")
     message(FATAL_ERROR "PoC release compatibility policy check failed; see ${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_COMPATIBILITY_CHECK.log")
 endif()
 
@@ -133,7 +137,8 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_PROVENANCE_POLICY_CHECK.log"
     "# Signing mode: ${ANO_CRYPTO_RELEASE_SIGNING_MODE}\n"
     "# Result: ${_release_provenance_result}\n\n"
     "${_release_provenance_stdout}${_release_provenance_stderr}")
-if(NOT _release_provenance_result EQUAL 0)
+if(NOT "${_release_provenance_result}" STREQUAL "0")
+    message("Native result: ${_release_provenance_result}\n${_release_provenance_stdout}${_release_provenance_stderr}")
     message(FATAL_ERROR "PoC release provenance policy check failed; see ${ANO_CRYPTO_POC_PACKAGE_DIR}/RELEASE_PROVENANCE_POLICY_CHECK.log")
 endif()
 
@@ -147,7 +152,8 @@ file(WRITE "${ANO_CRYPTO_POC_PACKAGE_DIR}/INSTALL_PACKAGE.log"
     "# Install clean AnoCrypto-C SDK into PoC package\n"
     "# Result: ${_install_result}\n\n"
     "${_install_stdout}${_install_stderr}")
-if(NOT _install_result EQUAL 0)
+if(NOT "${_install_result}" STREQUAL "0")
+    message("Native result: ${_install_result}\n${_install_stdout}${_install_stderr}")
     message(FATAL_ERROR "SDK install into PoC package failed; see ${ANO_CRYPTO_POC_PACKAGE_DIR}/INSTALL_PACKAGE.log")
 endif()
 

@@ -43,7 +43,8 @@ function(ano_crypto_poc_run_logged log_file description)
     endforeach()
     file(APPEND "${log_file}" "\n# Result: ${_result}\n\n")
     file(APPEND "${log_file}" "${_stdout}${_stderr}")
-    if(NOT _result EQUAL 0)
+    if(NOT "${_result}" STREQUAL "0")
+        message("Native result: ${_result}\n${_stdout}${_stderr}")
         message(FATAL_ERROR "${description} failed; see ${log_file}")
     endif()
 endfunction()
@@ -196,7 +197,8 @@ file(WRITE "${ANO_CRYPTO_POC_SMOKE_DIR}/POC_EXAMPLE_RUN.log"
     "# Executable: ${_example_exe}\n"
     "# Result: ${_run_result}\n\n"
     "${_run_stdout}${_run_stderr}")
-if(NOT _run_result EQUAL 0)
+if(NOT "${_run_result}" STREQUAL "0")
+    message("Native result: ${_run_result}\n${_run_stdout}${_run_stderr}")
     message(FATAL_ERROR "Packaged core PoC example failed; see ${ANO_CRYPTO_POC_SMOKE_DIR}/POC_EXAMPLE_RUN.log")
 endif()
 
