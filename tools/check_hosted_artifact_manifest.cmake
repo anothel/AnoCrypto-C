@@ -20,6 +20,7 @@ get_filename_component(ANO_CRYPTO_HOSTED_ARTIFACT_MANIFEST
 include("${ANO_CRYPTO_SOURCE_DIR}/release/ANOCRYPTO_C_RELEASE_IDENTITY.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/tools/sensitive_signing_material_helpers.cmake")
 include("${ANO_CRYPTO_SOURCE_DIR}/tools/hosted_artifact_path_helpers.cmake")
+include("${ANO_CRYPTO_SOURCE_DIR}/tools/hosted_artifact_text_helpers.cmake")
 
 function(_ano_require_safe_relative_path _path _description)
     string(FIND "${_path}" "\\" _backslash)
@@ -44,20 +45,6 @@ _ano_require_safe_relative_path("${_manifest_relative}" "hosted artifact manifes
 ano_crypto_require_regular_unaliased_hosted_child(
     "${ANO_CRYPTO_HOSTED_ARTIFACT_ROOT}" "${_manifest_relative}"
     "Hosted artifact manifest")
-
-function(_ano_reject_nul _path _relative)
-    file(READ "${_path}" _hex HEX)
-    string(LENGTH "${_hex}" _hex_length)
-    math(EXPR _last "${_hex_length} - 2")
-    if(_last GREATER_EQUAL 0)
-        foreach(_offset RANGE 0 ${_last} 2)
-            string(SUBSTRING "${_hex}" ${_offset} 2 _byte)
-            if(_byte MATCHES "^(0[0-8bBcCeEfF]|1[0-9a-fA-F]|7[fF])$")
-                message(FATAL_ERROR "Hosted artifact must be text-only: ${_relative}")
-            endif()
-        endforeach()
-    endif()
-endfunction()
 
 function(_ano_scan_sensitive_markers _path _relative)
     file(READ "${_path}" _content)
@@ -140,7 +127,7 @@ foreach(_line IN LISTS _lines)
         if(NOT _actual_hash STREQUAL _expected_hash)
             message(FATAL_ERROR "Hosted artifact hash mismatch: ${_relative}")
         endif()
-        _ano_reject_nul("${_full}" "${_relative}")
+        ano_crypto_require_hosted_text("${_full}" "${_relative}" "${_actual_size}")
         _ano_scan_sensitive_markers("${_full}" "${_relative}")
         list(APPEND _listed_files "${_relative}")
     elseif(_line MATCHES "^([a-z_]+)=(.*)$")
