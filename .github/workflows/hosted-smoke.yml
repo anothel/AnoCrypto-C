@@ -25,6 +25,7 @@ jobs:
           name: smoke-regression-${{ runner.os }}-${{ matrix.config }}
           path: |
             build-hosted-smoke/Testing/Temporary/LastTest.log
+            build-hosted-smoke/smoke-diagnostics-tests/**/*.log
             build-hosted-smoke/install-package-smoke/*.log
             build-hosted-smoke/poc-package-smoke/**/*.log
           if-no-files-found: error
