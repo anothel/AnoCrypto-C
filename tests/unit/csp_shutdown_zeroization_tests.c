@@ -47,8 +47,11 @@ static void expect_invalid(const char *name, ano_crypto_csp_handle_t handle)
     }
 }
 
+#include "csp_admission_test_helpers.h"
+
 int main(void)
 {
+    admission_fixture_t admission;
     static const uint8_t hmac_key[32] = {
         0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,
         0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f,
@@ -87,7 +90,11 @@ int main(void)
     expect_state("cipher active", cipher_handle, ANO_CRYPTO_CSP_STATE_ACTIVE);
     expect_state("CMAC active", cmac_handle, ANO_CRYPTO_CSP_STATE_ACTIVE);
 
+    admission_stage(&admission);
+
     expect_status("module shutdown", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
+
+    admission_after_transition(&admission, ANO_CRYPTO_ERR_NOT_INITIALIZED);
 
     expect_state("HMAC zeroized", hmac_handle, ANO_CRYPTO_CSP_STATE_ZEROIZED);
     expect_state("cipher zeroized", cipher_handle, ANO_CRYPTO_CSP_STATE_ZEROIZED);

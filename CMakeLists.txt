@@ -1608,6 +1608,7 @@ if(ANO_CRYPTO_BUILD_TESTS)
     add_executable(ano_crypto_csp_shutdown_zeroization_tests
         tests/unit/csp_shutdown_zeroization_tests.c)
     target_link_libraries(ano_crypto_csp_shutdown_zeroization_tests PRIVATE anocrypto_c)
+    target_include_directories(ano_crypto_csp_shutdown_zeroization_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
     add_test(NAME ano_crypto_csp_shutdown_zeroization_tests
         COMMAND ano_crypto_csp_shutdown_zeroization_tests)
     set_tests_properties(ano_crypto_csp_shutdown_zeroization_tests PROPERTIES

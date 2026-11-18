@@ -21,8 +21,11 @@ static void expect_status(const char *name, ano_crypto_status_t actual,
     }
 }
 
+#include "csp_admission_test_helpers.h"
+
 int main(void)
 {
+    admission_fixture_t admission;
     static const uint8_t key[32] = {
         0x40,0x41,0x42,0x43,0x44,0x45,0x46,0x47,
         0x48,0x49,0x4a,0x4b,0x4c,0x4d,0x4e,0x4f,
@@ -42,7 +45,11 @@ int main(void)
                       &handle),
                   ANO_CRYPTO_OK);
 
+    admission_stage(&admission);
+
     ano_crypto_internal_module_mark_error(ANO_CRYPTO_ERR_INTEGRITY_CHECK_FAILED);
+
+    admission_after_transition(&admission, ANO_CRYPTO_ERR_FATAL_STATE);
 
     expect_status("module state", ano_crypto_module_get_state(&module_state),
                   ANO_CRYPTO_OK);

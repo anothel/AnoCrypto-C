@@ -194,6 +194,13 @@ ano_crypto_status_t ano_crypto_internal_csp_import_secret(
         return st;
     }
 
+    /* Final admission and insertion share the shutdown/fatal transition lock.
+     * Reject before touching slots or generations, preserving tombstones. */
+    st = ano_crypto_internal_module_require_operational_unlocked();
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_internal_global_unlock();
+        return st;
+    }
     st = find_free_slot_unlocked(&index);
     if (st != ANO_CRYPTO_OK) {
         ano_crypto_internal_global_unlock();
@@ -245,6 +252,13 @@ ano_crypto_status_t ano_crypto_internal_csp_import_rsa(
     if (st != ANO_CRYPTO_OK) {
         return st;
     }
+    /* Final admission and insertion share the shutdown/fatal transition lock.
+     * Reject before touching slots or generations, preserving tombstones. */
+    st = ano_crypto_internal_module_require_operational_unlocked();
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_internal_global_unlock();
+        return st;
+    }
     st = find_free_slot_unlocked(&index);
     if (st != ANO_CRYPTO_OK) {
         ano_crypto_internal_global_unlock();
@@ -290,6 +304,13 @@ ano_crypto_status_t ano_crypto_internal_csp_import_ec_p256(
     }
     st = ano_crypto_internal_global_lock();
     if (st != ANO_CRYPTO_OK) {
+        return st;
+    }
+    /* Final admission and insertion share the shutdown/fatal transition lock.
+     * Reject before touching slots or generations, preserving tombstones. */
+    st = ano_crypto_internal_module_require_operational_unlocked();
+    if (st != ANO_CRYPTO_OK) {
+        ano_crypto_internal_global_unlock();
         return st;
     }
     st = find_free_slot_unlocked(&index);

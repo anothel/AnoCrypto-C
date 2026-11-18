@@ -33,6 +33,9 @@ ano_crypto_status_t ano_crypto_key_import_secret(
 {
     ano_crypto_status_t st;
 
+    if (out_handle != 0) {
+        *out_handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+    }
     st = ano_crypto_module_require_operational();
     if (st != ANO_CRYPTO_OK) {
         return st;
