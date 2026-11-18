@@ -211,10 +211,11 @@ jobs:
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_entropy_operational_policy_check
 
       - name: Install
-        run: cmake --install build --config ${{ matrix.build_type }} --prefix install-prefix
+        # The PoC provenance check scans the checkout for unsafe files, including symlinks.
+        run: cmake --install build --config ${{ matrix.build_type }} --prefix "${{ runner.temp }}/anocrypto-sdk"
 
       - name: Configure install smoke
-        run: cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=${{ github.workspace }}/install-prefix -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        run: cmake -S tests/install_smoke -B build-install-smoke "-DCMAKE_PREFIX_PATH=${{ runner.temp }}/anocrypto-sdk" -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build install smoke
         run: cmake --build build-install-smoke --config ${{ matrix.build_type }} --parallel
@@ -227,7 +228,7 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $env:PATH = "${{ github.workspace }}/install-prefix/bin;$env:PATH"
+          $env:PATH = "${{ runner.temp }}/anocrypto-sdk/bin;$env:PATH"
           & .\build-install-smoke\${{ matrix.build_type }}\anocrypto_c_install_smoke.exe
           $nativeExit = $LASTEXITCODE
           Write-Host "Installed smoke native exit code: $nativeExit"
