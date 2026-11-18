@@ -1963,6 +1963,9 @@ if(ANO_CRYPTO_BUILD_TESTS)
     set(_ano_crypto_ctest_evidence_dir "${CMAKE_CURRENT_BINARY_DIR}/ctest-evidence")
     add_custom_target(ano_crypto_ctest_evidence
         COMMAND ${CMAKE_COMMAND} -E rm -rf "${_ano_crypto_ctest_evidence_dir}"
+        COMMAND ${CMAKE_COMMAND}
+            -DANO_CRYPTO_TEST_WORK_DIR=${CMAKE_CURRENT_BINARY_DIR}/ctest-evidence-summary-test
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/ctest_evidence_summary_tests.cmake
         COMMAND ${CMAKE_COMMAND} -E make_directory "${_ano_crypto_ctest_evidence_dir}"
         COMMAND ${CMAKE_COMMAND} -E env --unset=MAKEFLAGS --unset=MFLAGS --unset=MAKELEVEL
             ${CMAKE_CTEST_COMMAND} --quiet --output-on-failure --timeout 180 -j 2 -I 1,20

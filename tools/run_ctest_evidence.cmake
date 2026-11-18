@@ -113,10 +113,19 @@ foreach(_index RANGE 0 9)
         message(FATAL_ERROR "CTest range log is missing or unsafe: ${_range_log}")
     endif()
     file(READ "${_range_log}" _range_output)
-    if(NOT _range_output MATCHES
-       "100% tests passed, 0 tests failed out of ${_count}")
+    # CTest 4.4 omits the zero-failure clause on success. Match the entire
+    # summary and reject multiple summaries so neither counts nor failures
+    # can be hidden behind a successful-looking substring.
+    string(REGEX MATCHALL "(^|[\r\n])[ \t]*[0-9]+% tests passed[^\r\n]*"
+        _range_summaries "${_range_output}")
+    string(STRIP "${_range_summaries}" _range_summary)
+    if(NOT _range_summary MATCHES "^100% tests passed(, 0 tests failed)? out of ${_count}$")
         message(FATAL_ERROR
             "CTest range ${_range} does not contain the expected pass summary")
+    endif()
+    # CTest counts skipped tests in the total and can still report 100%.
+    if(_range_output MATCHES "(^|[\r\n])The following tests did not run:")
+        message(FATAL_ERROR "CTest range ${_range} reports tests that did not run")
     endif()
     file(APPEND "${_ctest_log}"
         "===== CTest range ${_range} =====\n"
