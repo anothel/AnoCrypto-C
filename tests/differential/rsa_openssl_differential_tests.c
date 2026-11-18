@@ -80,22 +80,44 @@ int main(void)
     EVP_PKEY *ossl_priv=make_pkey(1),*ossl_pub=make_pkey(0);
     rsa_test_components_t c; ano_crypto_csp_handle_t priv=0,pub=0;
     unsigned char a[256],b[256]; size_t written; size_t i,j; unsigned comparisons=0;
+    ano_crypto_status_t st;
     REQUIRE(ossl_priv&&ossl_pub);
     REQUIRE(ano_crypto_module_init(NULL)==ANO_CRYPTO_OK);
     rsa_test_private_components(&c); REQUIRE(rsa_test_import(&c,0,&priv)==ANO_CRYPTO_OK);
     rsa_test_public_components(&c); REQUIRE(rsa_test_import(&c,0,&pub)==ANO_CRYPTO_OK);
     for(i=0;i<3u;++i) for(j=0;j<4u;++j){
-        written=0u;
-        REQUIRE(ano_crypto_signature_sign(priv,algorithms[i],messages[j],lengths[j],a,sizeof(a),&written)==ANO_CRYPTO_OK);
+        written=99u;
+        memset(a,0xa5,sizeof(a));
+        st=ano_crypto_signature_sign(priv,algorithms[i],messages[j],lengths[j],a,sizeof(a),&written);
+#if defined(ANO_CRYPTO_TEST_RSA_ENTROPY_AVAILABLE)
+        REQUIRE(st==ANO_CRYPTO_OK);
         REQUIRE(written==256u && openssl_verify(ossl_pub,md_for(algorithms[i]),messages[j],lengths[j],a));
+#else
+        {
+            size_t k;
+            REQUIRE(st==ANO_CRYPTO_ERR_NOT_IMPLEMENTED && written==0u);
+            for(k=0u;k<sizeof(a);++k) REQUIRE(a[k]==0u);
+        }
+#endif
         REQUIRE(openssl_sign(ossl_priv,md_for(algorithms[i]),messages[j],lengths[j],b));
+#if defined(ANO_CRYPTO_TEST_RSA_ENTROPY_AVAILABLE)
         REQUIRE(memcmp(a,b,256u)==0);
+#endif
+        REQUIRE(openssl_verify(ossl_pub,md_for(algorithms[i]),messages[j],lengths[j],b));
         REQUIRE(ano_crypto_signature_verify(pub,algorithms[i],messages[j],lengths[j],b,256u)==ANO_CRYPTO_OK);
+#if defined(ANO_CRYPTO_TEST_RSA_ENTROPY_AVAILABLE)
         comparisons += 3u;
+#else
+        comparisons += 1u;
+#endif
     }
     REQUIRE(ano_crypto_key_destroy(priv)==ANO_CRYPTO_OK); REQUIRE(ano_crypto_key_destroy(pub)==ANO_CRYPTO_OK);
     REQUIRE(ano_crypto_module_shutdown()==ANO_CRYPTO_OK);
     EVP_PKEY_free(ossl_priv);EVP_PKEY_free(ossl_pub);
-    printf("OpenSSL RSA differential comparisons passed: %u\n",comparisons);
+#if defined(ANO_CRYPTO_TEST_RSA_ENTROPY_AVAILABLE)
+    printf("OpenSSL RSA differential comparisons passed: %u (full signing and verification)\n",comparisons);
+#else
+    printf("OpenSSL RSA differential comparisons passed: %u (verification only; 12 unavailable-entropy signing rejections)\n",comparisons);
+#endif
     return 0;
 }

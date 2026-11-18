@@ -1304,6 +1304,15 @@ if(ANO_CRYPTO_BUILD_TESTS)
     add_test(NAME ano_crypto_rsa_pkcs1_v15_kat_tests COMMAND ano_crypto_rsa_pkcs1_v15_kat_tests)
     set_tests_properties(ano_crypto_rsa_pkcs1_v15_kat_tests PROPERTIES LABELS "kat;signature;rsa;pkcs1-v1_5;sha2;anopki")
 
+    if(ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS)
+        target_include_directories(ano_crypto_rsa_pkcs1_v15_kat_tests PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
+        target_compile_definitions(ano_crypto_rsa_pkcs1_v15_kat_tests PRIVATE
+            ANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS)
+        set_property(TEST ano_crypto_rsa_pkcs1_v15_kat_tests APPEND PROPERTY
+            LABELS "entropy-failure-injection")
+    endif()
+
     add_executable(ano_crypto_rsa_api_negative_tests
         tests/negative/rsa_api_negative_tests.c)
     target_link_libraries(ano_crypto_rsa_api_negative_tests PRIVATE anocrypto_c)
@@ -1759,6 +1768,22 @@ if(ANO_CRYPTO_BUILD_TESTS)
         add_test(NAME ano_crypto_ecdsa_p256_thread_safety_tests COMMAND ano_crypto_ecdsa_p256_thread_safety_tests)
         set_tests_properties(ano_crypto_ecdsa_p256_thread_safety_tests PROPERTIES
             LABELS "thread-safety;concurrency;ecdsa;p256;signature;destroy-race")
+    endif()
+
+    # Pin RSA expectations to configuration, never to a runtime probe that could
+    # silently turn an unexpected provider failure into a passing test.
+    if(ANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER AND
+       (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR WIN32 OR APPLE))
+        foreach(_rsa_test_target IN ITEMS
+            ano_crypto_rsa_pkcs1_v15_kat_tests
+            ano_crypto_rsa_api_negative_tests
+            ano_crypto_rsa_thread_safety_tests
+            ano_crypto_rsa_openssl_differential_tests)
+            if(TARGET ${_rsa_test_target})
+                target_compile_definitions(${_rsa_test_target} PRIVATE
+                    ANO_CRYPTO_TEST_RSA_ENTROPY_AVAILABLE)
+            endif()
+        endforeach()
     endif()
 
     add_executable(ano_crypto_thread_platform_review

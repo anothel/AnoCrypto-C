@@ -12,6 +12,7 @@ int main(void)
     ano_crypto_csp_handle_t priv=0,pub=0,handles[16];
     uint8_t out[256], bad[256], e[3], d[256], dp[128], dq[128];
     size_t written=99u, i;
+    ano_crypto_status_t public_sign_status;
     ano_crypto_csp_state_t state;
     REQUIRE(ano_crypto_module_init(NULL)==ANO_CRYPTO_OK);
     rsa_test_private_components(&c);
@@ -20,8 +21,14 @@ int main(void)
     REQUIRE(rsa_test_import(&c,0,&pub)==ANO_CRYPTO_OK);
 
     memset(out,0xa5,sizeof(out));
+    /* Signing obtains blinding entropy before checking the key role. */
+#if defined(ANO_CRYPTO_TEST_RSA_ENTROPY_AVAILABLE)
+    public_sign_status = ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
+#else
+    public_sign_status = ANO_CRYPTO_ERR_NOT_IMPLEMENTED;
+#endif
     REQUIRE(ano_crypto_signature_sign(pub,ANO_CRYPTO_SIGNATURE_RSA_PKCS1_V15_SHA256,
-        RSA_KAT_MESSAGE,sizeof(RSA_KAT_MESSAGE),out,sizeof(out),&written)==ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER);
+        RSA_KAT_MESSAGE,sizeof(RSA_KAT_MESSAGE),out,sizeof(out),&written)==public_sign_status);
     REQUIRE(cleared(out,sizeof(out)) && written==0u);
     memcpy(bad,RSA_KAT_SIG_SHA256,sizeof(bad)); bad[0]^=1u;
     REQUIRE(ano_crypto_signature_verify(pub,ANO_CRYPTO_SIGNATURE_RSA_PKCS1_V15_SHA256,
