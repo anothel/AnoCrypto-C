@@ -55,7 +55,8 @@ function(_ano_crypto_run_install_smoke_step _log_name _description)
         TIMEOUT 600)
     file(WRITE "${ANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR}/${_log_name}"
         "# ${_description}\n# Result: ${_result}\n\n${_stdout}${_stderr}")
-    if(NOT _result EQUAL 0)
+    if(NOT "${_result}" STREQUAL "0")
+        message("Native result: ${_result}\n${_stdout}${_stderr}")
         message(FATAL_ERROR "${_description} failed; see ${ANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR}/${_log_name}")
     endif()
 endfunction()
@@ -117,7 +118,8 @@ execute_process(
     TIMEOUT 120)
 file(WRITE "${ANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR}/INSTALL_SMOKE_RUN.log"
     "# Run installed-package smoke consumer\n# Result: ${_run_result}\n\n${_run_stdout}${_run_stderr}")
-if(NOT _run_result EQUAL 0)
+if(NOT "${_run_result}" STREQUAL "0")
+    message("Native result: ${_run_result}\n${_run_stdout}${_run_stderr}")
     message(FATAL_ERROR "installed-package smoke consumer failed; see ${ANO_CRYPTO_INSTALL_PACKAGE_SMOKE_DIR}/INSTALL_SMOKE_RUN.log")
 endif()
 

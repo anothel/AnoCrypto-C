@@ -1,34 +1,30 @@
-name: Hosted smoke investigation
+name: Hosted smoke regression
 on:
   push:
-    branches: [fix/hosted-smoke-reliability]
   pull_request:
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  reproduce:
-    name: ${{ matrix.os }} / ${{ matrix.source }} / Debug
+  package-smoke:
+    name: ${{ matrix.os }} / ${{ matrix.config }} / installed SDK
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        source: [main, pr2]
+        config: [Debug, Release]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ matrix.source == 'main' && 'b3d5e6551b2bcc38b39602592476146e4b81b9b0' || '2110708252c988441594f08c5f7adb4262aa43df' }}
-          path: baseline
-      - name: Reproduce unchanged source with native diagnostics
-        run: cmake -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}/baseline -P tests/hosted_smoke_reproduction.cmake
-      - name: Retain nested smoke diagnostics
+      - name: Full tests and installed SDK regression
+        run: cmake -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }} -DANO_CRYPTO_BUILD_CONFIG=${{ matrix.config }} -P tests/cmake/hosted_smoke_regression.cmake
+      - name: Retain package diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: smoke-reproduction-${{ runner.os }}-${{ matrix.source }}
+          name: smoke-regression-${{ runner.os }}-${{ matrix.config }}
           path: |
-            baseline/build/poc-package-smoke/**/*.log
-            baseline/build/poc-package-smoke/**/policy-check/*.txt
-          if-no-files-found: warn
+            build-hosted-smoke/Testing/Temporary/LastTest.log
+            build-hosted-smoke/install-package-smoke/*.log
+            build-hosted-smoke/poc-package-smoke/**/*.log
+          if-no-files-found: error
