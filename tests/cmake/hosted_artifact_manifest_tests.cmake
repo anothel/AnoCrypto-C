@@ -26,6 +26,15 @@ function(_run_expect _expected_success _description)
     endif()
 endfunction()
 
+function(_expect_rejection _diagnostic)
+    execute_process(COMMAND ${ARGN}
+        RESULT_VARIABLE _result ERROR_VARIABLE _stderr OUTPUT_QUIET TIMEOUT 30)
+    string(FIND "${_stderr}" "${_diagnostic}" _position)
+    if(NOT _result STREQUAL "1" OR _position EQUAL -1)
+        message(FATAL_ERROR "Expected ${_diagnostic}, got ${_result}:\n${_stderr}")
+    endif()
+endfunction()
+
 function(_require_text _path _text)
     file(READ "${_path}" _content)
     string(FIND "${_content}" "${_text}" _position)
@@ -129,8 +138,11 @@ _require_text("${_manifest}" "disposition=UNREVIEWED")
 _require_text("${_manifest}" "integrity_status=PASS")
 
 file(APPEND "${_bundle}/status.txt" "tamper\n")
-_run_expect(FALSE "Tampered hosted artifact verification" ${_verify_command})
+_expect_rejection("Hosted artifact size mismatch:" ${_verify_command})
 _run_expect(TRUE "Hosted artifact fixture recreation" ${_create_command})
+_replace_text("${_bundle}/status.txt" "lane_status=PASS" "lane_status=FAIL")
+_expect_rejection("Hosted artifact hash mismatch:" ${_verify_command})
+_run_expect(TRUE "Hosted artifact recreation after same-size tampering" ${_create_command})
 
 file(WRITE "${_bundle}/unlisted.txt" "unlisted_status=PASS\n")
 _run_expect(FALSE "Unlisted hosted artifact verification" ${_verify_command})
@@ -138,12 +150,12 @@ file(REMOVE "${_bundle}/unlisted.txt")
 _run_expect(TRUE "Hosted artifact verification after unlisted-file removal" ${_verify_command})
 
 _replace_text("${_manifest}" "file=review.md|" "file=../review.md|")
-_run_expect(FALSE "Path-traversal hosted artifact verification" ${_verify_command})
+_expect_rejection("Unsafe hosted artifact manifest entry:" ${_verify_command})
 _run_expect(TRUE "Hosted artifact fixture recreation after traversal" ${_create_command})
 
 string(ASCII 92 _backslash)
 _replace_text("${_manifest}" "file=review.md|" "file=C:${_backslash}review.md|")
-_run_expect(FALSE "Drive/backslash hosted artifact path verification" ${_verify_command})
+_expect_rejection("Unsafe hosted artifact manifest entry:" ${_verify_command})
 _run_expect(TRUE "Hosted artifact fixture recreation after drive path" ${_create_command})
 
 file(CREATE_LINK "${_bundle}/status.txt" "${_bundle}/status-link.txt"
@@ -211,6 +223,60 @@ else()
     message(STATUS
         "Intermediate-alias regression skipped because this host cannot create one: ${_intermediate_alias_result}")
 endif()
+
+# Refresh both manifest fields so these fixtures reach the content checks.
+function(_refresh_listed_status)
+    set(_status "${_bundle}/status.txt")
+    file(SIZE "${_status}" _size)
+    file(SHA256 "${_status}" _hash)
+    file(READ "${_manifest}" _contents)
+    string(REGEX MATCH "file=status[.]txt[|]size=[0-9]+[|]sha256=[0-9a-f]+"
+        _entry "${_contents}")
+    _replace_text("${_manifest}" "${_entry}" "file=status.txt|size=${_size}|sha256=${_hash}")
+endfunction()
+
+function(_set_listed_status _data)
+    file(WRITE "${_bundle}/status.txt" "${_data}")
+    _refresh_listed_status()
+endfunction()
+
+# Allowed pairs can resemble forbidden bytes if hex is matched at odd offsets.
+string(REPEAT "p0" 1024 _boundary_text)
+string(ASCII 9 10 13 32 126 128 255 _allowed)
+_set_listed_status("${_boundary_text}${_allowed}\n")
+_run_expect(TRUE "Allowed text bytes across scanner chunks" ${_verify_command})
+
+foreach(_code IN ITEMS 1 2 3 4 5 6 7 8 11 12 14 15
+        16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 127)
+    string(ASCII ${_code} _control)
+    _set_listed_status("${_boundary_text}${_control}suffix\n")
+    _expect_rejection("Hosted artifact must be text-only: status.txt" ${_verify_command})
+endforeach()
+
+# An uncompressed tar of the text fixture supplies raw NUL padding on all hosts.
+execute_process(COMMAND "${CMAKE_COMMAND}" -E tar cf status.txt --format=gnutar review.md
+    WORKING_DIRECTORY "${_bundle}" RESULT_VARIABLE _tar_result TIMEOUT 30)
+file(READ "${_bundle}/status.txt" _nul_hex OFFSET 9 LIMIT 1 HEX)
+if(NOT _tar_result STREQUAL "0" OR NOT _nul_hex STREQUAL "00")
+    message(FATAL_ERROR "Could not create a raw NUL fixture for hosted artifact verification")
+endif()
+_refresh_listed_status()
+_expect_rejection("Hosted artifact must be text-only: status.txt" ${_verify_command})
+
+string(CONCAT _listed_marker "export sign" "ing_token=fixture-only")
+_set_listed_status("${_boundary_text}\n${_listed_marker}\n")
+_expect_rejection("Hosted artifact contains forbidden signing material:" ${_verify_command})
+
+# Keep the performance regression separate from the small integrity fixtures.
+string(REPEAT "00000000: 70 30 7e ff\tcompiler output status line\n" 65536 _large_text)
+_set_listed_status("${_large_text}")
+unset(_large_text)
+execute_process(COMMAND ${_verify_command}
+    RESULT_VARIABLE _large_result OUTPUT_QUIET ERROR_VARIABLE _large_error TIMEOUT 30)
+if(NOT _large_result STREQUAL "0")
+    message(FATAL_ERROR "Large text verification exceeded its budget or failed: ${_large_result}\n${_large_error}")
+endif()
+_run_expect(TRUE "Hosted artifact recreation after byte regressions" ${_create_command})
 
 string(REPEAT "x" 10485761 _oversized_content)
 file(WRITE "${ANO_CRYPTO_TEST_WORK_DIR}/input/oversized.txt" "${_oversized_content}")
