@@ -1,0 +1,33 @@
+name: Hosted smoke investigation
+on:
+  push:
+    branches: [fix/hosted-smoke-reliability]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reproduce:
+    name: ${{ matrix.os }} / ${{ matrix.source }} / Debug
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        source: [main, pr2]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.source == 'main' && 'b3d5e6551b2bcc38b39602592476146e4b81b9b0' || '2110708252c988441594f08c5f7adb4262aa43df' }}
+          path: baseline
+      - name: Reproduce unchanged source with native diagnostics
+        run: cmake -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}/baseline -P tests/hosted_smoke_reproduction.cmake
+      - name: Retain nested smoke diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-reproduction-${{ runner.os }}-${{ matrix.source }}
+          path: |
+            baseline/build/poc-package-smoke/**/*.log
+            baseline/build/poc-package-smoke/**/policy-check/*.txt
+          if-no-files-found: warn
