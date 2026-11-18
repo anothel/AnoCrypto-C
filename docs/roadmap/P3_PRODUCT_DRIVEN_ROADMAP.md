@@ -31,7 +31,8 @@ truthful capability reporting, dependency purity, and no fallback.
 
 ### P3-12 — Phase 1 closeout
 
-The P3-11 committed tree and pinned SDK artifact were audited and frozen. No
+The P3-11 committed tree and pinned SDK artifact were reviewed and frozen.
+This engineering review does not establish independent audit assurance. No
 new implementation or repository closeout commit was required.
 
 ## Exit state

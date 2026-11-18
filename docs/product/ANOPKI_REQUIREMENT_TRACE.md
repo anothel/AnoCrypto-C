@@ -42,4 +42,4 @@ fail-closed.
 - no production HSM/KMS/PKCS#11 qualification;
 - no hosted-success claim;
 - no race-clean claim;
-- no customer release, production-ready, KCMVP, signing, or timestamp claim.
+- no customer release, production readiness, KCMVP certification, signing, or timestamp claim.
