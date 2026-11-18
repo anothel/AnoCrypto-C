@@ -168,6 +168,17 @@ ano_crypto_status_t ano_crypto_module_get_last_error(
     return ANO_CRYPTO_OK;
 }
 
+ano_crypto_status_t ano_crypto_internal_module_require_operational_unlocked(void)
+{
+    if (g_fatal_latched != 0 || g_module_state == ANO_CRYPTO_MODULE_STATE_ERROR_STATE) {
+        return ANO_CRYPTO_ERR_FATAL_STATE;
+    }
+    if (g_module_state != ANO_CRYPTO_MODULE_STATE_OPERATIONAL) {
+        return ANO_CRYPTO_ERR_NOT_INITIALIZED;
+    }
+    return ANO_CRYPTO_OK;
+}
+
 ano_crypto_status_t ano_crypto_module_require_operational(void)
 {
     ano_crypto_status_t st;
@@ -178,13 +189,7 @@ ano_crypto_status_t ano_crypto_module_require_operational(void)
         return st;
     }
 
-    if (g_fatal_latched != 0 || g_module_state == ANO_CRYPTO_MODULE_STATE_ERROR_STATE) {
-        result = ANO_CRYPTO_ERR_FATAL_STATE;
-    } else if (g_module_state != ANO_CRYPTO_MODULE_STATE_OPERATIONAL) {
-        result = ANO_CRYPTO_ERR_NOT_INITIALIZED;
-    } else {
-        result = ANO_CRYPTO_OK;
-    }
+    result = ano_crypto_internal_module_require_operational_unlocked();
 
     ano_crypto_internal_global_unlock();
     return result;

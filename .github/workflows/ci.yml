@@ -211,10 +211,11 @@ jobs:
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_entropy_operational_policy_check
 
       - name: Install
-        run: cmake --install build --config ${{ matrix.build_type }} --prefix install-prefix
+        # The PoC provenance check scans the checkout for unsafe files, including symlinks.
+        run: cmake --install build --config ${{ matrix.build_type }} --prefix "${{ runner.temp }}/anocrypto-sdk"
 
       - name: Configure install smoke
-        run: cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=${{ github.workspace }}/install-prefix -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+        run: cmake -S tests/install_smoke -B build-install-smoke "-DCMAKE_PREFIX_PATH=${{ runner.temp }}/anocrypto-sdk" -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build install smoke
         run: cmake --build build-install-smoke --config ${{ matrix.build_type }} --parallel
@@ -225,11 +226,27 @@ jobs:
 
       - name: Run install smoke on Windows
         if: runner.os == 'Windows'
-        run: .\build-install-smoke\${{ matrix.build_type }}\anocrypto_c_install_smoke.exe
+        shell: pwsh
+        run: |
+          $env:PATH = "${{ runner.temp }}/anocrypto-sdk/bin;$env:PATH"
+          & .\build-install-smoke\${{ matrix.build_type }}\anocrypto_c_install_smoke.exe
+          $nativeExit = $LASTEXITCODE
+          Write-Host "Installed smoke native exit code: $nativeExit"
+          exit $nativeExit
 
       - name: PoC package smoke on Linux thread-safety ON
         if: runner.os == 'Linux' && matrix.thread_safety == 'ON'
         run: cmake --build build --config ${{ matrix.build_type }} --target ano_crypto_poc_package_smoke
+
+      - name: Upload package smoke failure logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-smoke-failure-${{ runner.os }}-thread-safety-${{ matrix.thread_safety }}
+          path: |
+            build/poc-package-smoke/**/*.log
+            build/install-package-smoke/*.log
+          if-no-files-found: warn
 
   differential-validation:
     name: Linux OpenSSL 3.x differential validation
@@ -252,7 +269,7 @@ jobs:
           -DANO_CRYPTO_ENABLE_ENTROPY_TEST_HOOKS=OFF
           -DANO_CRYPTO_ENABLE_RANDOM_TEST_HOOKS=OFF
           -DANO_CRYPTO_ENABLE_THREAD_SAFETY=ON
-          -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=OFF
+          -DANO_CRYPTO_ENABLE_OS_ENTROPY_PROVIDER=ON
           -DANO_CRYPTO_ENABLE_OPENSSL_DIFFERENTIAL_TESTS=ON
           -DANO_CRYPTO_REQUIRE_OPENSSL_DIFFERENTIAL_PROVIDER=ON
           -DANO_CRYPTO_BUILD_GIT_COMMIT=${{ github.sha }}
