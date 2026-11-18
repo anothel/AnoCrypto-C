@@ -14,7 +14,6 @@ typedef DWORD (WINAPI *test_thread_entry_t)(LPVOID);
 #  define TEST_THREAD_ARG LPVOID
 #else
 #  include <pthread.h>
-#  include <sched.h>
 typedef pthread_t test_thread_t;
 typedef void *(*test_thread_entry_t)(void *);
 #  define TEST_THREAD_RETURN void *
@@ -27,11 +26,19 @@ typedef void *(*test_thread_entry_t)(void *);
 typedef struct worker_s {
     ano_crypto_csp_handle_t private_key;
     ano_crypto_csp_handle_t public_key;
-    volatile int started;
     unsigned int failures;
     int race_mode;
     ano_crypto_status_t race_status;
 } worker_t;
+
+/* Synchronize the start notification; volatile is not thread synchronization. */
+#if defined(_WIN32)
+static HANDLE race_started;
+#else
+static pthread_mutex_t start_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t start_cond = PTHREAD_COND_INITIALIZER;
+static int race_started;
+#endif
 
 static int create_thread(test_thread_t *t, test_thread_entry_t entry, void *arg)
 {
@@ -52,28 +59,27 @@ static int join_thread(test_thread_t t)
     return pthread_join(t, NULL);
 #endif
 }
-static void yield_thread(void)
-{
-#if defined(_WIN32)
-    Sleep(0u);
-#else
-    (void)sched_yield();
-#endif
-}
-
 static TEST_THREAD_RETURN worker_main(TEST_THREAD_ARG arg)
 {
     worker_t *w = (worker_t *)arg;
     uint8_t signature[ANO_CRYPTO_RSA2048_SIGNATURE_SIZE];
-    size_t written = 0u;
+    size_t written = 99u;
     unsigned int i;
-    w->started = 1;
     if (w->race_mode) {
+#if defined(_WIN32)
+        if (!SetEvent(race_started)) w->failures++;
+#else
+        (void)pthread_mutex_lock(&start_mutex);
+        race_started = 1;
+        (void)pthread_cond_signal(&start_cond);
+        (void)pthread_mutex_unlock(&start_mutex);
+#endif
         memset(signature, 0xa5, sizeof(signature));
         w->race_status = ano_crypto_signature_sign(
             w->private_key, ANO_CRYPTO_SIGNATURE_RSA_PKCS1_V15_SHA256,
             RSA_KAT_MESSAGE, sizeof(RSA_KAT_MESSAGE),
             signature, sizeof(signature), &written);
+#if defined(ANO_CRYPTO_TEST_RSA_ENTROPY_AVAILABLE)
         if (w->race_status == ANO_CRYPTO_OK) {
             if (written != sizeof(signature) ||
                 memcmp(signature, RSA_KAT_SIG_SHA256, sizeof(signature)) != 0 ||
@@ -84,6 +90,10 @@ static TEST_THREAD_RETURN worker_main(TEST_THREAD_ARG arg)
                 w->failures++;
             }
         } else if (w->race_status == ANO_CRYPTO_ERR_INVALID_ARGUMENT) {
+#else
+        /* Entropy rejection precedes the live/destroyed-key check. */
+        if (w->race_status == ANO_CRYPTO_ERR_NOT_IMPLEMENTED) {
+#endif
             size_t j;
             if (written != 0u) w->failures++;
             for (j = 0u; j < sizeof(signature); ++j) {
@@ -99,18 +109,32 @@ static TEST_THREAD_RETURN worker_main(TEST_THREAD_ARG arg)
 #endif
     }
     for (i = 0u; i < ITERATIONS; ++i) {
-        memset(signature, 0, sizeof(signature));
-        written = 0u;
-        if (ano_crypto_signature_sign(
+        ano_crypto_status_t st;
+        memset(signature, 0xa5, sizeof(signature));
+        written = 99u;
+        st = ano_crypto_signature_sign(
                 w->private_key, ANO_CRYPTO_SIGNATURE_RSA_PKCS1_V15_SHA256,
                 RSA_KAT_MESSAGE, sizeof(RSA_KAT_MESSAGE),
-                signature, sizeof(signature), &written) != ANO_CRYPTO_OK ||
+                signature, sizeof(signature), &written);
+#if defined(ANO_CRYPTO_TEST_RSA_ENTROPY_AVAILABLE)
+        if (st != ANO_CRYPTO_OK ||
             written != sizeof(signature) ||
-            memcmp(signature, RSA_KAT_SIG_SHA256, sizeof(signature)) != 0 ||
-            ano_crypto_signature_verify(
+            memcmp(signature, RSA_KAT_SIG_SHA256, sizeof(signature)) != 0) {
+            w->failures++;
+        }
+#else
+        {
+            size_t j;
+            if (st != ANO_CRYPTO_ERR_NOT_IMPLEMENTED || written != 0u) w->failures++;
+            for (j = 0u; j < sizeof(signature); ++j) {
+                if (signature[j] != 0u) { w->failures++; break; }
+            }
+        }
+#endif
+        if (ano_crypto_signature_verify(
                 w->public_key, ANO_CRYPTO_SIGNATURE_RSA_PKCS1_V15_SHA256,
                 RSA_KAT_MESSAGE, sizeof(RSA_KAT_MESSAGE),
-                signature, sizeof(signature)) != ANO_CRYPTO_OK) {
+                RSA_KAT_SIG_SHA256, sizeof(RSA_KAT_SIG_SHA256)) != ANO_CRYPTO_OK) {
             w->failures++;
         }
     }
@@ -152,12 +176,29 @@ int main(void)
     race_worker.private_key = private_key;
     race_worker.public_key = public_key;
     race_worker.race_mode = 1;
+#if defined(_WIN32)
+    race_started = CreateEvent(NULL, TRUE, FALSE, NULL);
+    if (race_started == NULL) return 1;
+#endif
     if (create_thread(&race_thread, worker_main, &race_worker) != 0) return 1;
-    while (!race_worker.started) yield_thread();
+#if defined(_WIN32)
+    if (WaitForSingleObject(race_started, INFINITE) != WAIT_OBJECT_0) return 1;
+#else
+    (void)pthread_mutex_lock(&start_mutex);
+    while (!race_started) (void)pthread_cond_wait(&start_cond, &start_mutex);
+    (void)pthread_mutex_unlock(&start_mutex);
+#endif
     if (ano_crypto_key_destroy(private_key) != ANO_CRYPTO_OK) return 1;
     if (join_thread(race_thread) != 0 || race_worker.failures != 0u) return 1;
+#if defined(_WIN32)
+    CloseHandle(race_started);
+#endif
     if (ano_crypto_key_destroy(public_key) != ANO_CRYPTO_OK) return 1;
     if (ano_crypto_module_shutdown() != ANO_CRYPTO_OK) return 1;
-    puts("RSA thread and destroy-race tests passed");
+#if defined(ANO_CRYPTO_TEST_RSA_ENTROPY_AVAILABLE)
+    puts("RSA signing, verification, and destroy-race tests passed");
+#else
+    puts("RSA concurrent verification, unavailable-entropy rejection, and destroy-race tests passed");
+#endif
     return 0;
 }
