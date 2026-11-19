@@ -1024,10 +1024,13 @@ if(ANO_CRYPTO_BUILD_TESTS)
         src/core/module_state.c src/core/thread_lock.c src/core/status.c)
     target_include_directories(ano_crypto_module_init_shutdown_race_tests PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
-    target_compile_definitions(ano_crypto_module_init_shutdown_race_tests PRIVATE
-        $<$<BOOL:${ANO_CRYPTO_ENABLE_THREAD_SAFETY}>:ANO_CRYPTO_ENABLE_THREAD_SAFETY=1>)
-    if(Threads_FOUND)
-        target_link_libraries(ano_crypto_module_init_shutdown_race_tests PRIVATE Threads::Threads)
+    # Match the library backend selection, including unavailable-Threads fallback.
+    if(ANO_CRYPTO_ENABLE_THREAD_SAFETY AND (WIN32 OR Threads_FOUND))
+        target_compile_definitions(ano_crypto_module_init_shutdown_race_tests PRIVATE
+            ANO_CRYPTO_ENABLE_THREAD_SAFETY=1)
+        if(Threads_FOUND)
+            target_link_libraries(ano_crypto_module_init_shutdown_race_tests PRIVATE Threads::Threads)
+        endif()
     endif()
     add_dependencies(ano_crypto_module_state_tests ano_crypto_module_init_shutdown_race_tests)
     add_test(NAME ano_crypto_module_state_tests

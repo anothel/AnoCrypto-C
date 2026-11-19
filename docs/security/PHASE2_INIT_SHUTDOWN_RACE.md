@@ -30,7 +30,7 @@ fatal. Mandatory failures, including those from obsolete startup, remain fatal.
 Additional schedules retain an externally latched fatal state while old init
 resumes, and a mandatory failure from old init after a newer init succeeds.
 Successful cancellation is followed by a fresh successful startup. The
-thread-safety-OFF build exercises only serialized startup/shutdown/reinit.
+thread-safety-OFF and unavailable-Threads builds exercise only serialized startup/shutdown/reinit.
 
 ## Verification commands
 
@@ -73,8 +73,9 @@ schedules under ThreadSanitizer; Release thread-safety-OFF focused tests 3/3;
 clean hidden-symbol Release ABI 85/85, public-surface and release compatibility
 policy checks passed. Public-surface policy retains one existing tracked TODO.
 The Release CTest evidence target covered all 102 test indices. The first full
-evidence assembly correctly refused a dirty source tree; rerun after committing
-is recorded in the PR/final handoff. Hosted results are recorded there as well.
+evidence assembly correctly refused a dirty source tree; assembly then passed
+against the clean initial fix commit. Final follow-up commit and hosted results
+are recorded in the PR/final handoff.
 The existing module-state CTest registration remains index 1, and all 102
 release-evidence test registrations and ten evidence ranges remain intact. The
 fixture is a build dependency of that original target. It is not installed and
@@ -89,3 +90,10 @@ The lifecycle generation saturation path is verified by source inspection, not
 2^64 actual startup cycles. Windows/macOS native scheduling must be verified by
 hosted CI. Emergency lock-failure cleanup and broad operation/shutdown barriers
 remain separate review subjects. No independent security approval is claimed.
+
+Automated code review identified fixture/backend drift when CMake Threads was
+unavailable. A configuration with CMAKE_DISABLE_FIND_PACKAGE_Threads=TRUE
+reproduced the fixture incorrectly claiming concurrent coverage while the
+library selected the no-op fallback. The fixture now mirrors the library's
+backend selection; that configuration must report concurrent schedules not run.
+This automated review is not independent human security approval.
