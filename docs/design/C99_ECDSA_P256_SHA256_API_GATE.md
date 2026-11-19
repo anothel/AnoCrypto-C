@@ -37,10 +37,13 @@ handles sign and may verify.
 
 ## Lifecycle and concurrency
 
-P-256 keys use the existing bounded CSP storage and operation lease. Destroy,
-shutdown, and fatal state prevent new operations while a started operation owns
-its lease. Stale handles fail closed. Private scalar and intermediate values are
-zeroized on release.
+P-256 keys use the shared CSP table. The implementation holds the global CSP
+lock during key-slot access and the P-256 computation that uses it. Destroy and
+lock-protected shutdown or fatal cleanup acquire the same lock before clearing
+the stored key. Signing clears operation-local private intermediates before
+returning. Stale handles fail closed. See the
+[CSP lifecycle](C99_CSP_LIFECYCLE.md#p3-08p3-09-implemented-public-key-lifecycle)
+for the caller's responsibility to coordinate shutdown with complete calls.
 
 ## Side-channel posture
 

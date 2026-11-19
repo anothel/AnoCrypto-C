@@ -64,6 +64,7 @@ Existing tests:
 
 - `ano_crypto_thread_lock_tests`: basic internal lock seam smoke test.
 - `ano_crypto_csp_thread_safety_tests`: Win32 native-thread or POSIX pthread concurrent HMAC/AES/CMAC import/use/destroy and shared-handle compute loops when the reviewed backend is available.
+- `ano_crypto_module_state_tests`: library-backed sequential lifecycle checks plus the conditional Issue #8 fixture described below.
 
 P1-21 evidence wiring includes:
 
@@ -77,32 +78,14 @@ The concurrent test uses public synthetic HMAC/AES/CMAC fixture bytes only and m
 
 1. Review actual hosted Windows/macOS/Linux thread artifacts before widening support wording.
 2. Review Clang sanitizer runtime and ThreadSanitizer separately from the required GCC ASan/UBSan lane.
-3. Extend lifecycle review beyond the init/shutdown generation contract below, especially emergency lock failures and caller-owned operation contexts.
-4. Add per-header guidance only where wording is stable enough for a public support boundary.
-5. Decide if future CSP operations require per-slot locks instead of one global lock.
-6. Implement and test the P3-07 operation-lease contract for future public-key types in P3-08.
+3. Add per-header guidance only where wording is stable enough for a public support boundary.
+4. Decide if future CSP operations require per-slot locks instead of one global lock.
 
-## P3-07 approved future public-key concurrency contract
+## Public-key concurrency
 
-P3-07 adds no public-key code. For P3-08, the approved external semantics are:
-
-- import, lookup, destroy, state query, and allocation are serialized when the
-  reviewed lock branch is enabled;
-- sign/verify acquires an operation lease/pin before leaving the object-table
-  critical section; the complete private key is not copied as a snapshot;
-- concurrent explicit destroy marks the object closing, rejects new leases,
-  waits for existing leases, and then zeroizes; later stale-handle calls fail;
-- callers must not use destroy as a cancellation mechanism;
-- module shutdown/fatal transition is a barrier: an in-flight operation finishes
-  before state visibility or aborts and clears output;
-- operation-local private material is cleared before return;
-- thread-safety OFF requires caller serialization of all module and public-key
-  handle operations.
-
-The bounded lease/pin implementation, active-operation accounting, shutdown
-waiting, lock-failure behavior, and concurrency limits are `TODO_P3_08`. These rules do not extend the current runtime support matrix until
-P3-08 implementation and tests pass.
-
+The current RSA and P-256 paths hold the global CSP lock during key-slot access
+and key-dependent computation. Their cleanup boundary and the original P3-07
+design goals are recorded in the [CSP lifecycle](C99_CSP_LIFECYCLE.md#p3-08p3-09-implemented-public-key-lifecycle).
 
 ## Phase 2 module init/shutdown contract (Issue #8)
 
@@ -111,13 +94,17 @@ flight: its successful self-test continuation returns
 `ANO_CRYPTO_ERR_NOT_INITIALIZED`, without publishing `OPERATIONAL` or clearing
 last-error state. A separately requested init after shutdown runs full startup
 checks and may succeed, even while the old startup has not yet returned.
+An init call made while a startup is current returns
+`ANO_CRYPTO_ERR_FATAL_STATE` for that call. The return alone leaves the current
+startup and the fatal latch unchanged.
 
 The final commit of startup success requires both `SELF_TEST_RUNNING` and the
 same private initialization generation captured under the global lock. A state
 check alone cannot distinguish a later startup in the same state. Generations
 never wrap: after `UINT64_MAX` admitted startups, further startup requests return
-`ANO_CRYPTO_ERR_RESOURCE_EXHAUSTED`; an already operational init remains
-idempotent. No public types, status values or symbols are added.
+`ANO_CRYPTO_ERR_RESOURCE_EXHAUSTED`. Init with a null config while already
+operational returns `ANO_CRYPTO_OK` without rerunning startup checks. Repeated
+orderly shutdown returns `ANO_CRYPTO_OK` and leaves the module in `SHUTDOWN`.
 
 Fatal-state and mandatory-self-test failures take precedence over cancellation.
 Even an obsolete startup's mandatory failure remains fatal, and shutdown cannot
@@ -132,10 +119,24 @@ This contract does not revoke existing caller-owned contexts or add an operation
 barrier for every cryptographic API across shutdown/reinitialization.
 
 `ano_crypto_module_state_tests` retains its CTest index and first runs the
-original library-backed tests, then a standalone fixture compiled from the real
+library-backed tests, then a standalone fixture compiled from the real
 `module_state.c` and native lock backend. Only the fixture substitutes startup
 work and CSP cleanup, allowing condition-variable handshakes with no sleeps and
 no hooks in production binaries. Cases cover shutdown-only cancellation,
 old-init/shutdown/new-init with either completion order, external fatal state,
 and an older startup failing after a newer startup succeeds. Existing KATs and
-CSP tests still validate real startup work and zeroization separately.
+CSP tests still validate real startup work and zeroization separately. The
+library-backed tests distinguish an explicit self-test record from startup to
+check idempotent init and a fresh startup after orderly shutdown. They also
+check that shutdown preserves `ERROR_STATE` and its last error.
+
+## Specialized security follow-up
+
+1. Review fatal-state recording and CSP cleanup when the global lock cannot be
+   acquired. See the follow-up noted in Issue #8.
+2. Assess the shutdown/fatal completion and output boundary for in-flight
+   signature operations. Compare the lock-protected key-use interval with the
+   original P3-07 end-to-end barrier goal.
+3. Review caller-owned operation contexts across shutdown and reinitialization
+   by service, including cleanup responsibility and whether any stronger
+   invalidation contract is needed.
