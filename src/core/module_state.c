@@ -7,6 +7,9 @@
 static ano_crypto_module_state_t g_module_state = ANO_CRYPTO_MODULE_STATE_UNINITIALIZED;
 static ano_crypto_status_t g_last_error = ANO_CRYPTO_OK;
 static int g_fatal_latched = 0;
+/* Protected by the global lock. Never reuse an initialization identity: state
+ * alone cannot distinguish an old startup from a new startup after shutdown. */
+static uint64_t g_init_generation = 0u;
 
 static void ano_crypto_set_state_unlocked(ano_crypto_module_state_t state)
 {
@@ -46,6 +49,7 @@ ano_crypto_status_t ano_crypto_module_init(
     const ano_crypto_module_config_t *config)
 {
     ano_crypto_status_t st;
+    uint64_t init_generation;
 
     if (config != 0) {
         return ANO_CRYPTO_ERR_UNSUPPORTED_PARAMETER;
@@ -71,6 +75,11 @@ ano_crypto_status_t ano_crypto_module_init(
         return ANO_CRYPTO_ERR_FATAL_STATE;
     }
 
+    if (g_init_generation == UINT64_MAX) {
+        ano_crypto_internal_global_unlock();
+        return ANO_CRYPTO_ERR_RESOURCE_EXHAUSTED;
+    }
+    init_generation = ++g_init_generation;
     ano_crypto_set_state_unlocked(ANO_CRYPTO_MODULE_STATE_SELF_TEST_RUNNING);
     ano_crypto_internal_global_unlock();
 
@@ -97,6 +106,16 @@ ano_crypto_status_t ano_crypto_module_init(
     if (g_fatal_latched != 0 || g_module_state == ANO_CRYPTO_MODULE_STATE_ERROR_STATE) {
         ano_crypto_internal_global_unlock();
         return ANO_CRYPTO_ERR_FATAL_STATE;
+    }
+
+    /* Shutdown preempts this startup, even if a later init has already reached
+     * SELF_TEST_RUNNING (or OPERATIONAL). Only the current startup may publish
+     * success. Mandatory self-test failures and sticky fatal state above retain
+     * precedence, including failures from an older startup. */
+    if (g_module_state != ANO_CRYPTO_MODULE_STATE_SELF_TEST_RUNNING ||
+        init_generation != g_init_generation) {
+        ano_crypto_internal_global_unlock();
+        return ANO_CRYPTO_ERR_NOT_INITIALIZED;
     }
 
     g_last_error = ANO_CRYPTO_OK;

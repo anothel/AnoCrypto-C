@@ -1017,7 +1017,27 @@ if(ANO_CRYPTO_BUILD_TESTS)
     target_link_libraries(ano_crypto_module_state_tests PRIVATE anocrypto_c)
     target_include_directories(ano_crypto_module_state_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
 
-    add_test(NAME ano_crypto_module_state_tests COMMAND ano_crypto_module_state_tests)
+    # Separate fixture compiles the real state machine and lock backend, with
+    # controlled startup/cleanup dependencies only in this test executable.
+    add_executable(ano_crypto_module_init_shutdown_race_tests
+        tests/unit/module_init_shutdown_race_tests.c
+        src/core/module_state.c src/core/thread_lock.c src/core/status.c)
+    target_include_directories(ano_crypto_module_init_shutdown_race_tests PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/src/internal)
+    # Match the library backend selection, including unavailable-Threads fallback.
+    if(ANO_CRYPTO_ENABLE_THREAD_SAFETY AND (WIN32 OR Threads_FOUND))
+        target_compile_definitions(ano_crypto_module_init_shutdown_race_tests PRIVATE
+            ANO_CRYPTO_ENABLE_THREAD_SAFETY=1)
+        if(Threads_FOUND)
+            target_link_libraries(ano_crypto_module_init_shutdown_race_tests PRIVATE Threads::Threads)
+        endif()
+    endif()
+    add_dependencies(ano_crypto_module_state_tests ano_crypto_module_init_shutdown_race_tests)
+    add_test(NAME ano_crypto_module_state_tests
+        COMMAND ${CMAKE_COMMAND}
+            -DMODULE_STATE_TEST=$<TARGET_FILE:ano_crypto_module_state_tests>
+            -DMODULE_RACE_TEST=$<TARGET_FILE:ano_crypto_module_init_shutdown_race_tests>
+            -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/cmake/module_state_suite.cmake)
 
     add_test(NAME ano_crypto_self_test_integrity_policy_tests
         COMMAND ${CMAKE_COMMAND}
