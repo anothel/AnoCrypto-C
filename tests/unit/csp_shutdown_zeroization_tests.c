@@ -65,6 +65,8 @@ int main(void)
     ano_crypto_csp_handle_t hmac_handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
     ano_crypto_csp_handle_t cipher_handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
     ano_crypto_csp_handle_t cmac_handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
+    uint8_t mac[32];
+    size_t written;
 
     expect_status("module init", ano_crypto_module_init(0), ANO_CRYPTO_OK);
     expect_status("import HMAC",
@@ -103,20 +105,26 @@ int main(void)
     expect_invalid("cipher invalid after shutdown", cipher_handle);
     expect_invalid("CMAC invalid after shutdown", cmac_handle);
 
-    expect_status("explicit destroy HMAC tombstone",
-                  ano_crypto_key_destroy(hmac_handle), ANO_CRYPTO_OK);
     expect_status("explicit destroy cipher tombstone",
                   ano_crypto_key_destroy(cipher_handle), ANO_CRYPTO_OK);
     expect_status("explicit destroy CMAC tombstone",
                   ano_crypto_key_destroy(cmac_handle), ANO_CRYPTO_OK);
-    expect_state("HMAC destroyed", hmac_handle, ANO_CRYPTO_CSP_STATE_DESTROYED);
     expect_state("cipher destroyed", cipher_handle, ANO_CRYPTO_CSP_STATE_DESTROYED);
     expect_state("CMAC destroyed", cmac_handle, ANO_CRYPTO_CSP_STATE_DESTROYED);
 
     expect_status("module reinit", ano_crypto_module_init(0), ANO_CRYPTO_OK);
+    expect_state("HMAC tombstone after reinit", hmac_handle,
+                 ANO_CRYPTO_CSP_STATE_ZEROIZED);
     expect_invalid("old HMAC invalid after reinit", hmac_handle);
     expect_invalid("old cipher invalid after reinit", cipher_handle);
     expect_invalid("old CMAC invalid after reinit", cmac_handle);
+    expect_status("HMAC tombstone rejected after reinit",
+                  ano_crypto_hmac_compute_with_key(ANO_CRYPTO_HASH_ALG_SHA256,
+                      hmac_handle, NULL, 0u, mac, sizeof(mac), &written),
+                  ANO_CRYPTO_ERR_INVALID_ARGUMENT);
+    expect_status("explicit destroy HMAC tombstone after reinit",
+                  ano_crypto_key_destroy(hmac_handle), ANO_CRYPTO_OK);
+    expect_state("HMAC destroyed", hmac_handle, ANO_CRYPTO_CSP_STATE_DESTROYED);
     expect_status("final shutdown", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
 
     if (g_failures != 0) {

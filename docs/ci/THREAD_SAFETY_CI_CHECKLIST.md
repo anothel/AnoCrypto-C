@@ -36,7 +36,16 @@ ctest --test-dir build-no-thread-safety --output-on-failure
 cmake --build build-no-thread-safety --target ano_crypto_thread_safety_policy_check
 ```
 
-The OFF lane is not a concurrency-support lane. It confirms that the build configuration remains explicit and that callers must serialize shared state in that mode.
+The OFF lane covers serialized use. Callers must serialize shared state when the native lock is disabled or unavailable.
+
+`ano_crypto_module_state_tests` runs library-backed sequential lifecycle tests
+in both configurations. With the native backend it also runs the deterministic
+Issue #8 startup cancellation fixture. With thread safety OFF or the lock
+backend unavailable, the fixture uses its sequential fallback. The
+`ano_crypto_csp_shutdown_zeroization_tests` and
+`ano_crypto_csp_fatal_zeroization_tests` entries cover slot cleanup and rejected
+admission after the respective transitions. See the
+[current lifecycle contract](../design/C99_THREAD_SAFETY_POLICY.md#phase-2-module-initshutdown-contract-issue-8).
 
 ## Hosted CI starter lanes
 
@@ -71,5 +80,4 @@ The OFF lane is not a concurrency-support lane. It confirms that the build confi
 
 1. Review and retain actual hosted Linux/macOS/Windows artifacts after successful workflow runs.
 2. Review Clang sanitizer runtime and ThreadSanitizer before adding them as required lanes.
-3. Define concurrent module init/shutdown race semantics.
-4. Keep release-style symbol and build-identity ABI checks in release-candidate review.
+3. Keep release-style symbol and build-identity ABI checks in release-candidate review.

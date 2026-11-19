@@ -51,6 +51,19 @@ static int test_init_selftest_to_operational(void)
     return 0;
 }
 
+static int test_operational_init_preserves_selftest_record(void)
+{
+    uint32_t last_flags;
+
+    /* An explicit run distinguishes its record from a startup check. */
+    ASSERT_STATUS(ano_crypto_selftest_run(ANO_CRYPTO_SELFTEST_FLAG_DEFAULT), ANO_CRYPTO_OK);
+    ASSERT_STATUS(ano_crypto_module_init(0), ANO_CRYPTO_OK);
+    ASSERT_STATUS(ano_crypto_selftest_get_last_flags(&last_flags), ANO_CRYPTO_OK);
+    ASSERT_TRUE(last_flags == ANO_CRYPTO_SELFTEST_FLAG_DEFAULT);
+    ASSERT_STATUS(ano_crypto_module_require_operational(), ANO_CRYPTO_OK);
+    return 0;
+}
+
 static int test_build_and_version_queries(void)
 {
     const char *version = 0;
@@ -78,22 +91,22 @@ static int test_build_and_version_queries(void)
     return 0;
 }
 
-static int test_shutdown_blocks_services(void)
-{
-    ano_crypto_module_state_t state;
-
-    ASSERT_STATUS(ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
-    ASSERT_STATUS(ano_crypto_module_get_state(&state), ANO_CRYPTO_OK);
-    ASSERT_TRUE(state == ANO_CRYPTO_MODULE_STATE_SHUTDOWN);
-    ASSERT_STATUS(ano_crypto_module_require_operational(), ANO_CRYPTO_ERR_NOT_INITIALIZED);
-    return 0;
-}
-
 static int test_orderly_shutdown_allows_full_reinit(void)
 {
     ano_crypto_module_state_t state;
     ano_crypto_status_t last_selftest;
     uint32_t last_flags;
+    unsigned int i;
+
+    ASSERT_STATUS(ano_crypto_selftest_run(ANO_CRYPTO_SELFTEST_FLAG_DEFAULT), ANO_CRYPTO_OK);
+    for (i = 0u; i < 2u; ++i) {
+        ASSERT_STATUS(ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
+        ASSERT_STATUS(ano_crypto_module_get_state(&state), ANO_CRYPTO_OK);
+        ASSERT_TRUE(state == ANO_CRYPTO_MODULE_STATE_SHUTDOWN);
+        ASSERT_STATUS(ano_crypto_module_require_operational(), ANO_CRYPTO_ERR_NOT_INITIALIZED);
+    }
+    ASSERT_STATUS(ano_crypto_selftest_get_last_flags(&last_flags), ANO_CRYPTO_OK);
+    ASSERT_TRUE(last_flags == ANO_CRYPTO_SELFTEST_FLAG_DEFAULT);
 
     ASSERT_STATUS(ano_crypto_module_init(0), ANO_CRYPTO_OK);
     ASSERT_STATUS(ano_crypto_module_get_state(&state), ANO_CRYPTO_OK);
@@ -120,6 +133,12 @@ static int test_internal_fatal_transition_enters_error_state(void)
     ASSERT_TRUE(last_error == ANO_CRYPTO_ERR_SELF_TEST_FAILED);
     ASSERT_STATUS(ano_crypto_module_require_operational(), ANO_CRYPTO_ERR_FATAL_STATE);
     ASSERT_STATUS(ano_crypto_module_init(0), ANO_CRYPTO_ERR_FATAL_STATE);
+
+    ASSERT_STATUS(ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
+    ASSERT_STATUS(ano_crypto_module_get_state(&state), ANO_CRYPTO_OK);
+    ASSERT_TRUE(state == ANO_CRYPTO_MODULE_STATE_ERROR_STATE);
+    ASSERT_STATUS(ano_crypto_module_get_last_error(&last_error), ANO_CRYPTO_OK);
+    ASSERT_TRUE(last_error == ANO_CRYPTO_ERR_SELF_TEST_FAILED);
     return 0;
 }
 
@@ -131,10 +150,10 @@ int main(void)
     if (test_init_selftest_to_operational() != 0) {
         return 1;
     }
-    if (test_build_and_version_queries() != 0) {
+    if (test_operational_init_preserves_selftest_record() != 0) {
         return 1;
     }
-    if (test_shutdown_blocks_services() != 0) {
+    if (test_build_and_version_queries() != 0) {
         return 1;
     }
     if (test_orderly_shutdown_allows_full_reinit() != 0) {

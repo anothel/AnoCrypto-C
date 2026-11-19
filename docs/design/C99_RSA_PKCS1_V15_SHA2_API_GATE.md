@@ -29,16 +29,17 @@ remain downstream-owned.
 ## Handle and lifecycle contract
 
 The existing opaque CSP handle is reused. Public imports create verify-only
-public-key handles. Complete private imports create sign-capable private-key
-handles; private handles may also verify. Handles are non-copyable values,
-non-exportable through this API, stale after destroy/shutdown, and zeroized by
-the existing CSP lifecycle. The bounded CSP table performs no production heap
-allocation.
+public-key handles. Complete private imports create private-key handles that
+can sign and verify. Copies of a handle value refer to the same CSP slot. The
+module clears the stored key on destroy and lock-protected shutdown or fatal
+cleanup, invalidating all copies. The bounded CSP table performs no production
+heap allocation and provides no key export.
 
-The P3-08 implementation serializes RSA access with the existing CSP lock. This
-is a conservative operation lease: destroy and shutdown cannot erase a key
-while sign/verify is active. It is correct but intentionally not a throughput
-claim.
+The P3-08 implementation holds the existing CSP lock over key-slot access and
+the RSA computation that uses it. Destroy and lock-protected shutdown wait for
+that interval to end before clearing the stored key. See the
+[CSP lifecycle](C99_CSP_LIFECYCLE.md#p3-08p3-09-implemented-public-key-lifecycle)
+for the caller's responsibility to coordinate shutdown with complete calls.
 
 ## Failure and buffer rules
 
