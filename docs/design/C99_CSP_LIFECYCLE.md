@@ -49,7 +49,7 @@ When a fatal transition acquires the global lock, it clears every live module-ow
 
 ### Caller-owned contexts
 
-The module does not retain addresses of caller-owned opaque contexts. Coordinate shutdown with users of those contexts, follow the service-specific finalization and cleanup rules, and initialize fresh contexts for the next operational period. A streaming AES-256-GCM context snapshots the expanded key schedule during init. Destroying the originating CSP handle prevents new initialization with that handle while the initialized context retains its snapshot. Module-wide table cleanup covers module-owned slots. Abandoned contexts, forced process termination, OS copies, swap, core dumps, hibernation, VM snapshots, debugger copies, and hardware remanence are outside that boundary.
+The module does not retain addresses of caller-owned opaque contexts. Coordinate shutdown with users of those contexts, follow the service-specific finalization and cleanup rules, and initialize fresh contexts for the next operational period. A streaming AES-256-GCM context snapshots the expanded key schedule during init. Destroying the originating CSP handle prevents new initialization with that handle while the initialized context retains its snapshot. Module-wide table cleanup covers module-owned slots. Abandoned contexts, forced process termination, OS copies, swap, core dumps, hibernation, VM snapshots, debugger copies, and hardware remanence are outside that boundary. See the [caller-owned context lifecycle](C99_CALLER_OWNED_CONTEXT_LIFECYCLE.md) for per-service cleanup and restart procedures.
 
 ## Thread/process rules
 

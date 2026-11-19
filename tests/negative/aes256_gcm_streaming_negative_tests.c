@@ -28,6 +28,8 @@ int main(void)
     uint8_t key_bytes[32] = {0u};
     uint8_t wrong_key_bytes[32] = {1u};
     uint8_t nonce[12] = {0u};
+    static const uint8_t shutdown_nonce[12] = {0x41u};
+    static const uint8_t shutdown_final_nonce[12] = {0x42u};
     uint8_t aad[3] = {1u,2u,3u};
     uint8_t input[32];
     uint8_t overlap_payload[33];
@@ -39,7 +41,8 @@ int main(void)
     ano_crypto_csp_handle_t wrong_key = ANO_CRYPTO_CSP_INVALID_HANDLE;
     ano_crypto_csp_handle_t snapshot_key = ANO_CRYPTO_CSP_INVALID_HANDLE;
     size_t ctx_size = 0u;
-    void *ctx = 0;
+    uint8_t *ctx = 0;
+    uint8_t *final_ctx = 0;
     uint8_t *misaligned_storage = 0;
     union {
         size_t written;
@@ -54,9 +57,15 @@ int main(void)
     memset(output, 0xa5, sizeof(output));
 
     expect_status("context size", ano_crypto_aes256_gcm_stream_context_size(&ctx_size), ANO_CRYPTO_OK);
-    ctx = calloc(1u, ctx_size);
+    ctx = (uint8_t *)calloc(1u, ctx_size + 1u);
+    final_ctx = (uint8_t *)calloc(1u, ctx_size);
     misaligned_storage = (uint8_t *)calloc(1u, ctx_size + 1u);
-    if (ctx == 0 || misaligned_storage == 0) return 2;
+    if (ctx == 0 || final_ctx == 0 || misaligned_storage == 0) {
+        free(ctx);
+        free(final_ctx);
+        free(misaligned_storage);
+        return 2;
+    }
 
     expect_status("update before init", ano_crypto_aes256_gcm_stream_update(
         ctx, input, sizeof(input), output, sizeof(output), &written), ANO_CRYPTO_ERR_NOT_INITIALIZED);
@@ -169,25 +178,79 @@ int main(void)
         nonce, sizeof(nonce), 0u), ANO_CRYPTO_ERR_INVALID_ARGUMENT);
 
     memset(ctx, 0xa5, ctx_size);
+    expect_status("zero-length GCM uninit", ano_crypto_aes256_gcm_stream_uninit(ctx, 0u),
+                  ANO_CRYPTO_ERR_BUFFER_TOO_SMALL);
+    for (i = 0u; i < ctx_size; ++i) {
+        if (ctx[i] != 0xa5u) {
+            fputs("FAIL zero-length GCM cleanup changed storage\n", stderr);
+            ++failures;
+            break;
+        }
+    }
     expect_status("short uninit", ano_crypto_aes256_gcm_stream_uninit(ctx, ctx_size - 1u), ANO_CRYPTO_ERR_BUFFER_TOO_SMALL);
-    if (!all_zero((const uint8_t *)ctx, ctx_size - 1u)) { fprintf(stderr, "FAIL short uninit clearing\n"); ++failures; }
+    if (!all_zero(ctx, ctx_size - 1u) || ctx[ctx_size - 1u] != 0xa5u) {
+        fputs("FAIL GCM short cleanup extent\n", stderr);
+        ++failures;
+    }
     expect_status("full uninit", ano_crypto_aes256_gcm_stream_uninit(ctx, ctx_size), ANO_CRYPTO_OK);
 
     expect_status("shutdown-context init", ano_crypto_aes256_gcm_stream_init(
         ctx, ctx_size, ANO_CRYPTO_AEAD_DIRECTION_ENCRYPT, key,
-        nonce, sizeof(nonce), 0u), ANO_CRYPTO_OK);
+        shutdown_nonce, sizeof(shutdown_nonce), 0u), ANO_CRYPTO_OK);
+    expect_status("shutdown-final context init", ano_crypto_aes256_gcm_stream_init(
+        final_ctx, ctx_size, ANO_CRYPTO_AEAD_DIRECTION_ENCRYPT, key,
+        shutdown_final_nonce, sizeof(shutdown_final_nonce), 0u), ANO_CRYPTO_OK);
     expect_status("module shutdown", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
     memset(output, 0xa5, sizeof(output));
+    written = 99u;
     expect_status("update after shutdown", ano_crypto_aes256_gcm_stream_update(
         ctx, input, sizeof(input), output, sizeof(output), &written), ANO_CRYPTO_ERR_NOT_INITIALIZED);
-    if (!all_zero(output, sizeof(output))) { fprintf(stderr, "FAIL shutdown output clearing\n"); ++failures; }
-    expect_status("cleanup after shutdown", ano_crypto_aes256_gcm_stream_uninit(ctx, ctx_size), ANO_CRYPTO_OK);
+    if (written != 0u || !all_zero(output, sizeof(output))) {
+        fputs("FAIL GCM shutdown update output clearing\n", stderr);
+        ++failures;
+    }
+    memset(tag, 0xa5, sizeof(tag));
+    expect_status("GCM final after shutdown", ano_crypto_aes256_gcm_stream_encrypt_final(
+        final_ctx, tag, sizeof(tag)), ANO_CRYPTO_ERR_NOT_INITIALIZED);
+    if (!all_zero(final_ctx, ctx_size) || !all_zero(tag, sizeof(tag))) {
+        fputs("FAIL GCM shutdown final did not clear context and tag\n", stderr);
+        ++failures;
+    }
+    ctx[ctx_size] = 0xa5u;
+    expect_status("cleanup after shutdown", ano_crypto_aes256_gcm_stream_uninit(ctx, ctx_size + 1u), ANO_CRYPTO_OK);
+    if (!all_zero(ctx, ctx_size) || ctx[ctx_size] != 0xa5u) {
+        fputs("FAIL GCM cleanup did not stay within the opaque extent\n", stderr);
+        ++failures;
+    }
 
     expect_status("module reinit", ano_crypto_module_init(0), ANO_CRYPTO_OK);
+    nonce[0] = 0xa5u;
+    expect_status("GCM stale handle after reinit", ano_crypto_aes256_gcm_stream_init(
+        ctx, ctx_size, ANO_CRYPTO_AEAD_DIRECTION_ENCRYPT, key,
+        nonce, sizeof(nonce), 0u), ANO_CRYPTO_ERR_INVALID_ARGUMENT);
     expect_status("destroy key", ano_crypto_key_destroy(key), ANO_CRYPTO_OK);
     expect_status("destroy wrong key", ano_crypto_key_destroy(wrong_key), ANO_CRYPTO_OK);
+    expect_status("fresh GCM key import", ano_crypto_key_import_secret(
+        ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER, key_bytes, sizeof(key_bytes), 0u, &key), ANO_CRYPTO_OK);
+    expect_status("fresh GCM init", ano_crypto_aes256_gcm_stream_init(
+        ctx, ctx_size, ANO_CRYPTO_AEAD_DIRECTION_ENCRYPT, key, nonce, sizeof(nonce), 0u),
+        ANO_CRYPTO_OK);
+    expect_status("fresh GCM update", ano_crypto_aes256_gcm_stream_update(
+        ctx, input, sizeof(input), output, sizeof(output), &written), ANO_CRYPTO_OK);
+    if (written != sizeof(input)) {
+        fputs("FAIL GCM payload length\n", stderr);
+        ++failures;
+    }
+    expect_status("fresh GCM final", ano_crypto_aes256_gcm_stream_encrypt_final(
+        ctx, tag, sizeof(tag)), ANO_CRYPTO_OK);
+    if (!all_zero(ctx, ctx_size)) {
+        fputs("FAIL GCM final did not clear context\n", stderr);
+        ++failures;
+    }
+    expect_status("destroy fresh GCM key", ano_crypto_key_destroy(key), ANO_CRYPTO_OK);
     expect_status("final shutdown", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
     free(ctx);
+    free(final_ctx);
     free(misaligned_storage);
 
     if (failures != 0) {

@@ -136,6 +136,7 @@ static void test_provider_available(void)
     static const uint8_t personalization[] = { 'p', '1', '-', '1', '9' };
     static const uint8_t additional_input[] = { 0x11u, 0x22u, 0x33u };
     uint8_t out[48];
+    uint8_t cleanup_probe[2] = {0xa5u, 0xa5u};
     uint8_t entropy[ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_ENTROPY_INPUT_SIZE];
     uint8_t nonce[ANO_CRYPTO_DRBG_HMAC_SHA256_MIN_NONCE_SIZE];
     uint8_t *ctx = 0;
@@ -151,7 +152,7 @@ static void test_provider_available(void)
                   ano_crypto_random_context_size(&ctx_size), ANO_CRYPTO_OK);
     expect_true("random context size nonzero", ctx_size != 0u);
 
-    ctx = (uint8_t *)malloc(ctx_size);
+    ctx = (uint8_t *)malloc(ctx_size + 1u);
     if (ctx == 0) {
         fprintf(stderr, "FAIL random context allocation\n");
         ++g_failures;
@@ -322,9 +323,36 @@ static void test_provider_available(void)
                       ctx, out, sizeof(out), 0, 0u, ANO_CRYPTO_RANDOM_FLAG_NONE),
                   ANO_CRYPTO_ERR_NOT_INITIALIZED);
     expect_true("post-shutdown generate clears output", buffer_is_zero(out, sizeof(out)));
+    expect_status("random reseed after shutdown",
+                  ano_crypto_random_reseed(ctx, 0, 0u, ANO_CRYPTO_RANDOM_FLAG_NONE),
+                  ANO_CRYPTO_ERR_NOT_INITIALIZED);
 
-    expect_status("random uninit", ano_crypto_random_uninit(ctx, ctx_size), ANO_CRYPTO_OK);
-    expect_true("random uninit clears context", buffer_is_zero(ctx, ctx_size));
+    expect_status("zero-length random cleanup", ano_crypto_random_uninit(cleanup_probe, 0u),
+                  ANO_CRYPTO_OK);
+    expect_true("zero-length random cleanup preserves storage",
+                buffer_is_value(cleanup_probe, sizeof(cleanup_probe), 0xa5u));
+    expect_status("short random cleanup", ano_crypto_random_uninit(cleanup_probe, 1u),
+                  ANO_CRYPTO_OK);
+    expect_true("short random cleanup clears only the prefix",
+                cleanup_probe[0] == 0u && cleanup_probe[1] == 0xa5u);
+    ctx[ctx_size] = 0xa5u;
+    expect_status("random uninit after shutdown", ano_crypto_random_uninit(ctx, ctx_size + 1u),
+                  ANO_CRYPTO_OK);
+    expect_true("random uninit clears supplied extent", buffer_is_zero(ctx, ctx_size + 1u));
+
+    expect_status("module reinit for fresh random context", ano_crypto_module_init(0), ANO_CRYPTO_OK);
+    expect_status("fresh random init",
+                  ano_crypto_random_init(ctx, ctx_size, personalization, sizeof(personalization),
+                      ANO_CRYPTO_RANDOM_FLAG_NONE), ANO_CRYPTO_OK);
+    expect_status("fresh random reseed",
+                  ano_crypto_random_reseed(ctx, additional_input, sizeof(additional_input),
+                      ANO_CRYPTO_RANDOM_FLAG_NONE), ANO_CRYPTO_OK);
+    expect_status("fresh random generate",
+                  ano_crypto_random_generate(ctx, out, sizeof(out), 0, 0u,
+                      ANO_CRYPTO_RANDOM_FLAG_NONE), ANO_CRYPTO_OK);
+    (void)ano_crypto_csp_zeroize(out, sizeof(out));
+    expect_status("fresh random cleanup", ano_crypto_random_uninit(ctx, ctx_size), ANO_CRYPTO_OK);
+    expect_status("final module shutdown", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
     free(ctx);
 }
 

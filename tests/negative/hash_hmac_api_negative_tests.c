@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <anocrypto/anocrypto.h>
 
 static int g_failures = 0;
@@ -134,10 +135,81 @@ static void test_hmac_negative_cases(void)
                   ANO_CRYPTO_ERR_INVALID_ARGUMENT);
 }
 
+static void expect_hmac_storage_cleared(const uint8_t *ctx, size_t ctx_size)
+{
+    size_t i;
+
+    for (i = 0u; i < ctx_size; ++i) {
+        if (ctx[i] != 0u) {
+            fputs("FAIL HMAC context storage was not cleared\n", stderr);
+            ++g_failures;
+            break;
+        }
+    }
+}
+
+static void test_hmac_shutdown_and_reinit(ano_crypto_hash_algorithm_t algorithm)
+{
+    static const uint8_t key[] = { 'k', 'e', 'y' };
+    static const uint8_t msg[] = { 'a', 'b', 'c' };
+    uint8_t out[64];
+    size_t ctx_size = 0u;
+    size_t mac_size = 0u;
+    size_t written = 0u;
+    uint8_t *ctx;
+
+    expect_status("HMAC context size", ano_crypto_hmac_context_size(algorithm, &ctx_size),
+                  ANO_CRYPTO_OK);
+    expect_status("HMAC tag size", ano_crypto_hmac_mac_size(algorithm, &mac_size),
+                  ANO_CRYPTO_OK);
+    if (ctx_size == 0u || mac_size == 0u || mac_size > sizeof(out)) {
+        ++g_failures;
+        return;
+    }
+    ctx = (uint8_t *)malloc(ctx_size);
+    if (ctx == NULL) {
+        ++g_failures;
+        return;
+    }
+
+    expect_status("HMAC init", ano_crypto_hmac_init(ctx, ctx_size, algorithm, key, sizeof(key)),
+                  ANO_CRYPTO_OK);
+    expect_status("HMAC update", ano_crypto_hmac_update(ctx, msg, sizeof(msg)), ANO_CRYPTO_OK);
+    expect_status("module shutdown with active HMAC", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
+    expect_status("HMAC update after shutdown", ano_crypto_hmac_update(ctx, msg, sizeof(msg)),
+                  ANO_CRYPTO_ERR_NOT_INITIALIZED);
+    expect_status("HMAC final after shutdown", ano_crypto_hmac_final(ctx, out, sizeof(out), &written),
+                  ANO_CRYPTO_ERR_NOT_INITIALIZED);
+    expect_status("explicit clear of abandoned HMAC", ano_crypto_csp_zeroize(ctx, ctx_size),
+                  ANO_CRYPTO_OK);
+    expect_hmac_storage_cleared(ctx, ctx_size);
+
+    expect_status("module reinit for fresh HMAC", ano_crypto_module_init(0), ANO_CRYPTO_OK);
+    expect_status("fresh HMAC init", ano_crypto_hmac_init(ctx, ctx_size, algorithm, key, sizeof(key)),
+                  ANO_CRYPTO_OK);
+    expect_status("fresh HMAC update", ano_crypto_hmac_update(ctx, msg, sizeof(msg)), ANO_CRYPTO_OK);
+    expect_status("short HMAC final", ano_crypto_hmac_final(ctx, out, mac_size - 1u, &written),
+                  ANO_CRYPTO_ERR_BUFFER_TOO_SMALL);
+    expect_status("retry HMAC final", ano_crypto_hmac_final(ctx, out, sizeof(out), &written),
+                  ANO_CRYPTO_OK);
+    if (written != mac_size) {
+        fputs("FAIL HMAC final tag length\n", stderr);
+        ++g_failures;
+    }
+    expect_hmac_storage_cleared(ctx, ctx_size);
+    expect_status("HMAC repeat final", ano_crypto_hmac_final(ctx, out, sizeof(out), &written),
+                  ANO_CRYPTO_ERR_INVALID_ARGUMENT);
+    (void)ano_crypto_csp_zeroize(ctx, ctx_size);
+    free(ctx);
+}
+
 int main(void)
 {
     test_hash_negative_cases();
     test_hmac_negative_cases();
+    test_hmac_shutdown_and_reinit(ANO_CRYPTO_HASH_ALG_SHA256);
+    test_hmac_shutdown_and_reinit(ANO_CRYPTO_HASH_ALG_SHA384);
+    test_hmac_shutdown_and_reinit(ANO_CRYPTO_HASH_ALG_SHA512);
 
     expect_status("module shutdown", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
 
