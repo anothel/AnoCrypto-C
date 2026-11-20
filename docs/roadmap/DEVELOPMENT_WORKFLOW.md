@@ -74,6 +74,34 @@ Each task should follow this loop:
    - Create a patch against the previous step.
    - Include one recommended commit title that represents the complete task, because each task is committed as one commit.
 
+## Agent-assisted delivery
+
+Use this workflow for maintainer-authorized tasks. [Current / Active / Next](CURRENT_ACTIVE_NEXT.md) governs product priorities. The Delivery Master confirms scope, sequences dependencies, assigns bounded work, checks the evidence, and coordinates the draft PR and handoff. The maintainer owns priorities, scope changes, reviewer designation, and merge decisions. Release authorization follows its separate policy.
+
+| Role | Responsibility |
+|---|---|
+| Implementation | Make the smallest authorized change and provide the commit, affected paths, and supporting checks. |
+| Testing | Verify the candidate revision in a separate worktree or clean checkout. Report commands, configuration, outcomes, and gaps. Coordinate any test edits with the assigned writer. |
+| Refactoring | Take explicitly scoped behavior-preserving work. Show evidence that the relevant public, lifecycle, and security contracts hold. Raise any proposed behavior change for a separate decision. |
+| Review | Independently review scope, correctness, test evidence, and relevant security boundaries against the candidate revision. Record findings and disposition. An agent review is advisory. |
+
+### Issue, worktree, and draft PR
+
+1. Record the scope, acceptance criteria, owner, dependencies, authorized paths, base commit, expected checks, and any security gates in the issue or its linked handoff. Give each agent its role, paths, revision, and escalation conditions.
+2. Give each concurrent writer a dedicated issue-linked branch and Git worktree, plus separate build and evidence directories. Start from the recorded base or an explicitly recorded dependency revision. Check for existing branches and worktrees first. Coordinate overlapping edits through one assigned writer. Keep other people's worktrees and branches intact.
+3. Return the revision and handoff to the Delivery Master, who coordinates integration on the issue branch. Retain the existing one-commit-per-task convention. Open a draft PR against `main` and cite the issue, for example `Refs #123`. Use a closing keyword only when merging fully satisfies the issue. Put the PR link and milestone status in the issue.
+4. Recheck the candidate after any head change. Record which revision was tested and reviewed, and bring unresolved findings or scope changes back to the maintainer. The maintainer decides when to move a draft to review or merge it.
+
+### CI and security gates
+
+- Follow the default task loop and the [CI matrix](../ci/CI_MATRIX.md). Review the configured [CI](../../.github/workflows/ci.yml) and [installed SDK smoke](../../.github/workflows/hosted-smoke.yml) results for the latest PR revision, plus any GitHub-required checks. For documentation-only work, verify the diff, links, and policy consistency and record the checks actually run. For code changes, run the applicable local build, CTest, and policy checks. Include install, PoC, ABI, or other evidence when the affected contract calls for it. Escalate missing, skipped, or failed required checks before recommending merge.
+- If work would change algorithms, key handling or zeroization, entropy or DRBG, caller or module lifecycle, concurrency or failure behavior, public API/ABI, validation coverage, or release controls, pause the affected change for a recorded maintainer scope decision. At scope approval, the maintainer records who will provide independent human security review. A qualified maintainer may review a change they did not author or implement. Before recommending merge, record the reviewer's disposition for the exact candidate. If an eligible reviewer is unavailable, record the blocker and keep the affected change in draft while the maintainer arranges review, narrows the scope, or defers the work. Follow any stricter reviewer requirements in the applicable policy. The maintainer retains the engineering merge decision. Apply the relevant [API/ABI](../design/API_ABI_REVIEW_CHECKLIST.md), [secure-coding](../kcmvp/KCMVP_SECURE_CODING_REVIEW.md), [side-channel](../security/SIDE_CHANNEL_REVIEW_CHECKLIST.md), and [clean-room](../../cleanroom/SOURCE_MANIFEST.md) guidance.
+- Preserve the [tagged-release](../release/TAGGED_RELEASE_COMPATIBILITY_POLICY.md) and [provenance and signing](../release/RELEASE_PROVENANCE_AND_SIGNING_POLICY.md) gates. Engineering CI and agent reviews supply engineering evidence. Hosted qualification, signing, KCMVP claims, customer distribution, and external release require their existing separate decisions. Report `EXTERNAL_RELEASE_NOT_AUTHORIZED` while that gate remains blocked.
+
+### Handoff and reporting
+
+Use the issue for scope decisions and milestone status. Use the PR for changed paths, base and head SHAs, local commands and configuration, pass/fail counts, hosted run links, review disposition, open risks, and requested owner decisions. Record missing evidence as pending, skipped, or blocked with the reason. Label local, synthetic, and hosted evidence by origin. Use status-only evidence where required and keep secret or customer material out of logs, artifacts, and public discussions.
+
 ## P1-12 placement
 
 P1-12 is the scope-lock planning step after the P1-11 customer PoC package skeleton. It intentionally avoids adding block cipher code. The desired output is a set of review documents and evidence placeholders that make the next implementation step safer.
