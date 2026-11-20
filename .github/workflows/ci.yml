@@ -134,7 +134,7 @@ jobs:
           -DANO_CRYPTO_HOSTED_ARTIFACT_ORIGIN=HOSTED_RUNNER
           -DANO_CRYPTO_HOSTED_EXECUTION_STATUS=COMPLETED
           -DANO_CRYPTO_HOSTED_WORKFLOW_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -DANO_CRYPTO_HOSTED_REVIEW_STATUS=UNREVIEWED
           -DANO_CRYPTO_HOSTED_REVIEWER=UNPROVISIONED
           -DANO_CRYPTO_HOSTED_REVIEW_DATE=UNREVIEWED
@@ -149,7 +149,7 @@ jobs:
           -DANO_CRYPTO_EXPECTED_HOSTED_LANE=platform-thread-safety-${{ matrix.thread_safety }}
           -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=${{ runner.os }}
           -DANO_CRYPTO_EXPECTED_HOSTED_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -P tools/check_hosted_artifact_manifest.cmake
 
       - name: Upload hosted platform review bundle
@@ -312,7 +312,7 @@ jobs:
           -DANO_CRYPTO_HOSTED_ARTIFACT_ORIGIN=HOSTED_RUNNER
           -DANO_CRYPTO_HOSTED_EXECUTION_STATUS=COMPLETED
           -DANO_CRYPTO_HOSTED_WORKFLOW_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -DANO_CRYPTO_HOSTED_REVIEW_STATUS=UNREVIEWED
           -DANO_CRYPTO_HOSTED_REVIEWER=UNPROVISIONED
           -DANO_CRYPTO_HOSTED_REVIEW_DATE=UNREVIEWED
@@ -327,7 +327,7 @@ jobs:
           -DANO_CRYPTO_EXPECTED_HOSTED_LANE=openssl-differential
           -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=Linux
           -DANO_CRYPTO_EXPECTED_HOSTED_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -P tools/check_hosted_artifact_manifest.cmake
 
       - name: Upload differential hosted bundle
@@ -426,7 +426,7 @@ jobs:
           -DANO_CRYPTO_HOSTED_ARTIFACT_ORIGIN=HOSTED_RUNNER
           -DANO_CRYPTO_HOSTED_EXECUTION_STATUS=COMPLETED
           -DANO_CRYPTO_HOSTED_WORKFLOW_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -DANO_CRYPTO_HOSTED_REVIEW_STATUS=UNREVIEWED
           -DANO_CRYPTO_HOSTED_REVIEWER=UNPROVISIONED
           -DANO_CRYPTO_HOSTED_REVIEW_DATE=UNREVIEWED
@@ -441,7 +441,7 @@ jobs:
           -DANO_CRYPTO_EXPECTED_HOSTED_LANE=linux-32bit-portability
           -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=Linux
           -DANO_CRYPTO_EXPECTED_HOSTED_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -P tools/check_hosted_artifact_manifest.cmake
 
       - name: Upload 32-bit hosted bundle
@@ -514,7 +514,7 @@ jobs:
           -DANO_CRYPTO_HOSTED_ARTIFACT_ORIGIN=HOSTED_RUNNER
           -DANO_CRYPTO_HOSTED_EXECUTION_STATUS=COMPLETED
           -DANO_CRYPTO_HOSTED_WORKFLOW_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -DANO_CRYPTO_HOSTED_REVIEW_STATUS=UNREVIEWED
           -DANO_CRYPTO_HOSTED_REVIEWER=UNPROVISIONED
           -DANO_CRYPTO_HOSTED_REVIEW_DATE=UNREVIEWED
@@ -529,7 +529,7 @@ jobs:
           -DANO_CRYPTO_EXPECTED_HOSTED_LANE=aes-cmac-compiler-output-${{ matrix.cc }}
           -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=Linux
           -DANO_CRYPTO_EXPECTED_HOSTED_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -P tools/check_hosted_artifact_manifest.cmake
 
       - name: Upload compiler-output hosted bundle
@@ -620,7 +620,7 @@ jobs:
           -DANO_CRYPTO_HOSTED_ARTIFACT_ORIGIN=HOSTED_RUNNER
           -DANO_CRYPTO_HOSTED_EXECUTION_STATUS=COMPLETED
           -DANO_CRYPTO_HOSTED_WORKFLOW_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -DANO_CRYPTO_HOSTED_REVIEW_STATUS=UNREVIEWED
           -DANO_CRYPTO_HOSTED_REVIEWER=UNPROVISIONED
           -DANO_CRYPTO_HOSTED_REVIEW_DATE=UNREVIEWED
@@ -635,7 +635,7 @@ jobs:
           -DANO_CRYPTO_EXPECTED_HOSTED_LANE=linux-s390x-big-endian
           -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=Linux
           -DANO_CRYPTO_EXPECTED_HOSTED_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -P tools/check_hosted_artifact_manifest.cmake
 
       - name: Upload s390x hosted bundle
@@ -852,7 +852,7 @@ jobs:
           cmake
           -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
           -DANO_CRYPTO_BUILD_DIR=${{ github.workspace }}/build-clean-release
-          -DANO_CRYPTO_ACTUAL_RELEASE_TAG=${{ github.ref_name }}
+          "-DANO_CRYPTO_ACTUAL_RELEASE_TAG=${{ runner.os == 'Windows' && '$env:GITHUB_REF_NAME' || '$GITHUB_REF_NAME' }}"
           -DANO_CRYPTO_ACTUAL_RELEASE_COMMIT=${{ github.sha }}
           -DANO_CRYPTO_REQUIRE_ACTUAL_RELEASE_TAG=ON
           -DANO_CRYPTO_RELEASE_COMPATIBILITY_CHECK_OUTPUT=${{ github.workspace }}/build-clean-release/policy-check/TAGGED_RELEASE_COMPATIBILITY_CHECK.txt
@@ -872,7 +872,7 @@ jobs:
           -DANO_CRYPTO_HOSTED_ARTIFACT_ORIGIN=HOSTED_RUNNER
           -DANO_CRYPTO_HOSTED_EXECUTION_STATUS=COMPLETED
           -DANO_CRYPTO_HOSTED_WORKFLOW_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -DANO_CRYPTO_HOSTED_REVIEW_STATUS=UNREVIEWED
           -DANO_CRYPTO_HOSTED_REVIEWER=UNPROVISIONED
           -DANO_CRYPTO_HOSTED_REVIEW_DATE=UNREVIEWED
@@ -887,7 +887,7 @@ jobs:
           -DANO_CRYPTO_EXPECTED_HOSTED_LANE=clean-release-symbol-compatibility
           -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=${{ runner.os }}
           -DANO_CRYPTO_EXPECTED_HOSTED_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -P tools/check_hosted_artifact_manifest.cmake
 
       - name: Upload exported-symbol hosted bundle
@@ -924,7 +924,7 @@ jobs:
           cmake
           -DANO_CRYPTO_SOURCE_DIR=${{ github.workspace }}
           -DANO_CRYPTO_BUILD_DIR=${{ github.workspace }}/build-tag-identity
-          -DANO_CRYPTO_ACTUAL_RELEASE_TAG=${{ github.ref_name }}
+          "-DANO_CRYPTO_ACTUAL_RELEASE_TAG=${{ runner.os == 'Windows' && '$env:GITHUB_REF_NAME' || '$GITHUB_REF_NAME' }}"
           -DANO_CRYPTO_ACTUAL_RELEASE_COMMIT=${{ github.sha }}
           -DANO_CRYPTO_REQUIRE_ACTUAL_RELEASE_TAG=ON
           -DANO_CRYPTO_RELEASE_COMPATIBILITY_CHECK_OUTPUT=${{ github.workspace }}/build-tag-identity/policy-check/TAG_COMMIT_IDENTITY_CHECK.txt
@@ -953,7 +953,7 @@ jobs:
           -DANO_CRYPTO_HOSTED_ARTIFACT_ORIGIN=HOSTED_RUNNER
           -DANO_CRYPTO_HOSTED_EXECUTION_STATUS=COMPLETED
           -DANO_CRYPTO_HOSTED_WORKFLOW_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -DANO_CRYPTO_HOSTED_REVIEW_STATUS=UNREVIEWED
           -DANO_CRYPTO_HOSTED_REVIEWER=UNPROVISIONED
           -DANO_CRYPTO_HOSTED_REVIEW_DATE=UNREVIEWED
@@ -968,7 +968,7 @@ jobs:
           -DANO_CRYPTO_EXPECTED_HOSTED_LANE=tagged-release-compatibility
           -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=${{ runner.os }}
           -DANO_CRYPTO_EXPECTED_HOSTED_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -P tools/check_hosted_artifact_manifest.cmake
 
       - name: Upload tagged compatibility hosted bundle
@@ -1035,7 +1035,7 @@ jobs:
           -DANO_CRYPTO_HOSTED_ARTIFACT_ORIGIN=HOSTED_RUNNER
           -DANO_CRYPTO_HOSTED_EXECUTION_STATUS=COMPLETED
           -DANO_CRYPTO_HOSTED_WORKFLOW_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -DANO_CRYPTO_HOSTED_REVIEW_STATUS=UNREVIEWED
           -DANO_CRYPTO_HOSTED_REVIEWER=UNPROVISIONED
           -DANO_CRYPTO_HOSTED_REVIEW_DATE=UNREVIEWED
@@ -1050,7 +1050,7 @@ jobs:
           -DANO_CRYPTO_EXPECTED_HOSTED_LANE=${{ env.HOSTED_PROVENANCE_LANE }}
           -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=Linux
           -DANO_CRYPTO_EXPECTED_HOSTED_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -P tools/check_hosted_artifact_manifest.cmake
 
       - name: Upload release provenance hosted bundle
@@ -1074,7 +1074,7 @@ jobs:
           -DANO_CRYPTO_HOSTED_ARTIFACT_ORIGIN=HOSTED_RUNNER
           -DANO_CRYPTO_HOSTED_EXECUTION_STATUS=COMPLETED
           -DANO_CRYPTO_HOSTED_WORKFLOW_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -DANO_CRYPTO_HOSTED_REVIEW_STATUS=UNREVIEWED
           -DANO_CRYPTO_HOSTED_REVIEWER=UNPROVISIONED
           -DANO_CRYPTO_HOSTED_REVIEW_DATE=UNREVIEWED
@@ -1089,7 +1089,7 @@ jobs:
           -DANO_CRYPTO_EXPECTED_HOSTED_LANE=${{ env.HOSTED_SIGNING_LANE }}
           -DANO_CRYPTO_EXPECTED_HOSTED_PLATFORM=Linux
           -DANO_CRYPTO_EXPECTED_HOSTED_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_EXPECTED_HOSTED_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -P tools/check_hosted_artifact_manifest.cmake
 
       - name: Upload release signing-handoff hosted bundle
@@ -1178,7 +1178,7 @@ jobs:
           -DANO_CRYPTO_HOSTED_ARTIFACT_OUTPUT_DIR=${{ github.workspace }}/hosted-artifact-index
           -DANO_CRYPTO_WORKFLOW_RUN_ID=${{ github.run_id }}
           -DANO_CRYPTO_WORKFLOW_COMMIT=${{ github.sha }}
-          -DANO_CRYPTO_WORKFLOW_REF=${{ github.ref }}
+          "-DANO_CRYPTO_WORKFLOW_REF=${{ runner.os == 'Windows' && '$env:GITHUB_REF' || '$GITHUB_REF' }}"
           -P tools/create_hosted_artifact_index.cmake
 
       - name: Upload hosted artifact index
