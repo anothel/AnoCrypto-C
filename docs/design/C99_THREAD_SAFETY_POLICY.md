@@ -137,6 +137,7 @@ check that shutdown preserves `ERROR_STATE` and its last error.
 2. Assess the shutdown/fatal completion and output boundary for in-flight
    signature operations. Compare the lock-protected key-use interval with the
    original P3-07 end-to-end barrier goal.
-3. Review caller-owned operation contexts across shutdown and reinitialization
-   by service, including cleanup responsibility and whether any stronger
-   invalidation contract is needed.
+3. Assess whether caller-owned operation contexts need stronger invalidation,
+   completion, or output guarantees across shutdown, fatal transitions, and
+   reinitialization. See the [current caller procedure](C99_CALLER_OWNED_CONTEXT_LIFECYCLE.md)
+   and [Issue #11](https://github.com/anothel/AnoCrypto-C/issues/11).

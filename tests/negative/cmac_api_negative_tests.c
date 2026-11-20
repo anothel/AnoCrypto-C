@@ -329,18 +329,51 @@ int main(void)
     (void)ano_crypto_cmac_uninit(ctx, ctx_size);
     (void)ano_crypto_csp_zeroize(hmac_ctx, sizeof(hmac_ctx));
 
-    expect_status("destroy CMAC", ano_crypto_key_destroy(cmac_handle),
-                  ANO_CRYPTO_OK);
-    expect_status("stale CMAC handle",
-                  ano_crypto_cmac_init(ctx, ctx_size, cmac_handle, 0u),
-                  ANO_CRYPTO_ERR_INVALID_ARGUMENT);
     expect_status("destroy cipher", ano_crypto_key_destroy(cipher_handle),
                   ANO_CRYPTO_OK);
     expect_status("destroy HMAC", ano_crypto_key_destroy(hmac_handle),
                   ANO_CRYPTO_OK);
+    expect_status("CMAC init before shutdown",
+                  ano_crypto_cmac_init(ctx, ctx_size, cmac_handle, 0u), ANO_CRYPTO_OK);
+    expect_status("CMAC update before shutdown",
+                  ano_crypto_cmac_update(ctx, message, sizeof(message)), ANO_CRYPTO_OK);
     expect_status("module shutdown", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
+    expect_status("CMAC final after shutdown",
+                  ano_crypto_cmac_final(ctx, tag, sizeof(tag), &written),
+                  ANO_CRYPTO_ERR_NOT_INITIALIZED);
     expect_status("cleanup after shutdown", ano_crypto_cmac_uninit(ctx, ctx_size),
                   ANO_CRYPTO_OK);
+    if (!bytes_are_zero(ctx, ctx_size)) {
+        fputs("FAIL CMAC cleanup after shutdown\n", stderr);
+        ++failures;
+    }
+
+    expect_status("module reinit for fresh CMAC", ano_crypto_module_init(0), ANO_CRYPTO_OK);
+    expect_status("stale CMAC handle after reinit",
+                  ano_crypto_cmac_init(ctx, ctx_size, cmac_handle, 0u),
+                  ANO_CRYPTO_ERR_INVALID_ARGUMENT);
+    expect_status("destroy CMAC tombstone", ano_crypto_key_destroy(cmac_handle), ANO_CRYPTO_OK);
+    expect_status("fresh CMAC key import",
+                  ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_CMAC, key16, sizeof(key16),
+                      ANO_CRYPTO_KEY_FLAG_NONE, &cmac_handle), ANO_CRYPTO_OK);
+    expect_status("fresh CMAC init",
+                  ano_crypto_cmac_init(ctx, ctx_size, cmac_handle, 0u), ANO_CRYPTO_OK);
+    expect_status("fresh CMAC update",
+                  ano_crypto_cmac_update(ctx, message, sizeof(message)), ANO_CRYPTO_OK);
+    expect_status("fresh CMAC final",
+                  ano_crypto_cmac_final(ctx, tag, sizeof(tag), &written), ANO_CRYPTO_OK);
+    expect_status("fresh CMAC tag verifies",
+                  ano_crypto_cmac_verify_with_key(cmac_handle, message, sizeof(message),
+                      tag, sizeof(tag), 0u), ANO_CRYPTO_OK);
+    if (written != sizeof(tag) || !bytes_are_zero(ctx, ctx_size)) {
+        fputs("FAIL CMAC final length or context clearing\n", stderr);
+        ++failures;
+    }
+    expect_status("destroy fresh CMAC key", ano_crypto_key_destroy(cmac_handle), ANO_CRYPTO_OK);
+    expect_status("destroyed CMAC key rejected",
+                  ano_crypto_cmac_init(ctx, ctx_size, cmac_handle, 0u),
+                  ANO_CRYPTO_ERR_INVALID_ARGUMENT);
+    expect_status("final module shutdown", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
 
     (void)cipher_ctx_size;
     (void)ano_crypto_csp_zeroize(tag, sizeof(tag));

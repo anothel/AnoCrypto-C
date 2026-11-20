@@ -21,10 +21,12 @@ int main(void)
     static const uint8_t key15[15] = {0u};
     static const uint8_t hmac_key[4] = {'J','e','f','e'};
     static const uint8_t iv[16] = {0u};
+    static const uint8_t fresh_iv[16] = {1u};
     uint8_t input[48];
     uint8_t output[48];
     uint8_t overlap[64];
     uint8_t hmac_ctx[512];
+    uint8_t cleanup_probe[2] = {0xa5u, 0xa5u};
     ano_crypto_csp_handle_t aes_handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
     ano_crypto_csp_handle_t hmac_handle = ANO_CRYPTO_CSP_INVALID_HANDLE;
     size_t ctx_size = 0u;
@@ -48,7 +50,7 @@ int main(void)
     expect_status("aes key import", ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER, key16, sizeof(key16), ANO_CRYPTO_KEY_FLAG_NONE, &aes_handle), ANO_CRYPTO_OK);
     expect_status("hmac key import", ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_HMAC, hmac_key, sizeof(hmac_key), ANO_CRYPTO_KEY_FLAG_NONE, &hmac_handle), ANO_CRYPTO_OK);
     expect_status("context size", ano_crypto_cipher_context_size(ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC, &ctx_size), ANO_CRYPTO_OK);
-    ctx = (uint8_t *)calloc(1u, ctx_size);
+    ctx = (uint8_t *)calloc(1u, ctx_size + 1u);
     if (ctx == 0) return 2;
 
     expect_status("init null ctx", ano_crypto_cipher_init(0, ctx_size, ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC, ANO_CRYPTO_CIPHER_DIRECTION_ENCRYPT, aes_handle, iv, sizeof(iv), 0u), ANO_CRYPTO_ERR_INVALID_ARGUMENT);
@@ -81,11 +83,51 @@ int main(void)
 
     expect_status("uninit", ano_crypto_cipher_uninit(ctx, ctx_size), ANO_CRYPTO_OK);
     expect_status("update after uninit", ano_crypto_cipher_update(ctx, input, 16u, output, sizeof(output), &written), ANO_CRYPTO_ERR_INVALID_ARGUMENT);
-    expect_status("destroy aes", ano_crypto_key_destroy(aes_handle), ANO_CRYPTO_OK);
-    expect_status("stale handle init", ano_crypto_cipher_init(ctx, ctx_size, ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC, ANO_CRYPTO_CIPHER_DIRECTION_ENCRYPT, aes_handle, iv, sizeof(iv), 0u), ANO_CRYPTO_ERR_INVALID_ARGUMENT);
+    expect_status("CBC init before shutdown", ano_crypto_cipher_init(
+        ctx, ctx_size, ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC,
+        ANO_CRYPTO_CIPHER_DIRECTION_ENCRYPT, aes_handle, iv, sizeof(iv), 0u), ANO_CRYPTO_OK);
     expect_status("destroy hmac", ano_crypto_key_destroy(hmac_handle), ANO_CRYPTO_OK);
     expect_status("module shutdown", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
-    expect_status("cleanup after shutdown", ano_crypto_cipher_uninit(ctx, ctx_size), ANO_CRYPTO_OK);
+    expect_status("CBC update after shutdown", ano_crypto_cipher_update(
+        ctx, input, 16u, output, sizeof(output), &written), ANO_CRYPTO_ERR_NOT_INITIALIZED);
+    expect_status("zero-length CBC cleanup", ano_crypto_cipher_uninit(cleanup_probe, 0u),
+                  ANO_CRYPTO_OK);
+    if (cleanup_probe[0] != 0xa5u || cleanup_probe[1] != 0xa5u) ++failures;
+    expect_status("short CBC cleanup", ano_crypto_cipher_uninit(cleanup_probe, 1u), ANO_CRYPTO_OK);
+    if (cleanup_probe[0] != 0u || cleanup_probe[1] != 0xa5u) ++failures;
+    ctx[ctx_size] = 0xa5u;
+    expect_status("CBC cleanup after shutdown", ano_crypto_cipher_uninit(ctx, ctx_size + 1u),
+                  ANO_CRYPTO_OK);
+    for (i = 0u; i < ctx_size + 1u; ++i) {
+        if (ctx[i] != 0u) {
+            fputs("FAIL CBC cleanup did not clear the supplied extent\n", stderr);
+            ++failures;
+            break;
+        }
+    }
+
+    expect_status("module reinit for fresh CBC", ano_crypto_module_init(0), ANO_CRYPTO_OK);
+    expect_status("stale handle after reinit", ano_crypto_cipher_init(
+        ctx, ctx_size, ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC,
+        ANO_CRYPTO_CIPHER_DIRECTION_ENCRYPT, aes_handle, fresh_iv, sizeof(fresh_iv), 0u),
+        ANO_CRYPTO_ERR_INVALID_ARGUMENT);
+    expect_status("destroy AES tombstone", ano_crypto_key_destroy(aes_handle), ANO_CRYPTO_OK);
+    expect_status("fresh AES key import", ano_crypto_key_import_secret(
+        ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER, key16, sizeof(key16), ANO_CRYPTO_KEY_FLAG_NONE,
+        &aes_handle), ANO_CRYPTO_OK);
+    expect_status("fresh CBC init", ano_crypto_cipher_init(
+        ctx, ctx_size, ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC,
+        ANO_CRYPTO_CIPHER_DIRECTION_ENCRYPT, aes_handle, fresh_iv, sizeof(fresh_iv), 0u), ANO_CRYPTO_OK);
+    expect_status("fresh CBC update", ano_crypto_cipher_update(
+        ctx, input, 16u, output, sizeof(output), &written), ANO_CRYPTO_OK);
+    if (written != 16u) ++failures;
+    expect_status("fresh CBC cleanup", ano_crypto_cipher_uninit(ctx, ctx_size), ANO_CRYPTO_OK);
+    expect_status("destroy fresh AES key", ano_crypto_key_destroy(aes_handle), ANO_CRYPTO_OK);
+    expect_status("destroyed AES key rejected", ano_crypto_cipher_init(
+        ctx, ctx_size, ANO_CRYPTO_CIPHER_ALG_AES, ANO_CRYPTO_CIPHER_MODE_CBC,
+        ANO_CRYPTO_CIPHER_DIRECTION_ENCRYPT, aes_handle, fresh_iv, sizeof(fresh_iv), 0u),
+        ANO_CRYPTO_ERR_INVALID_ARGUMENT);
+    expect_status("final module shutdown", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
 
     free(ctx);
     (void)ano_crypto_csp_zeroize(output, sizeof(output));
