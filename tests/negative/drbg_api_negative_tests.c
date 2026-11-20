@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <anocrypto/anocrypto.h>
 
 static int g_failures = 0;
@@ -25,13 +26,15 @@ static void fill_sequence(uint8_t *out, size_t out_len, uint8_t start)
 
 static void test_drbg_negative_cases(void)
 {
-    uint8_t ctx[256];
+    uint8_t *ctx;
     uint8_t small_ctx[4];
+    uint8_t cleanup_probe[2] = {0xa5u, 0xa5u};
     uint8_t entropy[32];
     uint8_t short_entropy[31];
     uint8_t nonce[16];
     uint8_t output[32];
     size_t ctx_size = 0u;
+    size_t i;
     ano_crypto_drbg_state_t state = ANO_CRYPTO_DRBG_STATE_ERROR;
 
     fill_sequence(entropy, sizeof(entropy), 0x10u);
@@ -49,6 +52,13 @@ static void test_drbg_negative_cases(void)
     expect_status("drbg context size valid",
                   ano_crypto_drbg_context_size(ANO_CRYPTO_DRBG_ALG_HMAC_SHA256, &ctx_size),
                   ANO_CRYPTO_OK);
+    ctx = (uint8_t *)calloc(1u, ctx_size + 1u);
+    if (ctx == NULL || ctx_size == 0u) {
+        fputs("FAIL DRBG context allocation\n", stderr);
+        ++g_failures;
+        free(ctx);
+        return;
+    }
 
     expect_status("drbg instantiate before module init",
                   ano_crypto_drbg_instantiate(ctx, ctx_size,
@@ -172,6 +182,54 @@ static void test_drbg_negative_cases(void)
     expect_status("drbg uninstantiate error state",
                   ano_crypto_drbg_uninstantiate(ctx, ctx_size),
                   ANO_CRYPTO_OK);
+
+    expect_status("DRBG instantiate before shutdown",
+                  ano_crypto_drbg_instantiate(ctx, ctx_size, ANO_CRYPTO_DRBG_ALG_HMAC_SHA256,
+                      entropy, sizeof(entropy), nonce, sizeof(nonce),
+                      NULL, 0u, ANO_CRYPTO_DRBG_FLAG_NONE), ANO_CRYPTO_OK);
+    expect_status("module shutdown with active DRBG", ano_crypto_module_shutdown(), ANO_CRYPTO_OK);
+    expect_status("DRBG generate after shutdown",
+                  ano_crypto_drbg_generate(ctx, output, sizeof(output), NULL, 0u,
+                      ANO_CRYPTO_DRBG_FLAG_NONE), ANO_CRYPTO_ERR_NOT_INITIALIZED);
+    expect_status("DRBG reseed after shutdown",
+                  ano_crypto_drbg_reseed(ctx, entropy, sizeof(entropy), NULL, 0u,
+                      ANO_CRYPTO_DRBG_FLAG_NONE), ANO_CRYPTO_ERR_NOT_INITIALIZED);
+    expect_status("zero-length DRBG cleanup", ano_crypto_drbg_uninstantiate(cleanup_probe, 0u),
+                  ANO_CRYPTO_OK);
+    if (cleanup_probe[0] != 0xa5u || cleanup_probe[1] != 0xa5u) ++g_failures;
+    expect_status("short DRBG cleanup", ano_crypto_drbg_uninstantiate(cleanup_probe, 1u),
+                  ANO_CRYPTO_OK);
+    if (cleanup_probe[0] != 0u || cleanup_probe[1] != 0xa5u) ++g_failures;
+    ctx[ctx_size] = 0xa5u;
+    expect_status("DRBG uninstantiate after shutdown",
+                  ano_crypto_drbg_uninstantiate(ctx, ctx_size + 1u), ANO_CRYPTO_OK);
+    for (i = 0u; i < ctx_size + 1u; ++i) {
+        if (ctx[i] != 0u) {
+            fputs("FAIL DRBG cleanup did not clear the supplied extent\n", stderr);
+            ++g_failures;
+            break;
+        }
+    }
+    expect_status("DRBG state after cleanup outside OPERATIONAL",
+                  ano_crypto_drbg_get_state(ctx, &state), ANO_CRYPTO_OK);
+    if (state != ANO_CRYPTO_DRBG_STATE_UNINSTANTIATED) {
+        fputs("FAIL DRBG state after shutdown cleanup\n", stderr);
+        ++g_failures;
+    }
+
+    expect_status("module reinit for fresh DRBG", ano_crypto_module_init(0), ANO_CRYPTO_OK);
+    fill_sequence(entropy, sizeof(entropy), 0x40u);
+    fill_sequence(nonce, sizeof(nonce), 0x50u);
+    expect_status("fresh DRBG instantiate",
+                  ano_crypto_drbg_instantiate(ctx, ctx_size, ANO_CRYPTO_DRBG_ALG_HMAC_SHA256,
+                      entropy, sizeof(entropy), nonce, sizeof(nonce),
+                      NULL, 0u, ANO_CRYPTO_DRBG_FLAG_NONE), ANO_CRYPTO_OK);
+    expect_status("fresh DRBG generate",
+                  ano_crypto_drbg_generate(ctx, output, sizeof(output), NULL, 0u,
+                      ANO_CRYPTO_DRBG_FLAG_NONE), ANO_CRYPTO_OK);
+    expect_status("fresh DRBG cleanup", ano_crypto_drbg_uninstantiate(ctx, ctx_size), ANO_CRYPTO_OK);
+    (void)ano_crypto_csp_zeroize(output, sizeof(output));
+    free(ctx);
 }
 
 int main(void)
