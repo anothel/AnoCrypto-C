@@ -95,9 +95,14 @@ The example prints status-only success messages. It does not print raw key mater
 
 ## Current limitations
 
-- SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 remain ABI placeholders.
-- Hash_DRBG remains an ABI placeholder.
-- Public `ano_crypto_random_*` APIs are not exposed yet.
+- SHA-384/SHA-512 and HMAC-SHA-384/HMAC-SHA-512 are implemented. See
+  [`ac_hash.h`](../../include/anocrypto/ac_hash.h) and
+  [`ac_hmac.h`](../../include/anocrypto/ac_hmac.h).
+- Hash_DRBG remains ABI-reserved and unimplemented.
+- The public `ano_crypto_random_*` service is available only when a supported
+  platform entropy provider and a process-identity marker are both available.
+  Prediction-resistance requests remain unsupported. See
+  [`ac_random.h`](../../include/anocrypto/ac_random.h).
 - HMAC key handles are in-memory only.
 - Persistent keystore, key export, key wrapping, and multi-process CSP behavior are not finalized.
 - Public build identity currently uses a versioned struct and remains a tracked ABI TODO before ABI freeze.
