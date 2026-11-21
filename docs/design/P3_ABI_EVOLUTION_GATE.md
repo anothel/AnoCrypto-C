@@ -21,7 +21,8 @@ name and assignment remains unchanged.
 
 ## P3-10 approval
 
-P3-10 adds only `ano_crypto_ocsp_certid_sha1_digest` to existing `ac_hash.h`.
+P3-10 adds only `ano_crypto_ocsp_certid_sha1_digest`, declared in
+`include/anocrypto/ac_ocsp_certid_hash.h`.
 The service is one-shot, emits exactly 20 bytes, and accepts only caller-selected
 bytes for OCSP CertID issuerNameHash or issuerKeyHash compatibility. It does not
 add SHA-1 to the generic hash enum and does not authorize SHA-1 streaming,
