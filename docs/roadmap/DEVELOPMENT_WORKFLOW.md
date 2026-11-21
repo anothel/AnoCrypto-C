@@ -76,7 +76,15 @@ Each task should follow this loop:
 
 ## Agent-assisted delivery
 
-Use this workflow for maintainer-authorized tasks. [Current / Active / Next](CURRENT_ACTIVE_NEXT.md) governs product priorities. The Delivery Master confirms scope, sequences dependencies, assigns bounded work, checks the evidence, and coordinates the draft PR and handoff. The maintainer owns priorities, scope changes, reviewer designation, and merge decisions. Release authorization follows its separate policy.
+Use this workflow for authorized tasks. [Current / Active / Next](CURRENT_ACTIVE_NEXT.md) governs product priorities. The Delivery Master confirms scope, sequences dependencies, assigns bounded work, checks the evidence, and coordinates the draft PR and handoff. The maintainer owns priorities, reserved scope and scope changes, reviewer designation, and merge decisions. Release authorization follows its separate policy.
+
+### Continuous Delivery Authorization Policy v3
+
+The [owner-approved policy](https://github.com/anothel/AnoCrypto-C/issues/13#issuecomment-7069225969) delegates technical approval of bounded ordinary engineering work to the Master. Eligible work includes documentation, ordinary non-security fixes, behavior-preserving refactors outside protected contracts, and additive tests that preserve required coverage. The Master records `READY_FOR_IMPLEMENTATION — OWNER_STANDING_POLICY_V3` on the existing issue with the owner, repository and exact base SHA, allowed paths and changes, exclusions, acceptance tests, prerequisites, and risk classification. That scoped record or the owner's explicit authorization authorizes Codex to implement, verify, and submit a draft PR. Backlog entries, read-only reviews, and CI results are evidence or planning inputs. Keep implementation authority with the owner or the Master under the delegation.
+
+Use the [delivery queue](https://github.com/anothel/AnoCrypto-C/issues/15) to pick eligible packets in priority order. When a packet awaits evidence, access, approval, or review, record the blocker and next action on its issue and continue independent authorized packets. Check for existing work before opening a branch or PR. Preserve a resumable checkpoint when the queue has no executable packets or a legitimate execution limit is reached.
+
+Owner decisions remain required for scope expansion and changes to cryptographic behavior, key handling, zeroization, entropy or DRBG, lifecycle, concurrency or failure contracts, public API or ABI, security policy, mandatory validation coverage and CI gates, protected workflows or credentials, SDK pins or official candidate selection, and release controls. Apply stricter repository requirements and retain applicable independent qualified human review of the exact candidate SHA. The maintainer retains the separate merge decision. Record historical work and review evidence at their original scope and revision.
 
 | Role | Responsibility |
 |---|---|
