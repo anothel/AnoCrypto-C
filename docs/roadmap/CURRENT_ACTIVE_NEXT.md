@@ -1,5 +1,41 @@
 # Current / Active / Next
 
+## Strategy A checkpoint — 2026-11-22 KST
+
+Strategy A covers internal installed-SDK stabilization for AnoSecureKit
+Enterprise and AnoPKI Enterprise. Core `main@76d4af2e32b8bf9d7a624205f93607a24814843d`
+includes the Policy v3 documentation. The Master authorizes bounded ordinary
+packets by recording `READY_FOR_IMPLEMENTATION — OWNER_STANDING_POLICY_V3`
+on an existing issue. An explicit owner decision can also authorize a packet.
+Review and merge remain separate decisions. [Owner-adopted Policy v3 #13](https://github.com/anothel/AnoCrypto-C/issues/13#issuecomment-7069225969) ·
+[Current queue #15](https://github.com/anothel/AnoCrypto-C/issues/15)
+
+The installed SDK used in the Linux x86_64 GCC Release preflights came from
+`56fb11bc9049780d948308a5225cbbbf6c467a6f`. Its local core suite passed 102/102.
+Official SDK artifact selection and downstream acceptance remain pending.
+[Artifact tracking #30](https://github.com/anothel/AnoCrypto-C/issues/30) ·
+[Exact build and SDK digests](https://github.com/anothel/AnoCrypto-C/issues/15#issuecomment-7062859177)
+
+- AnoSecureKit `954c267e99a4e6c4d1d1db021f0c86e063bcc9fc` passed 9/9 local
+  tests with the exploratory SDK identity. [Preflight #5](https://github.com/anothel/AnoSecureKit-Enterprise/issues/5#issuecomment-7064471731)
+- AnoPKI's initial `0f3c1e82869a8ee2083559f9c6f7ae322f869a46` run passed
+  13/15. The R1+R2 candidate `aebc5ad59250840d74d93ea5ae7195801188f04f`
+  passed 15/15 local tests and 27/27 hosted CI jobs. It merged as
+  `d2d488696f898ff092ab23fd264941ec8ca6158a`, whose hosted CI passed 27/27.
+  Selected-profile local Release evidence is from the candidate. R3/R4 and
+  protected workflow qualification remain pending. [Initial preflight #8](https://github.com/anothel/AnoPKI-Enterprise/issues/8#issuecomment-7064479283) ·
+  [Candidate verification](https://github.com/anothel/AnoPKI-Enterprise/issues/8#issuecomment-7069333325) ·
+  [Merge CI](https://github.com/anothel/AnoPKI-Enterprise/actions/runs/44950830031)
+
+The premerge review and separate approval records for PKI PR #9 and Core PR #31
+still require clarification. [PKI postmerge record](https://github.com/anothel/AnoPKI-Enterprise/issues/8#issuecomment-7069407145) ·
+[Core postmerge record](https://github.com/anothel/AnoCrypto-C/issues/13#issuecomment-7069407526)
+
+`EXTERNAL_RELEASE_NOT_AUTHORIZED`. The preceding checkpoints are current as of
+the date shown. The original Phase 1 record and 2026-11-21 overlay follow.
+
+---
+
 Status: `ENGINEERING_PHASE_1_COMPLETE`
 
 ## Post-Phase-1 portfolio overlay — 2026-11-21 (information only)
