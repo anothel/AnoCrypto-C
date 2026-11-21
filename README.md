@@ -2,6 +2,23 @@
 
 Current runtime baseline: `0.1.0-p3-10-restricted-sha1-ocsp-certid`, source commit `98f544a574f70b387c300f171243b4e87174937a`, with 18 public headers and 85 exported symbols across `ANOCRYPTO_C_0` through `ANOCRYPTO_C_7`. Engineering Phase 1 is closed after local AnoSecureKit and AnoPKI Enterprise parity/no-fallback checkpoints. Commercialization is `UNDECIDED`; customer/external release remains `BLOCKED`/`NOT_AUTHORIZED`; hosted qualification is `NOT_RUN/UNREVIEWED`; repository signing remains `UNSIGNED`; KCMVP remains `DEFERRED` and not validated. No next product implementation is selected.
 
+### Work selection and retired Phase 1 prompts (2026-11-21)
+
+The product owner selected **strategic direction A**: internal installed-SDK stability
+for AnoSecureKit Enterprise and AnoPKI Enterprise. A narrow Linux x86_64 / GCC /
+Release / shared-SDK core validation was authorized and recorded. **This is not
+approval to change downstream SDK pins, change security or release policies,
+merge a pull request, or distribute an SDK.** The authoritative current
+planning/approval and exact-SHA evidence are the [Master issue index](https://github.com/anothel/AnoCrypto-C/issues/15),
+[Jira ACC-4](https://anothel.atlassian.net/browse/ACC-4), and
+[Jira ACC-9](https://anothel.atlassian.net/browse/ACC-9).
+
+Two completed P3 **next-work prompts** were retired from the active document tree.
+Their original contents remain accessible at the exact historical commit;
+see [historical prompt archive](docs/roadmap/HISTORICAL_PROMPT_ARCHIVE.md).
+Phase 1 completion and the separate owner-controlled implementation, security,
+independent human review, merge and external-release gates remain unchanged.
+
 Implemented processing scope:
 
 - RFC 5869 HKDF-SHA-256 combined extract-and-expand with 0..8160-byte output and exact AnoSecureKit SKF1 info-byte evidence
