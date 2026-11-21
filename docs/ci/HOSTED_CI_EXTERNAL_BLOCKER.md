@@ -1,5 +1,28 @@
 # Hosted CI External Blocker
 
+## Historical run context — 2026-11-22 KST
+
+This record preserves the P1-34 billing-blocked attempt and its original
+`NOT_RUN` / `UNREVIEWED` evidence. Its closure and review conditions below
+continue to apply to that evidence.
+
+Later engineering CI ran on Core PR #31 candidate
+`579411b04791cdf22e8c743d9250564a92a88149` and recorded 21/21 general CI and
+4/4 installed SDK smoke jobs passing. The merge SHA
+`76d4af2e32b8bf9d7a624205f93607a24814843d` also has its own hosted runs.
+Premerge review and approval evidence is tracked separately.
+[Candidate CI](https://github.com/anothel/AnoCrypto-C/actions/runs/44950372010) ·
+[Candidate SDK smoke](https://github.com/anothel/AnoCrypto-C/actions/runs/44950372027) ·
+[Merge CI](https://github.com/anothel/AnoCrypto-C/actions/runs/44950887286) ·
+[Merge SDK smoke](https://github.com/anothel/AnoCrypto-C/actions/runs/44950887270) ·
+[Postmerge record #13](https://github.com/anothel/AnoCrypto-C/issues/13#issuecomment-7069407526)
+
+See the [Strategy A checkpoint](../roadmap/CURRENT_ACTIVE_NEXT.md#strategy-a-checkpoint--2026-11-22-kst)
+for installed SDK evidence and the [Master queue #15](https://github.com/anothel/AnoCrypto-C/issues/15)
+for current engineering work. `EXTERNAL_RELEASE_NOT_AUTHORIZED`.
+
+---
+
 Status: `BLOCKED_EXTERNAL: GITHUB_ACTIONS_BILLING`
 
 ## Affected Work Item

@@ -1,5 +1,20 @@
 # C99 Priority TODO
 
+## Where to find current work — 2026-11-22 KST
+
+The status, baseline and TODO below record the completed Phase 1 scope. Active
+Strategy A work for internal SDK stabilization is tracked in the Master queue.
+Policy v3 governs authorization of bounded implementation packets. Official SDK
+artifact selection has its own record. [Current queue #15](https://github.com/anothel/AnoCrypto-C/issues/15) ·
+[Policy v3 #13](https://github.com/anothel/AnoCrypto-C/issues/13#issuecomment-7069225969) ·
+[SDK artifact tracking #30](https://github.com/anothel/AnoCrypto-C/issues/30)
+
+[Strategy A checkpoint](CURRENT_ACTIVE_NEXT.md#strategy-a-checkpoint--2026-11-22-kst)
+links the exact consumer evidence and postmerge follow-ups.
+`EXTERNAL_RELEASE_NOT_AUTHORIZED`.
+
+---
+
 Status: `PHASE_1_CLOSED_NO_ACTIVE_TODO`
 
 ## Frozen baseline
