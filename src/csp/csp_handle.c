@@ -113,6 +113,16 @@ static ano_crypto_status_t find_free_slot_unlocked(size_t *out_index)
     return ANO_CRYPTO_ERR_RESOURCE_EXHAUSTED;
 }
 
+/* The caller holds the global lock. */
+static void clear_slot_payload_unlocked(ano_crypto_csp_slot_t *slot)
+{
+    ano_crypto_internal_zeroize(slot->key_material, sizeof(slot->key_material));
+    ano_crypto_internal_zeroize(&slot->rsa_key, sizeof(slot->rsa_key));
+    ano_crypto_internal_zeroize(&slot->ec_p256_key, sizeof(slot->ec_p256_key));
+    slot->key_len = 0u;
+    slot->key_type = 0u;
+    slot->flags = 0u;
+}
 
 void ano_crypto_internal_csp_zeroize_all_unlocked(void)
 {
@@ -125,12 +135,7 @@ void ano_crypto_internal_csp_zeroize_all_unlocked(void)
             continue;
         }
 
-        ano_crypto_internal_zeroize(slot->key_material, sizeof(slot->key_material));
-        ano_crypto_internal_zeroize(&slot->rsa_key, sizeof(slot->rsa_key));
-        ano_crypto_internal_zeroize(&slot->ec_p256_key, sizeof(slot->ec_p256_key));
-        slot->key_len = 0u;
-        slot->key_type = 0u;
-        slot->flags = 0u;
+        clear_slot_payload_unlocked(slot);
         slot->state = (uint32_t)ANO_CRYPTO_CSP_STATE_ZEROIZED;
     }
 }
@@ -440,12 +445,7 @@ ano_crypto_status_t ano_crypto_internal_csp_destroy(
 
     /* A ZEROIZED tombstone may be explicitly destroyed after module shutdown
      * or fatal transition without restoring or exposing key material. */
-    ano_crypto_internal_zeroize(slot->key_material, sizeof(slot->key_material));
-    ano_crypto_internal_zeroize(&slot->rsa_key, sizeof(slot->rsa_key));
-    ano_crypto_internal_zeroize(&slot->ec_p256_key, sizeof(slot->ec_p256_key));
-    slot->key_len = 0u;
-    slot->key_type = 0u;
-    slot->flags = 0u;
+    clear_slot_payload_unlocked(slot);
     slot->state = (uint32_t)ANO_CRYPTO_CSP_STATE_DESTROYED;
     ano_crypto_internal_global_unlock();
     return ANO_CRYPTO_OK;
