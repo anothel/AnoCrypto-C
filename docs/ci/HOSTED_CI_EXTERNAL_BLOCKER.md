@@ -18,8 +18,9 @@ Premerge review and approval evidence is tracked separately.
 [Postmerge record #13](https://github.com/anothel/AnoCrypto-C/issues/13#issuecomment-7069407526)
 
 See the [Strategy A checkpoint](../roadmap/CURRENT_ACTIVE_NEXT.md#strategy-a-checkpoint--2026-11-22-kst)
-for installed SDK evidence and the [Master queue #15](https://github.com/anothel/AnoCrypto-C/issues/15)
-for current engineering work. `EXTERNAL_RELEASE_NOT_AUTHORIZED`.
+for installed SDK evidence, the [Jira ACC queue](https://anothel.atlassian.net/browse/ACC-1)
+for current engineering work, and [GitHub #15](https://github.com/anothel/AnoCrypto-C/issues/15)
+for the historical index. `EXTERNAL_RELEASE_NOT_AUTHORIZED`.
 
 ---
 
