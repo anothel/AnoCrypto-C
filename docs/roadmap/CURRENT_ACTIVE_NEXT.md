@@ -1,5 +1,37 @@
 # Current / Active / Next
 
+## Strategy A current status — Q9–Q11, 2026-11-22 KST
+
+The owner selected the Q9 SDK built from Core
+`56fb11bc9049780d948308a5225cbbbf6c467a6f` for internal consumer evaluation.
+The same-host reproduction produced byte-identical library and archive
+artifacts, and the local Core suite passed 102/102. The roadmap base is
+Core `main@5d4e51e5f51a727a6173464ab28519ed3d3685dc`.
+[Q9 decision](https://github.com/anothel/AnoCrypto-C/issues/30#issuecomment-7071703798)
+
+- Q10 AnoSecureKit Enterprise `954c267e99a4e6c4d1d1db021f0c86e063bcc9fc`:
+  9/9 native Release tests (`REUSED_EVIDENCE`).
+  [Q10 decision](https://github.com/anothel/AnoSecureKit-Enterprise/issues/5#issuecomment-7071860817)
+- Q11 AnoPKI Enterprise `360f92324f7affe0c691099801e61bee13c26047`:
+  17/17 selected Release tests and 8/8 R3 linkage-checker tests
+  (`REUSED_EVIDENCE`). Q8 completed local verification of R1–R4.
+  [Q11 decision](https://github.com/anothel/AnoPKI-Enterprise/issues/8#issuecomment-7071861202) ·
+  [Q8 decision](https://github.com/anothel/AnoPKI-Enterprise/issues/8#issuecomment-7070284329)
+
+Both consumer packets recorded `PASS` for the fresh SDK handoff, hash
+verification, and loader resolution on retained binaries. Fresh workload
+reruns and protected workflow execution were `NOT_RUN`. Final consumer
+acceptance and qualified independent human security review remain pending.
+Product SDK pins remain unchanged. [Latest queue](https://github.com/anothel/AnoCrypto-C/issues/15#issuecomment-7071865461)
+
+Q3 remains blocked on original runner-attestation evidence. Q12 requires
+explicit owner scope approval and a designated qualified independent human
+reviewer. [Q3 issue](https://github.com/anothel/AnoSecureKit-Enterprise/issues/6) ·
+[Q12 proposal](https://github.com/anothel/AnoCrypto-C/issues/17#issuecomment-7071863873)
+
+`EXTERNAL_RELEASE_NOT_AUTHORIZED`. The earlier dated checkpoints and Phase 1
+closeout below are historical records.
+
 ## Strategy A checkpoint — 2026-11-22 KST
 
 Strategy A covers internal installed-SDK stabilization for AnoSecureKit
