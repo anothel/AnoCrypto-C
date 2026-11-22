@@ -165,6 +165,8 @@ cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
+The illustrated `ctest --test-dir` command requires CTest 3.20 or newer; the CMake configuration minimum is not a guarantee that every developer command works with older tooling.
+
 ## Install smoke test
 
 ```sh
