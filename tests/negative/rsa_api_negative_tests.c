@@ -77,6 +77,52 @@ int main(void)
     rsa_test_public_components(&c);
     for(i=0u;i<16u;++i) REQUIRE(rsa_test_import(&c,0,&handles[i])==ANO_CRYPTO_OK);
     REQUIRE(rsa_test_import(&c,0,&pub)==ANO_CRYPTO_ERR_RESOURCE_EXHAUSTED);
+    {
+        const ano_crypto_csp_handle_t stale = handles[0];
+        ano_crypto_csp_handle_t extra = stale;
+        int is_valid = 0;
+
+        REQUIRE(rsa_test_import(&c, ANO_CRYPTO_KEY_FLAG_NONE, &extra) ==
+                ANO_CRYPTO_ERR_RESOURCE_EXHAUSTED);
+        REQUIRE(extra == ANO_CRYPTO_CSP_INVALID_HANDLE);
+
+        rsa_test_private_components(&c);
+        extra = stale;
+        REQUIRE(rsa_test_import(&c, ANO_CRYPTO_KEY_FLAG_NONE, &extra) ==
+                ANO_CRYPTO_ERR_RESOURCE_EXHAUSTED);
+        REQUIRE(extra == ANO_CRYPTO_CSP_INVALID_HANDLE);
+
+        for (i = 0u; i < sizeof(handles) / sizeof(handles[0]); ++i) {
+            is_valid = 0;
+            REQUIRE(ano_crypto_csp_handle_is_valid(handles[i], &is_valid) == ANO_CRYPTO_OK &&
+                    is_valid == 1);
+        }
+        REQUIRE(ano_crypto_signature_verify(
+            stale, ANO_CRYPTO_SIGNATURE_RSA_PKCS1_V15_SHA256,
+            RSA_KAT_MESSAGE, sizeof(RSA_KAT_MESSAGE),
+            RSA_KAT_SIG_SHA256, sizeof(RSA_KAT_SIG_SHA256)) == ANO_CRYPTO_OK);
+
+        REQUIRE(ano_crypto_key_destroy(stale) == ANO_CRYPTO_OK);
+        rsa_test_public_components(&c);
+        REQUIRE(rsa_test_import(&c, ANO_CRYPTO_KEY_FLAG_NONE, &handles[0]) == ANO_CRYPTO_OK);
+        REQUIRE(handles[0] != ANO_CRYPTO_CSP_INVALID_HANDLE && handles[0] != stale);
+        is_valid = 0;
+        REQUIRE(ano_crypto_csp_handle_is_valid(handles[0], &is_valid) == ANO_CRYPTO_OK &&
+                is_valid == 1);
+
+        is_valid = 1;
+        REQUIRE(ano_crypto_csp_handle_is_valid(stale, &is_valid) == ANO_CRYPTO_OK &&
+                is_valid == 0);
+        REQUIRE(ano_crypto_key_destroy(stale) == ANO_CRYPTO_ERR_INVALID_ARGUMENT);
+        REQUIRE(ano_crypto_signature_verify(
+            stale, ANO_CRYPTO_SIGNATURE_RSA_PKCS1_V15_SHA256,
+            RSA_KAT_MESSAGE, sizeof(RSA_KAT_MESSAGE),
+            RSA_KAT_SIG_SHA256, sizeof(RSA_KAT_SIG_SHA256)) == ANO_CRYPTO_ERR_INVALID_ARGUMENT);
+        REQUIRE(ano_crypto_signature_verify(
+            handles[0], ANO_CRYPTO_SIGNATURE_RSA_PKCS1_V15_SHA256,
+            RSA_KAT_MESSAGE, sizeof(RSA_KAT_MESSAGE),
+            RSA_KAT_SIG_SHA256, sizeof(RSA_KAT_SIG_SHA256)) == ANO_CRYPTO_OK);
+    }
     for(i=0u;i<16u;++i) REQUIRE(ano_crypto_key_destroy(handles[i])==ANO_CRYPTO_OK);
     REQUIRE(ano_crypto_module_shutdown()==ANO_CRYPTO_OK);
     puts("RSA API negative and boundary tests passed");
