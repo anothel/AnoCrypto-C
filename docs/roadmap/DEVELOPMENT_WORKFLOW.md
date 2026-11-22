@@ -82,7 +82,7 @@ Use this workflow for authorized tasks. [Current / Active / Next](CURRENT_ACTIVE
 
 The [owner-approved policy](https://github.com/anothel/AnoCrypto-C/issues/13#issuecomment-7069225969) delegates technical approval of bounded ordinary engineering work to the Master. Eligible work includes documentation, ordinary non-security fixes, behavior-preserving refactors outside protected contracts, and additive tests that preserve required coverage. The Master records `READY_FOR_IMPLEMENTATION — OWNER_STANDING_POLICY_V3` on the existing issue with the owner, repository and exact base SHA, allowed paths and changes, exclusions, acceptance tests, prerequisites, and risk classification. That scoped record or the owner's explicit authorization authorizes Codex to implement, verify, and submit a draft PR. Backlog entries, read-only reviews, and CI results are evidence or planning inputs. Keep implementation authority with the owner or the Master under the delegation.
 
-Use the [delivery queue](https://github.com/anothel/AnoCrypto-C/issues/15) to pick eligible packets in priority order. When a packet awaits evidence, access, approval, or review, record the blocker and next action on its issue and continue independent authorized packets. Check for existing work before opening a branch or PR. Preserve a resumable checkpoint when the queue has no executable packets or a legitimate execution limit is reached.
+Use the [delivery queue](https://github.com/anothel/AnoCrypto-C/issues/15) to pick eligible packets in priority order. Before starting, resuming, declaring a blocker, or publishing, read the full issue and queue, including the latest authorization and new comments on both. Check current `main` and existing work, then follow the newest applicable decision. Reuse approvals already on record. When a packet awaits evidence, access, approval, or review, record the blocker and next action on its issue and continue independent authorized packets. Check for existing work before opening a branch or PR. Preserve a resumable checkpoint when the queue has no executable packets or a legitimate execution limit is reached.
 
 Owner decisions remain required for scope expansion and changes to cryptographic behavior, key handling, zeroization, entropy or DRBG, lifecycle, concurrency or failure contracts, public API or ABI, security policy, mandatory validation coverage and CI gates, protected workflows or credentials, SDK pins or official candidate selection, and release controls. Apply stricter repository requirements and retain applicable independent qualified human review of the exact candidate SHA. The maintainer retains the separate merge decision. Record historical work and review evidence at their original scope and revision.
 
@@ -93,10 +93,27 @@ Owner decisions remain required for scope expansion and changes to cryptographic
 | Refactoring | Take explicitly scoped behavior-preserving work. Show evidence that the relevant public, lifecycle, and security contracts hold. Raise any proposed behavior change for a separate decision. |
 | Review | Independently review scope, correctness, test evidence, and relevant security boundaries against the candidate revision. Record findings and disposition. An agent review is advisory. |
 
+#### Safe base refresh
+
+The [owner-adopted v3.1 amendment](https://github.com/anothel/AnoCrypto-C/issues/13#issuecomment-7074813147) supplements v3 prospectively. Retain prior approvals and review gaps at their original scope. The Master may explicitly add `SAFE_BASE_REFRESH` under policy v3.1 to the existing authorization for an ordinary engineering packet. Keep `OWNER_STANDING_POLICY_V3` as the approval marker. With the explicit refresh marker, the recorded initial SHA is the technical baseline.
+
+Continue on a newer `main` without a new Master base decision only when all six conditions hold.
+
+1. The previously authorized base is an ancestor of the new base.
+2. Inspect the entire base delta and relevant dependencies. The refresh must be conflict-free and preserve the semantics of the approved scope and its dependencies.
+3. The base delta leaves security-sensitive areas, public contracts, mandatory validation and CI gates, and authorization policy unchanged.
+4. Retain the earlier work and exact-revision verification evidence. Attribute results to the revision that produced them and preserve unrelated work.
+5. Verify that the original scope still holds and perform all required checks on the exact new candidate.
+6. Record the old and new full SHAs, ancestry, delta and dependency comparison, rationale, decision, and actual verification on the existing issue. Link the existing authorization.
+
+Recheck before publishing. If any condition cannot be established, pause the affected packet, record the specific conflict or uncertainty and next action on its issue, and continue independent authorized work. Preserve the evidence for resumption and avoid redundant baseline reruns or duplicate branches and PRs.
+
+Fixed-base packets and separately approved reserved changes are excluded. Older fixed-base authorizations remain fixed unless the Master expressly records a conversion within ordinary delegated scope. Keep refresh authority separate from scope changes and the maintainer's merge decision. All applicable independent qualified human review at the exact candidate SHA, required CI, and stricter repository controls remain in force. Preserve restrictions on auto-merge, direct pushes to `main`, gate bypass, official SDK pins, credentials, protected workflows, signing, certification, and external release.
+
 ### Issue, worktree, and draft PR
 
 1. Record the scope, acceptance criteria, owner, dependencies, authorized paths, base commit, expected checks, and any security gates in the issue or its linked handoff. Give each agent its role, paths, revision, and escalation conditions.
-2. Give each concurrent writer a dedicated issue-linked branch and Git worktree, plus separate build and evidence directories. Start from the recorded base or an explicitly recorded dependency revision. Check for existing branches and worktrees first. Coordinate overlapping edits through one assigned writer. Keep other people's worktrees and branches intact.
+2. Give each concurrent writer a dedicated issue-linked branch and Git worktree, plus separate build and evidence directories. Start from the recorded base, an explicitly recorded dependency revision, or an eligible base under [Safe base refresh](#safe-base-refresh). Check for existing branches and worktrees first. Coordinate overlapping edits through one assigned writer. Keep other people's worktrees and branches intact.
 3. Return the revision and handoff to the Delivery Master, who coordinates integration on the issue branch. Retain the existing one-commit-per-task convention. Open a draft PR against `main` and cite the issue, for example `Refs #123`. Use a closing keyword only when merging fully satisfies the issue. Put the PR link and milestone status in the issue.
 4. Recheck the candidate after any head change. Record which revision was tested and reviewed, and bring unresolved findings or scope changes back to the maintainer. The maintainer decides when to move a draft to review or merge it.
 
