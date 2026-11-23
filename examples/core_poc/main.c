@@ -733,8 +733,11 @@ int main(void)
     }
 
     status = ano_crypto_module_shutdown();
-    if (status != ANO_CRYPTO_OK && result == 0) {
-        return fail_status("module shutdown", status);
+    if (status != ANO_CRYPTO_OK) {
+        const int shutdown_result = fail_status("module shutdown", status);
+        if (result == 0) {
+            result = shutdown_result;
+        }
     }
 
     if (result != 0) {
