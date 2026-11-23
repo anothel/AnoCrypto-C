@@ -167,6 +167,14 @@ ctest --test-dir build --output-on-failure
 
 The illustrated `ctest --test-dir` command requires CTest 3.20 or newer; the CMake configuration minimum is not a guarantee that every developer command works with older tooling.
 
+With a multi-configuration generator such as Visual Studio on Windows, select
+the same configuration for the build and test steps after configuring:
+
+```sh
+cmake --build build --config Debug
+ctest --test-dir build -C Debug --output-on-failure
+```
+
 ## Install smoke test
 
 ```sh
@@ -174,6 +182,18 @@ cmake --install build --prefix /tmp/anocrypto-c-p2-11
 cmake -S tests/install_smoke -B build-install-smoke -DCMAKE_PREFIX_PATH=/tmp/anocrypto-c-p2-11
 cmake --build build-install-smoke
 ./build-install-smoke/anocrypto_c_install_smoke
+```
+
+For a Visual Studio multi-configuration build, install and build the same
+configuration. In PowerShell, add the installed SDK's `bin` directory to
+`PATH` so Windows can find the DLL:
+
+```powershell
+cmake --install build --config Debug --prefix "$PWD/anocrypto-sdk"
+cmake -S tests/install_smoke -B build-install-smoke "-DCMAKE_PREFIX_PATH=$PWD/anocrypto-sdk"
+cmake --build build-install-smoke --config Debug
+$env:PATH = "$PWD/anocrypto-sdk/bin;$env:PATH"
+./build-install-smoke/Debug/anocrypto_c_install_smoke.exe
 ```
 
 ## Core PoC example
@@ -194,6 +214,15 @@ cmake -S examples/core_poc -B build-core-poc -DCMAKE_PREFIX_PATH=/tmp/anocrypto-
 cmake --build build-core-poc
 ./build-core-poc/anocrypto_c_core_poc
 ```
+
+With the same Visual Studio generator, use `cmake --build build --config Debug`
+for the build-tree example and run
+`./build/examples/core_poc/Debug/anocrypto_c_core_poc.exe`. For the installed-package
+example, use the install command and `PATH` setting above, with the same SDK
+prefix as `CMAKE_PREFIX_PATH` when configuring `build-core-poc`. Then use
+`cmake --build build-core-poc --config Debug` and run
+`./build-core-poc/Debug/anocrypto_c_core_poc.exe`. For a Release build, use
+`Release` consistently in the commands and executable paths.
 
 The example prints status-only success messages. It does not print raw key material, entropy input, nonce input, DRBG state, or generated DRBG bytes.
 
