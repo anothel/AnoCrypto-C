@@ -196,6 +196,25 @@ $env:PATH = "$PWD/anocrypto-sdk/bin;$env:PATH"
 ./build-install-smoke/Debug/anocrypto_c_install_smoke.exe
 ```
 
+## Minimal installed SDK consumer
+
+The [standalone C99 example](examples/installed_consumer_minimal/) uses the
+installed SDK to run one SHA-256 request and prints only status messages. Use
+the install smoke test above for an SDK regression check and the larger Core
+PoC below for a broader integration example.
+
+On Linux or macOS with a single-configuration CMake generator, copy only
+[`CMakeLists.txt`](examples/installed_consumer_minimal/CMakeLists.txt) and
+[`main.c`](examples/installed_consumer_minimal/main.c) into a new, empty
+directory. Run these commands from that directory, replacing
+`/path/to/installed-sdk` with the prefix of the separately installed SDK.
+
+```sh
+cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/installed-sdk -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+./build/anocrypto_c_minimal_consumer
+```
+
 ## Core PoC example
 
 Build the example from the build tree:
