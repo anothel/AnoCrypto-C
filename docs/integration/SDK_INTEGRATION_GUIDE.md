@@ -14,6 +14,15 @@
 
 ## Minimal CMake consumer
 
+For a complete standalone C99 project, start with the
+[minimal installed SDK example](../../examples/installed_consumer_minimal/).
+Copy its [`CMakeLists.txt`](../../examples/installed_consumer_minimal/CMakeLists.txt)
+and [`main.c`](../../examples/installed_consumer_minimal/main.c) into an empty
+directory and follow the [README quick start](../../README.md#minimal-installed-sdk-consumer).
+The example makes one SHA-256 request and prints only status messages. The
+[Core PoC](../../examples/core_poc/) covers more SDK operations, and the
+[install smoke test](../../README.md#install-smoke-test) checks SDK installation.
+
 ```cmake
 cmake_minimum_required(VERSION 3.16)
 project(my_anocrypto_consumer C)
