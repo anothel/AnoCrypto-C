@@ -2,6 +2,37 @@
 
 This directory contains engineering helper scripts for the C99 codebase.
 
+## `run_minimal_consumer_smoke.cmake`
+
+Run the [standalone minimal consumer](../examples/installed_consumer_minimal)
+twice against an already installed Release shared SDK. This opt-in engineering
+check uses a native Linux host with CMake 3.19 or newer, a C compiler, GNU Make,
+and `ldd`. CMake 3.19 enables the package identity check after configuration.
+
+```sh
+cmake \
+  -DSDK_PREFIX="/path/to/installed SDK" \
+  -DSDK_CONFIG_DIR="/path/to/installed SDK/lib/cmake/AnoCryptoC" \
+  -DSCRATCH_DIR="/path/to/scratch/new-minimal-consumer-run" \
+  -P tools/run_minimal_consumer_smoke.cmake
+```
+
+Pass absolute physical paths. Set `SDK_CONFIG_DIR` to the directory containing
+`AnoCryptoCConfig.cmake` in the install (the library directory may vary).
+The paths may contain spaces, letters, digits, and `_ . / + @ = -`.
+Use a fresh scratch path with an existing parent outside the source tree and
+SDK prefix. Use a trusted SDK, native build environment, and scratch parent
+under your control. The runner creates scratch once and leaves it in place
+after success or failure. Choose a new path for each invocation.
+
+The runner copies only the example's two source files and uses two separate
+Release build directories. It verifies the config selected by CMake and
+checks that the loader resolves the installed shared target before each run.
+The console reports commands, identity paths, and process statuses. A command
+failure, timeout, or identity mismatch exits nonzero.
+This check is outside required CI and provides local engineering evidence.
+Original Q9, certification, and other platform qualification are outside its scope.
+
 ## P2-05 evidence preparation and assembly
 
 Creates a local P2-05 release-evidence draft while retaining the reviewed P1-33 release-engineering boundary and the P2-02/P2-03/P2-04 candidate policies:
