@@ -12,6 +12,8 @@ int main(void)
     ano_crypto_build_identity_t identity;
     size_t size = 0u;
     ano_crypto_status_t st;
+    ano_crypto_status_t shutdown_status;
+    int result = 1;
 
     st = ano_crypto_version_string(&version);
     if (st != ANO_CRYPTO_OK || version == 0) {
@@ -61,7 +63,7 @@ int main(void)
     st = ano_crypto_module_get_state(&state);
     if (st != ANO_CRYPTO_OK || state != ANO_CRYPTO_MODULE_STATE_OPERATIONAL) {
         fprintf(stderr, "unexpected module state after init\n");
-        return 1;
+        goto shutdown;
     }
 
     {
@@ -71,7 +73,7 @@ int main(void)
         st = ano_crypto_hkdf_sha256(ikm, sizeof(ikm), NULL, 0u, info, sizeof(info), okm, sizeof(okm));
         if (st != ANO_CRYPTO_OK) {
             fprintf(stderr, "HKDF-SHA-256 install smoke failed: %s\n", ano_crypto_status_name(st));
-            return 1;
+            goto shutdown;
         }
         (void)ano_crypto_csp_zeroize(okm, sizeof(okm));
     }
@@ -86,7 +88,7 @@ int main(void)
         uint8_t derived[ANO_CRYPTO_SCRYPT_DERIVED_KEY_SIZE];
         if (workspace == NULL) {
             fprintf(stderr, "scrypt workspace allocation failed\n");
-            return 1;
+            goto shutdown;
         }
         st = ano_crypto_scrypt_derive_key(password, sizeof(password), salt, sizeof(salt),
                                            workspace, ANO_CRYPTO_SCRYPT_WORKSPACE_SIZE,
@@ -95,7 +97,7 @@ int main(void)
         if (st != ANO_CRYPTO_OK || memcmp(derived, expected, sizeof(derived)) != 0) {
             (void)ano_crypto_csp_zeroize(derived, sizeof(derived));
             fprintf(stderr, "scrypt install smoke failed: %s\n", ano_crypto_status_name(st));
-            return 1;
+            goto shutdown;
         }
         (void)ano_crypto_csp_zeroize(derived, sizeof(derived));
     }
@@ -115,7 +117,7 @@ int main(void)
                                           &handle);
         if (st != ANO_CRYPTO_OK || handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
             fprintf(stderr, "AES-256-GCM key import smoke failed: %s\n", ano_crypto_status_name(st));
-            return 1;
+            goto shutdown;
         }
         st = ano_crypto_aes256_gcm_encrypt(handle, nonce, sizeof(nonce),
                                             NULL, 0u, message, sizeof(message),
@@ -124,7 +126,7 @@ int main(void)
         if (st != ANO_CRYPTO_OK || written != sizeof(message)) {
             (void)ano_crypto_key_destroy(handle);
             fprintf(stderr, "AES-256-GCM encrypt smoke failed: %s\n", ano_crypto_status_name(st));
-            return 1;
+            goto shutdown;
         }
         st = ano_crypto_aes256_gcm_decrypt(handle, nonce, sizeof(nonce),
                                             NULL, 0u, ciphertext, sizeof(ciphertext),
@@ -134,14 +136,14 @@ int main(void)
             memcmp(recovered, message, sizeof(message)) != 0) {
             (void)ano_crypto_key_destroy(handle);
             fprintf(stderr, "AES-256-GCM decrypt smoke failed: %s\n", ano_crypto_status_name(st));
-            return 1;
+            goto shutdown;
         }
         (void)ano_crypto_csp_zeroize(ciphertext, sizeof(ciphertext));
         (void)ano_crypto_csp_zeroize(recovered, sizeof(recovered));
         (void)ano_crypto_csp_zeroize(tag, sizeof(tag));
         st = ano_crypto_key_destroy(handle);
         if (st != ANO_CRYPTO_OK) {
-            return 1;
+            goto shutdown;
         }
     }
 
@@ -161,13 +163,13 @@ int main(void)
             st = ano_crypto_hash_digest_size(algorithms[i], &expected);
             if (st != ANO_CRYPTO_OK) {
                 fprintf(stderr, "sha2 digest size smoke failed: %s\n", ano_crypto_status_name(st));
-                return 1;
+                goto shutdown;
             }
             st = ano_crypto_hash_digest(algorithms[i],
                                         msg, sizeof(msg), digest, sizeof(digest), &written);
             if (st != ANO_CRYPTO_OK || written != expected) {
                 fprintf(stderr, "sha2 digest smoke failed: %s\n", ano_crypto_status_name(st));
-                return 1;
+                goto shutdown;
             }
             (void)ano_crypto_csp_zeroize(digest, sizeof(digest));
         }
@@ -191,7 +193,7 @@ int main(void)
                                           &handle);
         if (st != ANO_CRYPTO_OK || handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
             fprintf(stderr, "hmac key import smoke failed: %s\n", ano_crypto_status_name(st));
-            return 1;
+            goto shutdown;
         }
 
         for (i = 0u; i < (sizeof(algorithms) / sizeof(algorithms[0])); ++i) {
@@ -200,7 +202,7 @@ int main(void)
             st = ano_crypto_hmac_mac_size(algorithms[i], &expected);
             if (st != ANO_CRYPTO_OK) {
                 (void)ano_crypto_key_destroy(handle);
-                return 1;
+                goto shutdown;
             }
             st = ano_crypto_hmac_compute_with_key(algorithms[i],
                                                   handle,
@@ -210,7 +212,7 @@ int main(void)
             if (st != ANO_CRYPTO_OK || written != expected) {
                 fprintf(stderr, "hmac key handle smoke failed: %s\n", ano_crypto_status_name(st));
                 (void)ano_crypto_key_destroy(handle);
-                return 1;
+                goto shutdown;
             }
             (void)ano_crypto_csp_zeroize(mac, sizeof(mac));
         }
@@ -218,7 +220,7 @@ int main(void)
         st = ano_crypto_key_destroy(handle);
         if (st != ANO_CRYPTO_OK) {
             fprintf(stderr, "hmac key destroy smoke failed: %s\n", ano_crypto_status_name(st));
-            return 1;
+            goto shutdown;
         }
     }
 
@@ -248,7 +250,7 @@ int main(void)
                                           &handle);
         if (st != ANO_CRYPTO_OK || handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
             fprintf(stderr, "AES key import smoke failed: %s\n", ano_crypto_status_name(st));
-            return 1;
+            goto shutdown;
         }
 
         st = ano_crypto_cipher_crypt_with_key(ANO_CRYPTO_CIPHER_ALG_AES,
@@ -263,7 +265,7 @@ int main(void)
         if (st != ANO_CRYPTO_OK || written != sizeof(ciphertext)) {
             fprintf(stderr, "AES-CBC encrypt smoke failed: %s\n", ano_crypto_status_name(st));
             (void)ano_crypto_key_destroy(handle);
-            return 1;
+            goto shutdown;
         }
 
         st = ano_crypto_cipher_crypt_with_key(ANO_CRYPTO_CIPHER_ALG_AES,
@@ -279,7 +281,7 @@ int main(void)
             fprintf(stderr, "AES-CBC decrypt smoke failed: %s\n", ano_crypto_status_name(st));
             (void)ano_crypto_csp_zeroize(ciphertext, sizeof(ciphertext));
             (void)ano_crypto_key_destroy(handle);
-            return 1;
+            goto shutdown;
         }
 
         for (i = 0u; i < sizeof(plaintext); ++i) {
@@ -290,7 +292,7 @@ int main(void)
         st = ano_crypto_key_destroy(handle);
         if (st != ANO_CRYPTO_OK || difference != 0u) {
             fprintf(stderr, "AES-CBC round-trip smoke failed\n");
-            return 1;
+            goto shutdown;
         }
     }
 
@@ -310,7 +312,7 @@ int main(void)
                                           &handle);
         if (st != ANO_CRYPTO_OK || handle == ANO_CRYPTO_CSP_INVALID_HANDLE) {
             fprintf(stderr, "CMAC key import smoke failed: %s\n", ano_crypto_status_name(st));
-            return 1;
+            goto shutdown;
         }
 
         st = ano_crypto_cmac_compute_with_key(handle,
@@ -321,7 +323,7 @@ int main(void)
         if (st != ANO_CRYPTO_OK || written != ANO_CRYPTO_CMAC_TAG_SIZE) {
             fprintf(stderr, "CMAC compute smoke failed: %s\n", ano_crypto_status_name(st));
             (void)ano_crypto_key_destroy(handle);
-            return 1;
+            goto shutdown;
         }
 
         st = ano_crypto_cmac_verify_with_key(handle,
@@ -332,13 +334,13 @@ int main(void)
         if (st != ANO_CRYPTO_OK) {
             fprintf(stderr, "CMAC verify smoke failed: %s\n", ano_crypto_status_name(st));
             (void)ano_crypto_key_destroy(handle);
-            return 1;
+            goto shutdown;
         }
 
         st = ano_crypto_key_destroy(handle);
         if (st != ANO_CRYPTO_OK) {
             fprintf(stderr, "CMAC key destroy smoke failed: %s\n", ano_crypto_status_name(st));
-            return 1;
+            goto shutdown;
         }
     }
 
@@ -355,12 +357,12 @@ int main(void)
         st = ano_crypto_drbg_context_size(ANO_CRYPTO_DRBG_ALG_HMAC_SHA256, &ctx_size);
         if (st != ANO_CRYPTO_OK || ctx_size == 0u) {
             fprintf(stderr, "hmac-drbg context size smoke failed: %s\n", ano_crypto_status_name(st));
-            return 1;
+            goto shutdown;
         }
         ctx = malloc(ctx_size);
         if (ctx == NULL) {
             fprintf(stderr, "hmac-drbg context allocation failed\n");
-            return 1;
+            goto shutdown;
         }
 
         for (i = 0u; i < sizeof(entropy); ++i) {
@@ -396,7 +398,7 @@ int main(void)
             fprintf(stderr, "hmac-drbg uninstantiate smoke failed: %s\n", ano_crypto_status_name(cleanup_status));
         }
         if (st != ANO_CRYPTO_OK || clear_status != ANO_CRYPTO_OK || cleanup_status != ANO_CRYPTO_OK) {
-            return 1;
+            goto shutdown;
         }
     }
 
@@ -410,13 +412,13 @@ int main(void)
             st = ano_crypto_random_context_size(&random_ctx_size);
             if (st != ANO_CRYPTO_OK || random_ctx_size == 0u) {
                 fprintf(stderr, "random context size smoke failed: %s\n", ano_crypto_status_name(st));
-                return 1;
+                goto shutdown;
             }
 
             random_ctx = (uint8_t *)malloc(random_ctx_size);
             if (random_ctx == 0) {
                 fprintf(stderr, "random context allocation failed\n");
-                return 1;
+                goto shutdown;
             }
 
             st = ano_crypto_random_init(
@@ -424,7 +426,7 @@ int main(void)
             if (st != ANO_CRYPTO_OK) {
                 fprintf(stderr, "random init smoke failed: %s\n", ano_crypto_status_name(st));
                 free(random_ctx);
-                return 1;
+                goto shutdown;
             }
 
             st = ano_crypto_random_generate(
@@ -434,7 +436,7 @@ int main(void)
                 fprintf(stderr, "random generate smoke failed: %s\n", ano_crypto_status_name(st));
                 (void)ano_crypto_random_uninit(random_ctx, random_ctx_size);
                 free(random_ctx);
-                return 1;
+                goto shutdown;
             }
 
             st = ano_crypto_random_uninit(random_ctx, random_ctx_size);
@@ -442,13 +444,13 @@ int main(void)
             free(random_ctx);
             if (st != ANO_CRYPTO_OK) {
                 fprintf(stderr, "random uninit smoke failed: %s\n", ano_crypto_status_name(st));
-                return 1;
+                goto shutdown;
             }
         } else {
             st = ano_crypto_random_context_size(&random_ctx_size);
             if (st != ANO_CRYPTO_ERR_NOT_IMPLEMENTED || random_ctx_size != 0u) {
                 fprintf(stderr, "random unavailable boundary smoke failed: %s\n", ano_crypto_status_name(st));
-                return 1;
+                goto shutdown;
             }
         }
     }
@@ -468,17 +470,22 @@ int main(void)
             (void)ano_crypto_csp_zeroize(digest, sizeof(digest));
             fprintf(stderr, "restricted SHA-1 OCSP CertID install smoke failed: %s\n",
                     ano_crypto_status_name(st));
-            return 1;
+            goto shutdown;
         }
         (void)ano_crypto_csp_zeroize(digest, sizeof(digest));
     }
 
-    st = ano_crypto_module_shutdown();
-    if (st != ANO_CRYPTO_OK) {
-        fprintf(stderr, "module shutdown failed: %s\n", ano_crypto_status_name(st));
+    result = 0;
+
+shutdown:
+    shutdown_status = ano_crypto_module_shutdown();
+    if (shutdown_status != ANO_CRYPTO_OK) {
+        fprintf(stderr, "module shutdown failed: %s\n", ano_crypto_status_name(shutdown_status));
         return 1;
     }
 
-    printf("AnoCrypto-C install smoke: PASS (%s)\n", version);
-    return 0;
+    if (result == 0) {
+        printf("AnoCrypto-C install smoke: PASS (%s)\n", version);
+    }
+    return result;
 }
