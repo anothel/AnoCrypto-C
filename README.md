@@ -215,6 +215,23 @@ cmake --build build
 ./build/anocrypto_c_minimal_consumer
 ```
 
+On Windows, copy only the same `CMakeLists.txt` and `main.c` into a new, empty
+directory and run these commands there in PowerShell. Use the same Visual
+Studio generator, architecture, and configuration as the separately installed
+SDK. This example uses Visual Studio 2022, x64, and Debug. Set
+`$sdkPrefix` to the absolute path of your installed SDK and set `$config` to
+`Release` if that is the configuration you installed.
+
+```powershell
+$sdkPrefix = 'C:\SDKs\AnoCrypto C'
+$config = 'Debug'
+cmake -S . -B build -G 'Visual Studio 17 2022' -A x64 "-DCMAKE_PREFIX_PATH=$sdkPrefix"
+cmake --build build --config "$config"
+# For a shared SDK, let Windows find the DLL in this PowerShell session.
+$env:PATH = "$(Join-Path $sdkPrefix 'bin');$env:PATH"
+& ".\build\$config\anocrypto_c_minimal_consumer.exe"
+```
+
 ## Core PoC example
 
 Build the example from the build tree:
