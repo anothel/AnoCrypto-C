@@ -388,6 +388,12 @@ static int check_build_identity_layout(void)
     return 1;
 }
 
+static int fail_stage(const char *stage, int exit_code)
+{
+    fprintf(stderr, "Compatibility probe failed at %s (exit %d)\n", stage, exit_code);
+    return exit_code;
+}
+
 int main(void)
 {
     const char *runtime_version = NULL;
@@ -401,21 +407,21 @@ int main(void)
 #if defined(ANO_CRYPTO_EXPECT_CURRENT_HEADER)
     symbol_count += bind_current_additive_surface();
     if (symbol_count != 84u) {
-        return 1;
+        return fail_stage("public symbol count", 1);
     }
 #else
     if (symbol_count != 69u) {
-        return 1;
+        return fail_stage("public symbol count", 1);
     }
 #endif
 
 #if defined(ANO_CRYPTO_EXPECT_P1_29_HEADER_SNAPSHOT)
     if (strcmp(ANO_CRYPTO_VERSION_STRING, "0.1.0-p1-29-cmac-hardening") != 0) {
-        return 2;
+        return fail_stage("header version", 2);
     }
 #elif defined(ANO_CRYPTO_EXPECT_CURRENT_HEADER)
     if (strcmp(ANO_CRYPTO_VERSION_STRING, ANO_CRYPTO_EXPECT_RUNTIME_VERSION) != 0) {
-        return 2;
+        return fail_stage("header version", 2);
     }
 #else
 #error A compatibility header mode must be selected
@@ -423,24 +429,24 @@ int main(void)
 
     if (ano_crypto_version_components(&major, &minor, &patch) != ANO_CRYPTO_OK ||
         major != 0u || minor != 1u || patch != 0u) {
-        return 3;
+        return fail_stage("runtime version components", 3);
     }
     if (ano_crypto_version_string(&runtime_version) != ANO_CRYPTO_OK ||
         runtime_version == NULL ||
         strcmp(runtime_version, ANO_CRYPTO_EXPECT_RUNTIME_VERSION) != 0) {
-        return 4;
+        return fail_stage("runtime version", 4);
     }
     if (!check_build_identity_layout()) {
-        return 5;
+        return fail_stage("build identity", 5);
     }
 
     if (ano_crypto_module_init(NULL) != ANO_CRYPTO_OK) {
-        return 6;
+        return fail_stage("module initialization", 6);
     }
     if (ano_crypto_module_get_state(&module_state) != ANO_CRYPTO_OK ||
         module_state != ANO_CRYPTO_MODULE_STATE_OPERATIONAL) {
         (void)ano_crypto_module_shutdown();
-        return 7;
+        return fail_stage("module operational state", 7);
     }
 #if defined(ANO_CRYPTO_EXPECT_CURRENT_HEADER)
     {
@@ -449,7 +455,7 @@ int main(void)
         if (ANO_CRYPTO_HKDF_SHA256_MAX_OUTPUT_SIZE != 8160u ||
             ano_crypto_hkdf_sha256(ikm, sizeof(ikm), NULL, 0u, NULL, 0u, okm, sizeof(okm)) != ANO_CRYPTO_OK) {
             (void)ano_crypto_module_shutdown();
-            return 8;
+            return fail_stage("HKDF-SHA-256", 8);
         }
     }
     {
@@ -479,7 +485,7 @@ int main(void)
                 (void)ano_crypto_key_destroy(handle);
             }
             (void)ano_crypto_module_shutdown();
-            return 9;
+            return fail_stage("AES-256-GCM", 9);
         }
         (void)ano_crypto_key_destroy(handle);
     }
@@ -503,7 +509,7 @@ int main(void)
         free(workspace);
         if (failed) {
             (void)ano_crypto_module_shutdown();
-            return 10;
+            return fail_stage("scrypt", 10);
         }
     }
     {
@@ -562,12 +568,12 @@ int main(void)
         free(dec);
         if (failed) {
             (void)ano_crypto_module_shutdown();
-            return 11;
+            return fail_stage("streaming AES-256-GCM", 11);
         }
     }
 #endif
     if (ano_crypto_module_shutdown() != ANO_CRYPTO_OK) {
-        return 12;
+        return fail_stage("module shutdown", 12);
     }
 
     printf("compatibility_baseline=0.1.0-p1-29-cmac-hardening\n");
