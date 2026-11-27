@@ -62,10 +62,19 @@ int main(void)
     size_t comparisons = 0u;
     size_t c;
 
-    if (ano_crypto_module_init(0) != ANO_CRYPTO_OK) return 1;
-    if (ano_crypto_aes256_gcm_stream_context_size(&ctx_size) != ANO_CRYPTO_OK) return 2;
+    if (ano_crypto_module_init(0) != ANO_CRYPTO_OK) {
+        fprintf(stderr, "stage=module-init exit=1\n");
+        return 1;
+    }
+    if (ano_crypto_aes256_gcm_stream_context_size(&ctx_size) != ANO_CRYPTO_OK) {
+        fprintf(stderr, "stage=context-size exit=2\n");
+        return 2;
+    }
     ctx = malloc(ctx_size);
-    if (ctx == 0) return 3;
+    if (ctx == 0) {
+        fprintf(stderr, "stage=context-allocation exit=3\n");
+        return 3;
+    }
 
     for (c = 0u; c < CASES; ++c) {
         uint8_t key[32];
@@ -88,51 +97,108 @@ int main(void)
         for (i = 0u; i < sizeof(nonce); ++i) nonce[i] = next_byte();
         for (i = 0u; i < aad_len; ++i) aad[i] = next_byte();
         for (i = 0u; i < text_len; ++i) plaintext[i] = next_byte();
-        if (!openssl_encrypt(key, nonce, aad, aad_len, plaintext, text_len, ref, ref_tag)) return 4;
+        if (!openssl_encrypt(key, nonce, aad, aad_len, plaintext, text_len, ref, ref_tag)) {
+            fprintf(stderr, "stage=openssl-encrypt exit=4 case=%zu aad_len=%zu text_len=%zu\n",
+                    c, aad_len, text_len);
+            return 4;
+        }
         if (ano_crypto_key_import_secret(ANO_CRYPTO_KEY_TYPE_BLOCK_CIPHER,
-                key, sizeof(key), 0u, &handle) != ANO_CRYPTO_OK) return 5;
+                key, sizeof(key), 0u, &handle) != ANO_CRYPTO_OK) {
+            fprintf(stderr, "stage=key-import exit=5 case=%zu aad_len=%zu text_len=%zu\n",
+                    c, aad_len, text_len);
+            return 5;
+        }
 
         if (ano_crypto_aes256_gcm_stream_init(ctx, ctx_size,
                 ANO_CRYPTO_AEAD_DIRECTION_ENCRYPT, handle,
-                nonce, sizeof(nonce), 0u) != ANO_CRYPTO_OK) return 6;
+                nonce, sizeof(nonce), 0u) != ANO_CRYPTO_OK) {
+            fprintf(stderr, "stage=encrypt-init exit=6 case=%zu aad_len=%zu text_len=%zu\n",
+                    c, aad_len, text_len);
+            return 6;
+        }
         if (ano_crypto_aes256_gcm_stream_aad_update(ctx, aad, aad_len / 2u) != ANO_CRYPTO_OK ||
             ano_crypto_aes256_gcm_stream_aad_update(ctx, aad + aad_len / 2u,
-                aad_len - aad_len / 2u) != ANO_CRYPTO_OK) return 7;
+                aad_len - aad_len / 2u) != ANO_CRYPTO_OK) {
+            fprintf(stderr, "stage=encrypt-aad-update exit=7 case=%zu aad_len=%zu text_len=%zu\n",
+                    c, aad_len, text_len);
+            return 7;
+        }
         offset = 0u;
         while (offset < text_len) {
             size_t take = 1u + ((offset + c * 3u) % 31u);
             if (take > text_len - offset) take = text_len - offset;
             if (ano_crypto_aes256_gcm_stream_update(ctx, plaintext + offset, take,
-                    out + offset, take, &written) != ANO_CRYPTO_OK || written != take) return 8;
+                    out + offset, take, &written) != ANO_CRYPTO_OK || written != take) {
+                fprintf(stderr, "stage=encrypt-update exit=8 case=%zu aad_len=%zu text_len=%zu\n",
+                        c, aad_len, text_len);
+                return 8;
+            }
             offset += take;
         }
         if (text_len == 0u && ano_crypto_aes256_gcm_stream_update(
-                ctx, 0, 0u, 0, 0u, &written) != ANO_CRYPTO_OK) return 9;
-        if (ano_crypto_aes256_gcm_stream_encrypt_final(ctx, tag, sizeof(tag)) != ANO_CRYPTO_OK) return 10;
-        if (!bytes_equal(out, ref, text_len) || !bytes_equal(tag, ref_tag, sizeof(tag))) return 11;
+                ctx, 0, 0u, 0, 0u, &written) != ANO_CRYPTO_OK) {
+            fprintf(stderr, "stage=encrypt-empty-update exit=9 case=%zu aad_len=%zu text_len=%zu\n",
+                    c, aad_len, text_len);
+            return 9;
+        }
+        if (ano_crypto_aes256_gcm_stream_encrypt_final(ctx, tag, sizeof(tag)) != ANO_CRYPTO_OK) {
+            fprintf(stderr, "stage=encrypt-final exit=10 case=%zu aad_len=%zu text_len=%zu\n",
+                    c, aad_len, text_len);
+            return 10;
+        }
+        if (!bytes_equal(out, ref, text_len) || !bytes_equal(tag, ref_tag, sizeof(tag))) {
+            fprintf(stderr, "stage=encrypt-compare exit=11 case=%zu aad_len=%zu text_len=%zu\n",
+                    c, aad_len, text_len);
+            return 11;
+        }
         comparisons += 2u;
 
         if (ano_crypto_aes256_gcm_stream_init(ctx, ctx_size,
                 ANO_CRYPTO_AEAD_DIRECTION_DECRYPT, handle,
-                nonce, sizeof(nonce), 0u) != ANO_CRYPTO_OK) return 12;
-        if (ano_crypto_aes256_gcm_stream_aad_update(ctx, aad, aad_len) != ANO_CRYPTO_OK) return 13;
+                nonce, sizeof(nonce), 0u) != ANO_CRYPTO_OK) {
+            fprintf(stderr, "stage=decrypt-init exit=12 case=%zu aad_len=%zu text_len=%zu\n",
+                    c, aad_len, text_len);
+            return 12;
+        }
+        if (ano_crypto_aes256_gcm_stream_aad_update(ctx, aad, aad_len) != ANO_CRYPTO_OK) {
+            fprintf(stderr, "stage=decrypt-aad-update exit=13 case=%zu aad_len=%zu text_len=%zu\n",
+                    c, aad_len, text_len);
+            return 13;
+        }
         offset = 0u;
         while (offset < text_len) {
             size_t take = 1u + ((offset + c * 5u) % 29u);
             if (take > text_len - offset) take = text_len - offset;
             if (ano_crypto_aes256_gcm_stream_update(ctx, ref + offset, take,
-                    recovered + offset, take, &written) != ANO_CRYPTO_OK || written != take) return 14;
+                    recovered + offset, take, &written) != ANO_CRYPTO_OK || written != take) {
+                fprintf(stderr, "stage=decrypt-update exit=14 case=%zu aad_len=%zu text_len=%zu\n",
+                        c, aad_len, text_len);
+                return 14;
+            }
             offset += take;
         }
         if (ano_crypto_aes256_gcm_stream_decrypt_final(ctx, ref_tag, sizeof(ref_tag)) != ANO_CRYPTO_OK ||
-            !bytes_equal(recovered, plaintext, text_len)) return 15;
+            !bytes_equal(recovered, plaintext, text_len)) {
+            fprintf(stderr, "stage=decrypt-final-or-compare exit=15 case=%zu aad_len=%zu text_len=%zu\n",
+                    c, aad_len, text_len);
+            return 15;
+        }
         comparisons += 2u;
-        if (ano_crypto_key_destroy(handle) != ANO_CRYPTO_OK) return 16;
+        if (ano_crypto_key_destroy(handle) != ANO_CRYPTO_OK) {
+            fprintf(stderr, "stage=key-destroy exit=16 case=%zu aad_len=%zu text_len=%zu\n",
+                    c, aad_len, text_len);
+            return 16;
+        }
     }
 
     free(ctx);
-    if (ano_crypto_module_shutdown() != ANO_CRYPTO_OK) return 17;
+    if (ano_crypto_module_shutdown() != ANO_CRYPTO_OK) {
+        fprintf(stderr, "stage=module-shutdown exit=17\n");
+        return 17;
+    }
     printf("AES-256-GCM streaming OpenSSL differential comparisons: %lu (values not printed)\n",
            (unsigned long)comparisons);
-    return comparisons == (size_t)CASES * 4u ? 0 : 18;
+    if (comparisons == (size_t)CASES * 4u) return 0;
+    fprintf(stderr, "stage=comparison-count exit=18\n");
+    return 18;
 }
