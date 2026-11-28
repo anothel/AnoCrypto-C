@@ -8,8 +8,11 @@ The product owner selected **strategic direction A**: internal installed-SDK sta
 for AnoSecureKit Enterprise and AnoPKI Enterprise. A narrow Linux x86_64 / GCC /
 Release / shared-SDK core validation was authorized and recorded. **This is not
 approval to change downstream SDK pins, change security or release policies,
-merge a pull request, or distribute an SDK.** The authoritative current
-planning/approval and exact-SHA evidence are the [Master issue index](https://github.com/anothel/AnoCrypto-C/issues/15),
+merge a pull request, or distribute an SDK.** Under the [official v3.2 activation record](https://github.com/anothel/AnoCrypto-C/issues/13#issuecomment-7080518599),
+[Jira ACC-1](https://anothel.atlassian.net/browse/ACC-1) is the current operational queue.
+Existing GitHub issues and pull requests retain technical implementation authorizations
+and exact-SHA evidence. For the historical checkpoint, see the
+[Master issue index (#15)](https://github.com/anothel/AnoCrypto-C/issues/15),
 [Jira ACC-4](https://anothel.atlassian.net/browse/ACC-4), and
 [Jira ACC-9](https://anothel.atlassian.net/browse/ACC-9).
 
