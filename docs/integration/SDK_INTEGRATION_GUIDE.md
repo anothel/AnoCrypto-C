@@ -44,6 +44,43 @@ cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/anocrypto-c-prefix
 cmake --build build
 ```
 
+### Package selection and version errors
+
+Use a fresh build directory when changing SDK installations. CMake caches
+package discovery, so a build directory configured with a previous SDK can
+keep using that SDK. Quote absolute paths so prefixes containing spaces are
+passed as one argument.
+
+Use `CMAKE_PREFIX_PATH` to give CMake an installation prefix to search. To
+point directly to the package configuration, set `AnoCryptoC_DIR` to the
+directory containing `AnoCryptoCConfig.cmake`. For an SDK installed with
+`CMAKE_INSTALL_LIBDIR=lib`, for example:
+
+```sh
+cmake -S . -B build-prefix "-DCMAKE_PREFIX_PATH=/opt/AnoCrypto SDK"
+cmake -S . -B build-config "-DAnoCryptoC_DIR=/opt/AnoCrypto SDK/lib/cmake/AnoCryptoC"
+cmake --build build-config
+```
+
+For other layouts, use the installed SDK's actual library directory. Check
+the resolved `AnoCryptoC_DIR` entry in the chosen build's `CMakeCache.txt`
+against the intended config directory. CMake can search elsewhere when an
+explicit directory is missing or its package version is incompatible.
+Treat a resolved path outside the intended SDK as a configuration error.
+
+For a trusted Linux shared-library build, inspect `ldd build-config/my_consumer`
+for the resolved `libanocrypto_c.so` entry. Canonicalize the reported path, check
+that it resolves to the intended SDK library, and compare its SHA-256 with the
+expected artifact digest when one is available. The
+[minimal consumer smoke runner](../../tools/run_minimal_consumer_smoke.cmake)
+shows how to verify package selection and loader resolution together.
+
+The [exact-version probe](../../tests/package_version/exact/) requests CMake
+package version `0.1.0` and checks that the loaded library reports runtime
+version `0.1.0-p3-10-restricted-sha1-ocsp-certid`. These version checks answer
+which versions the package and library declare. Verify the resolved paths and
+digest for artifact identity. ABI compatibility requires separate evidence.
+
 ## Basic lifecycle pattern
 
 1. Query version/build identity if needed.
